@@ -7,5 +7,6 @@ export default {
   EVENT: {
     INIT: 'ae2karas:init',
     LOG: 'ae2karas:log',
+    CONVERT: 'ae2karas:convert',
   },
 };

@@ -1,0 +1,62 @@
+.composition{
+  margin:10px;
+  padding:10px;
+  border:1px solid #2c2c2c;
+
+  table{
+    width:100%;
+  }
+
+  th, td{
+    padding:0 5px;
+    border:1px solid #3f3f3f;
+    font-weight:400;
+    height:24px;
+  }
+
+  th{
+    padding-bottom:5px;
+  }
+
+  .checkbox{
+    width:32px;
+    text-align:center;
+  }
+
+  td.checkbox{
+    background:url(check.png) no-repeat center;
+    background-size:16px 16px;
+  }
+
+  .pwd{
+    width:50%;
+  }
+
+  .preview{
+    width:32px;
+    background:url(preview.png) no-repeat center;
+    background-size:16px 16px;
+    opacity:0.5;
+    cursor:pointer;
+  }
+
+  tr{
+    &:hover{
+      td{
+        color:#E30;
+      }
+
+      .preview{
+        opacity:1;
+      }
+    }
+
+    &.checked{
+      background:#313131;
+
+      .checkbox{
+        background-image:url(checked.png);
+      }
+    }
+  }
+}

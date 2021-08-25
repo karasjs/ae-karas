@@ -1,4 +1,5 @@
 import enums from './enums';
+import convert from './convert';
 
 const { ES_TYPE, EVENT } = enums;
 
@@ -59,4 +60,24 @@ ae2karas.getCompositions = function() {
     }
   }
   $.ae2karas.dispatch(EVENT.INIT, list);
+};
+
+function findCompositionById(id) {
+  for(let i = 1; i <= app.project.numItems; i++) {
+    const compItem = app.project.item(i);
+    if(compItem.id === id) {
+      return compItem;
+    }
+  }
+  return null;
+}
+
+ae2karas.convert = function(id) {
+  let composition = findCompositionById(id);
+  if(!composition) {
+    $.ae2karas.dispatch(enums.EVENT.CONVERT, null);
+    return;
+  }
+  let res = convert(composition);
+  $.ae2karas.dispatch(enums.EVENT.CONVERT, res);
 };
