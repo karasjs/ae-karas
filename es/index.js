@@ -1,5 +1,5 @@
 import enums from './enums';
-import convert from './convert';
+import parse from './composition/parse';
 
 const { ES_TYPE, EVENT } = enums;
 
@@ -10,19 +10,19 @@ ae2karas.dispatch = (function() {
   try {
     xLib = new ExternalObject('lib:PlugPlugExternalObject');
   } catch(e) {
-    alert("Missing ExternalObject: ");
+    alert('Missing ExternalObject: ');
   }
   return function(type, data) {
     if(xLib) {
       if(data && data instanceof Object) {
         data = JSON.stringify(data);
       }
-      if(typeof data === 'number') {
-        // data = data.toString();
-      }
+      // if(typeof data === 'number') {
+      //   data = data.toString();
+      // }
       var eventObj = new CSXSEvent();
       eventObj.type = type;
-      eventObj.data = data || '';
+      eventObj.data = data;
       eventObj.dispatch();
     }
   };
@@ -78,6 +78,7 @@ ae2karas.convert = function(id) {
     $.ae2karas.dispatch(enums.EVENT.CONVERT, null);
     return;
   }
-  let res = convert(composition);
+  // 递归遍历分析合成对象，转换ae的图层为普通js对象，留给后续转换karas用
+  let res = parse(composition);
   $.ae2karas.dispatch(enums.EVENT.CONVERT, res);
 };

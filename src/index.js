@@ -14,7 +14,11 @@ import './index.less';
 ReactDom.render(
   <Provider {...store}>
     <div className="btn">
-      <div className="convert">转换</div>
+      <div className="convert" onClick={() => {
+        if(store.composition.currentId) {
+          csInterface.evalScript(`$.ae2karas.convert(${store.composition.currentId})`);
+        }
+      }}>转换</div>
       <div className="refresh">刷新</div>
     </div>
     <div className="choose">请选择合成：</div>
