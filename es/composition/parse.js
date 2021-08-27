@@ -4,7 +4,7 @@ import vector from './vector';
 
 function recursion(composition, library) {
   let { name, layers, width, height, duration } = composition;
-  $.ae2karas.dispatch(enums.EVENT.ERROR, 'composition: ' + name);
+  $.ae2karas.error('composition: ' + name);
   // 先统计哪些层被作为父级链接
   let childLink = {};
   for(let i = 1; i <= layers.length; i++) {
@@ -60,20 +60,18 @@ function parseLayer(layer, library) {
     inPoint: layer.inPoint, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
   };
-  $.ae2karas.dispatch(enums.EVENT.WARN, 'layer: ' + res.name);
+  $.ae2karas.warn('layer: ' + res.name);
   for(let i = 1; i <= layer.numProperties; i++) {
     let prop = layer.property(i);
     if(prop && prop.enabled) {
       let matchName = prop.matchName;
-      $.ae2karas.dispatch(enums.EVENT.LOG, 'layer prop: ' + matchName);
       switch(matchName) {
         case 'ADBE Transform Group': // 根元素
-        case 'ADBE Vector Transform Group': // 非根元素
+        // case 'ADBE Vector Transform Group': // 非根元素
           res.transform = transform(prop);
           break;
         case 'ADBE Root Vectors Group': // 根元素
-        case 'ADBE Vectors Group':
-          $.ae2karas.dispatch(enums.EVENT.LOG, prop.matchName);
+        // case 'ADBE Vectors Group':
           // 形状图层中的内容子属性
           res.vector = vector(prop, library);
           break;
@@ -86,8 +84,15 @@ function parseLayer(layer, library) {
       }
     }
   }
+  let vct = res.vector;
   let source = layer.source;
-  if(source) {
+  if(vct) {
+    vct.type = vct.content.type;
+    vct.id = library.length;
+    library.push(vct);
+    res.libraryId = vct.id;
+  }
+  else if(source) {
     let asset;
     // 图片图形等独立资源，将其解析为被link的放入library即可
     if(source instanceof FootageItem) {
@@ -144,10 +149,10 @@ export default function(composition) {
   let { workAreaStart, workAreaDuration } = composition;
   // workAreaStart *= 1000;
   // workAreaDuration *= 1000;
-  $.ae2karas.dispatch(enums.EVENT.LOG, 'workArea: ' + workAreaDuration + ',' + workAreaStart);
+  $.ae2karas.log('workArea: ' + workAreaDuration + ',' + workAreaStart);
   let library = [];
   let children = recursion(composition, library);
-  $.ae2karas.dispatch(enums.EVENT.LOG, children);
-  $.ae2karas.dispatch(enums.EVENT.LOG, library);
+  $.ae2karas.log(children);
+  $.ae2karas.log(library);
   return 1;
 }

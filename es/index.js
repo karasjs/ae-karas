@@ -17,6 +17,12 @@ ae2karas.dispatch = (function() {
       if(data && data instanceof Object) {
         data = JSON.stringify(data);
       }
+      else if(data === undefined) {
+        data = 'undefined';
+      }
+      else if(data === null) {
+        data = 'null';
+      }
       // if(typeof data === 'number') {
       //   data = data.toString();
       // }
@@ -27,6 +33,18 @@ ae2karas.dispatch = (function() {
     }
   };
 })();
+
+ae2karas.log = function(s) {
+  $.ae2karas.dispatch(enums.EVENT.LOG, s);
+};
+
+ae2karas.warn = function(s) {
+  $.ae2karas.dispatch(enums.EVENT.WARN, s);
+};
+
+ae2karas.error = function(s) {
+  $.ae2karas.dispatch(enums.EVENT.ERROR, s);
+};
 
 function getItemType(item) {
   let getType = {};
