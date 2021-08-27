@@ -36,5 +36,13 @@ csInterface.addEventListener(enums.EVENT.LOG, function(event) {
   console.log(event.data);
 });
 
+csInterface.addEventListener(enums.EVENT.WARN, function(event) {
+  console.warn(event.data);
+});
+
+csInterface.addEventListener(enums.EVENT.ERROR, function(event) {
+  console.error(event.data);
+});
+
 // 通知es初始化获取展示合成列表，不发送的话es那边不执行任何代码很神奇
 csInterface.evalScript('$.ae2karas.getCompositions();');

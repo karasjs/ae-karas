@@ -7,6 +7,8 @@ export default {
   EVENT: {
     INIT: 'ae2karas:init',
     LOG: 'ae2karas:log',
+    WARN: 'ae2karas:warn',
+    ERROR: 'ae2karas:error',
     CONVERT: 'ae2karas:convert',
   },
 };
