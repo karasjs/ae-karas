@@ -1,5 +1,3 @@
-import enums from '../enums';
-
 const LAYER_TRANSFORM = {
   'ADBE Anchor Point': 'anchorPoint',
   'ADBE Position': 'position',
@@ -30,7 +28,11 @@ function getPropertyValues(prop) {
   if(numKeys > 1) {
     let arr = [];
     for(let i = 1; i <= numKeys; i++) {
-      arr.push(prop.keyValue(i));
+      arr.push({
+        time: prop.keyTime(i),
+        value: prop.keyValue(i),
+        // TODO timeFunction
+      });
     }
     return arr;
   }
@@ -56,6 +58,5 @@ export default function(prop) {
       }
     }
   }
-  $.ae2karas.dispatch(enums.EVENT.LOG, res);
   return res;
 };
