@@ -1,4 +1,3 @@
-import enums from '../enums';
 import transform from './transform';
 import vector from './vector';
 
@@ -43,6 +42,7 @@ function recursion(composition, library) {
     children.push(parseLayer(item, library));
   }
   return {
+    name,
     width,
     height,
     duration, // 合成的总时长
@@ -53,14 +53,15 @@ function recursion(composition, library) {
 function parseLayer(layer, library) {
   let res = {
     name: layer.name,
-    // width: layer.width,
-    // height: layer.height,
+    width: layer.width,
+    height: layer.height,
     enabled: layer.solo || layer.enabled, // 可能是个隐藏的父级链接图层
     startTime: layer.startTime, // 开始时间，即时间轴上本图层初始位置
     inPoint: layer.inPoint, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
   };
   $.ae2karas.warn('layer: ' + res.name);
+  let geom;
   for(let i = 1; i <= layer.numProperties; i++) {
     let prop = layer.property(i);
     if(prop && prop.enabled) {
@@ -73,7 +74,7 @@ function parseLayer(layer, library) {
         case 'ADBE Root Vectors Group': // 根元素
         // case 'ADBE Vectors Group':
           // 形状图层中的内容子属性
-          res.vector = vector(prop, library);
+          geom = vector(prop, library);
           break;
         case 'ADBE Mask Parade':
           // todo mask
@@ -84,13 +85,12 @@ function parseLayer(layer, library) {
       }
     }
   }
-  let vct = res.vector;
   let source = layer.source;
-  if(vct) {
-    vct.type = vct.content.type;
-    vct.id = library.length;
-    library.push(vct);
-    res.libraryId = vct.id;
+  if(geom && geom.content && geom.content.type) {
+    geom.type = geom.content.type;
+    geom.id = library.length;
+    library.push(geom);
+    res.libraryId = geom.id;
   }
   else if(source) {
     let asset;

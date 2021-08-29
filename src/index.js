@@ -19,7 +19,10 @@ ReactDom.render(
           csInterface.evalScript(`$.ae2karas.convert(${store.composition.currentId})`);
         }
       }}>转换</div>
-      <div className="refresh">刷新</div>
+      <div className="refresh" onClick={() => {
+        store.composition.setCurrent(null);
+        csInterface.evalScript('$.ae2karas.getCompositions();');
+      }}>刷新</div>
     </div>
     <div className="choose">请选择合成：</div>
     <Composition/>

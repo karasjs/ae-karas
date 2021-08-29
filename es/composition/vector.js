@@ -1,10 +1,10 @@
 function group(prop) {
-  // 这里是矩形1层，只需关注Group即可，还有个blendMode无视
+  // 这里是矩形1层，只需关注Groups属性即可，还有个blendMode无视
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
+    $.ae2karas.log('group: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
-      $.ae2karas.log('vector2: ' + matchName);
       switch(matchName) {
         case 'ADBE Vectors Group':
           return content(item);
@@ -15,14 +15,26 @@ function group(prop) {
 
 function content(prop) {
   // 矩形1下面会多出一层内容层看不见，就是本层，其下面则是可视的子属性层
-  let res = {};
+  let res = {
+    name: prop.name,
+  };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
+    $.ae2karas.log('content: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {
         case 'ADBE Vector Shape - Rect':
           res.content = rect(item);
+          break;
+        case 'ADBE Vector Shape - Ellipse':
+          res.content = ellipse(item);
+          break;
+        case 'ADBE Vector Shape - Star':
+          res.content = star(item);
+          break;
+        case 'ADBE Vector Shape - Group':
+          res.content = path(item);
           break;
         case 'ADBE Vector Graphic - Stroke':
           res.stroke = stroke(item);
@@ -43,6 +55,7 @@ function rect(prop) {
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
+    $.ae2karas.log('rect: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {
@@ -57,6 +70,69 @@ function rect(prop) {
           break;
         case 'ADBE Vector Rect Roundness':
           res.roundness = item.value;
+          break;
+      }
+    }
+  }
+  return res;
+}
+
+function ellipse(prop) {
+  let res = {
+    type: 'ellipse',
+  };
+  for(let i = 1; i <= prop.numProperties; i++) {
+    let item = prop.property(i);
+    if(item && item.enabled) {
+      let matchName = item.matchName;
+      switch(matchName) {
+        case 'ADBE Vector Shape Direction':
+          res.direction = item.value;
+          break;
+        case 'ADBE Vector Ellipse Size':
+          res.size = item.value;
+          break;
+        case 'ADBE Vector Ellipse Position':
+          res.position = item.value;
+          break;
+      }
+    }
+  }
+  return res;
+}
+
+function star(prop) {
+  let res = {
+    type: 'star',
+  };
+  for(let i = 1; i <= prop.numProperties; i++) {
+    let item = prop.property(i);
+    if(item && item.enabled) {
+      let matchName = item.matchName;
+      switch(matchName) {
+        case 'ADBE Vector Shape Direction':
+          res.direction = item.value;
+          break;
+        case 'ADBE Vector Star Type':
+          res.starType = item.value;
+          break;
+        case 'ADBE Vector Star Points':
+          res.points = item.value;
+          break;
+        case 'ADBE Vector Star Position':
+          res.position = item.value;
+          break;
+        case 'ADBE Vector Star Inner Radius':
+          res.innerRadius = item.value;
+          break;
+        case 'ADBE Vector Star Outer Radius':
+          res.outerRadius = item.value;
+          break;
+        case 'ADBE Vector Star Inner Roundess':
+          res.innerRoundness = item.value;
+          break;
+        case 'ADBE Vector Star Outer Roundess':
+          res.outerRoundness = item.value;
           break;
       }
     }
@@ -91,6 +167,31 @@ function stroke(prop) {
           break;
         case 'ADBE Vector Stroke Dashes':
           res.dashes = dash(item);
+          break;
+      }
+    }
+  }
+  return res;
+}
+
+function path(prop) {
+  let res = {
+    type: 'path',
+  };
+  for(let i = 1; i <= prop.numProperties; i++) {
+    let item = prop.property(i);
+    if(item && item.enabled) {
+      let matchName = item.matchName;
+      switch(matchName) {
+        case 'ADBE Vector Shape Direction':
+          res.direction = item.value;
+          break;
+        case 'ADBE Vector Shape':
+          let { vertices } = res.points = item.value;
+          // 可能顶点为空
+          if(!vertices || !vertices.length) {
+            return;
+          }
           break;
       }
     }
@@ -158,31 +259,12 @@ export default function(prop, library) {
   // 这里是内容层，一般只有1个属性，如矩形1
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
+    $.ae2karas.log('vector: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {
         case 'ADBE Vector Group':
           return group(item, library);
-        // case 'ADBE Vector Shape - Rect':
-        //   break;
-        // case 'ADBE Vector Shape - Ellipse':
-        //   break;
-        // case 'ADBE Vector Shape - Star':
-        //   break;
-        // case 'ADBE Vector Shape - Group':
-        //   break;
-        // case 'ADBE Vector Shape - Gro':
-        //   break;
-        // case 'ADBE Vector Graphic - Fill':
-        //   break;
-        // case 'ADBE Vector Graphic - G-Fill':
-        //   break;
-        // case 'ADBE Vector Filter - Trim':
-        //   break;
-        // case 'ADBE Vector Graphic - Stroke':
-        //   break;
-        // case 'ADBE Vector Graphic - G-Stroke':
-        //   break;
       }
     }
   }
