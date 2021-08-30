@@ -1,5 +1,5 @@
 import enums from './enums';
-import parse from './composition/parse';
+import parse from './parse/index';
 
 const { ES_TYPE, EVENT } = enums;
 
