@@ -1,4 +1,4 @@
-import transform from './transform';
+import { transformLayer } from './transform';
 import vector from './vector';
 
 function recursion(composition, library) {
@@ -67,12 +67,10 @@ function parseLayer(layer, library) {
     if(prop && prop.enabled) {
       let matchName = prop.matchName;
       switch(matchName) {
-        case 'ADBE Transform Group': // 根元素
-        // case 'ADBE Vector Transform Group': // 非根元素
-          res.transform = transform(prop);
+        case 'ADBE Transform Group':
+          res.transform = transformLayer(prop);
           break;
-        case 'ADBE Root Vectors Group': // 根元素
-        // case 'ADBE Vectors Group':
+        case 'ADBE Root Vectors Group':
           // 形状图层中的内容子属性
           geom = vector(prop, library);
           break;

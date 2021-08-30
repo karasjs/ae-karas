@@ -1,16 +1,25 @@
+import { transformVector } from './transform';
+
 function group(prop) {
-  // 这里是矩形1层，只需关注Groups属性即可，还有个blendMode无视
+  let res = {};
+  // 这里是矩形1层，主要关注Groups属性即可，blendMode暂时无视，transform被上钻2层提前
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
-    $.ae2karas.log('group: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {
         case 'ADBE Vectors Group':
-          return content(item);
+          res.content = content(item);
+          break;
+        case 'ADBE Vector Transform Group':
+          // 奇怪的地方，显示应该下钻2层到如rect同级，可实际提前了
+          res.transform = transformVector(item);
+          break;
       }
     }
   }
+  res.content.transform = res.transform;
+  return res.content;
 }
 
 function content(prop) {
@@ -20,7 +29,6 @@ function content(prop) {
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
-    $.ae2karas.log('content: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {
@@ -55,7 +63,7 @@ function rect(prop) {
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
-    $.ae2karas.log('rect: ' + item.matchName);
+    // $.ae2karas.log('rect: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {
@@ -259,7 +267,6 @@ export default function(prop, library) {
   // 这里是内容层，一般只有1个属性，如矩形1
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
-    $.ae2karas.log('vector: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {

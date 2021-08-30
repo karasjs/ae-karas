@@ -44,7 +44,7 @@ function getPropertyValues(prop) {
   }
 }
 
-export default function(prop) {
+export function transformLayer(prop) {
   let res = {};
   for(let i = 1; prop && i <= prop.numProperties; i++) {
     let item = prop.property(i);
@@ -53,10 +53,21 @@ export default function(prop) {
       if(LAYER_TRANSFORM.hasOwnProperty(matchName)) {
         res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item);
       }
-      else if(VECTOR_TRANSFORM.hasOwnProperty(matchName)) {
+    }
+  }
+  return res;
+}
+
+export function transformVector(prop) {
+  let res = {};
+  for(let i = 1; prop && i <= prop.numProperties; i++) {
+    let item = prop.property(i);
+    if(item && item.enabled) {
+      let matchName = item.matchName;
+      if(VECTOR_TRANSFORM.hasOwnProperty(matchName)) {
         res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item);
       }
     }
   }
   return res;
-};
+}
