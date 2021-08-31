@@ -1,5 +1,6 @@
 import enums from './enums';
 import parse from './parse/index';
+import convert from './convert/index';
 
 const { ES_TYPE, EVENT } = enums;
 
@@ -98,5 +99,6 @@ ae2karas.convert = function(id) {
   }
   // 递归遍历分析合成对象，转换ae的图层为普通js对象，留给后续转换karas用
   let res = parse(composition);
-  $.ae2karas.dispatch(enums.EVENT.CONVERT, res);
+  // $.ae2karas.dispatch(enums.EVENT.CONVERT, res);
+  return convert(res);
 };

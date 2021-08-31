@@ -42,10 +42,11 @@ function recursion(composition, library) {
     children.push(parseLayer(item, library));
   }
   return {
+    type: 'div',
     name,
     width,
     height,
-    duration, // 合成的总时长
+    duration: duration * 1000, // 合成的总时长
     children,
   };
 }
@@ -56,9 +57,9 @@ function parseLayer(layer, library) {
     width: layer.width,
     height: layer.height,
     enabled: layer.solo || layer.enabled, // 可能是个隐藏的父级链接图层
-    startTime: layer.startTime, // 开始时间，即时间轴上本图层初始位置
-    inPoint: layer.inPoint, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
-    outPoint: layer.outPoint, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
+    startTime: layer.startTime * 1000, // 开始时间，即时间轴上本图层初始位置
+    inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
+    outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
   };
   $.ae2karas.warn('layer: ' + res.name);
   let geom;
@@ -113,6 +114,7 @@ function parseLayer(layer, library) {
         if(src) {
           asset = {
             type: 'img',
+            name,
             width: source.width,
             height: source.height,
             src,
@@ -145,12 +147,17 @@ function parseLayer(layer, library) {
 export default function(composition) {
   // 递归遍历合成，转换ae的图层为普通js对象
   let { workAreaStart, workAreaDuration } = composition;
-  // workAreaStart *= 1000;
-  // workAreaDuration *= 1000;
+  workAreaStart *= 1000;
+  workAreaDuration *= 1000;
   $.ae2karas.log('workArea: ' + workAreaDuration + ',' + workAreaStart);
   let library = [];
-  let children = recursion(composition, library);
-  $.ae2karas.log(children);
+  let result = recursion(composition, library);
+  $.ae2karas.log(result);
   $.ae2karas.log(library);
-  return 1;
+  return {
+    workAreaStart,
+    workAreaDuration,
+    result,
+    library,
+  };
 }
