@@ -29,7 +29,7 @@ function getPropertyValues(prop) {
     let arr = [];
     for(let i = 1; i <= numKeys; i++) {
       arr.push({
-        time: prop.keyTime(i),
+        time: prop.keyTime(i) * 1000,
         value: prop.keyValue(i),
         // TODO timeFunction
       });

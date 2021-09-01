@@ -149,7 +149,7 @@ export default function(composition) {
   let { workAreaStart, workAreaDuration } = composition;
   workAreaStart *= 1000;
   workAreaDuration *= 1000;
-  $.ae2karas.log('workArea: ' + workAreaDuration + ',' + workAreaStart);
+  $.ae2karas.log('workArea: ' + workAreaStart + ',' + workAreaDuration);
   let library = [];
   let result = recursion(composition, library);
   $.ae2karas.log(result);
