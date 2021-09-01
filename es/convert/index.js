@@ -20,35 +20,78 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
       style: {},
     },
   };
-  parse(library, libraryId, newLib, width, height, start, duration, offset, startTime, inPoint, outPoint);
+  parse(library, libraryId, newLib, width, height, start, duration, offset + startTime - start);
   res.animate = [];
+  // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
+  let begin = start + offset;
+  if(inPoint > begin || outPoint < begin + duration) {
+    let v = {
+      value: [],
+      options: {
+        duration,
+        fill: 'forwards',
+      },
+    };
+    // 开头不可见，默认init的style
+    if(inPoint > begin) {
+      res.init.style.visibility = 'hidden';
+      res.init.style.pointerEvents = 'none';
+      v.value.push({
+        offset: 0,
+        visibility: 'hidden',
+        pointerEvents: 'none',
+      });
+      v.value.push({
+        offset: (inPoint - begin) / duration,
+        visibility: 'inherit',
+        pointerEvents: 'auto',
+      });
+    }
+    // 结尾计算
+    if(outPoint < begin + duration) {
+      v.value.push({
+        offset: (outPoint - begin) / duration,
+        visibility: 'hidden',
+        pointerEvents: 'none',
+      });
+      // 默认不是隐藏需补结束帧为隐藏，否则karas会填补空关键帧
+      if(inPoint <= begin) {
+        v.value.push({
+          offset: 1,
+          visibility: 'hidden',
+          pointerEvents: 'none',
+        });
+      }
+    }
+    res.animate.push(v);
+  }
   // 分别分析每个变换，过程很相似
   let { anchorPoint, opacity, position, rotateX, rotateY, rotateZ, scale } = transform;
   if(Array.isArray(anchorPoint) && anchorPoint.length) {
-    res.animate.push(transformOrigin(anchorPoint, start, duration, offset));
+    res.animate.push(transformOrigin(anchorPoint, begin, duration));
   }
   if(Array.isArray(opacity) && opacity.length) {
-    res.animate.push(transformOpacity(opacity, start, duration, offset));
+    res.animate.push(transformOpacity(opacity, begin, duration));
   }
   if(Array.isArray(position) && position.length) {
-    res.animate.push(transformPosition(position, start, duration, offset));
+    res.animate.push(transformPosition(position, begin, duration));
   }
   if(Array.isArray(rotateX) && rotateX.length) {
-    res.animate.push(transformRotateX(rotateX, start, duration, offset));
+    res.animate.push(transformRotateX(rotateX, begin, duration));
   }
   if(Array.isArray(rotateX) && rotateX.length) {
-    res.animate.push(transformRotateY(rotateY, start, duration, offset));
+    res.animate.push(transformRotateY(rotateY, begin, duration));
   }
   if(Array.isArray(rotateX) && rotateZ.length) {
-    res.animate.push(transformRotateZ(rotateZ, start, duration, offset));
+    res.animate.push(transformRotateZ(rotateZ, begin, duration));
   }
   if(Array.isArray(scale) && scale.length) {
-    res.animate.push(transformScale(scale, start, duration, offset));
+    res.animate.push(transformScale(scale, begin, duration));
   }
   return res;
 }
 
-function parse(library, id, newLib) {
+function parse(library, id, newLib, w, h, start, duration, offset) {
   let data = library[id];
   let { type, name, src, width, height, children } = data;
   let res = newLib[id] = {
@@ -69,7 +112,7 @@ function parse(library, id, newLib) {
     res.children = [];
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
-      let temp = recursion(item, library, newLib, width, height, workAreaStart, workAreaDuration, 0);
+      let temp = recursion(item, library, newLib, width, height, start, duration, offset);
       if(temp) {
         res.children.push(temp);
       }

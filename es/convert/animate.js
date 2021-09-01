@@ -75,7 +75,7 @@ function getAreaList(list, begin, duration, reducer) {
   return list;
 }
 
-export function transformOrigin(list, start, duration, offset) {
+export function transformOrigin(list, begin, duration) {
   let res = {
     value: [],
     options: {
@@ -90,7 +90,6 @@ export function transformOrigin(list, start, duration, offset) {
     });
   }
   else {
-    let begin = start + offset;
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
       return [
         prev[0] + (next[0] - prev[0]) * percent,
@@ -108,7 +107,7 @@ export function transformOrigin(list, start, duration, offset) {
   return res;
 }
 
-export function transformOpacity(list, start, duration, offset) {
+export function transformOpacity(list, begin, duration) {
   let res = {
     value: [],
     options: {
@@ -123,7 +122,6 @@ export function transformOpacity(list, start, duration, offset) {
     });
   }
   else {
-    let begin = start + offset;
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
       return prev + (next - prev) * percent;
     });
@@ -138,7 +136,7 @@ export function transformOpacity(list, start, duration, offset) {
   return res;
 }
 
-export function transformPosition(list, start, duration, offset) {
+export function transformPosition(list, begin, duration) {
   let res = {
     value: [],
     options: {
@@ -154,7 +152,6 @@ export function transformPosition(list, start, duration, offset) {
     });
   }
   else {
-    let begin = start + offset;
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
       return [
         prev[0] + (next[0] - prev[0]) * percent,
@@ -174,7 +171,7 @@ export function transformPosition(list, start, duration, offset) {
   return res;
 }
 
-export function transformRotateX(list, start, duration, offset) {
+export function transformRotateX(list, begin, duration) {
   let res = {
     value: [],
     options: {
@@ -189,7 +186,6 @@ export function transformRotateX(list, start, duration, offset) {
     });
   }
   else {
-    let begin = start + offset;
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
       return prev + (next - prev) * percent;
     });
@@ -204,7 +200,7 @@ export function transformRotateX(list, start, duration, offset) {
   return res;
 }
 
-export function transformRotateY(list, start, duration, offset) {
+export function transformRotateY(list, begin, duration) {
   let res = {
     value: [],
     options: {
@@ -219,7 +215,6 @@ export function transformRotateY(list, start, duration, offset) {
     });
   }
   else {
-    let begin = start + offset;
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
       return prev + (next - prev) * percent;
     });
@@ -235,7 +230,7 @@ export function transformRotateY(list, start, duration, offset) {
 }
 
 
-export function transformRotateZ(list, start, duration, offset) {
+export function transformRotateZ(list, begin, duration) {
   let res = {
     value: [],
     options: {
@@ -250,7 +245,6 @@ export function transformRotateZ(list, start, duration, offset) {
     });
   }
   else {
-    let begin = start + offset;
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
       return prev + (next - prev) * percent;
     });
@@ -265,7 +259,7 @@ export function transformRotateZ(list, start, duration, offset) {
   return res;
 }
 
-export function transformScale(list, start, duration, offset) {
+export function transformScale(list, begin, duration) {
   let res = {
     value: [],
     options: {
@@ -282,7 +276,6 @@ export function transformScale(list, start, duration, offset) {
     });
   }
   else {
-    let begin = start + offset;
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
       return [
         prev[0] + (next[0] - prev[0]) * percent,
