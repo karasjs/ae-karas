@@ -90,8 +90,20 @@ export function transformOrigin(list, start, duration, offset) {
     });
   }
   else {
-    // 根据工作区间的时间，外加图层的偏移时间，递归的偏移量计算开始结束事件
-    let begin = startTime + offset;
+    let begin = start + offset;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return [
+        prev[0] + (next[0] - prev[0]) * percent,
+        prev[1] + (next[1] - prev[1]) * percent,
+      ];
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        transformOrigin: item.value[0] + ' ' + item.value[1],
+      });
+    }
   }
   return res;
 }
@@ -111,6 +123,17 @@ export function transformOpacity(list, start, duration, offset) {
     });
   }
   else {
+    let begin = start + offset;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return prev + (next - prev) * percent;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        opacity: item.value * 0.01,
+      });
+    }
   }
   return res;
 }
@@ -166,6 +189,17 @@ export function transformRotateX(list, start, duration, offset) {
     });
   }
   else {
+    let begin = start + offset;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return prev + (next - prev) * percent;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        rotateX: item.value,
+      });
+    }
   }
   return res;
 }
@@ -185,6 +219,17 @@ export function transformRotateY(list, start, duration, offset) {
     });
   }
   else {
+    let begin = start + offset;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return prev + (next - prev) * percent;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        rotateY: item.value,
+      });
+    }
   }
   return res;
 }
@@ -205,6 +250,17 @@ export function transformRotateZ(list, start, duration, offset) {
     });
   }
   else {
+    let begin = start + offset;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return prev + (next - prev) * percent;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        rotateZ: item.value,
+      });
+    }
   }
   return res;
 }
@@ -226,6 +282,23 @@ export function transformScale(list, start, duration, offset) {
     });
   }
   else {
+    let begin = start + offset;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return [
+        prev[0] + (next[0] - prev[0]) * percent,
+        prev[1] + (next[1] - prev[1]) * percent,
+        prev[2] + (next[2] - prev[2]) * percent,
+      ];
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        scaleX: item.value[0] * 0.01,
+        scaleY: item.value[1] * 0.01,
+        scaleZ: item.value[2] * 0.01,
+      });
+    }
   }
   return res;
 }
