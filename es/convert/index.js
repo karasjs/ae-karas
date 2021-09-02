@@ -20,7 +20,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
       style: {},
     },
   };
-  parse(library, libraryId, newLib, width, height, start, duration, offset + startTime - start);
+  parse(library, libraryId, newLib, width, height, start, duration, offset + startTime);
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
   let begin = start + offset;
