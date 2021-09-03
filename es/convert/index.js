@@ -14,6 +14,11 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     return null;
   }
   let { libraryId, width, height, transform, startTime, inPoint, outPoint } = data;
+  let begin = start + offset;
+  // 图层在工作区外可忽略
+  if(inPoint >= begin + duration || outPoint <= begin) {
+    return null;
+  }
   let res = {
     libraryId,
     init: {
@@ -23,7 +28,6 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
   parse(library, libraryId, newLib, width, height, start, duration, offset + startTime);
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
-  let begin = start + offset;
   if(inPoint > begin || outPoint < begin + duration) {
     let v = {
       value: [],
@@ -38,8 +42,6 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
       res.init.style.pointerEvents = 'none';
       v.value.push({
         offset: 0,
-        visibility: 'hidden',
-        pointerEvents: 'none',
       });
       v.value.push({
         offset: (inPoint - begin) / duration,
@@ -49,6 +51,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
     // 结尾计算
     if(outPoint < begin + duration) {
+      // 可能是第一帧但offset不为0，不用担心karas会补充空首帧
       v.value.push({
         offset: (outPoint - begin) / duration,
         visibility: 'hidden',
@@ -147,6 +150,5 @@ export default function(data) {
       }
     }
   }
-  $.ae2karas.warn(res);
   return res;
 }

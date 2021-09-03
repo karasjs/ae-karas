@@ -5,6 +5,7 @@ import { Provider } from 'mobx-react';
 import store from './store';
 import Composition from './component/Composition';
 import Preview from './component/Preview';
+import Loading from './component/Loading';
 import { csInterface } from './util/CSInterface';
 import enums from '../es/enums';
 
@@ -16,6 +17,7 @@ ReactDom.render(
     <div className="btn">
       <div className="convert" onClick={() => {
         if(store.composition.currentId) {
+          store.global.setLoading(true);
           csInterface.evalScript(`$.ae2karas.convert(${store.composition.currentId})`);
         }
       }}>转换</div>
@@ -27,6 +29,7 @@ ReactDom.render(
     <div className="choose">请选择合成：</div>
     <Composition/>
     <Preview/>
+    <Loading/>
   </Provider>,
   document.querySelector('#root')
 );
@@ -44,6 +47,11 @@ csInterface.addEventListener(enums.EVENT.WARN, function(event) {
 });
 
 csInterface.addEventListener(enums.EVENT.ERROR, function(event) {
+  console.error(event.data);
+});
+
+csInterface.addEventListener(enums.EVENT.FINISH, function(event) {
+  store.global.setLoading(false);
   console.error(event.data);
 });
 

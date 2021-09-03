@@ -10,5 +10,6 @@ export default {
     WARN: 'ae2karas:warn',
     ERROR: 'ae2karas:error',
     CONVERT: 'ae2karas:convert',
+    FINISH: 'ae2karas:finish',
   },
 };
