@@ -13,7 +13,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
   if(!data.enabled) {
     return null;
   }
-  let { libraryId, width, height, transform, startTime, inPoint, outPoint } = data;
+  let { name, libraryId, width, height, transform, startTime, inPoint, outPoint } = data;
   let begin = start + offset;
   // 图层在工作区外可忽略
   if(inPoint >= begin + duration || outPoint <= begin) {
@@ -21,6 +21,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
   }
   let res = {
     libraryId,
+    name,
     init: {
       style: {},
     },
@@ -70,8 +71,9 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
   }
   // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
   let { anchorPoint, opacity, position, rotateX, rotateY, rotateZ, scale } = transform;
+  let begin2 = start - offset;
   if(Array.isArray(anchorPoint) && anchorPoint.length) {
-    let t = transformOrigin(anchorPoint, begin, duration);
+    let t = transformOrigin(anchorPoint, begin2, duration);
     let first = t.value[0];
     let v = first.transformOrigin.split(' ');
     v[0] = parseFloat(v[0]);
@@ -96,7 +98,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
   }
   if(Array.isArray(opacity) && opacity.length) {
-    let t = transformOpacity(opacity, begin, duration);
+    let t = transformOpacity(opacity, begin2, duration);
     let first = t.value[0];
     if(first.opacity !== 1) {
       res.init.style.opacity = first.opacity;
@@ -111,7 +113,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
   }
   if(Array.isArray(position) && position.length) {
-    let t = transformPosition(position, begin, duration);
+    let t = transformPosition(position, begin2, duration);
     let first = t.value[0];
     if(first.translateX) {
       res.init.style.translateX = first.translateX;
@@ -129,7 +131,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
   }
   if(Array.isArray(rotateX) && rotateX.length) {
-    let t = transformRotateX(rotateX, begin, duration);
+    let t = transformRotateX(rotateX, begin2, duration);
     let first = t.value[0];
     if(first.rotateX) {
       res.init.style.rotateX = first.rotateX;
@@ -144,7 +146,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
   }
   if(Array.isArray(rotateY) && rotateY.length) {
-    let t = transformRotateY(rotateY, begin, duration);
+    let t = transformRotateY(rotateY, begin2, duration);
     let first = t.value[0];
     if(first.rotateY) {
       res.init.style.rotateY = first.rotateY;
@@ -159,7 +161,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
   }
   if(Array.isArray(rotateZ) && rotateZ.length) {
-    let t = transformRotateZ(rotateZ, begin, duration);
+    let t = transformRotateZ(rotateZ, begin2, duration);
     let first = t.value[0];
     if(first.rotateZ) {
       res.init.style.rotateZ = first.rotateZ;
