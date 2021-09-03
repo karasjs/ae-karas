@@ -1,5 +1,4 @@
 import React from 'react';
-import { transaction } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import classnames from 'classnames';
 
@@ -16,12 +15,9 @@ class Composition extends React.Component {
   }
 
   preview(id) {
-    transaction(function() {
-      store.preview.setShow(true);
-      store.preview.setId(id);
-      // 通知es转换合成对象
-      csInterface.evalScript(`$.ae2karas.convert(${id});`);
-    });
+    store.preview.setShow(true);
+    // 通知es转换合成对象
+    csInterface.evalScript(`$.ae2karas.convert(${id});`);
   }
 
   render() {

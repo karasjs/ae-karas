@@ -1,19 +1,14 @@
 import { makeAutoObservable } from 'mobx';
 
 class Preview {
-  isShow = false;
-  id = null;
+  data = null;
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  setShow(isShow) {
-    this.isShow = isShow;
-  }
-
-  setId(id) {
-    this.id = id;
+  setData(data) {
+    this.data = data;
   }
 }
 

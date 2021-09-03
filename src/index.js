@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDom from 'react-dom';
+import { transaction } from 'mobx';
 import { Provider } from 'mobx-react';
 
 import store from './store';
-import Composition from './component/Composition';
+import List from './component/List';
 import Preview from './component/Preview';
 import Loading from './component/Loading';
 import { csInterface } from './util/CSInterface';
@@ -14,20 +15,7 @@ import './index.less';
 
 ReactDom.render(
   <Provider {...store}>
-    <div className="btn">
-      <div className="convert" onClick={() => {
-        if(store.composition.currentId) {
-          store.global.setLoading(true);
-          csInterface.evalScript(`$.ae2karas.convert(${store.composition.currentId})`);
-        }
-      }}>转换</div>
-      <div className="refresh" onClick={() => {
-        store.composition.setCurrent(null);
-        csInterface.evalScript('$.ae2karas.getCompositions();');
-      }}>刷新</div>
-    </div>
-    <div className="choose">请选择合成：</div>
-    <Composition/>
+    <List/>
     <Preview/>
     <Loading/>
   </Provider>,
@@ -51,8 +39,13 @@ csInterface.addEventListener(enums.EVENT.ERROR, function(event) {
 });
 
 csInterface.addEventListener(enums.EVENT.FINISH, function(event) {
-  store.global.setLoading(false);
-  console.error(event.data);
+  console.log(JSON.stringify(event.data));
+  console.log(event.data);
+  transaction(function() {
+    store.global.setLoading(false);
+    store.preview.setData(event.data);
+    store.global.setPreview(true);
+  });
 });
 
 // 通知es初始化获取展示合成列表，不发送的话es那边不执行任何代码很神奇
