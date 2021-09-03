@@ -39,13 +39,10 @@ class Preview extends React.Component {
       canvas.style.width = width / max + 'px';
       canvas.style.height = height / max + 'px';
     }
-    let controller = root.animateController;
-    if(controller && controller.list.length) {
-      controller.iterations = Infinity;
-      // controller.list[0].on('finish', function() {
-      //   controller.gotoAndPlay(0);
-      // });
-    }
+    // let controller = root.animateController;
+    // if(controller && controller.list.length) {
+    //   controller.iterations = Infinity;
+    // }
   }
 
   render() {

@@ -39,7 +39,6 @@ csInterface.addEventListener(enums.EVENT.ERROR, function(event) {
 });
 
 csInterface.addEventListener(enums.EVENT.FINISH, function(event) {
-  console.log(JSON.stringify(event.data));
   console.log(event.data);
   transaction(function() {
     store.global.setLoading(false);

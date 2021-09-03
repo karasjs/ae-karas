@@ -68,28 +68,131 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
     res.animate.push(v);
   }
-  // 分别分析每个变换，过程很相似
+  // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
   let { anchorPoint, opacity, position, rotateX, rotateY, rotateZ, scale } = transform;
   if(Array.isArray(anchorPoint) && anchorPoint.length) {
-    res.animate.push(transformOrigin(anchorPoint, begin, duration));
+    let t = transformOrigin(anchorPoint, begin, duration);
+    let first = t.value[0];
+    let v = first.transformOrigin.split(' ');
+    v[0] = parseFloat(v[0]);
+    v[1] = parseFloat(v[1]);
+    if(v[0] !== width * 0.5 || v[1] !== height * 0.5) {
+      res.init.style.transformOrigin = first.transformOrigin;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+    // ae中位置相对于anchor，而不是默认左上角原点，因此有个位置计算
+    if(v[0]) {
+      res.init.style.left = -v[0];
+    }
+    if(v[1]) {
+      res.init.style.top = -v[1];
+    }
   }
   if(Array.isArray(opacity) && opacity.length) {
-    res.animate.push(transformOpacity(opacity, begin, duration));
+    let t = transformOpacity(opacity, begin, duration);
+    let first = t.value[0];
+    if(first.opacity !== 1) {
+      res.init.style.opacity = first.opacity;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
   }
   if(Array.isArray(position) && position.length) {
-    res.animate.push(transformPosition(position, begin, duration));
+    let t = transformPosition(position, begin, duration);
+    let first = t.value[0];
+    if(first.translateX) {
+      res.init.style.translateX = first.translateX;
+    }
+    if(first.translateY) {
+      res.init.style.translateY = first.translateY;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
   }
   if(Array.isArray(rotateX) && rotateX.length) {
-    res.animate.push(transformRotateX(rotateX, begin, duration));
+    let t = transformRotateX(rotateX, begin, duration);
+    let first = t.value[0];
+    if(first.rotateX) {
+      res.init.style.rotateX = first.rotateX;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
   }
-  if(Array.isArray(rotateX) && rotateX.length) {
-    res.animate.push(transformRotateY(rotateY, begin, duration));
+  if(Array.isArray(rotateY) && rotateY.length) {
+    let t = transformRotateY(rotateY, begin, duration);
+    let first = t.value[0];
+    if(first.rotateY) {
+      res.init.style.rotateY = first.rotateY;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
   }
-  if(Array.isArray(rotateX) && rotateZ.length) {
-    res.animate.push(transformRotateZ(rotateZ, begin, duration));
+  if(Array.isArray(rotateZ) && rotateZ.length) {
+    let t = transformRotateZ(rotateZ, begin, duration);
+    let first = t.value[0];
+    if(first.rotateZ) {
+      res.init.style.rotateZ = first.rotateZ;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
   }
   if(Array.isArray(scale) && scale.length) {
-    res.animate.push(transformScale(scale, begin, duration));
+    let t = transformScale(scale, begin, duration);
+    let first = t.value[0];
+    if(first.scaleX !== 1) {
+      res.init.style.scaleX = first.scaleX;
+    }
+    if(first.scaleY !== 1) {
+      res.init.style.scaleY = first.scaleY;
+    }
+    if(first.scaleZ !== 1) {
+      res.init.style.scaleZ = first.scaleZ;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
   }
   return res;
 }
@@ -103,6 +206,7 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
     tagName: type,
     props: {
       style: {
+        position: 'absolute',
         width,
         height,
       },
