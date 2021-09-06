@@ -86,7 +86,8 @@ function parseLayer(layer, library) {
   }
   let source = layer.source;
   if(geom && geom.content && geom.content.type) {
-    geom.type = geom.content.type;
+    geom.geom = true; // 特殊标识
+    geom.type = 'div';
     geom.id = library.length;
     library.push(geom);
     res.libraryId = geom.id;

@@ -59,11 +59,10 @@ function content(prop) {
 function rect(prop) {
   // 矩形路径层
   let res = {
-    type: 'rect',
+    type: '$rect',
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
-    // $.ae2karas.log('rect: ' + item.matchName);
     if(item && item.enabled) {
       let matchName = item.matchName;
       switch(matchName) {
@@ -87,7 +86,7 @@ function rect(prop) {
 
 function ellipse(prop) {
   let res = {
-    type: 'ellipse',
+    type: '$ellipse',
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
@@ -184,7 +183,7 @@ function stroke(prop) {
 
 function path(prop) {
   let res = {
-    type: 'path',
+    type: '$polyline',
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);

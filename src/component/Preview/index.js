@@ -25,7 +25,7 @@ class Preview extends React.Component {
       },
       children: [
         karas.parse(data, {
-          // autoPlay: false,
+          autoPlay: false,
         })
       ],
       abbr: false,
