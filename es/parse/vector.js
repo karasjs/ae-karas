@@ -193,11 +193,11 @@ function stroke(prop) {
         if(item.canSetExpression) {
           if(matchName.indexOf('ADBE Vector Stroke Dash') > -1) {
             let j = /\d+/.exec(matchName);
-            d[j[0]] = item.value;
+            d[j[0] - 1] = item.value;
           }
           else if (matchName.indexOf('ADBE Vector Stroke Gap') > -1) {
             let j = /\d+/.exec(matchName);
-            g[j[0]] = item.value;
+            g[j[0] - 1] = item.value;
           }
         }
       }

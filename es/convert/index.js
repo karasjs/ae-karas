@@ -266,7 +266,7 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
  * @param offset
  */
 function parseGeom(res, data, start, duration, offset) {
-  let { content, fill, stroke, dashes, transform } = data;
+  let { content, fill, stroke, transform } = data;
   let { type, direction, size, position, roundness, points } = content;
   let f = [fill.color[0] * 255, fill.color[1] * 255, fill.color[2] * 255, fill.color[3]];
   if(fill.opacity !== 100) {
@@ -289,8 +289,8 @@ function parseGeom(res, data, start, duration, offset) {
     },
     animate: [],
   };
-  if(dashes) {
-    child.props.style.strokeDasharray = [dashes];
+  if(stroke.dashes) {
+    child.props.style.strokeDasharray = [stroke.dashes];
   }
   if(type === 'rect') {
     child.tagName = '$rect';
