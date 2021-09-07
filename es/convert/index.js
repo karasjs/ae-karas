@@ -99,6 +99,15 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
           offset: 0,
         };
       }
+      // tfo的每个动画需考虑对坐标的影响
+      for(let i = 1, len = t.value.length; i < len; i++) {
+        let item = t.value[i];
+        let tfo = item.transformOrigin.split(' ');
+        tfo[0] = parseFloat(tfo[0]);
+        tfo[1] = parseFloat(tfo[1]);
+        item.left = -tfo[0];
+        item.top = -tfo[1];
+      }
       res.animate.push(t);
     }
     // ae中位置相对于anchor，而不是默认左上角原点，因此有个位置计算
@@ -268,11 +277,21 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
 function parseGeom(res, data, start, duration, offset) {
   let { content, fill, stroke, transform } = data;
   let { type, direction, size, position, roundness, points } = content;
-  let f = [fill.color[0] * 255, fill.color[1] * 255, fill.color[2] * 255, fill.color[3]];
+  let f = [
+    parseInt(fill.color[0] * 255),
+    parseInt(fill.color[1] * 255),
+    parseInt(fill.color[2] * 255),
+    fill.color[3]
+  ];
   if(fill.opacity !== 100) {
     f[3] *= fill.opacity * 0.01;
   }
-  let s = [stroke.color[0] * 255, stroke.color[1] * 255, stroke.color[2] * 255, stroke.color[3]];
+  let s = [
+    parseInt(stroke.color[0] * 255),
+    parseInt(stroke.color[1] * 255),
+    parseInt(stroke.color[2] * 255),
+    stroke.color[3]
+  ];
   if(stroke.opacity !== 100) {
     s[3] *= stroke.opacity * 0.01;
   }
