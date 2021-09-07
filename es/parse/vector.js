@@ -232,7 +232,7 @@ function path(prop) {
           res.direction = item.value;
           break;
         case 'ADBE Vector Shape':
-          let { vertices } = res.points = item.value;
+          res.points = item.value;
           break;
       }
     }
