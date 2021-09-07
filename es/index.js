@@ -24,6 +24,12 @@ ae2karas.dispatch = (function() {
       else if(data === null) {
         data = 'null';
       }
+      else if(data === true) {
+        data = 'true';
+      }
+      else if(data === false) {
+        data = 'false';
+      }
       // if(typeof data === 'number') {
       //   data = data.toString();
       // }

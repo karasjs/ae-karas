@@ -240,7 +240,7 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
   // 矢量图层特殊解析，添加
   if(geom) {
     let { content, fill, stroke, transform } = data;
-    let { type, direction, size, position, roundness } = content;
+    let { type, direction, size, position, roundness, points } = content;
     let f = [fill.color[0] * 255, fill.color[1] * 255, fill.color[2] * 255, fill.color[3]];
     if(fill.opacity !== 100) {
       f[3] *= fill.opacity * 0.01;
@@ -250,32 +250,113 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
       s[3] *= stroke.opacity * 0.01;
     }
     let child = {
-      tagName: type,
+      // tagName: type,
       props: {
         style: {
           position: 'absolute',
-          width: size[0],
-          height: size[1],
+          // width: size[0],
+          // height: size[1],
           fill: [f],
           strokeWidth: [stroke.width],
           stroke: [s],
-          strokeDasharray: [1],
+          // strokeDasharray: [1],
           strokeLinejoin: [stroke.lineJoin],
           strokeMiterlimit: [stroke.miterLimit],
         },
       },
       animate: [],
     };
-    if(position[0]) {
+    if(type === 'rect') {
+      child.tagName = '$rect';
+      child.props.style.width = size[0];
+      child.props.style.height = size[1];
+    }
+    else if(type === 'ellipse') {
+      child.tagName = '$ellipse';
+      child.props.style.width = size[0];
+      child.props.style.height = size[1];
+    }
+    else if(type === 'star') {
+      child.tagName = '$polyline';
+    }
+    else if(type === 'path') {
+      child.tagName = '$polyline';
+      let { vertices, inTangents, outTangents, closed } = points;
+      let x1 = vertices[0][0], y1 = vertices[0][1];
+      let x2 = x1, y2 = y1;
+      for(let i = 1, len = vertices.length; i < len; i++) {
+        let item = vertices[i];
+        x1 = Math.max(x1, item[0]);
+        y1 = Math.max(y1, item[1]);
+        x2 = Math.min(x2, item[0]);
+        y2 = Math.min(y2, item[1]);
+        // 控制点是相对于顶点的坐标
+        let it = inTangents[i], ot = outTangents[i];
+        if(it[0]) {
+          x1 = Math.max(x1, item[0] + it[0]);
+          x2 = Math.min(x2, item[0] + it[0]);
+        }
+        if(it[1]) {
+          y1 = Math.max(y1, item[1] + it[1]);
+          y2 = Math.min(y2, item[1] + it[1]);
+        }
+        if(ot[0]) {
+          x1 = Math.max(x1, item[0] + ot[0]);
+          x2 = Math.min(x2, item[0] + ot[0]);
+        }
+        if(ot[1]) {
+          y1 = Math.max(y1, item[1] + ot[1]);
+          y2 = Math.min(y2, item[1] + ot[1]);
+        }
+      }
+      // path尺寸为顶点的最大最小差值
+      let w = child.props.style.width = x1 - x2;
+      let h = child.props.style.height = y1 - y2;
+      let pts = [], cts = [];
+      for(let i = 0, len = vertices.length; i < len; i++) {
+        let item = vertices[i];
+        pts.push([
+          (item[0] - x2) / w,
+          (item[1] - y2) / h,
+        ]);
+        let it = inTangents[i], ot = outTangents[i];
+        // 上一个顶点到本顶点
+        if(it[0] || it[1]) {
+          let j = i - 1;
+          if(j === -1) {
+            j = len - 1;
+          }
+          cts[j] = cts[j] || [];
+          cts[j].push(pts[i][0] + it[0] / w);
+          cts[j].push(pts[i][1] + it[1] / h);
+        }
+        // 本顶点到下一个顶点
+        if(ot[0] || ot[1]) {
+          cts[i] = cts[i] || [];
+          cts[i].push(pts[i][0] + ot[0] / h);
+          cts[i].push(pts[i][1] + ot[1] / h);
+        }
+      }
+      if(closed) {
+        pts.push(pts[0].slice(0));
+      }
+      child.props.points = pts;
+      child.props.controls = cts;
+      // path的特殊位置计算
+      child.props.style.left = x2;
+      child.props.style.top = y2;
+    }
+    // path没有position
+    if(position && position[0]) {
       child.props.style.left = -position[0];
     }
-    if(position[1]) {
+    if(position && position[1]) {
       child.props.style.top = -position[1];
     }
     if(fill.rule === 2) {
       child.props.style.fillRule = 'evenodd';
     }
-    if(roundness) {
+    if(type === 'rect' && roundness) {
       child.props.rx = roundness / size[0];
       child.props.ry = roundness / size[1];
     }
@@ -286,25 +367,63 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
       let t = transformOrigin(anchorPoint, begin2, duration);
       let first = t.value[0];
       let v = first.transformOrigin.split(' ');
-      // 特殊需加上尺寸
-      v[0] = parseFloat(v[0]) + size[0] * 0.5;
-      v[1] = parseFloat(v[1]) + size[1] * 0.5;
-      if(v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
-        child.props.style.transformOrigin = first.transformOrigin;
-      }
-      if(t.value.length > 1) {
-        if(first.offset === 0) {
-          t.value[0] = {
-            offset: 0,
-          };
+      v[0] = parseFloat(v[0]);
+      v[1] = parseFloat(v[1]);
+      /**
+       * path很特殊，原始没有宽高，ae是锚点0,0相对于自身左上角原点，定位则是锚点来进行定位
+       * 需记录最初的位置，发生锚点动画时，其会干扰left/top，同步形成位置动画
+       */
+      if(type === 'path') {
+        let left = child.props.style.left;
+        let top = child.props.style.top;
+        child.props.style.left -= v[0];
+        child.props.style.top -= v[1];
+        let w = child.props.style.width;
+        let h = child.props.style.height;
+        v[0] += w * 0.5;
+        v[1] += h * 0.5;
+        if(v[0] !== w * 0.5 || v[1] !== h * 0.5) {
+          child.props.style.transformOrigin = first.transformOrigin;
         }
-        child.animate.push(t);
+        if(t.value.length > 1) {
+          if(first.offset === 0) {
+            t.value[0] = {
+              offset: 0,
+            };
+          }
+          // tfo的每个动画需考虑对坐标的影响
+          for(let i = 1, len = t.value.length; i < len; i++) {
+            let item = t.value[i];
+            let tfo = item.transformOrigin.split(' ');
+            tfo[0] = parseFloat(tfo[0]);
+            tfo[1] = parseFloat(tfo[1]);
+            item.left = left - tfo[0];
+            item.top = top - tfo[1];
+          }
+          child.animate.push(t);
+        }
       }
-      if(v[0]) {
-        child.props.style.left = -v[0];
-      }
-      if(v[1]) {
-        child.props.style.top = -v[1];
+      else {
+        // tfo中心判断，加上尺寸*0.5
+        v[0] += size[0] * 0.5;
+        v[1] += size[1] * 0.5;
+        if(v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
+          child.props.style.transformOrigin = first.transformOrigin;
+        }
+        if(t.value.length > 1) {
+          if(first.offset === 0) {
+            t.value[0] = {
+              offset: 0,
+            };
+          }
+          child.animate.push(t);
+        }
+        if(v[0]) {
+          child.props.style.left = -v[0];
+        }
+        if(v[1]) {
+          child.props.style.top = -v[1];
+        }
       }
     }
     if(Array.isArray(opacity) && opacity.length) {

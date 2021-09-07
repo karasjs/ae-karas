@@ -59,7 +59,7 @@ function content(prop) {
 function rect(prop) {
   // 矩形路径层
   let res = {
-    type: '$rect',
+    type: 'rect',
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
@@ -86,7 +86,7 @@ function rect(prop) {
 
 function ellipse(prop) {
   let res = {
-    type: '$ellipse',
+    type: 'ellipse',
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
@@ -141,6 +141,9 @@ function star(prop) {
         case 'ADBE Vector Star Outer Roundess':
           res.outerRoundness = item.value;
           break;
+        case 'ADBE Vector Star Rotation':
+          res.rotation = item.value;
+          break;
       }
     }
   }
@@ -172,10 +175,45 @@ function stroke(prop) {
         case 'ADBE Vector Stroke Miter Limit':
           res.miterLimit = item.value;
           break;
-        case 'ADBE Vector Stroke Dashes':
-          res.dashes = dash(item);
-          break;
+        // case 'ADBE Vector Stroke Dashes':
+        //   res.dashes = dash(item);
+        //   break;
       }
+    }
+  }
+  // 特殊的获取虚线样式
+  let dashes = prop.property('Dashes');
+  if(dashes) {
+    let d = [];
+    let g = [];
+    for(let i = 1; i <= dashes.numProperties; i++) {
+      let item = dashes.property(i);
+      if(item && item.enabled) {
+        let matchName = item.matchName;
+        if(item.canSetExpression) {
+          if(matchName.indexOf('ADBE Vector Stroke Dash') > -1) {
+            let j = /\d+/.exec(matchName);
+            d[j[0]] = item.value;
+          }
+          else if (matchName.indexOf('ADBE Vector Stroke Gap') > -1) {
+            let j = /\d+/.exec(matchName);
+            g[j[0]] = item.value;
+          }
+        }
+      }
+    }
+    if(d.length) {
+      let v = [];
+      for(let i = 0, len = d.length; i < len; i++) {
+        v.push(d[i]);
+        if(g[i] === undefined) {
+          v.push(d[i]);
+        }
+        else {
+          v.push(g[i]);
+        }
+      }
+      res.dashes = v;
     }
   }
   return res;
@@ -183,7 +221,7 @@ function stroke(prop) {
 
 function path(prop) {
   let res = {
-    type: '$polyline',
+    type: 'path',
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
@@ -195,10 +233,6 @@ function path(prop) {
           break;
         case 'ADBE Vector Shape':
           let { vertices } = res.points = item.value;
-          // 可能顶点为空
-          if(!vertices || !vertices.length) {
-            return;
-          }
           break;
       }
     }
@@ -228,39 +262,39 @@ function fill(prop) {
   return res;
 }
 
-function dash(prop) {
-  let res = {};
-  for(let i = 1; i <= prop.numProperties; i++) {
-    let item = prop.property(i);
-    if(item && item.enabled) {
-      let matchName = item.matchName;
-      switch(matchName) {
-        case 'ADBE Vector Stroke Dash 1':
-          res.dash1 = item.value;
-          break;
-        case 'ADBE Vector Stroke Dash 2':
-          res.dash2 = item.value;
-          break;
-        case 'ADBE Vector Stroke Dash 3':
-          res.dash3 = item.value;
-          break;
-        case 'ADBE Vector Stroke Gap 1':
-          res.gap1 = item.value;
-          break;
-        case 'ADBE Vector Stroke Gap 2':
-          res.gap2 = item.value;
-          break;
-        case 'ADBE Vector Stroke Gap 3':
-          res.gap3 = item.value;
-          break;
-        case 'ADBE Vector Stroke Offset':
-          res.offset = item.value;
-          break;
-      }
-    }
-  }
-  return res;
-}
+// function dash(prop) {
+//   let res = {};
+//   for(let i = 1; i <= prop.numProperties; i++) {
+//     let item = prop.property(i);
+//     if(item && item.enabled) {
+//       let matchName = item.matchName;
+//       switch(matchName) {
+//         case 'ADBE Vector Stroke Dash 1':
+//           res.dash1 = item.value;
+//           break;
+//         case 'ADBE Vector Stroke Dash 2':
+//           res.dash2 = item.value;
+//           break;
+//         case 'ADBE Vector Stroke Dash 3':
+//           res.dash3 = item.value;
+//           break;
+//         case 'ADBE Vector Stroke Gap 1':
+//           res.gap1 = item.value;
+//           break;
+//         case 'ADBE Vector Stroke Gap 2':
+//           res.gap2 = item.value;
+//           break;
+//         case 'ADBE Vector Stroke Gap 3':
+//           res.gap3 = item.value;
+//           break;
+//         case 'ADBE Vector Stroke Offset':
+//           res.offset = item.value;
+//           break;
+//       }
+//     }
+//   }
+//   return res;
+// }
 
 export default function(prop, library) {
   // 这里是内容层，一般只有1个属性，如矩形1

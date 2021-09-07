@@ -269,11 +269,14 @@ export function transformScale(list, begin, duration) {
   };
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
-    res.value.push({
+    let v = {
       scaleX: list[0][0] * 0.01,
       scaleY: list[0][1] * 0.01,
-      scaleZ: list[0][2] * 0.01,
-    });
+    };
+    if(list[0].length > 2) {
+      v.scaleZ = list[0][2] * 0.01;
+    }
+    res.value.push(v);
   }
   else {
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
@@ -285,12 +288,15 @@ export function transformScale(list, begin, duration) {
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      res.value.push({
+      let v = {
         offset: (item.time - begin) / duration,
         scaleX: item.value[0] * 0.01,
         scaleY: item.value[1] * 0.01,
-        scaleZ: item.value[2] * 0.01,
-      });
+      };
+      if(item.value.length > 2) {
+        v.scaleZ = item.value[2] * 0.01;
+      }
+      res.value.push(v);
     }
   }
   return res;
