@@ -234,7 +234,6 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
   let data = library[id];
   let { type, name, src, width, height, children, geom } = data;
   let res = {
-    id: newLib.length,
     name,
     tagName: type,
     props: {
@@ -245,7 +244,6 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
       },
     },
   };
-  newLib.push(res);
   // 矢量图层特殊解析，添加
   if(geom) {
     parseGeom(res, data, start, duration, offset);
@@ -264,6 +262,8 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
       }
     }
   }
+  res.id = newLib.length;
+  newLib.push(res);
   return res.id;
 }
 
