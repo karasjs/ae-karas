@@ -32,13 +32,12 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     return null;
   }
   let res = {
-    libraryId,
     name,
     init: {
       style: {},
     },
   };
-  parse(library, libraryId, newLib, width, height, start, duration, offset + startTime);
+  res.libraryId = parse(library, libraryId, newLib, width, height, start, duration, offset + startTime);
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
   if(inPoint > begin || outPoint < begin + duration) {
@@ -234,8 +233,8 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
 function parse(library, id, newLib, w, h, start, duration, offset) {
   let data = library[id];
   let { type, name, src, width, height, children, geom } = data;
-  let res = newLib[id] = {
-    id,
+  let res = {
+    id: newLib.length,
     name,
     tagName: type,
     props: {
@@ -246,6 +245,7 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
       },
     },
   };
+  newLib.push(res);
   // 矢量图层特殊解析，添加
   if(geom) {
     parseGeom(res, data, start, duration, offset);
@@ -264,6 +264,7 @@ function parse(library, id, newLib, w, h, start, duration, offset) {
       }
     }
   }
+  return res.id;
 }
 
 /**

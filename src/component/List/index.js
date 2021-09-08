@@ -21,6 +21,9 @@ class List extends React.Component {
             store.global.setLoading(true);
             csInterface.evalScript(`$.ae2karas.convert(${store.composition.currentId})`);
           }
+          else {
+            alert('请先选择合成');
+          }
         }}>转换</div>
         <div className="refresh" onClick={() => {
           store.composition.setCurrent(null);
