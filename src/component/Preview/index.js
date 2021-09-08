@@ -51,6 +51,10 @@ class Preview extends React.Component {
     })}>
       <div className="btn">
         <div className="return" onClick={() => {
+          if(root) {
+            root.destroy();
+            root = null;
+          }
           store.global.setPreview(false);
         }}>返回</div>
       </div>

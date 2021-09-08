@@ -9,23 +9,195 @@ import {
 } from './animate';
 
 /**
- * 动画和初始init部分转换
+ * 预解析父级链接，不递归深入children，返回一个普通的div
  * @param data
  * @param library
- * @param newLib
  * @param w
  * @param h
  * @param start
  * @param duration
  * @param offset
- * @returns {null|{init: {style: {}}, libraryId: ({enabled}|*), name: ({enabled}|*)}}
  */
-function recursion(data, library, newLib, w, h, start, duration, offset) {
+function preParse(data, library, w, h, start, duration, offset) {
+  let { name, width, height, inPoint, outPoint } = data;
+  let begin = start + offset;
+  // 图层在工作区外特殊处理，取最近的一帧内容 TODO
+  if(inPoint >= begin + duration || outPoint <= begin) {
+    return null;
+  }
+  let res = {
+    name,
+    tagName: 'div',
+    props: {
+      style: {
+        position: 'absolute',
+        width,
+        height,
+      },
+    },
+    animate: [],
+  };
+  parseAnimate(res, data, start, duration, offset, true);
+  return res;
+}
+
+function parseAnimate(res, data, start, duration, offset, isDirect) {
+  let { width, height, transform } = data;
+  // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
+  let { anchorPoint, opacity, position, rotateX, rotateY, rotateZ, scale } = transform;
+  let begin2 = start - offset;
+  let init = isDirect ? res.props : res.init;
+  if(Array.isArray(anchorPoint) && anchorPoint.length) {
+    let t = transformOrigin(anchorPoint, begin2, duration);
+    let first = t.value[0];
+    let v = first.transformOrigin.split(' ');
+    v[0] = parseFloat(v[0]);
+    v[1] = parseFloat(v[1]);
+    if(v[0] !== width * 0.5 || v[1] !== height * 0.5) {
+      init.style.transformOrigin = first.transformOrigin;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      // tfo的每个动画需考虑对坐标的影响
+      for(let i = 1, len = t.value.length; i < len; i++) {
+        let item = t.value[i];
+        let tfo = item.transformOrigin.split(' ');
+        tfo[0] = parseFloat(tfo[0]);
+        tfo[1] = parseFloat(tfo[1]);
+        item.left = -tfo[0];
+        item.top = -tfo[1];
+      }
+      res.animate.push(t);
+    }
+    // ae中位置相对于anchor，而不是默认左上角原点，因此有个位置计算
+    if(v[0]) {
+      init.style.left = -v[0];
+    }
+    if(v[1]) {
+      init.style.top = -v[1];
+    }
+  }
+  if(Array.isArray(opacity) && opacity.length) {
+    let t = transformOpacity(opacity, begin2, duration);
+    let first = t.value[0];
+    if(first.opacity !== 1) {
+      init.style.opacity = first.opacity;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
+  if(Array.isArray(position) && position.length) {
+    let t = transformPosition(position, begin2, duration);
+    let first = t.value[0];
+    if(first.translateX) {
+      init.style.translateX = first.translateX;
+    }
+    if(first.translateY) {
+      init.style.translateY = first.translateY;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
+  if(Array.isArray(rotateX) && rotateX.length) {
+    let t = transformRotateX(rotateX, begin2, duration);
+    let first = t.value[0];
+    if(first.rotateX) {
+      init.style.rotateX = first.rotateX;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
+  if(Array.isArray(rotateY) && rotateY.length) {
+    let t = transformRotateY(rotateY, begin2, duration);
+    let first = t.value[0];
+    if(first.rotateY) {
+      init.style.rotateY = first.rotateY;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
+  if(Array.isArray(rotateZ) && rotateZ.length) {
+    let t = transformRotateZ(rotateZ, begin2, duration);
+    let first = t.value[0];
+    if(first.rotateZ) {
+      init.style.rotateZ = first.rotateZ;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
+  if(Array.isArray(scale) && scale.length) {
+    let t = transformScale(scale, begin2, duration);
+    let first = t.value[0];
+    if(first.scaleX !== 1) {
+      init.style.scaleX = first.scaleX;
+    }
+    if(first.scaleY !== 1) {
+      init.style.scaleY = first.scaleY;
+    }
+    if(first.scaleZ !== 1) {
+      init.style.scaleZ = first.scaleZ;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
+  return res;
+}
+
+/**
+ * 动画和初始init部分转换
+ * @param data
+ * @param library
+ * @param newLib
+ * @param start
+ * @param duration
+ * @param offset
+ */
+function recursion(data, library, newLib, start, duration, offset) {
   // 作为父级链接不可见时无需导出
   if(!data.enabled) {
     return null;
   }
-  let { name, assetId, width, height, transform, startTime, inPoint, outPoint } = data;
+  let { name, assetId, width, height, startTime, inPoint, outPoint } = data;
   let begin = start + offset;
   // 图层在工作区外可忽略
   if(inPoint >= begin + duration || outPoint <= begin) {
@@ -33,11 +205,11 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
   }
   let res = {
     name,
-    init: {
-      style: {},
-    },
   };
-  res.libraryId = parse(library, assetId, newLib, width, height, start, duration, offset + startTime);
+  res.libraryId = parse(library, assetId, newLib, start, duration, offset + startTime);
+  res.init = {
+    style: {},
+  };
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
   if(inPoint > begin || outPoint < begin + duration) {
@@ -80,142 +252,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
     }
     res.animate.push(v);
   }
-  // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
-  let { anchorPoint, opacity, position, rotateX, rotateY, rotateZ, scale } = transform;
-  let begin2 = start - offset;
-  if(Array.isArray(anchorPoint) && anchorPoint.length) {
-    let t = transformOrigin(anchorPoint, begin2, duration);
-    let first = t.value[0];
-    let v = first.transformOrigin.split(' ');
-    v[0] = parseFloat(v[0]);
-    v[1] = parseFloat(v[1]);
-    if(v[0] !== width * 0.5 || v[1] !== height * 0.5) {
-      res.init.style.transformOrigin = first.transformOrigin;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      // tfo的每个动画需考虑对坐标的影响
-      for(let i = 1, len = t.value.length; i < len; i++) {
-        let item = t.value[i];
-        let tfo = item.transformOrigin.split(' ');
-        tfo[0] = parseFloat(tfo[0]);
-        tfo[1] = parseFloat(tfo[1]);
-        item.left = -tfo[0];
-        item.top = -tfo[1];
-      }
-      res.animate.push(t);
-    }
-    // ae中位置相对于anchor，而不是默认左上角原点，因此有个位置计算
-    if(v[0]) {
-      res.init.style.left = -v[0];
-    }
-    if(v[1]) {
-      res.init.style.top = -v[1];
-    }
-  }
-  if(Array.isArray(opacity) && opacity.length) {
-    let t = transformOpacity(opacity, begin2, duration);
-    let first = t.value[0];
-    if(first.opacity !== 1) {
-      res.init.style.opacity = first.opacity;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      res.animate.push(t);
-    }
-  }
-  if(Array.isArray(position) && position.length) {
-    let t = transformPosition(position, begin2, duration);
-    let first = t.value[0];
-    if(first.translateX) {
-      res.init.style.translateX = first.translateX;
-    }
-    if(first.translateY) {
-      res.init.style.translateY = first.translateY;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      res.animate.push(t);
-    }
-  }
-  if(Array.isArray(rotateX) && rotateX.length) {
-    let t = transformRotateX(rotateX, begin2, duration);
-    let first = t.value[0];
-    if(first.rotateX) {
-      res.init.style.rotateX = first.rotateX;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      res.animate.push(t);
-    }
-  }
-  if(Array.isArray(rotateY) && rotateY.length) {
-    let t = transformRotateY(rotateY, begin2, duration);
-    let first = t.value[0];
-    if(first.rotateY) {
-      res.init.style.rotateY = first.rotateY;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      res.animate.push(t);
-    }
-  }
-  if(Array.isArray(rotateZ) && rotateZ.length) {
-    let t = transformRotateZ(rotateZ, begin2, duration);
-    let first = t.value[0];
-    if(first.rotateZ) {
-      res.init.style.rotateZ = first.rotateZ;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      res.animate.push(t);
-    }
-  }
-  if(Array.isArray(scale) && scale.length) {
-    let t = transformScale(scale, begin2, duration);
-    let first = t.value[0];
-    if(first.scaleX !== 1) {
-      res.init.style.scaleX = first.scaleX;
-    }
-    if(first.scaleY !== 1) {
-      res.init.style.scaleY = first.scaleY;
-    }
-    if(first.scaleZ !== 1) {
-      res.init.style.scaleZ = first.scaleZ;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      res.animate.push(t);
-    }
-  }
+  parseAnimate(res, data, start, duration, offset, false);
   return res;
 }
 
@@ -224,13 +261,11 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
  * @param library
  * @param assetId
  * @param newLib
- * @param w
- * @param h
  * @param start
  * @param duration
  * @param offset
  */
-function parse(library, assetId, newLib, w, h, start, duration, offset) {
+function parse(library, assetId, newLib, start, duration, offset) {
   let data = library[assetId];
   let { type, name, src, width, height, children, geom } = data;
   let res = {
@@ -257,7 +292,7 @@ function parse(library, assetId, newLib, w, h, start, duration, offset) {
     res.children = [];
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
-      let temp = recursion(item, library, newLib, width, height, start, duration, offset);
+      let temp = recursion(item, library, newLib, start, duration, offset);
       if(temp) {
         res.children.push(temp);
       }
@@ -580,6 +615,7 @@ export default function(data) {
   let { workAreaStart, workAreaDuration, result, library } = data;
   let { name, width, height, children } = result;
   let newLib = [];
+  let parentLink = {};
   let res = {
     name,
     tagName: 'div',
@@ -595,9 +631,18 @@ export default function(data) {
     abbr: false,
   };
   if(Array.isArray(children)) {
+    // 先一遍解析父级链接，因为父级可能不展示或者只需要父级一层不递归解析父级的children
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
-      let temp = recursion(item, library, newLib, width, height, workAreaStart, workAreaDuration, 0);
+      if(item.hasOwnProperty('asParent')) {
+        parentLink[item.asParent] = preParse(item, library, width, height, workAreaStart, workAreaDuration, 0);
+      }
+    }
+    $.ae2karas.log(parentLink);
+    // 再普通解析，遇到父级链接
+    for(let i = 0, len = children.length; i < len; i++) {
+      let item = children[i];
+      let temp = recursion(item, library, newLib, workAreaStart, workAreaDuration, 0);
       if(temp) {
         res.children.push(temp);
       }
