@@ -37,17 +37,17 @@ function preParse(data, library, w, h, start, duration, offset) {
     },
     animate: [],
   };
-  parseAnimate(res, data, start, duration, offset, true);
+  parseAnimate(res, data, start, duration, offset, true, false);
   return res;
 }
 
-function parseAnimate(res, data, start, duration, offset, isDirect) {
+function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
   let { width, height, transform } = data;
   // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
   let { anchorPoint, opacity, position, rotateX, rotateY, rotateZ, scale } = transform;
   let begin2 = start - offset;
   let init = isDirect ? res.props : res.init;
-  if(Array.isArray(anchorPoint) && anchorPoint.length) {
+  if(!isGeom && Array.isArray(anchorPoint) && anchorPoint.length) {
     let t = transformOrigin(anchorPoint, begin2, duration);
     let first = t.value[0];
     let v = first.transformOrigin.split(' ');
@@ -252,7 +252,7 @@ function recursion(data, library, newLib, start, duration, offset) {
     }
     res.animate.push(v);
   }
-  parseAnimate(res, data, start, duration, offset, false);
+  parseAnimate(res, data, start, duration, offset, false, false);
   return res;
 }
 
@@ -443,7 +443,7 @@ function parseGeom(res, data, start, duration, offset) {
     child.props.ry = roundness / size[1];
   }
   // geom内嵌的transform单独分析
-  let { anchorPoint, opacity, position: position2, rotateX, rotateY, rotateZ, scale } = transform;
+  let { anchorPoint } = transform;
   let begin2 = start - offset;
   if(Array.isArray(anchorPoint) && anchorPoint.length) {
     let t = transformOrigin(anchorPoint, begin2, duration);
@@ -508,106 +508,7 @@ function parseGeom(res, data, start, duration, offset) {
       }
     }
   }
-  if(Array.isArray(opacity) && opacity.length) {
-    let t = transformOpacity(opacity, begin2, duration);
-    let first = t.value[0];
-    if(first.opacity !== 1) {
-      child.props.style.opacity = first.opacity;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      child.animate.push(t);
-    }
-  }
-  if(Array.isArray(position2) && position2.length) {
-    let t = transformPosition(position2, begin2, duration);
-    let first = t.value[0];
-    if(first.translateX) {
-      child.props.style.translateX = first.translateX;
-    }
-    if(first.translateY) {
-      child.props.style.translateY = first.translateY;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      child.animate.push(t);
-    }
-  }
-  if(Array.isArray(rotateX) && rotateX.length) {
-    let t = transformRotateX(rotateX, begin2, duration);
-    let first = t.value[0];
-    if(first.rotateX) {
-      child.props.style.rotateX = first.rotateX;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      child.animate.push(t);
-    }
-  }
-  if(Array.isArray(rotateY) && rotateY.length) {
-    let t = transformRotateY(rotateY, begin2, duration);
-    let first = t.value[0];
-    if(first.rotateY) {
-      child.props.style.rotateY = first.rotateY;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      child.animate.push(t);
-    }
-  }
-  if(Array.isArray(rotateZ) && rotateZ.length) {
-    let t = transformRotateZ(rotateZ, begin2, duration);
-    let first = t.value[0];
-    if(first.rotateZ) {
-      child.props.style.rotateZ = first.rotateZ;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      child.animate.push(t);
-    }
-  }
-  if(Array.isArray(scale) && scale.length) {
-    let t = transformScale(scale, begin2, duration);
-    let first = t.value[0];
-    if(first.scaleX !== 1) {
-      child.props.style.scaleX = first.scaleX;
-    }
-    if(first.scaleY !== 1) {
-      child.props.style.scaleY = first.scaleY;
-    }
-    if(first.scaleZ !== 1) {
-      child.props.style.scaleZ = first.scaleZ;
-    }
-    if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
-      child.animate.push(t);
-    }
-  }
-  // 直接children即可，无需library
+  parseAnimate(res, data, start, duration, offset, true, true);
   res.children = [child];
 }
 
