@@ -25,7 +25,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
   if(!data.enabled) {
     return null;
   }
-  let { name, libraryId, width, height, transform, startTime, inPoint, outPoint } = data;
+  let { name, assetId, width, height, transform, startTime, inPoint, outPoint } = data;
   let begin = start + offset;
   // 图层在工作区外可忽略
   if(inPoint >= begin + duration || outPoint <= begin) {
@@ -37,7 +37,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
       style: {},
     },
   };
-  res.libraryId = parse(library, libraryId, newLib, width, height, start, duration, offset + startTime);
+  res.libraryId = parse(library, assetId, newLib, width, height, start, duration, offset + startTime);
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
   if(inPoint > begin || outPoint < begin + duration) {
@@ -222,7 +222,7 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
 /**
  * 静态部分转换，library中无动画的部分
  * @param library
- * @param id
+ * @param assetId
  * @param newLib
  * @param w
  * @param h
@@ -230,10 +230,11 @@ function recursion(data, library, newLib, w, h, start, duration, offset) {
  * @param duration
  * @param offset
  */
-function parse(library, id, newLib, w, h, start, duration, offset) {
-  let data = library[id];
+function parse(library, assetId, newLib, w, h, start, duration, offset) {
+  let data = library[assetId];
   let { type, name, src, width, height, children, geom } = data;
   let res = {
+    id: -1, // 占位符
     name,
     tagName: type,
     props: {
@@ -589,11 +590,11 @@ export default function(data) {
         height,
       },
     },
+    children: [],
     library: newLib,
     abbr: false,
   };
   if(Array.isArray(children)) {
-    res.children = [];
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
       let temp = recursion(item, library, newLib, width, height, workAreaStart, workAreaDuration, 0);

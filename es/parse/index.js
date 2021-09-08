@@ -1,15 +1,18 @@
 import { transformLayer } from './transform';
 import vector from './vector';
 
+let uuid = 0;
+
 function recursion(composition, library) {
   let { name, layers, width, height, duration } = composition;
   $.ae2karas.error('composition: ' + name);
   // 先统计哪些层被作为父级链接
-  let childLink = {};
+  let asParent = {}, asChild = {};
   for(let i = 1; i <= layers.length; i++) {
     let item = layers[i];
     if(item.parent && item.parent.index) {
-      childLink[item.parent.index] = true;
+      asParent[item.parent.index] = true;
+      asChild[item.index] = item.parent.index;
     }
   }
   // 是否是独奏模式
@@ -26,8 +29,8 @@ function recursion(composition, library) {
   for(let i = 1; i <= layers.length; i++) {
     let item = layers[i];
     let index = item.index;
-    // 被作为父级链接的即便不可见也要统计
-    if(!childLink.hasOwnProperty(index)) {
+    // 根据是否独奏或可见决定是否分析或跳过，被作为父级链接的即便不可见也要统计
+    if(!asParent.hasOwnProperty(index)) {
       if(hasSolo) {
         if(!item.solo) {
           continue;
@@ -39,7 +42,20 @@ function recursion(composition, library) {
         }
       }
     }
-    children.push(parseLayer(item, library));
+    let o = parseLayer(item, library);
+    // 父级打标uuid的同时，之前记录的hash也记录下来
+    if(asParent.hasOwnProperty(index)) {
+      asParent[index] = o.asParent = uuid++;
+    }
+    children.push(o);
+  }
+  // children还要遍历一遍，根据父级链接增加指向父级的字段
+  for(let i = 0; i < children.length; i++) {
+    let item = children[i];
+    let index = item.index;
+    if(asChild.hasOwnProperty(index)) {
+      item.asChild = asParent[asChild[index]];
+    }
   }
   return {
     type: 'div',
@@ -54,9 +70,10 @@ function recursion(composition, library) {
 function parseLayer(layer, library) {
   let res = {
     name: layer.name,
+    index: layer.index,
     width: layer.width,
     height: layer.height,
-    enabled: layer.solo || layer.enabled, // 可能是个隐藏的父级链接图层
+    enabled: layer.solo || layer.enabled, // 可能是个隐藏的父级链接图层就false不可见
     startTime: layer.startTime * 1000, // 开始时间，即时间轴上本图层初始位置
     inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
@@ -90,7 +107,7 @@ function parseLayer(layer, library) {
     geom.type = 'div';
     geom.id = library.length;
     library.push(geom);
-    res.libraryId = geom.id;
+    res.assetId = geom.id;
   }
   else if(source) {
     let asset;
@@ -139,7 +156,7 @@ function parseLayer(layer, library) {
     if(asset) {
       asset.id = library.length;
       library.push(asset);
-      res.libraryId = asset.id;
+      res.assetId = asset.id;
     }
   }
   return res;
