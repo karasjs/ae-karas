@@ -12,13 +12,11 @@ import {
  * 预解析父级链接，不递归深入children，返回一个普通的div
  * @param data
  * @param library
- * @param w
- * @param h
  * @param start
  * @param duration
  * @param offset
  */
-function preParse(data, library, w, h, start, duration, offset) {
+function preParse(data, library, start, duration, offset) {
   let { name, width, height, inPoint, outPoint } = data;
   let begin = start + offset;
   // 图层在工作区外特殊处理，取最近的一帧内容 TODO
@@ -35,6 +33,7 @@ function preParse(data, library, w, h, start, duration, offset) {
         height,
       },
     },
+    children: [],
     animate: [],
   };
   parseAnimate(res, data, start, duration, offset, true, false);
@@ -191,13 +190,14 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
  * @param start
  * @param duration
  * @param offset
+ * @param parentLink
  */
-function recursion(data, library, newLib, start, duration, offset) {
+function recursion(data, library, newLib, start, duration, offset, parentLink) {
   // 作为父级链接不可见时无需导出
   if(!data.enabled) {
     return null;
   }
-  let { name, assetId, width, height, startTime, inPoint, outPoint } = data;
+  let { name, assetId, startTime, inPoint, outPoint } = data;
   let begin = start + offset;
   // 图层在工作区外可忽略
   if(inPoint >= begin + duration || outPoint <= begin) {
@@ -253,6 +253,15 @@ function recursion(data, library, newLib, start, duration, offset) {
     res.animate.push(v);
   }
   parseAnimate(res, data, start, duration, offset, false, false);
+  if(data.hasOwnProperty('asChild')) {
+    let asChild = data.asChild;
+    if(parentLink.hasOwnProperty(asChild)) {
+      let div = JSON.stringify(parentLink[asChild]);
+      div = JSON.parse(div);
+      div.children.push(res);
+      res = div;
+    }
+  }
   return res;
 }
 
@@ -290,9 +299,18 @@ function parse(library, assetId, newLib, start, duration, offset) {
   }
   else if(Array.isArray(children)) {
     res.children = [];
+    // 先一遍解析父级链接，因为父级可能不展示或者只需要父级一层不递归解析父级的children
+    let parentLink = {};
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
-      let temp = recursion(item, library, newLib, start, duration, offset);
+      if(item.hasOwnProperty('asParent')) {
+        parentLink[item.asParent] = preParse(item, library, workAreaStart, workAreaDuration, 0);
+      }
+    }
+    // 再普通解析，遇到父级链接特殊处理
+    for(let i = 0, len = children.length; i < len; i++) {
+      let item = children[i];
+      let temp = recursion(item, library, newLib, start, duration, offset, parentLink);
       if(temp) {
         res.children.push(temp);
       }
@@ -442,7 +460,7 @@ function parseGeom(res, data, start, duration, offset) {
     child.props.rx = roundness / size[0];
     child.props.ry = roundness / size[1];
   }
-  // geom内嵌的transform单独分析
+  // geom内嵌的transform单独分析，anchorPoint比较特殊
   let { anchorPoint } = transform;
   let begin2 = start - offset;
   if(Array.isArray(anchorPoint) && anchorPoint.length) {
@@ -516,7 +534,6 @@ export default function(data) {
   let { workAreaStart, workAreaDuration, result, library } = data;
   let { name, width, height, children } = result;
   let newLib = [];
-  let parentLink = {};
   let res = {
     name,
     tagName: 'div',
@@ -533,17 +550,17 @@ export default function(data) {
   };
   if(Array.isArray(children)) {
     // 先一遍解析父级链接，因为父级可能不展示或者只需要父级一层不递归解析父级的children
+    let parentLink = {};
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
       if(item.hasOwnProperty('asParent')) {
-        parentLink[item.asParent] = preParse(item, library, width, height, workAreaStart, workAreaDuration, 0);
+        parentLink[item.asParent] = preParse(item, library, workAreaStart, workAreaDuration, 0);
       }
     }
-    $.ae2karas.log(parentLink);
-    // 再普通解析，遇到父级链接
+    // 再普通解析，遇到父级链接特殊处理
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
-      let temp = recursion(item, library, newLib, workAreaStart, workAreaDuration, 0);
+      let temp = recursion(item, library, newLib, workAreaStart, workAreaDuration, 0, parentLink);
       if(temp) {
         res.children.push(temp);
       }
