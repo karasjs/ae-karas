@@ -198,7 +198,7 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   if(!data.enabled) {
     return null;
   }
-  let { name, assetId, startTime, inPoint, outPoint } = data;
+  let { name, assetId, startTime, inPoint, outPoint, blendingMode } = data;
   let begin = start + offset;
   // 图层在工作区外可忽略
   if(inPoint >= begin + duration || outPoint <= begin) {
@@ -211,6 +211,51 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   res.init = {
     style: {},
   };
+  // 混合模式
+  switch(blendingMode) {
+    case BlendingMode.MULTIPLY:
+      res.init.style.mixBlendMode = 'multiply';
+      break;
+    case BlendingMode.SCREEN:
+      res.init.style.mixBlendMode = 'screen';
+      break;
+    case BlendingMode.OVERLAY:
+      res.init.style.mixBlendMode = 'overlay';
+      break;
+    case BlendingMode.DARKEN:
+      res.init.style.mixBlendMode = 'darken';
+      break;
+    case BlendingMode.COLOR_DODGE:
+      res.init.style.mixBlendMode = 'color-dodge';
+      break;
+    case BlendingMode.COLOR_BURN:
+      res.init.style.mixBlendMode = 'color-burn';
+      break;
+    case BlendingMode.HARD_LIGHT:
+      res.init.style.mixBlendMode = 'hard-light';
+      break;
+    case BlendingMode.SOFT_LIGHT:
+      res.init.style.mixBlendMode = 'soft-light';
+      break;
+    case BlendingMode.DIFFERENCE:
+      res.init.style.mixBlendMode = 'difference';
+      break;
+    case BlendingMode.EXCLUSION:
+      res.init.style.mixBlendMode = 'exclusion';
+      break;
+    case BlendingMode.HUE:
+      res.init.style.mixBlendMode = 'hue';
+      break;
+    case BlendingMode.SATURATION:
+      res.init.style.mixBlendMode = 'saturation';
+      break;
+    case BlendingMode.COLOR:
+      res.init.style.mixBlendMode = 'color';
+      break;
+    case BlendingMode.LUMINOSITY:
+      res.init.style.mixBlendMode = 'luminosity';
+      break;
+  }
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
   if(inPoint > begin || outPoint < begin + duration) {
@@ -492,8 +537,6 @@ function parseGeom(res, data, start, duration, offset) {
 }
 
 function parseMask(data, target) {
-  $.ae2karas.log(data);
-  $.ae2karas.log(target);
   let left = target.init.style.left || 0;
   let top = target.init.style.top || 0;
   let res = {

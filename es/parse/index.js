@@ -57,6 +57,7 @@ function recursion(composition, library) {
       item.asChild = asParent[asChild[index]];
     }
   }
+  children.reverse();
   return {
     type: 'div',
     name,
@@ -77,6 +78,7 @@ function parseLayer(layer, library) {
     startTime: layer.startTime * 1000, // 开始时间，即时间轴上本图层初始位置
     inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
+    blendingMode: layer.blendingMode,
   };
   $.ae2karas.warn('layer: ' + res.name);
   let geom;
