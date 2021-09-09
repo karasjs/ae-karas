@@ -93,7 +93,7 @@ function parseLayer(layer, library) {
           geom = vector(prop, library);
           break;
         case 'ADBE Mask Parade':
-          // todo mask
+          res.mask = mask(prop);
           break;
         case 'ADBE Text Properties':
           // todo text
@@ -157,6 +157,22 @@ function parseLayer(layer, library) {
       asset.id = library.length;
       library.push(asset);
       res.assetId = asset.id;
+    }
+  }
+  return res;
+}
+
+function mask(prop) {
+  let res = {};
+  for(let i = 1; i <= prop.numProperties; i++) {
+    let item = prop.property(i);
+    if(item && item.enabled) {
+      let matchName = item.matchName;
+      if(matchName === 'ADBE Mask Atom') {
+        res.enabled = true;
+        res.points = item.property('maskShape').value;
+        res.opacity = item.property('Mask Opacity').value;
+      }
     }
   }
   return res;

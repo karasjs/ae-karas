@@ -7,6 +7,7 @@ import {
   transformRotateZ,
   transformScale,
 } from './animate';
+import path from './path';
 
 /**
  * 预解析父级链接，不递归深入children，返回一个普通的div
@@ -299,12 +300,21 @@ function parse(library, assetId, newLib, start, duration, offset) {
   }
   else if(Array.isArray(children)) {
     res.children = [];
+    parseChildren(res, children, library, newLib, start, duration, offset);
+  }
+  res.id = newLib.length;
+  newLib.push(res);
+  return res.id;
+}
+
+function parseChildren(res, children, library, newLib, start, duration, offset) {
+  if(Array.isArray(children)) {
     // 先一遍解析父级链接，因为父级可能不展示或者只需要父级一层不递归解析父级的children
     let parentLink = {};
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
       if(item.hasOwnProperty('asParent')) {
-        parentLink[item.asParent] = preParse(item, library, workAreaStart, workAreaDuration, 0);
+        parentLink[item.asParent] = preParse(item, library, start, duration, offset);
       }
     }
     // 再普通解析，遇到父级链接特殊处理
@@ -313,12 +323,13 @@ function parse(library, assetId, newLib, start, duration, offset) {
       let temp = recursion(item, library, newLib, start, duration, offset, parentLink);
       if(temp) {
         res.children.push(temp);
+        if(item.mask && item.mask.enabled) {
+          // parseMask(item, temp);
+          res.children.push(parseMask(item, temp));
+        }
       }
     }
   }
-  res.id = newLib.length;
-  newLib.push(res);
-  return res.id;
 }
 
 /**
@@ -332,23 +343,29 @@ function parse(library, assetId, newLib, start, duration, offset) {
 function parseGeom(res, data, start, duration, offset) {
   let { content, fill, stroke, transform } = data;
   let { type, direction, size, position, roundness, points } = content;
-  let f = [
-    parseInt(fill.color[0] * 255),
-    parseInt(fill.color[1] * 255),
-    parseInt(fill.color[2] * 255),
-    fill.color[3]
-  ];
-  if(fill.opacity !== 100) {
-    f[3] *= fill.opacity * 0.01;
+  let f;
+  if(fill) {
+    f = [
+      parseInt(fill.color[0] * 255),
+      parseInt(fill.color[1] * 255),
+      parseInt(fill.color[2] * 255),
+      fill.color[3]
+    ];
+    if(fill.opacity !== 100) {
+      f[3] *= fill.opacity * 0.01;
+    }
   }
-  let s = [
-    parseInt(stroke.color[0] * 255),
-    parseInt(stroke.color[1] * 255),
-    parseInt(stroke.color[2] * 255),
-    stroke.color[3]
-  ];
-  if(stroke.opacity !== 100) {
-    s[3] *= stroke.opacity * 0.01;
+  let s;
+  if(stroke) {
+    s = [
+      parseInt(stroke.color[0] * 255),
+      parseInt(stroke.color[1] * 255),
+      parseInt(stroke.color[2] * 255),
+      stroke.color[3]
+    ];
+    if(stroke.opacity !== 100) {
+      s[3] *= stroke.opacity * 0.01;
+    }
   }
   let child = {
     props: {
@@ -382,69 +399,14 @@ function parseGeom(res, data, start, duration, offset) {
   else if(type === 'path') {
     child.tagName = '$polyline';
     let { vertices, inTangents, outTangents, closed } = points;
-    let x1 = vertices[0][0], y1 = vertices[0][1];
-    let x2 = x1, y2 = y1;
-    for(let i = 1, len = vertices.length; i < len; i++) {
-      let item = vertices[i];
-      x1 = Math.max(x1, item[0]);
-      y1 = Math.max(y1, item[1]);
-      x2 = Math.min(x2, item[0]);
-      y2 = Math.min(y2, item[1]);
-      // 控制点是相对于顶点的坐标
-      let it = inTangents[i], ot = outTangents[i];
-      if(it[0]) {
-        x1 = Math.max(x1, item[0] + it[0]);
-        x2 = Math.min(x2, item[0] + it[0]);
-      }
-      if(it[1]) {
-        y1 = Math.max(y1, item[1] + it[1]);
-        y2 = Math.min(y2, item[1] + it[1]);
-      }
-      if(ot[0]) {
-        x1 = Math.max(x1, item[0] + ot[0]);
-        x2 = Math.min(x2, item[0] + ot[0]);
-      }
-      if(ot[1]) {
-        y1 = Math.max(y1, item[1] + ot[1]);
-        y2 = Math.min(y2, item[1] + ot[1]);
-      }
-    }
-    // path尺寸为顶点的最大最小差值
-    let w = child.props.style.width = x1 - x2;
-    let h = child.props.style.height = y1 - y2;
-    let pts = [], cts = [];
-    for(let i = 0, len = vertices.length; i < len; i++) {
-      let item = vertices[i];
-      pts.push([
-        (item[0] - x2) / w,
-        (item[1] - y2) / h,
-      ]);
-      let it = inTangents[i], ot = outTangents[i];
-      // 上一个顶点到本顶点
-      if(it[0] || it[1]) {
-        let j = i - 1;
-        if(j === -1) {
-          j = len - 1;
-        }
-        cts[j] = cts[j] || [];
-        cts[j].push(pts[i][0] + it[0] / w);
-        cts[j].push(pts[i][1] + it[1] / h);
-      }
-      // 本顶点到下一个顶点
-      if(ot[0] || ot[1]) {
-        cts[i] = cts[i] || [];
-        cts[i].push(pts[i][0] + ot[0] / h);
-        cts[i].push(pts[i][1] + ot[1] / h);
-      }
-    }
-    if(closed) {
-      pts.push(pts[0].slice(0));
-    }
-    child.props.points = pts;
-    child.props.controls = cts;
+    let data = path.parse(vertices, inTangents, outTangents, closed);
+    child.props.style.width = data.width;
+    child.props.style.height = data.height;
+    child.props.points = data.points
+    child.props.controls = data.controls;
     // path的特殊位置计算
-    child.props.style.left = x2;
-    child.props.style.top = y2;
+    child.props.style.left = data.x2;
+    child.props.style.top = data.y2;
   }
   // path没有position
   if(position && position[0]) {
@@ -453,7 +415,7 @@ function parseGeom(res, data, start, duration, offset) {
   if(position && position[1]) {
     child.props.style.top = -position[1];
   }
-  if(fill.rule === 2) {
+  if(fill && fill.rule === 2) {
     child.props.style.fillRule = 'evenodd';
   }
   if(type === 'rect' && roundness) {
@@ -526,8 +488,46 @@ function parseGeom(res, data, start, duration, offset) {
       }
     }
   }
-  parseAnimate(res, data, start, duration, offset, true, true);
+  parseAnimate(child, data, start, duration, offset, true, true);
   res.children = [child];
+}
+
+function parseMask(data, target) {
+  $.ae2karas.log(data);
+  $.ae2karas.log(target);
+  let left = target.init.style.left || 0;
+  let top = target.init.style.top || 0;
+  let res = {
+    tagName: '$polyline',
+    props: {
+      mask: true,
+      style: {
+        position: 'absolute',
+      },
+    },
+  };
+  let { width, height, mask: { points, opacity } } = data;
+  // 默认锚点是中心，也有可能有变化，mask的坐标则以锚点为原点
+  let transformOrigin = target.init.style.transformOrigin;
+  let cx = width * 0.5, cy = height * 0.5;
+  if(transformOrigin) {
+    let v = transformOrigin.split(' ');
+    cx = parseFloat(v[0]);
+    cy = parseFloat(v[1]);
+  }
+  let { vertices, inTangents, outTangents, closed } = points;
+  $.ae2karas.log(1);
+  let o = path.parse(vertices, inTangents, outTangents, closed);
+  $.ae2karas.log(2);
+  res.props.style.width = o.width;
+  res.props.style.height = o.height;
+  res.props.points = o.points
+  res.props.controls = o.controls;
+  // 位置计算考虑锚点
+  res.props.style.left = left + cx;
+  res.props.style.top = top + cy;
+  $.ae2karas.log(3);
+  return res;
 }
 
 export default function(data) {
@@ -548,23 +548,6 @@ export default function(data) {
     library: newLib,
     abbr: false,
   };
-  if(Array.isArray(children)) {
-    // 先一遍解析父级链接，因为父级可能不展示或者只需要父级一层不递归解析父级的children
-    let parentLink = {};
-    for(let i = 0, len = children.length; i < len; i++) {
-      let item = children[i];
-      if(item.hasOwnProperty('asParent')) {
-        parentLink[item.asParent] = preParse(item, library, workAreaStart, workAreaDuration, 0);
-      }
-    }
-    // 再普通解析，遇到父级链接特殊处理
-    for(let i = 0, len = children.length; i < len; i++) {
-      let item = children[i];
-      let temp = recursion(item, library, newLib, workAreaStart, workAreaDuration, 0, parentLink);
-      if(temp) {
-        res.children.push(temp);
-      }
-    }
-  }
+  parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, 0);
   return res;
 }
