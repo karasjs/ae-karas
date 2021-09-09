@@ -1,9 +1,5 @@
 export default {
   parse(vertices, inTangents, outTangents, closed) {
-    // $.ae2karas.log(vertices);
-    // $.ae2karas.log(inTangents);
-    // $.ae2karas.log(outTangents);
-    // $.ae2karas.log(closed);
     let x1 = vertices[0][0], y1 = vertices[0][1];
     let x2 = x1, y2 = y1;
     // 控制点是相对于顶点的坐标
@@ -88,5 +84,59 @@ export default {
       points: pts,
       controls: cts,
     };
+  },
+  rect2polyline(width, height, roundness) {
+    roundness = roundness || 0;
+    let r = Math.min(width, height) * 0.5;
+    roundness = Math.min(roundness, r);
+    let pts = [], cts = [];
+    if(roundness && roundness > 0) {
+      let h = roundness * 0.5522847498307936;
+      pts.push([(width - roundness) / width, 0]);
+      cts.push([(width - roundness + h) / width, 0, 1, (roundness - h) / height]);
+      pts.push([1, roundness / height]);
+      cts.push([]);
+      pts.push([1, (height - roundness) / height]);
+      cts.push([1, (height - roundness + h) / height, (width - roundness + h) / width, 1]);
+      pts.push([(width - roundness) / width, 1]);
+      cts.push([]);
+      pts.push([roundness / width, 1]);
+      cts.push([(roundness - h) / width, 1, 0, (height - roundness + h) / height]);
+      pts.push([0, (height - roundness) / height]);
+      cts.push([]);
+      pts.push([0, roundness / height]);
+      cts.push([0, (roundness - h) / height, (roundness - h) / width, 0]);
+      pts.push([roundness / width, 0]);
+      cts.push([]);
+      pts.push([(width - roundness) / width, 0]);
+    }
+    else {
+      pts.push([1, 0]);
+      pts.push([1, 1]);
+      pts.push([0, 1]);
+      pts.push([0, 0]);
+      pts.push([1, 0]);
+    }
+    return {
+      points: pts,
+      controls: cts,
+    }
+  },
+  ellipse2polyline() {
+    let pts = [], cts = [];
+    let rx =  0.5 * 0.5522847498307936, ry = 0.5 * 0.5522847498307936;
+    pts.push([0.5, 0]);
+    cts.push([0.5 + rx, 0, 1, 0.5 - ry]);
+    pts.push([1, 0.5]);
+    cts.push([1, 0.5 + ry, 0.5 + rx, 1]);
+    pts.push([0.5, 1]);
+    cts.push([0.5 - rx, 1, 0, 0.5 + ry]);
+    pts.push([0, 0.5]);
+    cts.push([0, 0.5 - ry, rx, 0]);
+    pts.push([0.5, 0]);
+    return {
+      points: pts,
+      controls: cts,
+    }
   },
 };

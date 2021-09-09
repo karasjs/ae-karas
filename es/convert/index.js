@@ -412,6 +412,7 @@ function parseGeom(res, data, start, duration, offset) {
     }
   }
   let child = {
+    tagName: '$polyline',
     props: {
       style: {
         position: 'absolute',
@@ -428,20 +429,23 @@ function parseGeom(res, data, start, duration, offset) {
     child.props.style.strokeDasharray = [stroke.dashes];
   }
   if(type === 'rect') {
-    child.tagName = '$rect';
     child.props.style.width = size[0];
     child.props.style.height = size[1];
+    let o = path.rect2polyline(size[0], size[1], roundness);
+    child.props.points = o.points;
+    child.props.controls = o.controls;
   }
   else if(type === 'ellipse') {
-    child.tagName = '$ellipse';
     child.props.style.width = size[0];
     child.props.style.height = size[1];
+    let o = path.ellipse2polyline();
+    child.props.points = o.points;
+    child.props.controls = o.controls;
   }
   else if(type === 'star') {
-    child.tagName = '$polyline';
+    // TODO
   }
   else if(type === 'path') {
-    child.tagName = '$polyline';
     let { vertices, inTangents, outTangents, closed } = points;
     let data = path.parse(vertices, inTangents, outTangents, closed);
     child.props.style.width = data.width;
@@ -461,10 +465,6 @@ function parseGeom(res, data, start, duration, offset) {
   }
   if(fill && fill.rule === 2) {
     child.props.style.fillRule = 'evenodd';
-  }
-  if(type === 'rect' && roundness) {
-    child.props.rx = roundness / size[0];
-    child.props.ry = roundness / size[1];
   }
   // geom内嵌的transform单独分析，anchorPoint比较特殊
   let { anchorPoint } = transform;
