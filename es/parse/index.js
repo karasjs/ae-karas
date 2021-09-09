@@ -169,9 +169,13 @@ function mask(prop) {
     if(item && item.enabled) {
       let matchName = item.matchName;
       if(matchName === 'ADBE Mask Atom') {
-        res.enabled = true;
+        if(item.maskMode !== MaskMode.NONE) {
+          res.enabled = true;
+        }
         res.points = item.property('maskShape').value;
         res.opacity = item.property('Mask Opacity').value;
+        res.mode = item.maskMode;
+        res.inverted = item.inverted;
       }
     }
   }

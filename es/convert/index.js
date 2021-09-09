@@ -499,16 +499,32 @@ function parseMask(data, target) {
   let res = {
     tagName: '$polyline',
     props: {
-      mask: true,
       style: {
         position: 'absolute',
         fill: '#FFF',
       },
     },
   };
-  let { width, height, mask: { points, opacity } } = data;
+  let { width, height, mask: { points, opacity, mode, inverted } } = data;
   if(opacity < 100) {
     res.props.style.opacity = opacity * 0.01;
+  }
+  // 相加之外都是相减
+  if(mode === MaskMode.ADD) {
+    if(inverted) {
+      res.props.clip = true;
+    }
+    else {
+      res.props.mask = true;
+    }
+  }
+  else {
+    if(inverted) {
+      res.props.mask = true;
+    }
+    else {
+      res.props.clip = true;
+    }
   }
   // 获取对象锚点，mask的锚点需保持相同
   let transformOrigin = target.init.style.transformOrigin;
