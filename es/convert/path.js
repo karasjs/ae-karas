@@ -1,11 +1,29 @@
 export default {
   parse(vertices, inTangents, outTangents, closed) {
-    $.ae2karas.log(vertices);
-    $.ae2karas.log(inTangents);
-    $.ae2karas.log(outTangents);
-    $.ae2karas.log(closed);
+    // $.ae2karas.log(vertices);
+    // $.ae2karas.log(inTangents);
+    // $.ae2karas.log(outTangents);
+    // $.ae2karas.log(closed);
     let x1 = vertices[0][0], y1 = vertices[0][1];
     let x2 = x1, y2 = y1;
+    // 控制点是相对于顶点的坐标
+    let it = inTangents[0], ot = outTangents[0];
+    if(it[0]) {
+      x1 = Math.max(x1, x1 + it[0]);
+      x2 = Math.min(x2, x1 + it[0]);
+    }
+    if(it[1]) {
+      y1 = Math.max(y1, y1 + it[1]);
+      y2 = Math.min(y2, y1 + it[1]);
+    }
+    if(ot[0]) {
+      x1 = Math.max(x1, x1 + ot[0]);
+      x2 = Math.min(x2, x1 + ot[0]);
+    }
+    if(ot[1]) {
+      y1 = Math.max(y1, y1 + ot[1]);
+      y2 = Math.min(y2, y1 + ot[1]);
+    }
     for(let i = 1, len = vertices.length; i < len; i++) {
       let item = vertices[i];
       x1 = Math.max(x1, item[0]);
@@ -31,6 +49,7 @@ export default {
         y2 = Math.min(y2, item[1] + ot[1]);
       }
     }
+    let w = x1 - x2, h = y1 - y2;
     let pts = [], cts = [];
     for(let i = 0, len = vertices.length; i < len; i++) {
       let item = vertices[i];
@@ -64,8 +83,8 @@ export default {
       y1,
       x2,
       y2,
-      width: x1 - x2,
-      height: y1 - y2,
+      width: w,
+      height: h,
       points: pts,
       controls: cts,
     };

@@ -324,7 +324,6 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
       if(temp) {
         res.children.push(temp);
         if(item.mask && item.mask.enabled) {
-          // parseMask(item, temp);
           res.children.push(parseMask(item, temp));
         }
       }
@@ -503,11 +502,15 @@ function parseMask(data, target) {
       mask: true,
       style: {
         position: 'absolute',
+        fill: '#FFF',
       },
     },
   };
   let { width, height, mask: { points, opacity } } = data;
-  // 默认锚点是中心，也有可能有变化，mask的坐标则以锚点为原点
+  if(opacity < 100) {
+    res.props.style.opacity = opacity * 0.01;
+  }
+  // 获取对象锚点，mask的锚点需保持相同
   let transformOrigin = target.init.style.transformOrigin;
   let cx = width * 0.5, cy = height * 0.5;
   if(transformOrigin) {
@@ -516,17 +519,22 @@ function parseMask(data, target) {
     cy = parseFloat(v[1]);
   }
   let { vertices, inTangents, outTangents, closed } = points;
-  $.ae2karas.log(1);
   let o = path.parse(vertices, inTangents, outTangents, closed);
-  $.ae2karas.log(2);
   res.props.style.width = o.width;
   res.props.style.height = o.height;
   res.props.points = o.points
   res.props.controls = o.controls;
-  // 位置计算考虑锚点
-  res.props.style.left = left + cx;
-  res.props.style.top = top + cy;
-  $.ae2karas.log(3);
+  // 样式和target一致
+  let style = target.init.style;
+  for(let i in style) {
+    if(style.hasOwnProperty(i)) {
+      res.props.style[i] = style[i];
+    }
+  }
+  // 位置和锚点保持和mask相同，由于points可能不是0，0开始，需计算偏移
+  res.props.style.transformOrigin = (cx - o.x2) + ' ' + (cy - o.y2);
+  res.props.style.left = left + o.x2;
+  res.props.style.top = top + o.y2;
   return res;
 }
 
