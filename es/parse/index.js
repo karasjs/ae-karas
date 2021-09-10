@@ -1,5 +1,6 @@
 import { transformLayer } from './transform';
 import vector from './vector';
+import render from '../render';
 
 let uuid = 0;
 
@@ -125,8 +126,10 @@ function parseLayer(layer, library) {
       let src = source.file && source.file.fsName;
       let name = source.name;
       if(/\.psd$/.test(name)) {
-        let path = name.split(';/');
-        src = path.slice(0, path.length - 1).join('/') + '@@' + src;
+        let path = src.replace(/[^\/]*\.psd$/, '');
+        let newName = name.replace(/[\/.]/g, '_') + '.png';
+        render.psd2png(source, src, path, newName);
+        src = path + newName;
       }
       let hasExist;
       for(let i = 0; i < library.length; i++) {
@@ -213,7 +216,6 @@ function text(prop) {
       }
     }
   }
-  $.ae2karas.log(res);
   return res;
 }
 
