@@ -200,6 +200,9 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
     return null;
   }
   let { name, assetId, startTime, inPoint, outPoint, blendingMode } = data;
+  if(assetId === undefined || assetId === null) {
+    return null;
+  }
   let begin = start + offset;
   // 图层在工作区外可忽略
   if(inPoint >= begin + duration || outPoint <= begin) {
@@ -323,7 +326,7 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
  */
 function parse(library, assetId, newLib, start, duration, offset) {
   let data = library[assetId];
-  let { type, name, src, width, height, children, geom } = data;
+  let { type, name, src, width, height, children, geom, text } = data;
   let res = {
     id: -1, // 占位符
     name,
@@ -339,6 +342,19 @@ function parse(library, assetId, newLib, start, duration, offset) {
   // 矢量图层特殊解析，添加
   if(geom) {
     parseGeom(res, data, start, duration, offset);
+  }
+  else if(text) {
+    let content = data.content;
+    res.props.style.color = [
+      parseInt(content.fillColor[0] * 255),
+      parseInt(content.fillColor[1] * 255),
+      parseInt(content.fillColor[2] * 255),
+    ];
+    res.props.style.fontFamily = content.fontFamily;
+    res.props.style.fontSize = content.fontSize;
+    res.props.style.fontStyle = content.fontStyle;
+    res.props.style.lineHeight = content.leading / content.fontSize;
+    res.children = [content.text];
   }
   // 图片无children
   else if(type === 'img') {
@@ -639,6 +655,7 @@ function parseMask(data, target) {
 }
 
 export default function(data) {
+  $.ae2karas.error('convert');
   let { workAreaStart, workAreaDuration, result, library } = data;
   let { name, width, height, children } = result;
   let newLib = [];

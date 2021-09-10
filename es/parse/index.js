@@ -81,7 +81,7 @@ function parseLayer(layer, library) {
     blendingMode: layer.blendingMode,
   };
   $.ae2karas.warn('layer: ' + res.name);
-  let geom;
+  let geom, txt;
   for(let i = 1; i <= layer.numProperties; i++) {
     let prop = layer.property(i);
     if(prop && prop.enabled) {
@@ -98,7 +98,7 @@ function parseLayer(layer, library) {
           res.mask = mask(prop);
           break;
         case 'ADBE Text Properties':
-          // todo text
+          txt = text(prop);
           break;
       }
     }
@@ -110,6 +110,13 @@ function parseLayer(layer, library) {
     geom.id = library.length;
     library.push(geom);
     res.assetId = geom.id;
+  }
+  else if(txt) {
+    txt.text = true; // 特殊标识
+    txt.type = 'span';
+    txt.id = library.length;
+    library.push(txt);
+    res.assetId = txt.id;
   }
   else if(source) {
     let asset;
@@ -181,6 +188,32 @@ function mask(prop) {
       }
     }
   }
+  return res;
+}
+
+function text(prop) {
+  let res = {};
+  for(let i = 1; i <= prop.numProperties; i++) {
+    let item = prop.property(i);
+    if(item && item.enabled) {
+      let matchName = item.matchName;
+      switch(matchName) {
+        case 'ADBE Text Document':
+          let value = item.value;
+          res.content = {
+            fillColor: value.fillColor,
+            font: value.font,
+            fontFamily: value.fontFamily,
+            fontStyle: value.fontStyle,
+            fontSize: value.fontSize,
+            leading: value.leading,
+            text: value.text,
+          };
+          break;
+      }
+    }
+  }
+  $.ae2karas.log(res);
   return res;
 }
 
