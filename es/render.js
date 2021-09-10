@@ -5,6 +5,7 @@ export default {
     $.ae2karas.addTemp(helperSequenceComp);
 
     let item = app.project.renderQueue.items.add(helperSequenceComp);
+    $.ae2karas.addTemp(item);
 
     let outputModule = item.outputModule(1);
     outputModule.applyTemplate("_HIDDEN X-Factor 8 Premul");

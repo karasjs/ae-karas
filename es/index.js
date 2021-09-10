@@ -106,7 +106,7 @@ ae2karas.convert = function(id) {
   // 递归遍历分析合成对象，转换ae的图层为普通js对象，留给后续转换karas用
   let res = parse(composition);
   $.ae2karas.dispatch(enums.EVENT.FINISH, convert(res));
-  // 结束后才能删除临时生成的导出psd的合成
+  // 结束后才能删除临时生成的导出psd的合成和渲染队列
   $.ae2karas.delTemp();
 };
 
