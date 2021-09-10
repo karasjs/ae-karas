@@ -44,11 +44,13 @@ function recursion(composition, library) {
       }
     }
     let o = parseLayer(item, library);
-    // 父级打标uuid的同时，之前记录的hash也记录下来
-    if(asParent.hasOwnProperty(index)) {
-      asParent[index] = o.asParent = uuid++;
+    if(o) {
+      // 父级打标uuid的同时，之前记录的hash也记录下来
+      if(asParent.hasOwnProperty(index)) {
+        asParent[index] = o.asParent = uuid++;
+      }
+      children.push(o);
     }
-    children.push(o);
   }
   // children还要遍历一遍，根据父级链接增加指向父级的字段
   for(let i = 0; i < children.length; i++) {
@@ -130,6 +132,13 @@ function parseLayer(layer, library) {
         let newName = name.replace(/[\/.]/g, '_') + '.png';
         render.psd2png(source, src, path, newName);
         src = path + newName;
+      }
+      if(!/\.jpg$/.test(src)
+        && !/\.jpeg$/.test(src)
+        && !/\.png/.test(src)
+        && !/\.webp/.test(src)
+        && !/\.gif/.test(src)) {
+        return;
       }
       let hasExist;
       for(let i = 0; i < library.length; i++) {
