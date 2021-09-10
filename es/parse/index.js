@@ -104,7 +104,7 @@ function parseLayer(layer, library) {
     }
   }
   let source = layer.source;
-  if(geom && geom.content && geom.content.type) {
+  if(geom && geom.shape && geom.shape.content && geom.shape.content.type) {
     geom.geom = true; // 特殊标识
     geom.type = 'div';
     geom.id = library.length;

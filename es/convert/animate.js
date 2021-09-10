@@ -301,3 +301,44 @@ export function transformScale(list, begin, duration) {
   }
   return res;
 }
+
+export function transformPath(list, begin, duration, isEnd) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(list.length === 1) {
+    let v = {
+    };
+    if(isEnd) {
+      v.end = list[0] * 0.01;
+    }
+    else {
+      v.start = list[0] * 0.01;
+    }
+    res.value.push(v);
+  }
+  else {
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return (prev + (next - prev) * percent) * 0.01;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      let v = {
+        offset: (item.time - begin) / duration,
+      };
+      if(isEnd) {
+        v.end = item.value * 0.01;
+      }
+      else {
+        v.start = item.value * 0.01;
+      }
+      res.value.push(v);
+    }
+  }
+  return res;
+}

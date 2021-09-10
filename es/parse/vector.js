@@ -299,6 +299,7 @@ function gFill(prop) {
 }
 
 export default function(prop, library) {
+  let res = {};
   // 这里是内容层，一般只有1个属性，如矩形1
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
@@ -306,8 +307,13 @@ export default function(prop, library) {
       let matchName = item.matchName;
       switch(matchName) {
         case 'ADBE Vector Group':
-          return group(item, library);
+          res.shape = group(item, library);
+          break;
+        case 'ADBE Vector Filter - Trim':
+          res.trim = transformVector(item);
+          break;
       }
     }
   }
+  return res;
 };

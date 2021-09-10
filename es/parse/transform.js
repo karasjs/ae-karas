@@ -20,12 +20,14 @@ const VECTOR_TRANSFORM = {
   'ADBE Vector Skew Axis': 'skewAxis',
   'ADBE Vector Rotation': 'rotation',
   'ADBE Vector Group Opacity': 'opacity',
+  'ADBE Vector Trim Start': 'start',
+  'ADBE Vector Trim End': 'end',
 };
 
 function getPropertyValues(prop) {
   let { numKeys } = prop;
   // 根据关键帧数量，2+帧是普通变化，1帧等同于0帧value
-  if(numKeys > 1) {
+  if(numKeys && numKeys > 1) {
     let arr = [];
     for(let i = 1; i <= numKeys; i++) {
       arr.push({
@@ -36,7 +38,7 @@ function getPropertyValues(prop) {
     }
     return arr;
   }
-  else if(numKeys > 0) {
+  else if(numKeys && numKeys > 0) {
     return [prop.keyValue(1)];
   }
   else {

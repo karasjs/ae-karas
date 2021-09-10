@@ -6,6 +6,7 @@ import {
   transformRotateY,
   transformRotateZ,
   transformScale,
+  transformPath,
 } from './animate';
 import path from './path';
 
@@ -385,7 +386,7 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
  * @param offset
  */
 function parseGeom(res, data, start, duration, offset) {
-  let { content, fill, stroke, transform } = data;
+  let { shape: { content, fill, stroke, transform }, trim } = data;
   let { type, direction, size, position, roundness, points } = content;
   let f;
   if(fill) {
@@ -447,14 +448,14 @@ function parseGeom(res, data, start, duration, offset) {
   }
   else if(type === 'path') {
     let { vertices, inTangents, outTangents, closed } = points;
-    let data = path.parse(vertices, inTangents, outTangents, closed);
-    child.props.style.width = data.width;
-    child.props.style.height = data.height;
-    child.props.points = data.points
-    child.props.controls = data.controls;
+    let o = path.parse(vertices, inTangents, outTangents, closed);
+    child.props.style.width = o.width;
+    child.props.style.height = o.height;
+    child.props.points = o.points
+    child.props.controls = o.controls;
     // path的特殊位置计算
-    child.props.style.left = data.x2;
-    child.props.style.top = data.y2;
+    child.props.style.left = o.x2;
+    child.props.style.top = o.y2;
   }
   // path没有position
   if(position && position[0]) {
@@ -532,7 +533,47 @@ function parseGeom(res, data, start, duration, offset) {
       }
     }
   }
-  parseAnimate(child, data, start, duration, offset, true, true);
+  parseAnimate(child, data.shape, start, duration, offset, true, true);
+  // trimPath裁剪动画或属性
+  if(trim && trim.hasOwnProperty('start') && trim.hasOwnProperty('end')) {
+    let start = trim.start, end = trim.end;
+    if(start.length > 1) {
+      let t = transformPath(start, begin2, duration, false);
+      let first = t.value[0];
+      if(first.start !== 0) {
+        child.props.start = first.start;
+      }
+      if(t.value.length > 1) {
+        if(first.offset === 0) {
+          t.value[0] = {
+            offset: 0,
+          };
+        }
+        child.animate.push(t);
+      }
+    }
+    else {
+      child.props.start = start[0] * 0.01;
+    }
+    if(end.length > 1) {
+      let t = transformPath(end, begin2, duration, true);
+      let first = t.value[0];
+      if(first.end !== 0) {
+        child.props.end = first.end;
+      }
+      if(t.value.length > 1) {
+        if(first.offset === 0) {
+          t.value[0] = {
+            offset: 0,
+          };
+        }
+        child.animate.push(t);
+      }
+    }
+    else {
+      child.props.end = end[0] * 0.01;
+    }
+  }
   res.children = [child];
 }
 
