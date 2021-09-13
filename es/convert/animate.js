@@ -57,6 +57,15 @@ function getAreaList(list, begin, duration, reducer) {
     let percent = (begin - first.time) / (next.time - first.time);
     first.time = begin;
     first.value = reducer(first.value, next.value, percent);
+    if(first.easing) {
+      let points = sliceBezier([
+        [0, 0],
+        [first.easing[0], first.easing[1]],
+        [first.easing[2], first.easing[3]],
+        [1, 1],
+      ].reverse(), percent).reverse();
+      first.easing = [points[1][0], points[1][1], points[2][0], points[2][1]];
+    }
   }
   // 截取尾帧部分，同上
   let last = list[list.length - 1];
@@ -65,6 +74,15 @@ function getAreaList(list, begin, duration, reducer) {
     let percent = (begin + duration - prev.time) / (last.time - prev.time);
     last.time = begin + duration;
     last.value = reducer(prev.value, last.value, percent);
+    if(prev.easing) {
+      let points = sliceBezier([
+        [0, 0],
+        [prev.easing[0], prev.easing[1]],
+        [prev.easing[2], prev.easing[3]],
+        [1, 1],
+      ], percent);
+      prev.easing = [points[1][0], points[1][1], points[2][0], points[2][1]];
+    }
   }
   // 补齐尾帧，同上
   else if(last.time < begin + duration) {
