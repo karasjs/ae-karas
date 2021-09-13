@@ -129,7 +129,7 @@ function parseLayer(layer, library) {
       let name = source.name;
       if(/\.psd$/.test(name)) {
         let path = src.replace(/[^\/]*\.psd$/, '');
-        let newName = name.replace(/[\/.]/g, '_') + '.png';
+        let newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
         render.psd2png(source, src, path, newName);
         src = path + newName;
       }

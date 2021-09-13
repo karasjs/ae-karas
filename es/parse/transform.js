@@ -33,7 +33,7 @@ function getPropertyValues(prop) {
       arr.push({
         time: prop.keyTime(i) * 1000,
         value: prop.keyValue(i),
-        // TODO timeFunction
+        easing: i === numKeys ? undefined : getEasing(prop, i, i + 1),
       });
     }
     return arr;
@@ -44,6 +44,46 @@ function getPropertyValues(prop) {
   else {
     return [prop.value];
   }
+}
+
+/**
+ * https://www.zhihu.com/question/24404065
+ * 柄点1的X值 = 关键帧1的影响值/100
+ * 柄点1的Y值 = 关键帧1的输出速度/两关键帧平均速度*柄点1的X值
+ * 柄点2的X值 = 1 - 关键帧2的影响值/100
+ * 柄点2的Y值 = 1 - 关键帧2的输入速度/两关键帧平均速度*柄点2的X值
+ * @param prop
+ * @param start
+ * @param end
+ */
+function getEasing(prop, start, end) {
+  let t1 = prop.keyTime(start), t2 = prop.keyTime(end);
+  let v1 = prop.keyValue(start), v2 = prop.keyValue(end);
+  let e1 = prop.keyOutTemporalEase(start)[0], e2 = prop.keyInTemporalEase(end)[0];
+  let x1 = e1.influence * 0.01, x2 = 1 - e2.influence * 0.01;
+  let y1 = 0, y2 = 1;
+  let matchName = prop.matchName;
+  if([
+    'ADBE Anchor Point', 'ADBE Position',
+    'ADBE Vector Anchor', 'ADBE Vector Position',
+    'ADBE Vector Scale', 'ADBE Vector Skew'].indexOf(matchName) > -1) {
+    let avSpeedX = Math.abs(v2[0] - v1[0]) / (t2 - t1);
+    let avSpeedY = Math.abs(v2[1] - v1[1]) / (t2 - t1);
+    let avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY);
+    y1 = x1 * e1.speed / avSpeed;
+    y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+  }
+  else {
+    let avSpeedX = Math.abs(v2 - v1) / (t2 - t1);
+    let avSpeedY = Math.abs(v2 - v1) / (t2 - t1);
+    let avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY);
+    y1 = x1 * e1.speed / avSpeed;
+    y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+  }
+  if(x1 === y1 && x2 === y2) {
+    return;
+  }
+  return [x1, y1, x2, y2];
 }
 
 export function transformLayer(prop) {

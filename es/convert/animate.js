@@ -51,13 +51,14 @@ function getAreaList(list, begin, duration, reducer) {
     };
     list.unshift(o);
   }
+  // 截取首帧部分
   else if(first.time < begin) {
     let next = list[1];
     let percent = (begin - first.time) / (next.time - first.time);
     first.time = begin;
     first.value = reducer(first.value, next.value, percent);
   }
-  // 补齐尾帧，同上
+  // 截取尾帧部分，同上
   let last = list[list.length - 1];
   if(last.time > begin + duration) {
     let prev = list[list.length - 2];
@@ -65,14 +66,43 @@ function getAreaList(list, begin, duration, reducer) {
     last.time = begin + duration;
     last.value = reducer(prev.value, last.value, percent);
   }
+  // 补齐尾帧，同上
   else if(last.time < begin + duration) {
     let o = {
       time: begin + duration,
-      value: Array.isArray(first.value) ? first.value.slice(0) : first.value,
+      value: Array.isArray(last.value) ? last.value.slice(0) : last.value,
     };
     list.push(o);
   }
   return list;
+}
+
+/**
+ * 百分比截取贝塞尔中的一段，t为[0, 1]
+ * @param points
+ * @param t
+ */
+function sliceBezier(points, t) {
+  let [[x1, y1], [x2, y2], [x3, y3], p4] = points;
+  let x12 = (x2 - x1) * t + x1;
+  let y12 = (y2 - y1) * t + y1;
+  let x23 = (x3 - x2) * t + x2;
+  let y23 = (y3 - y2) * t + y2;
+  let x123 = (x23 - x12) * t + x12;
+  let y123 = (y23 - y12) * t + y12;
+  if(points.length === 4) {
+    let [x4, y4] = p4;
+    let x34 = (x4 - x3) * t + x3;
+    let y34 = (y4 - y3) * t + y3;
+    let x234 = (x34 - x23) * t + x23;
+    let y234 = (y34 - y23) * t + y23;
+    let x1234 = (x234 - x123) * t + x123;
+    let y1234 = (y234 - y123) * t + y123;
+    return [[x1, y1], [x12, y12], [x123, y123], [x1234, y1234]];
+  }
+  else if(points.length === 3) {
+    return [[x1, y1], [x12, y12], [x123, y123]];
+  }
 }
 
 export function transformOrigin(list, begin, duration) {
@@ -101,6 +131,7 @@ export function transformOrigin(list, begin, duration) {
       res.value.push({
         offset: (item.time - begin) / duration,
         transformOrigin: item.value[0] + ' ' + item.value[1],
+        easing: item.easing,
       });
     }
   }
@@ -130,6 +161,7 @@ export function transformOpacity(list, begin, duration) {
       res.value.push({
         offset: (item.time - begin) / duration,
         opacity: item.value * 0.01,
+        easing: item.easing,
       });
     }
   }
@@ -165,6 +197,7 @@ export function transformPosition(list, begin, duration) {
         offset: (item.time - begin) / duration,
         translateX: item.value[0],
         translateY: item.value[1],
+        easing: item.easing,
       });
     }
   }
@@ -194,6 +227,7 @@ export function transformRotateX(list, begin, duration) {
       res.value.push({
         offset: (item.time - begin) / duration,
         rotateX: item.value,
+        easing: item.easing,
       });
     }
   }
@@ -223,6 +257,7 @@ export function transformRotateY(list, begin, duration) {
       res.value.push({
         offset: (item.time - begin) / duration,
         rotateY: item.value,
+        easing: item.easing,
       });
     }
   }
@@ -253,6 +288,7 @@ export function transformRotateZ(list, begin, duration) {
       res.value.push({
         offset: (item.time - begin) / duration,
         rotateZ: item.value,
+        easing: item.easing,
       });
     }
   }
@@ -292,6 +328,7 @@ export function transformScale(list, begin, duration) {
         offset: (item.time - begin) / duration,
         scaleX: item.value[0] * 0.01,
         scaleY: item.value[1] * 0.01,
+        easing: item.easing,
       };
       if(item.value.length > 2) {
         v.scaleZ = item.value[2] * 0.01;
@@ -330,6 +367,7 @@ export function transformPath(list, begin, duration, isEnd) {
       let item = list[i];
       let v = {
         offset: (item.time - begin) / duration,
+        easing: item.easing,
       };
       if(isEnd) {
         v.end = item.value * 0.01;
