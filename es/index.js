@@ -100,7 +100,6 @@ function findCompositionById(id) {
 ae2karas.convert = function(id) {
   let composition = findCompositionById(id);
   if(!composition) {
-    $.ae2karas.dispatch(enums.EVENT.CONVERT, null);
     return;
   }
   // 递归遍历分析合成对象，转换ae的图层为普通js对象，留给后续转换karas用

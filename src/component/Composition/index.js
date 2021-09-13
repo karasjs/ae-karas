@@ -3,7 +3,6 @@ import { observer, inject } from 'mobx-react';
 import classnames from 'classnames';
 
 import store from '../../store';
-import { csInterface } from '../../util/CSInterface';
 
 import './index.less';
 
@@ -12,12 +11,6 @@ import './index.less';
 class Composition extends React.Component {
   click(id) {
     store.composition.setCurrent(id);
-  }
-
-  preview(id) {
-    store.preview.setShow(true);
-    // 通知es转换合成对象
-    csInterface.evalScript(`$.ae2karas.convert(${id});`);
   }
 
   render() {
