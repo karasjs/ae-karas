@@ -61,7 +61,7 @@ function getEasing(prop, start, end) {
   let v1 = prop.keyValue(start), v2 = prop.keyValue(end);
   let e1 = prop.keyOutTemporalEase(start)[0], e2 = prop.keyInTemporalEase(end)[0];
   let x1 = e1.influence * 0.01, x2 = 1 - e2.influence * 0.01;
-  let y1 = 0, y2 = 1;
+  let y1, y2;
   let matchName = prop.matchName;
   if([
     'ADBE Anchor Point', 'ADBE Position',
@@ -80,7 +80,7 @@ function getEasing(prop, start, end) {
     y1 = x1 * e1.speed / avSpeed;
     y2 = 1 - (1 - x2) * e2.speed / avSpeed;
   }
-  if(x1 === y1 && x2 === y2) {
+  if(x1 === y1 && x2 === y2 || y1 === undefined || y2 === undefined) {
     return;
   }
   return [x1, y1, x2, y2];
