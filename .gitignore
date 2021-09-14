@@ -7,5 +7,3 @@ coverage/
 .idea/
 .DS_Store
 *.swp
-bundle/dist/
-bundle/jsx/
