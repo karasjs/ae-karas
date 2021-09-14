@@ -424,7 +424,8 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('globa
         type: "radio",
         name: "type",
         value: "canvas",
-        checked: type === 'canvas'
+        checked: type === 'canvas',
+        readOnly: true
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "canvas")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
         onClick: function onClick() {
           return _this.change('svg');
@@ -433,7 +434,8 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('globa
         type: "radio",
         name: "type",
         value: "svg",
-        checked: type === 'svg'
+        checked: type === 'svg',
+        readOnly: true
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "svg")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
         onClick: function onClick() {
           return _this.change('webgl');
@@ -442,7 +444,8 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('globa
         type: "radio",
         name: "type",
         value: "webgl",
-        checked: type === 'webgl'
+        checked: type === 'webgl',
+        readOnly: true
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "webgl"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "container"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {

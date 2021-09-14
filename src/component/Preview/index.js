@@ -74,21 +74,24 @@ class Preview extends React.Component {
           <input type="radio"
                  name="type"
                  value="canvas"
-                 checked={type === 'canvas'}/>
+                 checked={type === 'canvas'}
+                 readOnly={true}/>
           <span>canvas</span>
         </label>
         <label onClick={() => this.change('svg')}>
           <input type="radio"
                  name="type"
                  value="svg"
-                 checked={type === 'svg'}/>
+                 checked={type === 'svg'}
+                 readOnly={true}/>
           <span>svg</span>
         </label>
         <label onClick={() => this.change('webgl')}>
           <input type="radio"
                  name="type"
                  value="webgl"
-                 checked={type === 'webgl'}/>
+                 checked={type === 'webgl'}
+                 readOnly={true}/>
           <span>webgl</span>
         </label>
       </div>

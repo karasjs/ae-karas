@@ -1921,7 +1921,7 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
 
         if (temp.init && temp.init.style && temp.init.style.perspective) {
           res.props.style.perspective = temp.init.style.perspective;
-          delete temp.init.perspective;
+          temp.init.style.perspective = undefined;
         } // 有mask分析mask
 
 
