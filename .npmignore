@@ -7,11 +7,6 @@ Makefile
 .babelrc
 webpack.*.js
 rollup.*.js
-gulpfile.js
-nightwatch.json
-nightwatch.conf.js
-test/
-demo/
 node_modules/
 .DS_Store
 reports/
