@@ -121,6 +121,16 @@
 .preview-panel .btn div:hover {
   background: #336dff;
 }
+.preview-panel .type {
+  display: flex;
+  margin: 0 10px 10px;
+}
+.preview-panel .type label {
+  margin-right: 10px;
+}
+.preview-panel .type input {
+  margin-right: 2px;
+}
 .preview-panel .container {
   flex: 1;
   display: flex;

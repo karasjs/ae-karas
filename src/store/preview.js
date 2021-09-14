@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 
 class Preview {
   data = null;
+  type = 'canvas';
 
   constructor() {
     makeAutoObservable(this);
@@ -9,6 +10,10 @@ class Preview {
 
   setData(data) {
     this.data = data;
+  }
+
+  setType(type) {
+    this.type = type;
   }
 }
 

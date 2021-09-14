@@ -115,11 +115,13 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       res.animate.push(t);
     }
   }
+  let is3d;
   if(Array.isArray(rotateX) && rotateX.length) {
     let t = transformRotateX(rotateX, begin2, duration);
     let first = t.value[0];
     if(first.rotateX) {
       init.style.rotateX = first.rotateX;
+      is3d = true;
     }
     if(t.value.length > 1) {
       if(first.offset === 0) {
@@ -128,6 +130,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
         };
       }
       res.animate.push(t);
+      is3d = true;
     }
   }
   if(Array.isArray(rotateY) && rotateY.length) {
@@ -135,6 +138,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     let first = t.value[0];
     if(first.rotateY) {
       init.style.rotateY = first.rotateY;
+      is3d = true;
     }
     if(t.value.length > 1) {
       if(first.offset === 0) {
@@ -143,6 +147,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
         };
       }
       res.animate.push(t);
+      is3d = true;
     }
   }
   if(Array.isArray(rotateZ) && rotateZ.length) {
@@ -150,6 +155,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     let first = t.value[0];
     if(first.rotateZ) {
       init.style.rotateZ = first.rotateZ;
+      is3d = true;
     }
     if(t.value.length > 1) {
       if(first.offset === 0) {
@@ -158,7 +164,11 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
         };
       }
       res.animate.push(t);
+      is3d = true;
     }
+  }
+  if(is3d) {
+    init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
   if(Array.isArray(scale) && scale.length) {
     let t = transformScale(scale, begin2, duration);
@@ -385,6 +395,12 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
       let temp = recursion(item, library, newLib, start, duration, offset, parentLink);
       if(temp) {
         res.children.push(temp);
+        // ppt应该放在父层
+        if(temp.init && temp.init.style && temp.init.style.perspective) {
+          res.props.style.perspective = temp.init.style.perspective;
+          delete temp.init.perspective;
+        }
+        // 有mask分析mask
         if(item.mask && item.mask.enabled) {
           res.children.push(parseMask(item, temp));
         }

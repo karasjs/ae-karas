@@ -347,12 +347,20 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('globa
     key: "componentDidUpdate",
     value: function componentDidUpdate(nextProps, nextState, nextContext) {
       var data = this.props.preview.data;
+      var type = this.props.preview.type;
       var _data$props$style = data.props.style,
           width = _data$props$style.width,
           height = _data$props$style.height;
       var stage = this.stage;
+
+      if (root) {
+        root.destroy();
+        root = null;
+        stage.innerHTML = '';
+      }
+
       root = karas__WEBPACK_IMPORTED_MODULE_7___default().parse({
-        tagName: 'canvas',
+        tagName: type,
         props: {
           width: width,
           height: height
@@ -380,10 +388,16 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('globa
       }
     }
   }, {
+    key: "change",
+    value: function change(v) {
+      _store__WEBPACK_IMPORTED_MODULE_8__.default.preview.setType(v);
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this = this;
 
+      var type = this.props.preview.type;
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('preview-panel', {
           show: _store__WEBPACK_IMPORTED_MODULE_8__.default.global.isPreview
@@ -401,6 +415,35 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('globa
           _store__WEBPACK_IMPORTED_MODULE_8__.default.global.setPreview(false);
         }
       }, "\u8FD4\u56DE")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "type"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
+        onClick: function onClick() {
+          return _this.change('canvas');
+        }
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "radio",
+        name: "type",
+        value: "canvas",
+        checked: type === 'canvas'
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "canvas")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
+        onClick: function onClick() {
+          return _this.change('svg');
+        }
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "radio",
+        name: "type",
+        value: "svg",
+        checked: type === 'svg'
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "svg")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
+        onClick: function onClick() {
+          return _this.change('webgl');
+        }
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "radio",
+        name: "type",
+        value: "webgl",
+        checked: type === 'webgl'
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "webgl"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "container"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "menu"
@@ -572,6 +615,8 @@ var Preview = /*#__PURE__*/function () {
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__.default)(this, "data", null);
 
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__.default)(this, "type", 'canvas');
+
     (0,mobx__WEBPACK_IMPORTED_MODULE_3__.makeAutoObservable)(this);
   }
 
@@ -579,6 +624,11 @@ var Preview = /*#__PURE__*/function () {
     key: "setData",
     value: function setData(data) {
       this.data = data;
+    }
+  }, {
+    key: "setType",
+    value: function setType(type) {
+      this.type = type;
     }
   }]);
 

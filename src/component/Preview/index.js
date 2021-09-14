@@ -15,10 +15,16 @@ let root, canvas;
 class Preview extends React.Component {
   componentDidUpdate(nextProps, nextState, nextContext) {
     let data = this.props.preview.data;
+    let type = this.props.preview.type;
     let { width, height } = data.props.style;
     let stage = this.stage;
+    if(root) {
+      root.destroy();
+      root = null;
+      stage.innerHTML = '';
+    }
     root = karas.parse({
-      tagName: 'canvas',
+      tagName: type,
       props: {
         width,
         height,
@@ -45,7 +51,12 @@ class Preview extends React.Component {
     }
   }
 
+  change(v) {
+    store.preview.setType(v);
+  }
+
   render() {
+    let type = this.props.preview.type;
     return <div className={classnames('preview-panel', {
       show: store.global.isPreview,
     })}>
@@ -57,6 +68,29 @@ class Preview extends React.Component {
           }
           store.global.setPreview(false);
         }}>返回</div>
+      </div>
+      <div className="type">
+        <label onClick={() => this.change('canvas')}>
+          <input type="radio"
+                 name="type"
+                 value="canvas"
+                 checked={type === 'canvas'}/>
+          <span>canvas</span>
+        </label>
+        <label onClick={() => this.change('svg')}>
+          <input type="radio"
+                 name="type"
+                 value="svg"
+                 checked={type === 'svg'}/>
+          <span>svg</span>
+        </label>
+        <label onClick={() => this.change('webgl')}>
+          <input type="radio"
+                 name="type"
+                 value="webgl"
+                 checked={type === 'webgl'}/>
+          <span>webgl</span>
+        </label>
       </div>
       <div className="container">
         <div className="menu"/>

@@ -101,7 +101,6 @@ function getAreaList(list, begin, duration, reducer) {
  * @param t
  */
 function sliceBezier(points, t) {
-  // let [[x1, y1], [x2, y2], [x3, y3], p4] = points;
   let p1 = points[0], p2 = points[1], p3 = points[2], p4 = points[3];
   let x1 = p1[0], y1 = p1[1];
   let x2 = p2[0], y2 = p2[1];
@@ -237,7 +236,7 @@ export function transformRotateX(list, begin, duration) {
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
     res.value.push({
-      rotateX: list[0],
+      rotateX: -list[0],
     });
   }
   else {
@@ -248,7 +247,7 @@ export function transformRotateX(list, begin, duration) {
       let item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateX: item.value,
+        rotateX: -item.value,
         easing: item.easing,
       });
     }
@@ -267,7 +266,7 @@ export function transformRotateY(list, begin, duration) {
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
     res.value.push({
-      rotateY: list[0],
+      rotateY: -list[0],
     });
   }
   else {
@@ -278,7 +277,7 @@ export function transformRotateY(list, begin, duration) {
       let item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateY: item.value,
+        rotateY: -item.value,
         easing: item.easing,
       });
     }
@@ -298,7 +297,7 @@ export function transformRotateZ(list, begin, duration) {
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
     res.value.push({
-      rotateZ: list[0],
+      rotateZ: -list[0],
     });
   }
   else {
@@ -309,7 +308,7 @@ export function transformRotateZ(list, begin, duration) {
       let item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateZ: item.value,
+        rotateZ: -item.value,
         easing: item.easing,
       });
     }

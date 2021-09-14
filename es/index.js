@@ -99,7 +99,6 @@ function findCompositionById(id) {
 
 ae2karas.convert = function(id) {
   $.ae2karas.error('start');
-  $.ae2karas.log(id);
   let composition = findCompositionById(id);
   if(!composition) {
     $.ae2karas.error('error: no composition');
@@ -111,7 +110,7 @@ ae2karas.convert = function(id) {
   $.ae2karas.dispatch(enums.EVENT.FINISH, convert(res));
   // 结束后才能删除临时生成的导出psd的合成和渲染队列
   $.ae2karas.delTemp();
-  $.ae2karas.error('end');
+  $.ae2karas.error('finish');
 };
 
 let list = [];

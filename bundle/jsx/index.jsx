@@ -968,7 +968,6 @@ function getAreaList(list, begin, duration, reducer) {
 
 
 function sliceBezier(points, t) {
-  // let [[x1, y1], [x2, y2], [x3, y3], p4] = points;
   var p1 = points[0],
       p2 = points[1],
       p3 = points[2],
@@ -1104,7 +1103,7 @@ function transformRotateX(list, begin, duration) {
 
   if (list.length === 1) {
     res.value.push({
-      rotateX: list[0]
+      rotateX: -list[0]
     });
   } else {
     list = getAreaList(list, begin, duration, function (prev, next, percent) {
@@ -1115,7 +1114,7 @@ function transformRotateX(list, begin, duration) {
       var item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateX: item.value,
+        rotateX: -item.value,
         easing: item.easing
       });
     }
@@ -1134,7 +1133,7 @@ function transformRotateY(list, begin, duration) {
 
   if (list.length === 1) {
     res.value.push({
-      rotateY: list[0]
+      rotateY: -list[0]
     });
   } else {
     list = getAreaList(list, begin, duration, function (prev, next, percent) {
@@ -1145,7 +1144,7 @@ function transformRotateY(list, begin, duration) {
       var item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateY: item.value,
+        rotateY: -item.value,
         easing: item.easing
       });
     }
@@ -1164,7 +1163,7 @@ function transformRotateZ(list, begin, duration) {
 
   if (list.length === 1) {
     res.value.push({
-      rotateZ: list[0]
+      rotateZ: -list[0]
     });
   } else {
     list = getAreaList(list, begin, duration, function (prev, next, percent) {
@@ -1175,7 +1174,7 @@ function transformRotateZ(list, begin, duration) {
       var item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateZ: item.value,
+        rotateZ: -item.value,
         easing: item.easing
       });
     }
@@ -1578,6 +1577,8 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
   }
 
+  var is3d;
+
   if (Array.isArray(rotateX) && rotateX.length) {
     var _t3 = transformRotateX(rotateX, begin2, duration);
 
@@ -1585,6 +1586,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
 
     if (_first3.rotateX) {
       init.style.rotateX = _first3.rotateX;
+      is3d = true;
     }
 
     if (_t3.value.length > 1) {
@@ -1595,6 +1597,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       }
 
       res.animate.push(_t3);
+      is3d = true;
     }
   }
 
@@ -1605,6 +1608,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
 
     if (_first4.rotateY) {
       init.style.rotateY = _first4.rotateY;
+      is3d = true;
     }
 
     if (_t4.value.length > 1) {
@@ -1615,6 +1619,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       }
 
       res.animate.push(_t4);
+      is3d = true;
     }
   }
 
@@ -1625,6 +1630,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
 
     if (_first5.rotateZ) {
       init.style.rotateZ = _first5.rotateZ;
+      is3d = true;
     }
 
     if (_t5.value.length > 1) {
@@ -1635,7 +1641,12 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       }
 
       res.animate.push(_t5);
+      is3d = true;
     }
+  }
+
+  if (is3d) {
+    init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
 
   if (Array.isArray(scale) && scale.length) {
@@ -1906,7 +1917,13 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
       var temp = recursion(_item, library, newLib, start, duration, offset, parentLink);
 
       if (temp) {
-        res.children.push(temp);
+        res.children.push(temp); // ppt应该放在父层
+
+        if (temp.init && temp.init.style && temp.init.style.perspective) {
+          res.props.style.perspective = temp.init.style.perspective;
+          delete temp.init.perspective;
+        } // 有mask分析mask
+
 
         if (_item.mask && _item.mask.enabled) {
           res.children.push(parseMask(_item, temp));
@@ -2360,7 +2377,6 @@ function findCompositionById(id) {
 
 ae2karas.convert = function (id) {
   $.ae2karas.error('start');
-  $.ae2karas.log(id);
   var composition = findCompositionById(id);
 
   if (!composition) {
@@ -2374,7 +2390,7 @@ ae2karas.convert = function (id) {
   $.ae2karas.dispatch(enums.EVENT.FINISH, convert(res)); // 结束后才能删除临时生成的导出psd的合成和渲染队列
 
   $.ae2karas.delTemp();
-  $.ae2karas.error('end');
+  $.ae2karas.error('finish');
 };
 
 var list = [];
