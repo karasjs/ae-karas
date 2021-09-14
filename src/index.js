@@ -48,5 +48,12 @@ csInterface.addEventListener(enums.EVENT.FINISH, function(event) {
   });
 });
 
+csInterface.addEventListener(enums.EVENT.CANCEL, function() {
+  transaction(function() {
+    store.global.setLoading(false);
+    store.global.setPreview(false);
+  });
+});
+
 // 通知es初始化获取展示合成列表，不发送的话es那边不执行任何代码很神奇
 csInterface.evalScript('$.ae2karas.getCompositions();');

@@ -98,8 +98,12 @@ function findCompositionById(id) {
 }
 
 ae2karas.convert = function(id) {
+  $.ae2karas.error('start');
+  $.ae2karas.log(id);
   let composition = findCompositionById(id);
   if(!composition) {
+    $.ae2karas.error('error: no composition');
+    $.ae2karas.dispatch(enums.EVENT.CANCEL);
     return;
   }
   // 递归遍历分析合成对象，转换ae的图层为普通js对象，留给后续转换karas用
@@ -107,6 +111,7 @@ ae2karas.convert = function(id) {
   $.ae2karas.dispatch(enums.EVENT.FINISH, convert(res));
   // 结束后才能删除临时生成的导出psd的合成和渲染队列
   $.ae2karas.delTemp();
+  $.ae2karas.error('end');
 };
 
 let list = [];

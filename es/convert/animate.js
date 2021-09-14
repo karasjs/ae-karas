@@ -101,7 +101,11 @@ function getAreaList(list, begin, duration, reducer) {
  * @param t
  */
 function sliceBezier(points, t) {
-  let [[x1, y1], [x2, y2], [x3, y3], p4] = points;
+  // let [[x1, y1], [x2, y2], [x3, y3], p4] = points;
+  let p1 = points[0], p2 = points[1], p3 = points[2], p4 = points[3];
+  let x1 = p1[0], y1 = p1[1];
+  let x2 = p2[0], y2 = p2[1];
+  let x3 = p3[0], y3 = p3[1];
   let x12 = (x2 - x1) * t + x1;
   let y12 = (y2 - y1) * t + y1;
   let x23 = (x3 - x2) * t + x2;
@@ -109,7 +113,7 @@ function sliceBezier(points, t) {
   let x123 = (x23 - x12) * t + x12;
   let y123 = (y23 - y12) * t + y12;
   if(points.length === 4) {
-    let [x4, y4] = p4;
+    let x4 = p4[0], y4 = p4[1];
     let x34 = (x4 - x3) * t + x3;
     let y34 = (y4 - y3) * t + y3;
     let x234 = (x34 - x23) * t + x23;

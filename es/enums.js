@@ -10,6 +10,7 @@ export default {
     WARN: 'ae2karas:warn',
     ERROR: 'ae2karas:error',
     FINISH: 'ae2karas:finish',
+    CANCEL: 'ae2karas:cancel',
     ADD_TEMP: 'ae2karas:addTemp',
     DEL_TEMP: 'ae2karas:delTemp',
   },

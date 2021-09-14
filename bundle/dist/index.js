@@ -24,6 +24,7 @@ __webpack_require__.r(__webpack_exports__);
     WARN: 'ae2karas:warn',
     ERROR: 'ae2karas:error',
     FINISH: 'ae2karas:finish',
+    CANCEL: 'ae2karas:cancel',
     ADD_TEMP: 'ae2karas:addTemp',
     DEL_TEMP: 'ae2karas:delTemp'
   }
@@ -154,7 +155,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var _dec, _dec2, _class;
+var _dec, _class;
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0,_babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__.default)(this, result); }; }
 
@@ -167,7 +168,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 
 
-var List = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.inject)('composition'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.observer)(_class = /*#__PURE__*/function (_React$Component) {
+var List = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.inject)('global'), _dec(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.observer)(_class = /*#__PURE__*/function (_React$Component) {
   (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__.default)(List, _React$Component);
 
   var _super = _createSuper(List);
@@ -179,17 +180,14 @@ var List = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.inject)('global')
   }
 
   (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__.default)(List, [{
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {
-      var id = this.props.composition.currentId;
-
-      if (id && this.props.global.isLoading) {
-        _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__.csInterface.evalScript("$.ae2karas.convert(".concat(id, ")"));
-      }
-    }
-  }, {
     key: "render",
-    value: function render() {
+    value: // componentDidUpdate() {
+    //   let id = this.props.composition.currentId;
+    //   if(id && this.props.global.isLoading) {
+    //     csInterface.evalScript(`$.ae2karas.convert(${id})`);
+    //   }
+    // }
+    function render() {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('list-panel', {
           show: !this.props.global.isPreview
@@ -200,12 +198,14 @@ var List = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.inject)('global')
         className: "convert",
         onClick: function onClick() {
           if (_store__WEBPACK_IMPORTED_MODULE_7__.default.composition.currentId) {
-            _store__WEBPACK_IMPORTED_MODULE_7__.default.global.setLoading(true); // csInterface.evalScript(`$.ae2karas.convert(${store.composition.currentId})`);
+            _store__WEBPACK_IMPORTED_MODULE_7__.default.global.setLoading(true);
+            setTimeout(function () {
+              _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__.csInterface.evalScript("$.ae2karas.convert(".concat(_store__WEBPACK_IMPORTED_MODULE_7__.default.composition.currentId, ")"));
+            }, 100);
           } else {
             alert('请先选择合成');
           }
-        },
-        rel: this.props.composition.currentId + this.props.global.isLoading
+        }
       }, "\u8F6C\u6362"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "refresh",
         onClick: function onClick() {
@@ -219,7 +219,7 @@ var List = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_11__.inject)('global')
   }]);
 
   return List;
-}(react__WEBPACK_IMPORTED_MODULE_5__.Component)) || _class) || _class) || _class);
+}(react__WEBPACK_IMPORTED_MODULE_5__.Component)) || _class) || _class);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (List);
 
 /***/ }),
@@ -75326,6 +75326,12 @@ _util_CSInterface__WEBPACK_IMPORTED_MODULE_6__.csInterface.addEventListener(_es_
     _store__WEBPACK_IMPORTED_MODULE_2__.default.global.setLoading(false);
     _store__WEBPACK_IMPORTED_MODULE_2__.default.preview.setData(event.data);
     _store__WEBPACK_IMPORTED_MODULE_2__.default.global.setPreview(true);
+  });
+});
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_6__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_7__.default.EVENT.CANCEL, function () {
+  (0,mobx__WEBPACK_IMPORTED_MODULE_11__.transaction)(function () {
+    _store__WEBPACK_IMPORTED_MODULE_2__.default.global.setLoading(false);
+    _store__WEBPACK_IMPORTED_MODULE_2__.default.global.setPreview(false);
   });
 }); // 通知es初始化获取展示合成列表，不发送的话es那边不执行任何代码很神奇
 

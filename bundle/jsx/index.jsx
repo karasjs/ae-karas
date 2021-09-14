@@ -1,11 +1,5 @@
 'use strict';
 
-var _slicedToArray = require('@babel/runtime/helpers/slicedToArray');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var _slicedToArray__default = /*#__PURE__*/_interopDefaultLegacy(_slicedToArray);
-
 var enums = {
   ES_TYPE: {
     FOLDER_ITEM: 'FolderItem',
@@ -18,6 +12,7 @@ var enums = {
     WARN: 'ae2karas:warn',
     ERROR: 'ae2karas:error',
     FINISH: 'ae2karas:finish',
+    CANCEL: 'ae2karas:cancel',
     ADD_TEMP: 'ae2karas:addTemp',
     DEL_TEMP: 'ae2karas:delTemp'
   }
@@ -851,7 +846,8 @@ function text(prop) {
 }
 
 function parse$1 (composition) {
-  // 递归遍历合成，转换ae的图层为普通js对象
+  $.ae2karas.error('parse'); // 递归遍历合成，转换ae的图层为普通js对象
+
   var workAreaStart = composition.workAreaStart,
       workAreaDuration = composition.workAreaDuration;
   workAreaStart *= 1000;
@@ -972,18 +968,17 @@ function getAreaList(list, begin, duration, reducer) {
 
 
 function sliceBezier(points, t) {
-  var _points2 = _slicedToArray__default['default'](points, 4),
-      _points2$ = _slicedToArray__default['default'](_points2[0], 2),
-      x1 = _points2$[0],
-      y1 = _points2$[1],
-      _points2$2 = _slicedToArray__default['default'](_points2[1], 2),
-      x2 = _points2$2[0],
-      y2 = _points2$2[1],
-      _points2$3 = _slicedToArray__default['default'](_points2[2], 2),
-      x3 = _points2$3[0],
-      y3 = _points2$3[1],
-      p4 = _points2[3];
-
+  // let [[x1, y1], [x2, y2], [x3, y3], p4] = points;
+  var p1 = points[0],
+      p2 = points[1],
+      p3 = points[2],
+      p4 = points[3];
+  var x1 = p1[0],
+      y1 = p1[1];
+  var x2 = p2[0],
+      y2 = p2[1];
+  var x3 = p3[0],
+      y3 = p3[1];
   var x12 = (x2 - x1) * t + x1;
   var y12 = (y2 - y1) * t + y1;
   var x23 = (x3 - x2) * t + x2;
@@ -992,10 +987,8 @@ function sliceBezier(points, t) {
   var y123 = (y23 - y12) * t + y12;
 
   if (points.length === 4) {
-    var _p = _slicedToArray__default['default'](p4, 2),
-        x4 = _p[0],
-        y4 = _p[1];
-
+    var x4 = p4[0],
+        y4 = p4[1];
     var x34 = (x4 - x3) * t + x3;
     var y34 = (y4 - y3) * t + y3;
     var x234 = (x34 - x23) * t + x23;
@@ -2366,9 +2359,13 @@ function findCompositionById(id) {
 }
 
 ae2karas.convert = function (id) {
+  $.ae2karas.error('start');
+  $.ae2karas.log(id);
   var composition = findCompositionById(id);
 
   if (!composition) {
+    $.ae2karas.error('error: no composition');
+    $.ae2karas.dispatch(enums.EVENT.CANCEL);
     return;
   } // 递归遍历分析合成对象，转换ae的图层为普通js对象，留给后续转换karas用
 
@@ -2377,6 +2374,7 @@ ae2karas.convert = function (id) {
   $.ae2karas.dispatch(enums.EVENT.FINISH, convert(res)); // 结束后才能删除临时生成的导出psd的合成和渲染队列
 
   $.ae2karas.delTemp();
+  $.ae2karas.error('end');
 };
 
 var list = [];

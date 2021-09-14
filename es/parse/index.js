@@ -229,6 +229,7 @@ function text(prop) {
 }
 
 export default function(composition) {
+  $.ae2karas.error('parse');
   // 递归遍历合成，转换ae的图层为普通js对象
   let { workAreaStart, workAreaDuration } = composition;
   workAreaStart *= 1000;
