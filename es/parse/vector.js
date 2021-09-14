@@ -51,7 +51,7 @@ function content(prop) {
           res.fill = fill(item);
           break;
         case 'ADBE Vector Graphic - G-Fill':
-          res.gfill = gFill(item);
+          res.gFill = gFill(item);
           break;
       }
     }
@@ -287,7 +287,7 @@ function gFill(prop) {
           res.end = item.value;
           break;
         case 'ADBE Vector Grad Colors':
-          //
+          // 拿不到
           break;
         case 'ADBE Vector Fill Opacity':
           res.opacity = item.value;

@@ -418,7 +418,7 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
  * @param offset
  */
 function parseGeom(res, data, start, duration, offset) {
-  let { shape: { content, fill, stroke, transform }, trim } = data;
+  let { shape: { content, fill, gFill, stroke, transform }, trim } = data;
   let { type, direction, size, position, roundness, points } = content;
   let f;
   if(fill) {
@@ -449,7 +449,7 @@ function parseGeom(res, data, start, duration, offset) {
     props: {
       style: {
         position: 'absolute',
-        fill: [f],
+        fill: f ? [f] : undefined,
         strokeWidth: [stroke.width],
         stroke: [s],
         strokeLinejoin: [stroke.lineJoin],
@@ -496,7 +496,7 @@ function parseGeom(res, data, start, duration, offset) {
   if(position && position[1]) {
     child.props.style.top = -position[1];
   }
-  if(fill && fill.rule === 2) {
+  if(fill && fill.rule === 2 || gFill && gFill.rule === 2) {
     child.props.style.fillRule = 'evenodd';
   }
   // geom内嵌的transform单独分析，anchorPoint比较特殊
@@ -566,6 +566,35 @@ function parseGeom(res, data, start, duration, offset) {
     }
   }
   parseAnimate(child, data.shape, start, duration, offset, true, true);
+  // gradient需要根据transformOrigin来计算
+  if(gFill) {
+    let transformOrigin = child.props.style.transformOrigin;
+    let w = child.props.style.width, h = child.props.style.height;
+    let cx, cy;
+    if(transformOrigin) {
+      transformOrigin = transformOrigin.split(' ');
+      cx = parseFloat(transformOrigin[0]);
+      cy = parseFloat(transformOrigin[1]);
+    }
+    else {
+      cx = w * 0.5;
+      cy = h * 0.5;
+    }
+    let { type, start, end } = gFill;
+    if(type === 1) {
+      let x0 = position[0], y0 = position[1];
+      let x1 = start[0] + cx, y1 = start[1] + cy;
+      let x2 = end[0] + cx, y2 = end[1] + cy;
+      f = `linearGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
+    }
+    else if(type === 2) {
+      let x0 = position[0], y0 = position[1];
+      let x1 = start[0] + cx, y1 = start[1] + cy;
+      let x2 = end[0] + cx, y2 = end[1] + cy;
+      f = `radialGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
+    }
+    child.props.style.fill = [f];
+  }
   // trimPath裁剪动画或属性
   if(trim && trim.hasOwnProperty('start') && trim.hasOwnProperty('end')) {
     let start = trim.start, end = trim.end;

@@ -211,7 +211,7 @@ function content(prop) {
           break;
 
         case 'ADBE Vector Graphic - G-Fill':
-          res.gfill = gFill(item);
+          res.gFill = gFill(item);
           break;
       }
     }
@@ -509,7 +509,7 @@ function gFill(prop) {
           break;
 
         case 'ADBE Vector Grad Colors':
-          //
+          // 拿不到
           break;
 
         case 'ADBE Vector Fill Opacity':
@@ -1946,6 +1946,7 @@ function parseGeom(res, data, start, duration, offset) {
   var _data$shape = data.shape,
       content = _data$shape.content,
       fill = _data$shape.fill,
+      gFill = _data$shape.gFill,
       stroke = _data$shape.stroke,
       transform = _data$shape.transform,
       trim = data.trim;
@@ -1980,7 +1981,7 @@ function parseGeom(res, data, start, duration, offset) {
     props: {
       style: {
         position: 'absolute',
-        fill: [f],
+        fill: f ? [f] : undefined,
         strokeWidth: [stroke.width],
         stroke: [s],
         strokeLinejoin: [stroke.lineJoin],
@@ -2034,7 +2035,7 @@ function parseGeom(res, data, start, duration, offset) {
     child.props.style.top = -position[1];
   }
 
-  if (fill && fill.rule === 2) {
+  if (fill && fill.rule === 2 || gFill && gFill.rule === 2) {
     child.props.style.fillRule = 'evenodd';
   } // geom内嵌的transform单独分析，anchorPoint比较特殊
 
@@ -2115,14 +2116,58 @@ function parseGeom(res, data, start, duration, offset) {
     }
   }
 
-  parseAnimate(child, data.shape, start, duration, offset, true, true); // trimPath裁剪动画或属性
+  parseAnimate(child, data.shape, start, duration, offset, true, true); // gradient需要根据transformOrigin来计算
+
+  if (gFill) {
+    var _transformOrigin = child.props.style.transformOrigin;
+    var _w = child.props.style.width,
+        _h = child.props.style.height;
+    var cx, cy;
+
+    if (_transformOrigin) {
+      _transformOrigin = _transformOrigin.split(' ');
+      cx = parseFloat(_transformOrigin[0]);
+      cy = parseFloat(_transformOrigin[1]);
+    } else {
+      cx = _w * 0.5;
+      cy = _h * 0.5;
+    }
+
+    var _type = gFill.type,
+        _start = gFill.start,
+        end = gFill.end;
+
+    if (_type === 1) {
+      var x0 = position[0],
+          y0 = position[1];
+      var x1 = _start[0] + cx,
+          y1 = _start[1] + cy;
+      var x2 = end[0] + cx,
+          y2 = end[1] + cy;
+      f = "linearGradient(".concat((x1 - x0) / _w, " ").concat((y1 - y0) / _h, " ").concat((x2 - x0) / _w, " ").concat((y2 - y0) / _h, ", #FFF, #000)");
+    } else if (_type === 2) {
+      var _x = position[0],
+          _y = position[1];
+
+      var _x2 = _start[0] + cx,
+          _y2 = _start[1] + cy;
+
+      var _x3 = end[0] + cx,
+          _y3 = end[1] + cy;
+
+      f = "radialGradient(".concat((_x2 - _x) / _w, " ").concat((_y2 - _y) / _h, " ").concat((_x3 - _x) / _w, " ").concat((_y3 - _y) / _h, ", #FFF, #000)");
+    }
+
+    child.props.style.fill = [f];
+  } // trimPath裁剪动画或属性
+
 
   if (trim && trim.hasOwnProperty('start') && trim.hasOwnProperty('end')) {
-    var _start = trim.start,
-        end = trim.end;
+    var _start2 = trim.start,
+        _end = trim.end;
 
-    if (_start.length > 1) {
-      var _t7 = transformPath(_start, begin2, duration, false);
+    if (_start2.length > 1) {
+      var _t7 = transformPath(_start2, begin2, duration, false);
 
       var _first7 = _t7.value[0];
 
@@ -2140,11 +2185,11 @@ function parseGeom(res, data, start, duration, offset) {
         child.animate.push(_t7);
       }
     } else {
-      child.props.start = _start[0] * 0.01;
+      child.props.start = _start2[0] * 0.01;
     }
 
-    if (end.length > 1) {
-      var _t8 = transformPath(end, begin2, duration, true);
+    if (_end.length > 1) {
+      var _t8 = transformPath(_end, begin2, duration, true);
 
       var _first8 = _t8.value[0];
 
@@ -2162,7 +2207,7 @@ function parseGeom(res, data, start, duration, offset) {
         child.animate.push(_t8);
       }
     } else {
-      child.props.end = end[0] * 0.01;
+      child.props.end = _end[0] * 0.01;
     }
   }
 
