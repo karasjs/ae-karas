@@ -24,7 +24,7 @@
     "body-parser": "^1.19.0",
     "classnames": "^2.3.1",
     "express": "^4.17.1",
-    "karas": "~0.61.6",
+    "karas": "~0.61.7",
     "mobx": "^6.3.2",
     "mobx-react": "^7.2.0",
     "psd": "^3.2.0",
