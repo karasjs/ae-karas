@@ -53,7 +53,7 @@ function recursion(composition, library) {
         }
       }
     }
-    let o = parseLayer(item, library);
+    let o = parseLayer(item, library, hasSolo);
     if(o) {
       // 父级打标uuid的同时，之前记录的hash也记录下来
       if(asParent.hasOwnProperty(index)) {
@@ -81,18 +81,24 @@ function recursion(composition, library) {
   };
 }
 
-function parseLayer(layer, library) {
+function parseLayer(layer, library, hasSolo) {
   let res = {
     name: layer.name,
     index: layer.index,
     width: layer.width,
     height: layer.height,
-    enabled: layer.solo || layer.enabled, // 可能是个隐藏的父级链接图层就false不可见
     startTime: layer.startTime * 1000, // 开始时间，即时间轴上本图层初始位置
     inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
   };
+  // 标明图层是否可见，也许不可见但作为父级链接也要分析
+  if(hasSolo) {
+    res.enabled = layer.solo;
+  }
+  else {
+    res.enabled = layer.enabled;
+  }
   $.ae2karas.warn('layer: ' + res.name);
   let geom, txt;
   for(let i = 1; i <= layer.numProperties; i++) {
