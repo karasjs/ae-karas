@@ -7,15 +7,6 @@ let uuid = 0;
 function recursion(composition, library) {
   let { name, layers, width, height, duration } = composition;
   $.ae2karas.error('composition: ' + name);
-  // 先统计哪些层被作为父级链接
-  let asParent = {}, asChild = {};
-  for(let i = 1; i <= layers.length; i++) {
-    let item = layers[i];
-    if(item.parent && item.parent.index) {
-      asParent[item.parent.index] = true;
-      asChild[item.index] = item.parent.index;
-    }
-  }
   // 是否是独奏模式
   let hasSolo;
   for(let i = 1; i <= layers.length; i++) {
@@ -23,6 +14,25 @@ function recursion(composition, library) {
     if(item.solo) {
       hasSolo = true;
       break;
+    }
+  }
+  // 再统计哪些层被作为父级链接
+  let asParent = {}, asChild = {};
+  for(let i = 1; i <= layers.length; i++) {
+    let item = layers[i];
+    if(hasSolo) {
+      if(!item.solo) {
+        continue;
+      }
+    }
+    else {
+      if(!item.enabled) {
+        continue;
+      }
+    }
+    if(item.parent && item.parent.index) {
+      asParent[item.parent.index] = true;
+      asChild[item.index] = item.parent.index;
     }
   }
   let children = [];

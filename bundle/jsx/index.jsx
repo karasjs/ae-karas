@@ -88,18 +88,17 @@ function getEasing(prop, start, end) {
   var y1, y2;
   var matchName = prop.matchName;
 
-  if (['ADBE Anchor Point', 'ADBE Position', 'ADBE Vector Anchor', 'ADBE Vector Position', 'ADBE Vector Scale', 'ADBE Vector Skew'].indexOf(matchName) > -1) {
+  if (['ADBE Anchor Point', 'ADBE Position', 'ADBE Vector Anchor', 'ADBE Vector Position', 'ADBE Scale', 'ADBE Vector Scale', 'ADBE Vector Skew'].indexOf(matchName) > -1) {
     var avSpeedX = Math.abs(v2[0] - v1[0]) / (t2 - t1);
     var avSpeedY = Math.abs(v2[1] - v1[1]) / (t2 - t1);
     var avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY);
-    y1 = x1 * e1.speed / avSpeed;
-    y2 = 1 - (1 - x2) * e2.speed / avSpeed;
-  } else {
-    var _avSpeedX = Math.abs(v2 - v1) / (t2 - t1);
 
-    var _avSpeedY = Math.abs(v2 - v1) / (t2 - t1);
-
-    var _avSpeed = Math.sqrt(_avSpeedX * _avSpeedX + _avSpeedY * _avSpeedY);
+    if (avSpeed !== 0) {
+      y1 = x1 * e1.speed / avSpeed;
+      y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+    }
+  } else if (v2 !== v1) {
+    var _avSpeed = Math.abs(v2 - v1) / (t2 - t1);
 
     y1 = x1 * e1.speed / _avSpeed;
     y2 = 1 - (1 - x2) * e2.speed / _avSpeed;
@@ -587,29 +586,39 @@ function recursion$1(composition, library) {
       width = composition.width,
       height = composition.height,
       duration = composition.duration;
-  $.ae2karas.error('composition: ' + name); // 先统计哪些层被作为父级链接
+  $.ae2karas.error('composition: ' + name); // 是否是独奏模式
 
-  var asParent = {},
-      asChild = {};
+  var hasSolo;
 
   for (var i = 1; i <= layers.length; i++) {
     var item = layers[i];
 
-    if (item.parent && item.parent.index) {
-      asParent[item.parent.index] = true;
-      asChild[item.index] = item.parent.index;
+    if (item.solo) {
+      hasSolo = true;
+      break;
     }
-  } // 是否是独奏模式
+  } // 再统计哪些层被作为父级链接
 
 
-  var hasSolo;
+  var asParent = {},
+      asChild = {};
 
   for (var _i = 1; _i <= layers.length; _i++) {
     var _item = layers[_i];
 
-    if (_item.solo) {
-      hasSolo = true;
-      break;
+    if (hasSolo) {
+      if (!_item.solo) {
+        continue;
+      }
+    } else {
+      if (!_item.enabled) {
+        continue;
+      }
+    }
+
+    if (_item.parent && _item.parent.index) {
+      asParent[_item.parent.index] = true;
+      asChild[_item.index] = _item.parent.index;
     }
   }
 

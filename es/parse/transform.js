@@ -66,17 +66,18 @@ function getEasing(prop, start, end) {
   if([
     'ADBE Anchor Point', 'ADBE Position',
     'ADBE Vector Anchor', 'ADBE Vector Position',
-    'ADBE Vector Scale', 'ADBE Vector Skew'].indexOf(matchName) > -1) {
+    'ADBE Scale', 'ADBE Vector Scale',
+    'ADBE Vector Skew'].indexOf(matchName) > -1) {
     let avSpeedX = Math.abs(v2[0] - v1[0]) / (t2 - t1);
     let avSpeedY = Math.abs(v2[1] - v1[1]) / (t2 - t1);
     let avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY);
-    y1 = x1 * e1.speed / avSpeed;
-    y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+    if(avSpeed !== 0) {
+      y1 = x1 * e1.speed / avSpeed;
+      y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+    }
   }
-  else {
-    let avSpeedX = Math.abs(v2 - v1) / (t2 - t1);
-    let avSpeedY = Math.abs(v2 - v1) / (t2 - t1);
-    let avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY);
+  else if(v2 !== v1){
+    let avSpeed = Math.abs(v2 - v1) / (t2 - t1);
     y1 = x1 * e1.speed / avSpeed;
     y2 = 1 - (1 - x2) * e2.speed / avSpeed;
   }
