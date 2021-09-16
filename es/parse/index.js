@@ -59,6 +59,13 @@ function recursion(composition, library) {
       if(asParent.hasOwnProperty(index)) {
         asParent[index] = o.asParent = uuid++;
       }
+      // mask/clip类型在被遮罩层上
+      if(i > 1 && o.isClip) {
+        let last = children[children.length - 1];
+        if(last && last.isMask) {
+          last.isClip = true;
+        }
+      }
       children.push(o);
     }
   }
@@ -92,7 +99,7 @@ function parseLayer(layer, library, hasSolo) {
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
     isMask: layer.isTrackMatte,
-    isClip: layer.isTrackMatte && layer.trackMatteType === TrackMatteType.ALPHA_INVERTED,
+    isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED,
   };
   // 标明图层是否可见，也许不可见但作为父级链接也要分析
   if(hasSolo) {

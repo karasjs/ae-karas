@@ -646,6 +646,15 @@ function recursion$1(composition, library) {
       // 父级打标uuid的同时，之前记录的hash也记录下来
       if (asParent.hasOwnProperty(index)) {
         asParent[index] = o.asParent = uuid++;
+      } // mask/clip类型在被遮罩层上
+
+
+      if (_i2 > 1 && o.isClip) {
+        var last = children[children.length - 1];
+
+        if (last && last.isMask) {
+          last.isClip = true;
+        }
       }
 
       children.push(o);
@@ -688,7 +697,7 @@ function parseLayer(layer, library, hasSolo) {
     // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
     isMask: layer.isTrackMatte,
-    isClip: layer.isTrackMatte && layer.trackMatteType === TrackMatteType.ALPHA_INVERTED
+    isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED
   }; // 标明图层是否可见，也许不可见但作为父级链接也要分析
 
   if (hasSolo) {
@@ -1738,12 +1747,14 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   res.libraryId = parse(library, assetId, newLib, start, duration, offset + startTime);
   res.init = {
     style: {}
-  };
+  }; // isMask代表是否是遮罩，isClip需在isMask的基础上判断，因为被遮罩层存储isClip值再赋给遮罩层
 
-  if (isClip) {
-    res.init.clip = true;
-  } else if (isMask) {
-    res.init.mask = true;
+  if (isMask) {
+    if (isClip) {
+      res.init.clip = true;
+    } else {
+      res.init.mask = true;
+    }
   } // 混合模式
 
 

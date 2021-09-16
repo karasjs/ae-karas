@@ -225,11 +225,14 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   res.init = {
     style: {},
   };
-  if(isClip) {
-    res.init.clip = true;
-  }
-  else if(isMask) {
-    res.init.mask = true;
+  // isMask代表是否是遮罩，isClip需在isMask的基础上判断，因为被遮罩层存储isClip值再赋给遮罩层
+  if(isMask) {
+    if(isClip) {
+      res.init.clip = true;
+    }
+    else {
+      res.init.mask = true;
+    }
   }
   // 混合模式
   switch(blendingMode) {
