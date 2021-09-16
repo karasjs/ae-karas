@@ -630,11 +630,11 @@ function recursion$1(composition, library) {
 
     if (!asParent.hasOwnProperty(index)) {
       if (hasSolo) {
-        if (!_item2.solo) {
+        if (!_item2.solo && !_item2.isTrackMatte) {
           continue;
         }
       } else {
-        if (!_item2.enabled) {
+        if (!_item2.enabled && !_item2.isTrackMatte) {
           continue;
         }
       }
@@ -686,13 +686,15 @@ function parseLayer(layer, library, hasSolo) {
     // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000,
     // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
-    blendingMode: layer.blendingMode
+    blendingMode: layer.blendingMode,
+    isMask: layer.isTrackMatte,
+    isClip: layer.isTrackMatte && layer.trackMatteType === TrackMatteType.ALPHA_INVERTED
   }; // 标明图层是否可见，也许不可见但作为父级链接也要分析
 
   if (hasSolo) {
-    res.enabled = layer.solo;
+    res.enabled = layer.solo || layer.isTrackMatte;
   } else {
-    res.enabled = layer.enabled;
+    res.enabled = layer.enabled || layer.isTrackMatte;
   }
 
   $.ae2karas.warn('layer: ' + res.name);
@@ -1716,7 +1718,9 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
       startTime = data.startTime,
       inPoint = data.inPoint,
       outPoint = data.outPoint,
-      blendingMode = data.blendingMode;
+      blendingMode = data.blendingMode,
+      isMask = data.isMask,
+      isClip = data.isClip;
 
   if (assetId === undefined || assetId === null) {
     return null;
@@ -1734,7 +1738,14 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   res.libraryId = parse(library, assetId, newLib, start, duration, offset + startTime);
   res.init = {
     style: {}
-  }; // 混合模式
+  };
+
+  if (isClip) {
+    res.init.clip = true;
+  } else if (isMask) {
+    res.init.mask = true;
+  } // 混合模式
+
 
   switch (blendingMode) {
     case BlendingMode.MULTIPLY:

@@ -43,12 +43,12 @@ function recursion(composition, library) {
     // 根据是否独奏或可见决定是否分析或跳过，被作为父级链接的即便不可见也要统计
     if(!asParent.hasOwnProperty(index)) {
       if(hasSolo) {
-        if(!item.solo) {
+        if(!item.solo && !item.isTrackMatte) {
           continue;
         }
       }
       else {
-        if(!item.enabled) {
+        if(!item.enabled && !item.isTrackMatte) {
           continue;
         }
       }
@@ -91,13 +91,15 @@ function parseLayer(layer, library, hasSolo) {
     inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
+    isMask: layer.isTrackMatte,
+    isClip: layer.isTrackMatte && layer.trackMatteType === TrackMatteType.ALPHA_INVERTED,
   };
   // 标明图层是否可见，也许不可见但作为父级链接也要分析
   if(hasSolo) {
-    res.enabled = layer.solo;
+    res.enabled = layer.solo || layer.isTrackMatte;
   }
   else {
-    res.enabled = layer.enabled;
+    res.enabled = layer.enabled || layer.isTrackMatte;
   }
   $.ae2karas.warn('layer: ' + res.name);
   let geom, txt;

@@ -309,7 +309,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.2.0@mobx-react/dist/mobxreact.esm.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.61.7@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.61.9@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
 /* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./index.less */ "./src/component/Preview/index.less");
@@ -1545,9 +1545,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./node_modules/_karas@0.61.7@karas/index.js":
+/***/ "./node_modules/_karas@0.61.9@karas/index.js":
 /*!***************************************************!*\
-  !*** ./node_modules/_karas@0.61.7@karas/index.js ***!
+  !*** ./node_modules/_karas@0.61.9@karas/index.js ***!
   \***************************************************/
 /***/ (function(module) {
 
@@ -15202,7 +15202,7 @@ __webpack_require__.r(__webpack_exports__);
     getEasing: function getEasing(v, v1, v2, v3) {
       if (arguments.length === 4) {
         return bezier(v, v1, v2, v3);
-      } else if (Array.isArray(v)) {
+      } else if (Array.isArray(v) && v.length === 4) {
         return bezier(v[0], v[1], v[2], v[3]);
       } else if (v) {
         v = v.toString();
@@ -18537,7 +18537,8 @@ __webpack_require__.r(__webpack_exports__);
       NODE_DEFS_CACHE$3 = _enums$NODE_KEY$4.NODE_DEFS_CACHE,
       NODE_DOM_PARENT$2 = _enums$NODE_KEY$4.NODE_DOM_PARENT,
       NODE_IS_INLINE = _enums$NODE_KEY$4.NODE_IS_INLINE,
-      NODE_PERSPECTIVE_MATRIX = _enums$NODE_KEY$4.NODE_PERSPECTIVE_MATRIX;
+      NODE_PERSPECTIVE_MATRIX = _enums$NODE_KEY$4.NODE_PERSPECTIVE_MATRIX,
+      NODE_IS_MASK = _enums$NODE_KEY$4.NODE_IS_MASK;
   var AUTO$4 = o.AUTO,
       PX$6 = o.PX,
       PERCENT$7 = o.PERCENT,
@@ -18656,6 +18657,8 @@ __webpack_require__.r(__webpack_exports__);
 
       _this.__cacheDefs = []; // svg专用，缓存渲染时使用已有的defs，diff过程用，否则会defs被清空
 
+      var isClip = _this.__isClip = !!_this.props.clip;
+      var isMask = _this.__isMask = isClip || !!_this.props.mask;
       var config = _this.__config;
       config[NODE_TAG_NAME] = tagName;
       config[NODE_CACHE_STYLE] = _this.__cacheStyle;
@@ -18666,6 +18669,7 @@ __webpack_require__.r(__webpack_exports__);
       config[NODE_MATRIX$1] = [];
       config[NODE_MATRIX_EVENT$2] = [];
       config[NODE_DEFS_CACHE$3] = _this.__cacheDefs;
+      config[NODE_IS_MASK] = isMask;
       _this.__frameAnimateList = [];
       _this.__contentBoxList = []; // inline存储内容用
       // this.__json domApi需要获取生成时的json引用，builder过程添加，如appendChild时json也需要跟着变更
@@ -21578,6 +21582,16 @@ __webpack_require__.r(__webpack_exports__);
       key: "firstBaseLine",
       get: function get() {
         return this.offsetHeight;
+      }
+    }, {
+      key: "isMask",
+      get: function get() {
+        return this.__isMask;
+      }
+    }, {
+      key: "isClip",
+      get: function get() {
+        return this.__isClip;
       }
     }]);
 
@@ -25870,7 +25884,7 @@ __webpack_require__.r(__webpack_exports__);
       _enums$NODE_KEY$6 = enums.NODE_KEY,
       NODE_CACHE$3 = _enums$NODE_KEY$6.NODE_CACHE,
       NODE_DEFS_CACHE$4 = _enums$NODE_KEY$6.NODE_DEFS_CACHE,
-      NODE_IS_MASK = _enums$NODE_KEY$6.NODE_IS_MASK;
+      NODE_IS_MASK$1 = _enums$NODE_KEY$6.NODE_IS_MASK;
   var AUTO$7 = o.AUTO,
       PX$9 = o.PX,
       PERCENT$a = o.PERCENT,
@@ -25902,10 +25916,9 @@ __webpack_require__.r(__webpack_exports__);
         loadImg.error = true;
       }
 
-      var isClip = _this.__isClip = !!_this.props.clip;
-      var isMask = _this.__isMask = isClip || !!_this.props.mask;
+      var config = _this.__config;
 
-      if (isMask) {
+      if (config[NODE_IS_MASK$1]) {
         var _assertThisInitialize = _assertThisInitialized(_this),
             style = _assertThisInitialize.style,
             currentStyle = _assertThisInitialize.currentStyle;
@@ -25920,8 +25933,6 @@ __webpack_require__.r(__webpack_exports__);
         style[MIX_BLEND_MODE$1] = currentStyle[MIX_BLEND_MODE$1] = 'normal';
       }
 
-      var config = _this.__config;
-      config[NODE_IS_MASK] = isMask;
       return _this;
     }
     /**
@@ -26629,16 +26640,6 @@ __webpack_require__.r(__webpack_exports__);
         inject.error('Img can not appendChild.');
       }
     }, {
-      key: "isMask",
-      get: function get() {
-        return this.__isMask;
-      }
-    }, {
-      key: "isClip",
-      get: function get() {
-        return this.__isClip;
-      }
-    }, {
       key: "src",
       get: function get() {
         return this.__loadImg.src;
@@ -26752,7 +26753,7 @@ __webpack_require__.r(__webpack_exports__);
       NODE_CACHE_PROPS = _enums$NODE_KEY$7.NODE_CACHE_PROPS,
       NODE_CURRENT_PROPS = _enums$NODE_KEY$7.NODE_CURRENT_PROPS,
       NODE_CURRENT_STYLE$3 = _enums$NODE_KEY$7.NODE_CURRENT_STYLE,
-      NODE_IS_MASK$1 = _enums$NODE_KEY$7.NODE_IS_MASK,
+      NODE_IS_MASK$2 = _enums$NODE_KEY$7.NODE_IS_MASK,
       NODE_STYLE$3 = _enums$NODE_KEY$7.NODE_STYLE,
       NODE_DEFS_CACHE$5 = _enums$NODE_KEY$7.NODE_DEFS_CACHE;
   var PX$a = o.PX,
@@ -26779,19 +26780,6 @@ __webpack_require__.r(__webpack_exports__);
 
       _this = _super.call(this, tagName, props);
       _this.__isMulti = !!_this.props.multi;
-      var isClip = _this.__isClip = !!_this.props.clip;
-      var isMask = _this.__isMask = isClip || !!_this.props.mask;
-
-      var _assertThisInitialize = _assertThisInitialized(_this),
-          style = _assertThisInitialize.style;
-
-      if (isMask) {
-        style.background = null;
-        style.border = null;
-        style.boxShadow = null;
-        style.mixBlendMode = 'normal';
-      }
-
       _this.__style = css.normalize(_this.style, reset.DOM_ENTRY_SET.concat(reset.GEOM_ENTRY_SET));
       _this.__currentStyle = util.extend({}, _this.__style);
       _this.__currentProps = util.clone(_this.props);
@@ -26799,7 +26787,6 @@ __webpack_require__.r(__webpack_exports__);
       config[NODE_CACHE_PROPS] = _this.__cacheProps = {};
       config[NODE_CURRENT_PROPS] = _this.__currentProps;
       config[NODE_CURRENT_STYLE$3] = _this.__currentStyle;
-      config[NODE_IS_MASK$1] = isMask;
       config[NODE_STYLE$3] = _this.__style;
       return _this;
     }
@@ -27717,16 +27704,6 @@ __webpack_require__.r(__webpack_exports__);
       key: "isMulti",
       get: function get() {
         return this.__isMulti;
-      }
-    }, {
-      key: "isMask",
-      get: function get() {
-        return this.__isMask;
-      }
-    }, {
-      key: "isClip",
-      get: function get() {
-        return this.__isClip;
       }
     }, {
       key: "currentProps",
@@ -29146,7 +29123,7 @@ __webpack_require__.r(__webpack_exports__);
       NODE_REFRESH_LV$1 = _enums$NODE_KEY$9.NODE_REFRESH_LV,
       NODE_CACHE_STYLE$1 = _enums$NODE_KEY$9.NODE_CACHE_STYLE,
       NODE_DEFS_CACHE$6 = _enums$NODE_KEY$9.NODE_DEFS_CACHE,
-      NODE_IS_MASK$2 = _enums$NODE_KEY$9.NODE_IS_MASK,
+      NODE_IS_MASK$3 = _enums$NODE_KEY$9.NODE_IS_MASK,
       NODE_DOM_PARENT$5 = _enums$NODE_KEY$9.NODE_DOM_PARENT,
       NODE_PERSPECTIVE_MATRIX$1 = _enums$NODE_KEY$9.NODE_PERSPECTIVE_MATRIX,
       _enums$STRUCT_KEY$2 = enums.STRUCT_KEY,
@@ -29451,7 +29428,7 @@ __webpack_require__.r(__webpack_exports__);
               __cacheFilter = _config[NODE_CACHE_FILTER$2],
               __cacheMask = _config[NODE_CACHE_MASK$1],
               __cacheOverflow = _config[NODE_CACHE_OVERFLOW$2],
-              isMask = _config[NODE_IS_MASK$2],
+              isMask = _config[NODE_IS_MASK$3],
               _config$NODE_COMPUTED = _config[NODE_COMPUTED_STYLE$4],
               display = _config$NODE_COMPUTED[DISPLAY$9],
               visibility = _config$NODE_COMPUTED[VISIBILITY$6],
@@ -29685,7 +29662,7 @@ __webpack_require__.r(__webpack_exports__);
               __cacheFilter = _config2[NODE_CACHE_FILTER$2],
               __cacheMask = _config2[NODE_CACHE_MASK$1],
               __cacheOverflow = _config2[NODE_CACHE_OVERFLOW$2],
-              isMask = _config2[NODE_IS_MASK$2],
+              isMask = _config2[NODE_IS_MASK$3],
               _config2$NODE_COMPUTE = _config2[NODE_COMPUTED_STYLE$4],
               display = _config2$NODE_COMPUTE[DISPLAY$9],
               visibility = _config2$NODE_COMPUTE[VISIBILITY$6],
@@ -30522,12 +30499,7 @@ __webpack_require__.r(__webpack_exports__);
           matrix = node.__calMatrix(refreshLevel, __cacheStyle, currentStyle, computedStyle, __config); // 恶心的v8性能优化
 
           var m = __config[NODE_MATRIX$3];
-          util.assignMatrix(m, matrix); // m[0] = matrix[0];
-          // m[1] = matrix[1];
-          // m[2] = matrix[2];
-          // m[3] = matrix[3];
-          // m[4] = matrix[4];
-          // m[5] = matrix[5];
+          util.assignMatrix(m, matrix);
         } else {
           matrix = __config[NODE_MATRIX$3];
         } // 父不为E时要点乘继承父的
@@ -30538,13 +30510,7 @@ __webpack_require__.r(__webpack_exports__);
         } // 恶心的v8性能优化
 
 
-        util.assignMatrix(matrixEvent, matrix); // matrixEvent[0] = matrix[0];
-        // matrixEvent[1] = matrix[1];
-        // matrixEvent[2] = matrix[2];
-        // matrixEvent[3] = matrix[3];
-        // matrixEvent[4] = matrix[4];
-        // matrixEvent[5] = matrix[5];
-
+        util.assignMatrix(matrixEvent, matrix);
         var opacity = void 0;
 
         if (contain$2(refreshLevel, OP)) {
@@ -30747,16 +30713,27 @@ __webpack_require__.r(__webpack_exports__);
         } // 自身cache尝试
         else {
             if (maskStartHash.hasOwnProperty(_i4)) {
-              var _maskStartHash$_i = _slicedToArray(maskStartHash[_i4], 2),
-                  n = _maskStartHash$_i[0],
-                  _offscreenMask = _maskStartHash$_i[1];
+              var _maskStartHash$_i = _slicedToArray(maskStartHash[_i4], 3),
+                  idx = _maskStartHash$_i[0],
+                  n = _maskStartHash$_i[1],
+                  _offscreenMask = _maskStartHash$_i[2];
 
               var _target4 = inject.getCacheCanvas(width, height, null, 'mask2');
 
               _offscreenMask.mask = _target4; // 应用mask用到
 
-              var j = _i4 + n - 1 + (_total5 || 0);
-              var list = offscreenHash[j];
+              _offscreenMask.isClip = _node3.isClip; // 定位到最后一个mask元素上的末尾
+
+              var j = _i4 + (_total5 || 0) + 1;
+
+              while (--n) {
+                var _total6 = __structs[j][STRUCT_TOTAL$1];
+                j += (_total6 || 0) + 1;
+              }
+
+              j--;
+              var list = offscreenHash[j] = offscreenHash[j] || [];
+              list.push([idx, _lv, OFFSCREEN_MASK, _offscreenMask]);
               list.push([j, _lv, OFFSCREEN_MASK2, {
                 ctx: ctx,
                 // 保存等待OFFSCREEN_MASK2时还原
@@ -30849,14 +30826,7 @@ __webpack_require__.r(__webpack_exports__);
               if (offscreenMask) {
                 var _j2 = _i4 + (_total5 || 0);
 
-                maskStartHash[_j2 + 1] = [_hasMask, offscreenMask];
-                offscreenMask.isClip = __structs[_j2 + 1][STRUCT_NODE$1].isClip;
-                _j2 += _hasMask || 0; // 有start一定有end
-
-                var _list2 = offscreenHash[_j2] = offscreenHash[_j2] || [];
-
-                _list2.push([_i4, _lv, OFFSCREEN_MASK, offscreenMask]);
-
+                maskStartHash[_j2 + 1] = [_i4, _hasMask, offscreenMask];
                 ctx = offscreenMask.target.ctx;
               } // filter造成的离屏，需要将后续一段孩子节点区域的ctx替换，并在结束后应用结果，再替换回来
 
@@ -30864,9 +30834,9 @@ __webpack_require__.r(__webpack_exports__);
               if (offscreenFilter) {
                 var _j3 = _i4 + (_total5 || 0) + (_hasMask || 0);
 
-                var _list3 = offscreenHash[_j3] = offscreenHash[_j3] || [];
+                var _list2 = offscreenHash[_j3] = offscreenHash[_j3] || [];
 
-                _list3.push([_i4, _lv, OFFSCREEN_FILTER, offscreenFilter]);
+                _list2.push([_i4, _lv, OFFSCREEN_FILTER, offscreenFilter]);
 
                 ctx = offscreenFilter.target.ctx;
               } // overflow:hidden的离屏，最后孩子进行截取
@@ -30875,9 +30845,9 @@ __webpack_require__.r(__webpack_exports__);
               if (offscreenOverflow) {
                 var _j4 = _i4 + (_total5 || 0) + (_hasMask || 0);
 
-                var _list4 = offscreenHash[_j4] = offscreenHash[_j4] || [];
+                var _list3 = offscreenHash[_j4] = offscreenHash[_j4] || [];
 
-                _list4.push([_i4, _lv, OFFSCREEN_OVERFLOW, offscreenOverflow]);
+                _list3.push([_i4, _lv, OFFSCREEN_OVERFLOW, offscreenOverflow]);
 
                 ctx = offscreenOverflow.target.ctx;
               }
@@ -30939,15 +30909,26 @@ __webpack_require__.r(__webpack_exports__);
       // 这样当mask本身有filter时优先自身，然后才是OFFSCREEN_MASK2
 
       if (maskStartHash.hasOwnProperty(i)) {
-        var _maskStartHash$i = _slicedToArray(maskStartHash[i], 2),
-            n = _maskStartHash$i[0],
-            _offscreenMask2 = _maskStartHash$i[1];
+        var _maskStartHash$i = _slicedToArray(maskStartHash[i], 3),
+            idx = _maskStartHash$i[0],
+            n = _maskStartHash$i[1],
+            _offscreenMask2 = _maskStartHash$i[2];
 
         var target = inject.getCacheCanvas(width, height, null, 'mask2');
         _offscreenMask2.mask = target; // 应用mask用到
 
-        var j = i + n - 1 + (total || 0);
-        var list = offscreenHash[j];
+        _offscreenMask2.isClip = node.isClip; // 定位到最后一个mask元素上的末尾
+
+        var j = i + (total || 0) + 1;
+
+        while (--n) {
+          var _total7 = __structs[j][STRUCT_TOTAL$1];
+          j += (_total7 || 0) + 1;
+        }
+
+        j--;
+        var list = offscreenHash[j] = offscreenHash[j] || [];
+        list.push([idx, lv, OFFSCREEN_MASK, _offscreenMask2]);
         list.push([j, lv, OFFSCREEN_MASK2, {
           ctx: ctx,
           // 保存等待OFFSCREEN_MASK2时还原
@@ -30968,25 +30949,19 @@ __webpack_require__.r(__webpack_exports__);
       if (offscreenBlend) {
         var _j5 = i + (total || 0) + (hasMask || 0);
 
-        var _list5 = offscreenHash[_j5] = offscreenHash[_j5] || [];
+        var _list4 = offscreenHash[_j5] = offscreenHash[_j5] || [];
 
-        _list5.push([i, lv, OFFSCREEN_BLEND, offscreenBlend]);
+        _list4.push([i, lv, OFFSCREEN_BLEND, offscreenBlend]);
 
         ctx = offscreenBlend.target.ctx;
       } // 被遮罩的节点要为第一个遮罩和最后一个遮罩的索引打标，被遮罩的本身在一个离屏canvas，遮罩的元素在另外一个
+      // 最后一个遮罩索引因数量不好计算，放在maskStartHash做
 
 
       if (offscreenMask) {
         var _j6 = i + (total || 0);
 
-        maskStartHash[_j6 + 1] = [hasMask, offscreenMask];
-        offscreenMask.isClip = __structs[_j6 + 1][STRUCT_NODE$1].isClip;
-        _j6 += hasMask || 0; // 有start一定有end
-
-        var _list6 = offscreenHash[_j6] = offscreenHash[_j6] || [];
-
-        _list6.push([i, lv, OFFSCREEN_MASK, offscreenMask]);
-
+        maskStartHash[_j6 + 1] = [i, hasMask, offscreenMask];
         ctx = offscreenMask.target.ctx;
       } // filter造成的离屏，需要将后续一段孩子节点区域的ctx替换，并在结束后应用结果，再替换回来
 
@@ -30994,9 +30969,9 @@ __webpack_require__.r(__webpack_exports__);
       if (offscreenFilter) {
         var _j7 = i + (total || 0) + (hasMask || 0);
 
-        var _list7 = offscreenHash[_j7] = offscreenHash[_j7] || [];
+        var _list5 = offscreenHash[_j7] = offscreenHash[_j7] || [];
 
-        _list7.push([i, lv, OFFSCREEN_FILTER, offscreenFilter]);
+        _list5.push([i, lv, OFFSCREEN_FILTER, offscreenFilter]);
 
         ctx = offscreenFilter.target.ctx;
       } // overflow:hidden的离屏，最后孩子进行截取
@@ -31005,9 +30980,9 @@ __webpack_require__.r(__webpack_exports__);
       if (offscreenOverflow) {
         var _j8 = i + (total || 0) + (hasMask || 0);
 
-        var _list8 = offscreenHash[_j8] = offscreenHash[_j8] || [];
+        var _list6 = offscreenHash[_j8] = offscreenHash[_j8] || [];
 
-        _list8.push([i, lv, OFFSCREEN_OVERFLOW, offscreenOverflow]);
+        _list6.push([i, lv, OFFSCREEN_OVERFLOW, offscreenOverflow]);
 
         ctx = offscreenOverflow.target.ctx;
       } // 离屏应用，按照lv从大到小即子节点在前先应用，同一个节点多个效果按offscreen优先级从小到大来，
@@ -31054,7 +31029,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
         if (refreshLevel < REPAINT$2) {
-          // let hasFilter = contain(refreshLevel, FT);
           // 特殊的mask判断，遮罩对象影响这个mask了，除去filter、遮罩对象无TRANSFORM变化外都可缓存
           if (maskEffectHash.hasOwnProperty(i)) {
             var v = maskEffectHash[i];
@@ -31086,7 +31060,7 @@ __webpack_require__.r(__webpack_exports__);
     for (var _i5 = 0, _len3 = __structs.length; _i5 < _len3; _i5++) {
       var _structs$_i3 = __structs[_i5],
           _node4 = _structs$_i3[STRUCT_NODE$1],
-          _total6 = _structs$_i3[STRUCT_TOTAL$1],
+          _total8 = _structs$_i3[STRUCT_TOTAL$1],
           _hasMask2 = _structs$_i3[STRUCT_HAS_MASK$1],
           lv = _structs$_i3[STRUCT_LV$2];
       var __config = _node4.__config;
@@ -31097,7 +31071,7 @@ __webpack_require__.r(__webpack_exports__);
       var display = computedStyle[DISPLAY$9]; // 将随后的若干个mask节点范围存下来
 
       if (_hasMask2 && display !== 'none') {
-        var _start = _i5 + (_total6 || 0) + 1;
+        var _start = _i5 + (_total8 || 0) + 1;
 
         var _end = _start + _hasMask2; // svg限制了只能Geom单节点，不可能是Dom，所以end只有唯一
 
@@ -31131,7 +31105,7 @@ __webpack_require__.r(__webpack_exports__);
         virtualDom = _node4.virtualDom; // total可以跳过所有孩子节点省略循环
 
         if (__cacheTotal && __cacheTotal.available) {
-          _i5 += _total6 || 0;
+          _i5 += _total8 || 0;
           virtualDom.cache = true;
         } else {
           __cacheTotal && (__cacheTotal.available = true);
@@ -31144,7 +31118,7 @@ __webpack_require__.r(__webpack_exports__);
           delete virtualDom.cache; // 还得判断，和img加载混在一起时，触发刷新如果display:none，则还有cacheTotal
 
           if (display === 'none') {
-            _i5 += _total6 || 0;
+            _i5 += _total8 || 0;
 
             if (_hasMask2) {
               _i5 += _hasMask2;
@@ -31222,7 +31196,7 @@ __webpack_require__.r(__webpack_exports__);
         display = computedStyle[DISPLAY$9];
 
         if (display === 'none') {
-          _i5 += _total6 || 0;
+          _i5 += _total8 || 0;
 
           if (_hasMask2) {
             _i5 += _hasMask2;
@@ -31706,7 +31680,7 @@ __webpack_require__.r(__webpack_exports__);
     for (var _i7 = 0, _len7 = __structs.length; _i7 < _len7; _i7++) {
       var _structs$_i4 = __structs[_i7],
           _node6 = _structs$_i4[STRUCT_NODE$1],
-          _total7 = _structs$_i4[STRUCT_TOTAL$1],
+          _total9 = _structs$_i4[STRUCT_TOTAL$1],
           _hasMask3 = _structs$_i4[STRUCT_HAS_MASK$1];
       var _config5 = _node6.__config; // text如果display不可见，parent会直接跳过，不会走到这里，这里一定是直接绘制到root的，visibility在其内部判断
 
@@ -31719,7 +31693,7 @@ __webpack_require__.r(__webpack_exports__);
             _opacity4 = _config5$NODE_DOM_PAR[NODE_OPACITY$3];
 
         if (__cache && __cache.available) {
-          texCache.addTexAndDrawWhenLimit(gl, __cache, _opacity4, _matrixEvent3, cx, cy, true);
+          texCache.addTexAndDrawWhenLimit(gl, __cache, _opacity4, _matrixEvent3, cx, cy, 0, 0, true);
         } // 超限特殊处理，先生成画布尺寸大小的纹理然后原始位置绘制
         else if (_limitCache2) {
             var c = inject.getCacheCanvas(width, height, '__$$OVERSIZE$$__');
@@ -31755,7 +31729,7 @@ __webpack_require__.r(__webpack_exports__);
             _mixBlendMode2 = _config5$NODE_COMPUTE[MIX_BLEND_MODE$3];
 
         if (display === 'none') {
-          _i7 += (_total7 || 0) + (_hasMask3 || 0);
+          _i7 += (_total9 || 0) + (_hasMask3 || 0);
           continue;
         } // 有total的可以直接绘制并跳过子节点索引，忽略total本身，其独占用纹理单元，注意特殊不取cacheTotal，
         // 这种情况发生在只有overflow:hidden声明但无效没有生成__cacheOverflow的情况，
@@ -31793,7 +31767,7 @@ __webpack_require__.r(__webpack_exports__);
           }
 
           if (target !== _cache) {
-            _i7 += (_total7 || 0) + (_hasMask3 || 0);
+            _i7 += (_total9 || 0) + (_hasMask3 || 0);
           }
         } else if (limitHash.hasOwnProperty(_i7)) {
           var _target5 = limitHash[_i7];
@@ -31823,7 +31797,7 @@ __webpack_require__.r(__webpack_exports__);
             texCache.addTexAndDrawWhenLimit(gl, _target5, _opacity5, _matrixEvent4, cx, cy, 0, 0, true);
           }
 
-          _i7 += (_total7 || 0) + (_hasMask3 || 0);
+          _i7 += (_total9 || 0) + (_hasMask3 || 0);
         } // 超限的情况，这里是普通单节点超限，没有合成total后再合成特殊cache如filter/mask/mbm之类的，
         // 直接按原始位置绘制到离屏canvas，再作为纹理绘制即可，特殊的在total那做过降级了
         else if (_limitCache3 && display !== 'none' && visibility !== 'hidden') {
@@ -32276,7 +32250,7 @@ __webpack_require__.r(__webpack_exports__);
       NODE_COMPUTED_STYLE$5 = _enums$NODE_KEY$a.NODE_COMPUTED_STYLE,
       NODE_CURRENT_PROPS$1 = _enums$NODE_KEY$a.NODE_CURRENT_PROPS,
       NODE_DOM_PARENT$6 = _enums$NODE_KEY$a.NODE_DOM_PARENT,
-      NODE_IS_MASK$3 = _enums$NODE_KEY$a.NODE_IS_MASK,
+      NODE_IS_MASK$4 = _enums$NODE_KEY$a.NODE_IS_MASK,
       NODE_REFRESH_LV$2 = _enums$NODE_KEY$a.NODE_REFRESH_LV,
       NODE_IS_DESTROYED$2 = _enums$NODE_KEY$a.NODE_IS_DESTROYED,
       NODE_STYLE$5 = _enums$NODE_KEY$a.NODE_STYLE,
@@ -32634,7 +32608,7 @@ __webpack_require__.r(__webpack_exports__);
         computedStyle = __config[NODE_COMPUTED_STYLE$5],
         currentProps = __config[NODE_CURRENT_PROPS$1],
         domParent = __config[NODE_DOM_PARENT$6],
-        isMask = __config[NODE_IS_MASK$3];
+        isMask = __config[NODE_IS_MASK$4];
     var lv = focus || NONE$3;
     var hasMeasure = measure;
     var hasZ, hasVisibility, hasColor, hasDisplay; // component无需遍历直接赋值，img重新加载等情况没有样式更新
@@ -37464,7 +37438,7 @@ __webpack_require__.r(__webpack_exports__);
     Cache: Cache
   };
 
-  var version = "0.61.7";
+  var version = "0.61.9";
 
   Geom$1.register('$line', Line);
   Geom$1.register('$polyline', Polyline);

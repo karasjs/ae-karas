@@ -209,7 +209,7 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   if(!data.enabled) {
     return null;
   }
-  let { name, assetId, startTime, inPoint, outPoint, blendingMode } = data;
+  let { name, assetId, startTime, inPoint, outPoint, blendingMode, isMask, isClip } = data;
   if(assetId === undefined || assetId === null) {
     return null;
   }
@@ -225,6 +225,12 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   res.init = {
     style: {},
   };
+  if(isClip) {
+    res.init.clip = true;
+  }
+  else if(isMask) {
+    res.init.mask = true;
+  }
   // 混合模式
   switch(blendingMode) {
     case BlendingMode.MULTIPLY:
