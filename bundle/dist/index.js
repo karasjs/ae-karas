@@ -300,7 +300,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/_@babel_runtime@7.15.3@@babel/runtime/helpers/esm/possibleConstructorReturn.js");
 /* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/_@babel_runtime@7.15.3@@babel/runtime/helpers/esm/getPrototypeOf.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react */ "./node_modules/_react@17.0.2@react/index.js");
-/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.2.0@mobx-react/dist/mobxreact.esm.js");
+/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.2.0@mobx-react/dist/mobxreact.esm.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.61.9@karas/index.js");
@@ -308,7 +308,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
 /* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../util/CSInterface */ "./src/util/CSInterface.js");
 /* harmony import */ var _util_output__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../util/output */ "./src/util/output.js");
-/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./index.less */ "./src/component/Preview/index.less");
+/* harmony import */ var _util_img__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../util/img */ "./src/util/img.js");
+/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./index.less */ "./src/component/Preview/index.less");
 
 
 
@@ -329,8 +330,9 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 
 
+
 var root, canvas;
-var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_12__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_12__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_12__.observer)(_class = /*#__PURE__*/function (_React$Component) {
+var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_13__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_13__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_13__.observer)(_class = /*#__PURE__*/function (_React$Component) {
   (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__.default)(Preview, _React$Component);
 
   var _super = _createSuper(Preview);
@@ -515,10 +517,19 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_12__.inject)('globa
             iterations: iterations,
             precision: precision
           });
-          var str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-          str = str.replace(/'/g, '\\\'');
-          str = str.replace(/\n/g, '\\\n');
-          _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__.csInterface.evalScript("$.ae2karas.export('".concat(str, "')"));
+
+          function cb() {
+            var str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+            str = str.replace(/'/g, '\\\'');
+            str = str.replace(/\n/g, '\\\n');
+            _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__.csInterface.evalScript("$.ae2karas.export('".concat(str, "')"));
+          }
+
+          if (base64.checked) {
+            (0,_util_img__WEBPACK_IMPORTED_MODULE_11__.default)(data, cb);
+          } else {
+            cb();
+          }
         }
       }, "\u5BFC\u51FA"))));
     }
@@ -1551,6 +1562,93 @@ CSInterface.prototype.getCurrentApiVersion = function () {
 
 var csInterface = new CSInterface();
 
+
+/***/ }),
+
+/***/ "./src/util/img.js":
+/*!*************************!*\
+  !*** ./src/util/img.js ***!
+  \*************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+var canvas = document.createElement('canvas');
+var count = 0,
+    total = 0;
+var maxW = 0,
+    maxH = 0;
+
+function recursion(data, cb) {
+  // 分为普通节点和library节点
+  if (data.hasOwnProperty('libraryId')) {} else {
+    if (data.props) {
+      base64(data.props, cb);
+    }
+
+    var children = data.children;
+
+    if (Array.isArray(children)) {
+      for (var i = 0, len = children.length; i < len; i++) {
+        recursion(children[i], cb);
+      }
+    }
+  }
+}
+
+function base64(data, cb) {
+  if (data.hasOwnProperty('src')) {
+    var src = data.src,
+        _data$style = data.style,
+        width = _data$style.width,
+        height = _data$style.height;
+    total++;
+    var img = document.createElement('img');
+
+    img.onload = function () {
+      maxW = Math.max(maxW, width);
+      maxH = Math.max(maxH, height);
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, maxW, maxH);
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      if (/\.jpe?g$/.test(src)) {
+        data.src = canvas.toDataURL('image/jpeg');
+      } else {
+        data.src = canvas.toDataURL('image/png');
+      }
+
+      if (++count === total) {
+        cb();
+      }
+    };
+
+    img.onerror = function () {
+      if (++count === total) {
+        cb();
+      }
+    };
+
+    img.src = src;
+  }
+}
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(data, cb) {
+  count = total = maxW = maxH = 0;
+  var library = data.library;
+
+  if (Array.isArray(library)) {
+    for (var i = 0, len = library.length; i < len; i++) {
+      recursion(library[i], cb);
+    }
+  }
+}
+;
 
 /***/ }),
 

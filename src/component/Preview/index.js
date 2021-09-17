@@ -6,6 +6,7 @@ import karas from 'karas';
 import store from '../../store';
 import { csInterface } from '../../util/CSInterface';
 import output from '../../util/output';
+import img from '../../util/img';
 
 import './index.less';
 
@@ -149,10 +150,18 @@ class Preview extends React.Component {
               iterations,
               precision,
             });
-            let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-            str = str.replace(/'/g, '\\\'');
-            str = str.replace(/\n/g, '\\\n');
-            csInterface.evalScript(`$.ae2karas.export('${str}')`);
+            function cb() {
+              let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+              str = str.replace(/'/g, '\\\'');
+              str = str.replace(/\n/g, '\\\n');
+              csInterface.evalScript(`$.ae2karas.export('${str}')`);
+            }
+            if(base64.checked) {
+              img(data, cb);
+            }
+            else {
+              cb();
+            }
           }}>导出</div>
         </div>
       </div>
