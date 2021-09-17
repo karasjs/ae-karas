@@ -142,27 +142,73 @@ class Preview extends React.Component {
                    defaultValue={this.props.preview.precision}
                    onChange={e => this.changePrecision(e)}/>
           </label>
-          <div className="export" onClick={() => {
-            let { data, iterations, precision } = this.props.preview;
-            let { format, base64 } = this;
-            data = JSON.parse(JSON.stringify(data));
-            output(data, {
-              iterations,
-              precision,
-            });
-            function cb() {
-              let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-              str = str.replace(/'/g, '\\\'');
-              str = str.replace(/\n/g, '\\\n');
-              csInterface.evalScript(`$.ae2karas.export('${str}')`);
-            }
-            if(base64.checked) {
-              img(data, cb);
-            }
-            else {
-              cb();
-            }
-          }}>导出</div>
+          <div className="btn">
+            <div className="export" onClick={() => {
+              let { data, iterations, precision } = this.props.preview;
+              let { format, base64 } = this;
+              data = JSON.parse(JSON.stringify(data));
+              output(data, {
+                iterations,
+                precision,
+              });
+              function cb() {
+                let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+                str = str.replace(/'/g, '\\\'');
+                str = str.replace(/\n/g, '\\\n');
+                csInterface.evalScript(`$.ae2karas.export('${str}')`);
+                store.global.setAlert('导出成功！');
+              }
+              if(base64.checked) {
+                img.base64(data, cb);
+              }
+              else {
+                cb();
+              }
+            }}>导出</div>
+            <div className="upload" onClick={() => {
+              let { data, iterations, precision } = this.props.preview;
+              let { format, base64 } = this;
+              let name = data.name;
+              data = JSON.parse(JSON.stringify(data));
+              output(data, {
+                iterations,
+                precision,
+              });
+              function cb() {
+                store.global.setLoading(true);
+                let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+                str = str.replace(/'/g, '\\\'');
+                let blob = new Blob([str], {
+                  type: 'application/json',
+                });
+                let file = new File([blob], name + '.json', {
+                  type: 'application/json',
+                });
+                let formData = new FormData();
+                formData.append(file.name, file);
+                formData.append('mode', 'public');
+                fetch(img.UPLOAD_JSON, {
+                  method: 'POST',
+                  body: formData,
+                }).then(res => res.json()).then(function(res) {
+                  store.global.setLoading(false);
+                  console.log(res);
+                  if(res.success && res.result) {
+                    store.global.setAlert('已上传至：\n' + res.result);
+                  }
+                }).catch(function(e) {
+                  store.global.setLoading(false);
+                  store.global.setAlert('上传失败！');
+                });
+              }
+              if(base64.checked) {
+                img.base64(data, cb);
+              }
+              else {
+                img.upload(data, cb);
+              }
+            }}>上传</div>
+          </div>
         </div>
       </div>
     </div>

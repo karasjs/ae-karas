@@ -7,6 +7,7 @@ import store from './store';
 import List from './component/List';
 import Preview from './component/Preview';
 import Loading from './component/Loading';
+import Alert from './component/Alert';
 import { csInterface } from './util/CSInterface';
 import enums from '../es/enums';
 
@@ -18,6 +19,7 @@ ReactDom.render(
     <List/>
     <Preview/>
     <Loading/>
+    <Alert/>
   </Provider>,
   document.querySelector('#root')
 );

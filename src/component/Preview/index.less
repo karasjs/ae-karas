@@ -99,21 +99,27 @@
         }
       }
 
-      .export{
-        width:70px;
-        height:30px;
-        background:#005df7;
-        border-radius:3px;
-        line-height:30px;
-        text-align:center;
-        color:#FFF;
+      .btn{
+        display:flex;
+        justify-content:space-between;
+        margin:10px 0;
 
-        &:hover{
-          background:#336dff;
-        }
+        .export, .upload{
+          width:65px;
+          height:30px;
+          background:#005df7;
+          border-radius:3px;
+          line-height:30px;
+          text-align:center;
+          color:#FFF;
 
-        &:active{
-          color:#E30;
+          &:hover{
+            background:#336dff;
+          }
+
+          &:active{
+            color:#E30;
+          }
         }
       }
     }

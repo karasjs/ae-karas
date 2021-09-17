@@ -3,6 +3,7 @@ import { makeAutoObservable } from 'mobx';
 class Global {
   isLoading = false;
   isPreview = false;
+  alert = '';
 
   constructor() {
     makeAutoObservable(this);
@@ -14,6 +15,10 @@ class Global {
 
   setPreview(b) {
     this.isPreview = b;
+  }
+
+  setAlert(b) {
+    this.alert = b;
   }
 }
 
