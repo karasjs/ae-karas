@@ -35,6 +35,9 @@ function base64(data, cb) {
       if(/\.jpe?g$/.test(src)) {
         data.src = canvas.toDataURL('image/jpeg');
       }
+      else if(/\.webp$/.test(src)) {
+        data.src = canvas.toDataURL('image/webp');
+      }
       else {
         data.src = canvas.toDataURL('image/png');
       }
