@@ -132,6 +132,7 @@ export function transformOrigin(list, begin, duration) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间
@@ -165,6 +166,7 @@ export function transformOpacity(list, begin, duration) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间
@@ -195,6 +197,7 @@ export function transformPosition(list, begin, duration) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间
@@ -231,6 +234,7 @@ export function transformRotateX(list, begin, duration) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间
@@ -261,6 +265,7 @@ export function transformRotateY(list, begin, duration) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间
@@ -292,6 +297,7 @@ export function transformRotateZ(list, begin, duration) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间
@@ -322,6 +328,7 @@ export function transformScale(list, begin, duration) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间
@@ -366,6 +373,7 @@ export function transformPath(list, begin, duration, isEnd) {
     options: {
       duration,
       fill: 'forwards',
+      iterations: 1,
     },
   };
   // 只有1帧没有动画，无需计算补间

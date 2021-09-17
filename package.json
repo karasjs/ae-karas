@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/karasjs/karas.git"
+    "url": "git://github.com/karasjs/ae-karas.git"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

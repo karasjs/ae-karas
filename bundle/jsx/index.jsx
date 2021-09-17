@@ -1030,7 +1030,8 @@ function transformOrigin(list, begin, duration) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1060,7 +1061,8 @@ function transformOpacity(list, begin, duration) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1090,7 +1092,8 @@ function transformPosition(list, begin, duration) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1122,7 +1125,8 @@ function transformRotateX(list, begin, duration) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1152,7 +1156,8 @@ function transformRotateY(list, begin, duration) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1182,7 +1187,8 @@ function transformRotateZ(list, begin, duration) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1212,7 +1218,8 @@ function transformScale(list, begin, duration) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1256,7 +1263,8 @@ function transformPath(list, begin, duration, isEnd) {
     value: [],
     options: {
       duration: duration,
-      fill: 'forwards'
+      fill: 'forwards',
+      iterations: 1
     }
   }; // 只有1帧没有动画，无需计算补间
 
@@ -1823,7 +1831,8 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
       value: [],
       options: {
         duration: duration,
-        fill: 'forwards'
+        fill: 'forwards',
+        iterations: 1
       }
     }; // 开头不可见，默认init的style
 
@@ -2484,5 +2493,22 @@ ae2karas.delTemp = function () {
   while (list.length) {
     list.pop().remove();
   }
+};
+
+ae2karas["export"] = function (data) {
+  $.ae2karas.error('export');
+  $.ae2karas.log(data);
+  var file = File.saveDialog();
+
+  if (!file) {
+    return;
+  }
+
+  new Folder(file).create();
+  var f = new File(file.fsName + '.json');
+  f.open('w');
+  f.encoding = 'utf-8';
+  f.write(data);
+  f.close();
 };
 //# sourceMappingURL=index.jsx.map

@@ -9,16 +9,8 @@ import { csInterface } from '../../util/CSInterface';
 import './index.less';
 
 @inject('global')
-// @inject('composition')
 @observer
 class List extends React.Component {
-  // componentDidUpdate() {
-  //   let id = this.props.composition.currentId;
-  //   if(id && this.props.global.isLoading) {
-  //     csInterface.evalScript(`$.ae2karas.convert(${id})`);
-  //   }
-  // }
-
   render() {
     return <div className={classnames('list-panel', {
       show: !this.props.global.isPreview,

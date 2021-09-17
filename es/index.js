@@ -122,3 +122,18 @@ ae2karas.delTemp = function() {
     list.pop().remove();
   }
 };
+
+ae2karas.export = function(data) {
+  $.ae2karas.error('export');
+  $.ae2karas.log(data);
+  let file = File.saveDialog();
+  if(!file) {
+    return;
+  }
+  (new Folder(file)).create();
+  let f = new File(file.fsName + '.json');
+  f.open('w');
+  f.encoding = 'utf-8';
+  f.write(data);
+  f.close();
+};

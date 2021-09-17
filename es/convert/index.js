@@ -287,6 +287,7 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
       options: {
         duration,
         fill: 'forwards',
+        iterations: 1,
       },
     };
     // 开头不可见，默认init的style

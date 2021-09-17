@@ -4,6 +4,8 @@ import classnames from 'classnames';
 import karas from 'karas';
 
 import store from '../../store';
+import { csInterface } from '../../util/CSInterface';
+import output from '../../util/output';
 
 import './index.less';
 
@@ -45,14 +47,30 @@ class Preview extends React.Component {
       canvas.style.width = width / max + 'px';
       canvas.style.height = height / max + 'px';
     }
-    let controller = root.animateController;
-    if(controller && controller.list.length) {
-      controller.iterations = Infinity;
-    }
+    // let controller = root.animateController;
+    // if(controller && controller.list.length) {
+    //   controller.iterations = Infinity;
+    // }
   }
 
   change(v) {
     store.preview.setType(v);
+  }
+
+  changeIterations(e) {
+    let n = parseInt(e.target.value);
+    if(!n) {
+      n = 'Infinity';
+    }
+    store.preview.setIterations(n);
+  }
+
+  changePrecision(e) {
+    let n = parseInt(e.target.value);
+    if(!n) {
+      n = 0;
+    }
+    store.preview.setPrecision(n);
   }
 
   render() {
@@ -98,7 +116,45 @@ class Preview extends React.Component {
       <div className="container">
         <div className="menu"/>
         <div className="stage" ref={el => this.stage = el}/>
-        <div className="side"/>
+        <div className="side">
+          <label>
+            <input type="checkbox"
+                   ref={el => this.format = el}
+                   defaultChecked={this.props.preview.format}/>
+            <span>格式化</span>
+          </label>
+          <label>
+            <input type="checkbox"
+                   ref={el => this.base64 = el}
+                   defaultChecked={this.props.preview.base64}/>
+            <span>图片base64</span>
+          </label>
+          <label>
+            <span>循环次数(0为无穷)</span>
+            <input type="number" min="0"
+                   defaultValue={this.props.preview.iterations}
+                   onChange={e => this.changeIterations(e)}/>
+          </label>
+          <label>
+            <span>小数精度(0为无穷)</span>
+            <input type="number" min="0"
+                   defaultValue={this.props.preview.precision}
+                   onChange={e => this.changePrecision(e)}/>
+          </label>
+          <div className="export" onClick={() => {
+            let { data, iterations, precision } = this.props.preview;
+            let { format, base64 } = this;
+            data = JSON.parse(JSON.stringify(data));
+            output(data, {
+              iterations,
+              precision,
+            });
+            let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+            str = str.replace(/'/g, '\\\'');
+            str = str.replace(/\n/g, '\\\n');
+            csInterface.evalScript(`$.ae2karas.export('${str}')`);
+          }}>导出</div>
+        </div>
       </div>
     </div>
   }
