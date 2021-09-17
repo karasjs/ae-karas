@@ -18,3 +18,7 @@ es/
 .github
 *.png
 *.md
+ZXPSignCmd-64bit*.*
+ZXPSignCmd-64bit*
+*.p12
+*.zxp
