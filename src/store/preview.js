@@ -6,7 +6,7 @@ class Preview {
   format = false;
   base64 = false;
   iterations = 1;
-  precision = 1;
+  precision = 0;
 
   constructor() {
     makeAutoObservable(this);

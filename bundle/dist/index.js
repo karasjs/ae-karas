@@ -700,7 +700,7 @@ var Preview = /*#__PURE__*/function () {
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__.default)(this, "iterations", 1);
 
-    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__.default)(this, "precision", 1);
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__.default)(this, "precision", 0);
 
     (0,mobx__WEBPACK_IMPORTED_MODULE_3__.makeAutoObservable)(this);
   }
