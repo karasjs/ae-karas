@@ -709,12 +709,15 @@ function parseMask(data, target) {
   return res;
 }
 
+let uuid = 0;
+
 export default function(data) {
   $.ae2karas.error('convert');
   let { workAreaStart, workAreaDuration, result, library } = data;
   let { name, width, height, children } = result;
   let newLib = [];
   let res = {
+    uuid: uuid++,
     name,
     tagName: 'div',
     props: {

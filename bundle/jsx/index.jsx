@@ -578,7 +578,7 @@ var render = {
   }
 };
 
-var uuid = 0;
+var uuid$1 = 0;
 
 function recursion$1(composition, library) {
   var name = composition.name,
@@ -645,7 +645,7 @@ function recursion$1(composition, library) {
     if (o) {
       // 父级打标uuid的同时，之前记录的hash也记录下来
       if (asParent.hasOwnProperty(index)) {
-        asParent[index] = o.asParent = uuid++;
+        asParent[index] = o.asParent = uuid$1++;
       } // mask/clip类型在被遮罩层上
 
 
@@ -2334,6 +2334,7 @@ function parseMask(data, target) {
   return res;
 }
 
+var uuid = 0;
 function convert (data) {
   $.ae2karas.error('convert');
   var workAreaStart = data.workAreaStart,
@@ -2346,6 +2347,7 @@ function convert (data) {
       children = result.children;
   var newLib = [];
   var res = {
+    uuid: uuid++,
     name: name,
     tagName: 'div',
     props: {

@@ -36,31 +36,59 @@ function formatTime(duration) {
     str += '00.';
   }
   if(duration > 0) {
-    let ms = Math.round(duration / 10);
-    if(ms < 10) {
-      ms = '00' + ms;
-    }
-    else if(ms < 100) {
-      ms = '0' + ms;
-    }
-    str += ms;
+    str += String(duration).slice(0, 1);
   }
   else {
-    str += '000';
+    str += '00';
   }
   return str;
 }
 
-let root;
+let root, uuid;
+let isDrag, originX, W;
 
 @inject('global')
 @inject('preview')
 @observer
 class Preview extends React.Component {
+  componentDidMount() {
+    let timeout;
+    document.addEventListener('mousemove', function(e) {
+      if(isDrag) {
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+          let pageX = e.pageX;
+          let percent = (pageX - originX) / W;
+          let animateController = root.animateController;
+          if(animateController.list.length || animateController.__list2.length) {
+            let list = animateController.list.length ? animateController.list : animateController.__list2;
+            let time = percent * list[0].options.duration;
+            if(time < 0) {
+              time = 0;
+            }
+            else if(time > this.props.preview.total) {
+              time = total;
+            }
+            store.preview.setTime(time);
+            animateController.gotoAndStop(time);
+          }
+        }, 10);
+      }
+    });
+    document.addEventListener('mouseup', function(e) {
+      isDrag = false;
+      clearTimeout(timeout);
+    });
+  }
+
   componentDidUpdate(nextProps, nextState, nextContext) {
     let data = this.props.preview.data;
-    console.log(data === nextProps.preview.data);
-    let type = this.props.preview.type;
+    // 每次重新转换后新的才生成新的root
+    if(data.uuid === uuid) {
+      return;
+    }
+    uuid = data.uuid;
+    // 缩放画布显示保持宽高比
     let { width, height } = data.props.style;
     let stage = this.stage;
     let canvas = this.canvas;
@@ -78,6 +106,8 @@ class Preview extends React.Component {
       root = null;
       canvas.innerHTML = '';
     }
+    // 不同类型type根节点
+    let type = this.props.preview.type;
     root = karas.parse({
       tagName: type,
       props: {
@@ -86,15 +116,29 @@ class Preview extends React.Component {
       },
       children: [
         karas.parse(data, {
-          // autoPlay: false,
+          autoPlay: false,
         })
       ],
       abbr: false,
     }, canvas);
-    // let controller = root.animateController;
-    // if(controller && controller.list.length) {
-    //   controller.iterations = Infinity;
-    // }
+    // 时间显示
+    store.preview.setTime(0);
+    let animateController = root.animateController;
+    if(animateController.list.length) {
+      store.preview.setTotal(animateController.list[0].options.duration);
+    }
+    else if(animateController.__list2.length) {
+      store.preview.setTotal(animateController.__list2[0].options.duration);
+    }
+    else {
+      store.preview.setTotal(0);
+    }
+    // 侦听root的refresh事件刷新时间和进度条
+    root.on('refresh', function() {
+      if(animateController.list.length) {
+        store.preview.setTime(animateController.list[0].currentTime);
+      }
+    });
   }
 
   change(v) {
@@ -119,6 +163,66 @@ class Preview extends React.Component {
 
   clickBg(v) {
     store.preview.setBgBlack(v);
+  }
+
+  clickPlay() {
+    if(root) {
+      store.preview.setPlay(true);
+      root.animateController.play();
+    }
+  }
+
+  clickPause() {
+    if(root) {
+      store.preview.setPlay(false);
+      root.animateController.pause();
+    }
+  }
+
+  mouseDown(e) {
+    isDrag = true;
+    let target = e.target.parentNode;
+    W = e.target.parentNode.clientWidth;
+    originX = target.offsetLeft;
+    while(target.parentNode) {
+      target = target.parentNode;
+      originX += target.offsetLeft || 0;
+    }
+    if(root) {
+      let animateController = root.animateController;
+      animateController.pause();
+    }
+  }
+
+  clickProgress(e) {
+    let target = e.target;
+    if(target.className === 'drag') {
+      return;
+    }
+    if(target.className === 'bar') {
+      target = target.parentNode;
+    }
+    let pageX = e.pageX;
+    W = target.clientWidth;
+    originX = target.offsetLeft;
+    while(target.parentNode) {
+      target = target.parentNode;
+      originX += target.offsetLeft || 0;
+    }
+    let percent = (pageX - originX) / W;
+    let animateController = root.animateController;
+    if(animateController.list.length || animateController.__list2.length) {
+      let list = animateController.list.length ? animateController.list : animateController.__list2;
+      let time = percent * list[0].options.duration;
+      if(time < 0) {
+        time = 0;
+      }
+      else if(time > this.props.preview.total) {
+        time = total;
+      }
+      store.preview.setTime(time);
+      animateController.gotoAndStop(time);
+    }
   }
 
   render() {
@@ -168,8 +272,7 @@ class Preview extends React.Component {
                ref={el => this.stage = el}>
             <div className={classnames('canvas', {
               mosaic: !isBgBlack,
-            })}
-                 ref={el => this.canvas = el}/>
+            })} ref={el => this.canvas = el}/>
           </div>
           <div className="control">
             <div className={classnames('bg', {
@@ -177,18 +280,20 @@ class Preview extends React.Component {
             })} onClick={() => this.clickBg(!isBgBlack)}/>
             <div className={classnames('play', {
               show: !isPlaying,
-            })}/>
+            })} onClick={() => this.clickPlay()}/>
             <div className={classnames('pause', {
               show: isPlaying,
-            })}/>
-            <div className="time">{formatTime(time)}</div>
-            <div className="progress">
+            })} onClick={() => this.clickPause()}/>
+            <div className="time">{formatTime(time || 0)}</div>
+            <div className="progress" onClick={e => this.clickProgress(e)}>
               <div className="bar" style={{
                 width: ((time * 100 / total) || 0) + '%',
               }}/>
-              <div className="drag"/>
+              <div className="drag" style={{
+                left: ((time * 100 / total) || 0) + '%',
+              }} onMouseDown={e => this.mouseDown(e)}/>
             </div>
-            <div className="time2">{formatTime(total)}</div>
+            <div className="time2">{formatTime(total || 0)}</div>
           </div>
         </div>
         <div className="side">
@@ -266,7 +371,6 @@ class Preview extends React.Component {
                   body: formData,
                 }).then(res => res.json()).then(function(res) {
                   store.global.setLoading(false);
-                  console.log(res);
                   if(res.success && res.result) {
                     store.global.setAlert('已上传至：\n' + res.result);
                   }

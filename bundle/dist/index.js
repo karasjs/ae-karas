@@ -442,23 +442,16 @@ function formatTime(duration) {
   }
 
   if (duration > 0) {
-    var ms = Math.round(duration / 10);
-
-    if (ms < 10) {
-      ms = '00' + ms;
-    } else if (ms < 100) {
-      ms = '0' + ms;
-    }
-
-    str += ms;
+    str += String(duration).slice(0, 1);
   } else {
-    str += '000';
+    str += '00';
   }
 
   return str;
 }
 
-var root;
+var root, uuid;
+var isDrag, originX, W;
 var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.observer)(_class = /*#__PURE__*/function (_React$Component) {
   (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__["default"])(Preview, _React$Component);
 
@@ -471,11 +464,49 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
   }
 
   (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(Preview, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var timeout;
+      document.addEventListener('mousemove', function (e) {
+        if (isDrag) {
+          clearTimeout(timeout);
+          timeout = setTimeout(function () {
+            var pageX = e.pageX;
+            var percent = (pageX - originX) / W;
+            var animateController = root.animateController;
+
+            if (animateController.list.length || animateController.__list2.length) {
+              var list = animateController.list.length ? animateController.list : animateController.__list2;
+              var time = percent * list[0].options.duration;
+
+              if (time < 0) {
+                time = 0;
+              } else if (time > this.props.preview.total) {
+                time = total;
+              }
+
+              _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(time);
+              animateController.gotoAndStop(time);
+            }
+          }, 10);
+        }
+      });
+      document.addEventListener('mouseup', function (e) {
+        isDrag = false;
+        clearTimeout(timeout);
+      });
+    }
+  }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(nextProps, nextState, nextContext) {
-      var data = this.props.preview.data;
-      console.log(data === nextProps.preview.data);
-      var type = this.props.preview.type;
+      var data = this.props.preview.data; // 每次重新转换后新的才生成新的root
+
+      if (data.uuid === uuid) {
+        return;
+      }
+
+      uuid = data.uuid; // 缩放画布显示保持宽高比
+
       var _data$props$style = data.props.style,
           width = _data$props$style.width,
           height = _data$props$style.height;
@@ -498,21 +529,39 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
         root.destroy();
         root = null;
         canvas.innerHTML = '';
-      }
+      } // 不同类型type根节点
 
+
+      var type = this.props.preview.type;
       root = karas__WEBPACK_IMPORTED_MODULE_7___default().parse({
         tagName: type,
         props: {
           width: width,
           height: height
         },
-        children: [karas__WEBPACK_IMPORTED_MODULE_7___default().parse(data, {// autoPlay: false,
+        children: [karas__WEBPACK_IMPORTED_MODULE_7___default().parse(data, {
+          autoPlay: false
         })],
         abbr: false
-      }, canvas); // let controller = root.animateController;
-      // if(controller && controller.list.length) {
-      //   controller.iterations = Infinity;
-      // }
+      }, canvas); // 时间显示
+
+      _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(0);
+      var animateController = root.animateController;
+
+      if (animateController.list.length) {
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTotal(animateController.list[0].options.duration);
+      } else if (animateController.__list2.length) {
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTotal(animateController.__list2[0].options.duration);
+      } else {
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTotal(0);
+      } // 侦听root的refresh事件刷新时间和进度条
+
+
+      root.on('refresh', function () {
+        if (animateController.list.length) {
+          _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(animateController.list[0].currentTime);
+        }
+      });
     }
   }, {
     key: "change",
@@ -545,6 +594,79 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
     key: "clickBg",
     value: function clickBg(v) {
       _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setBgBlack(v);
+    }
+  }, {
+    key: "clickPlay",
+    value: function clickPlay() {
+      if (root) {
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(true);
+        root.animateController.play();
+      }
+    }
+  }, {
+    key: "clickPause",
+    value: function clickPause() {
+      if (root) {
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(false);
+        root.animateController.pause();
+      }
+    }
+  }, {
+    key: "mouseDown",
+    value: function mouseDown(e) {
+      isDrag = true;
+      var target = e.target.parentNode;
+      W = e.target.parentNode.clientWidth;
+      originX = target.offsetLeft;
+
+      while (target.parentNode) {
+        target = target.parentNode;
+        originX += target.offsetLeft || 0;
+      }
+
+      if (root) {
+        var animateController = root.animateController;
+        animateController.pause();
+      }
+    }
+  }, {
+    key: "clickProgress",
+    value: function clickProgress(e) {
+      var target = e.target;
+
+      if (target.className === 'drag') {
+        return;
+      }
+
+      if (target.className === 'bar') {
+        target = target.parentNode;
+      }
+
+      var pageX = e.pageX;
+      W = target.clientWidth;
+      originX = target.offsetLeft;
+
+      while (target.parentNode) {
+        target = target.parentNode;
+        originX += target.offsetLeft || 0;
+      }
+
+      var percent = (pageX - originX) / W;
+      var animateController = root.animateController;
+
+      if (animateController.list.length || animateController.__list2.length) {
+        var list = animateController.list.length ? animateController.list : animateController.__list2;
+        var time = percent * list[0].options.duration;
+
+        if (time < 0) {
+          time = 0;
+        } else if (time > this.props.preview.total) {
+          time = total;
+        }
+
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(time);
+        animateController.gotoAndStop(time);
+      }
     }
   }, {
     key: "render",
@@ -635,25 +757,40 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('play', {
           show: !isPlaying
-        })
+        }),
+        onClick: function onClick() {
+          return _this.clickPlay();
+        }
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('pause', {
           show: isPlaying
-        })
+        }),
+        onClick: function onClick() {
+          return _this.clickPause();
+        }
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "time"
-      }, formatTime(time)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
-        className: "progress"
+      }, formatTime(time || 0)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "progress",
+        onClick: function onClick(e) {
+          return _this.clickProgress(e);
+        }
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "bar",
         style: {
           width: (time * 100 / total || 0) + '%'
         }
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
-        className: "drag"
+        className: "drag",
+        style: {
+          left: (time * 100 / total || 0) + '%'
+        },
+        onMouseDown: function onMouseDown(e) {
+          return _this.mouseDown(e);
+        }
       })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "time2"
-      }, formatTime(total)))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+      }, formatTime(total || 0)))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "side"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
         type: "checkbox",
@@ -748,7 +885,6 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
               return res.json();
             }).then(function (res) {
               _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setLoading(false);
-              console.log(res);
 
               if (res.success && res.result) {
                 _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setAlert('已上传至：\n' + res.result);

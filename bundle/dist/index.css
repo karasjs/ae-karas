@@ -227,6 +227,7 @@
 .preview-panel .container .view .control .time,
 .preview-panel .container .view .control .time2 {
   margin-left: 5px;
+  font-family: Consolas, "Courier New", Courier, FreeMono, monospace;
 }
 .preview-panel .container .view .control .progress {
   flex: 1;
@@ -241,14 +242,15 @@
   left: 0;
   top: 0;
   width: 50%;
-  height: 50%;
+  height: 100%;
   background: #81d4ff;
   border-radius: 5px;
 }
 .preview-panel .container .view .control .progress .drag {
   position: absolute;
-  left: -10px;
+  left: 0;
   top: -4px;
+  margin-left: -10px;
   width: 8px;
   height: 8px;
   background: #000;
