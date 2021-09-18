@@ -19,5 +19,7 @@ npm install ae-karas
 4. `defaults write com.adobe.CSXS.11 PlayerDebugMode 1`  高版本的ae可能需要打开11
 5. npm run dev
 
+上传功能需自定义配置src/util/config.js中的URL并实现对应服务端接口后，重新打包。
+
 # License
 [MIT License]

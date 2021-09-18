@@ -7,6 +7,7 @@ import store from '../../store';
 import { csInterface } from '../../util/CSInterface';
 import output from '../../util/output';
 import img from '../../util/img';
+import config from '../../util/config';
 
 import './index.less';
 
@@ -187,7 +188,7 @@ class Preview extends React.Component {
                 let formData = new FormData();
                 formData.append(file.name, file);
                 formData.append('mode', 'public');
-                fetch(img.UPLOAD_JSON, {
+                fetch(config.UPLOAD_JSON, {
                   method: 'POST',
                   body: formData,
                 }).then(res => res.json()).then(function(res) {

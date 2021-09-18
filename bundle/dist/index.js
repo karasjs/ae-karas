@@ -378,7 +378,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/_@babel_runtime@7.15.4@@babel/runtime/helpers/esm/possibleConstructorReturn.js");
 /* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/_@babel_runtime@7.15.4@@babel/runtime/helpers/esm/getPrototypeOf.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react */ "./node_modules/_react@17.0.2@react/index.js");
-/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.2.0@mobx-react/dist/mobxreact.esm.js");
+/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.2.0@mobx-react/dist/mobxreact.esm.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.61.9@karas/index.js");
@@ -387,7 +387,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../util/CSInterface */ "./src/util/CSInterface.js");
 /* harmony import */ var _util_output__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../util/output */ "./src/util/output.js");
 /* harmony import */ var _util_img__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../util/img */ "./src/util/img.js");
-/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./index.less */ "./src/component/Preview/index.less");
+/* harmony import */ var _util_config__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../util/config */ "./src/util/config.js");
+/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./index.less */ "./src/component/Preview/index.less");
 
 
 
@@ -409,8 +410,9 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 
 
+
 var root, canvas;
-var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_13__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_13__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_13__.observer)(_class = /*#__PURE__*/function (_React$Component) {
+var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.observer)(_class = /*#__PURE__*/function (_React$Component) {
   (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__["default"])(Preview, _React$Component);
 
   var _super = _createSuper(Preview);
@@ -641,7 +643,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_13__.inject)('globa
             var formData = new FormData();
             formData.append(file.name, file);
             formData.append('mode', 'public');
-            fetch(_util_img__WEBPACK_IMPORTED_MODULE_11__["default"].UPLOAD_JSON, {
+            fetch(_util_config__WEBPACK_IMPORTED_MODULE_12__["default"].UPLOAD_JSON, {
               method: 'POST',
               body: formData
             }).then(function (res) {
@@ -1706,6 +1708,24 @@ var csInterface = new CSInterface();
 
 /***/ }),
 
+/***/ "./src/util/config.js":
+/*!****************************!*\
+  !*** ./src/util/config.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  UPLOAD_JSON: '',
+  UPLOAD_BASE64: ''
+});
+
+/***/ }),
+
 /***/ "./src/util/img.js":
 /*!*************************!*\
   !*** ./src/util/img.js ***!
@@ -1717,6 +1737,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./config */ "./src/util/config.js");
+
 var canvas = document.createElement('canvas');
 var count = 0,
     total = 0;
@@ -1825,7 +1847,7 @@ function upload(name, data, cb) {
         str = canvas.toDataURL('image/png');
       }
 
-      fetch(UPLOAD_BASE64, {
+      fetch(_config__WEBPACK_IMPORTED_MODULE_0__["default"].UPLOAD_BASE64, {
         method: 'post',
         headers: {
           Accept: 'application/json',
@@ -1863,8 +1885,6 @@ function upload(name, data, cb) {
   }
 }
 
-var UPLOAD_JSON = '';
-var UPLOAD_BASE64 = '';
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   base64: function base64(data, cb) {
     count = total = maxW = maxH = 0;
@@ -1885,9 +1905,7 @@ var UPLOAD_BASE64 = '';
         recursionUpload(library[i], cb);
       }
     }
-  },
-  UPLOAD_JSON: UPLOAD_JSON,
-  UPLOAD_BASE64: UPLOAD_BASE64
+  }
 });
 
 /***/ }),

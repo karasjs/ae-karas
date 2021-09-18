@@ -1,3 +1,5 @@
+import config from './config';
+
 let canvas = document.createElement('canvas');
 let count = 0, total = 0;
 let maxW = 0, maxH = 0;
@@ -94,7 +96,7 @@ function upload(name, data, cb) {
       else {
         str = canvas.toDataURL('image/png');
       }
-      fetch(UPLOAD_BASE64, {
+      fetch(config.UPLOAD_BASE64, {
         method: 'post',
         headers: {
           Accept: 'application/json',
@@ -127,9 +129,6 @@ function upload(name, data, cb) {
   }
 }
 
-const UPLOAD_JSON = '';
-const UPLOAD_BASE64 = '';
-
 export default {
   base64(data, cb) {
     count = total = maxW = maxH = 0;
@@ -149,6 +148,4 @@ export default {
       }
     }
   },
-  UPLOAD_JSON,
-  UPLOAD_BASE64,
 };
