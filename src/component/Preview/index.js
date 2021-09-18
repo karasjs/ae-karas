@@ -11,7 +11,47 @@ import config from '../../util/config';
 
 import './index.less';
 
-let root, canvas;
+function formatTime(duration) {
+  let str;
+  if(duration > 1000 * 60) {
+    let m = Math.floor(duration / (1000 * 60));
+    if(m < 10) {
+      m = '0' + s;
+    }
+    str = m + ':';
+    duration -= m * 1000 * 60;
+  }
+  else {
+    str = '00:';
+  }
+  if(duration > 1000) {
+    let s = Math.floor(duration / 1000);
+    if(s < 10) {
+      s = '0' + s;
+    }
+    str += s + '.';
+    duration -= s * 1000;
+  }
+  else {
+    str += '00.';
+  }
+  if(duration > 0) {
+    let ms = Math.round(duration / 10);
+    if(ms < 10) {
+      ms = '00' + ms;
+    }
+    else if(ms < 100) {
+      ms = '0' + ms;
+    }
+    str += ms;
+  }
+  else {
+    str += '000';
+  }
+  return str;
+}
+
+let root;
 
 @inject('global')
 @inject('preview')
@@ -19,13 +59,24 @@ let root, canvas;
 class Preview extends React.Component {
   componentDidUpdate(nextProps, nextState, nextContext) {
     let data = this.props.preview.data;
+    console.log(data === nextProps.preview.data);
     let type = this.props.preview.type;
     let { width, height } = data.props.style;
     let stage = this.stage;
+    let canvas = this.canvas;
+    let { clientWidth, clientHeight } = stage;
+    let rw = width / clientWidth;
+    let rh = height / clientHeight;
+    let max = Math.max(rw, rh);
+    if(max < 1) {
+      max = 1;
+    }
+    canvas.style.width = width / max + 'px';
+    canvas.style.height = height / max + 'px';
     if(root) {
       root.destroy();
       root = null;
-      stage.innerHTML = '';
+      canvas.innerHTML = '';
     }
     root = karas.parse({
       tagName: type,
@@ -39,16 +90,7 @@ class Preview extends React.Component {
         })
       ],
       abbr: false,
-    }, stage);
-    let { clientWidth, clientHeight } = stage;
-    let rw = width / clientWidth;
-    let rh = height / clientHeight;
-    let max = Math.max(rw, rh) * 1.05;
-    canvas = stage.querySelector('canvas');
-    if(canvas) {
-      canvas.style.width = width / max + 'px';
-      canvas.style.height = height / max + 'px';
-    }
+    }, canvas);
     // let controller = root.animateController;
     // if(controller && controller.list.length) {
     //   controller.iterations = Infinity;
@@ -75,8 +117,12 @@ class Preview extends React.Component {
     store.preview.setPrecision(n);
   }
 
+  clickBg(v) {
+    store.preview.setBgBlack(v);
+  }
+
   render() {
-    let type = this.props.preview.type;
+    let { type, time, total, isPlaying, isBgBlack } = this.props.preview;
     return <div className={classnames('preview-panel', {
       show: store.global.isPreview,
     })}>
@@ -117,7 +163,34 @@ class Preview extends React.Component {
       </div>
       <div className="container">
         <div className="menu"/>
-        <div className="stage" ref={el => this.stage = el}/>
+        <div className="view">
+          <div className="stage"
+               ref={el => this.stage = el}>
+            <div className={classnames('canvas', {
+              mosaic: !isBgBlack,
+            })}
+                 ref={el => this.canvas = el}/>
+          </div>
+          <div className="control">
+            <div className={classnames('bg', {
+              mosaic: !isBgBlack,
+            })} onClick={() => this.clickBg(!isBgBlack)}/>
+            <div className={classnames('play', {
+              show: !isPlaying,
+            })}/>
+            <div className={classnames('pause', {
+              show: isPlaying,
+            })}/>
+            <div className="time">{formatTime(time)}</div>
+            <div className="progress">
+              <div className="bar" style={{
+                width: ((time * 100 / total) || 0) + '%',
+              }}/>
+              <div className="drag"/>
+            </div>
+            <div className="time2">{formatTime(total)}</div>
+          </div>
+        </div>
         <div className="side">
           <label>
             <input type="checkbox"
@@ -138,7 +211,7 @@ class Preview extends React.Component {
                    onChange={e => this.changeIterations(e)}/>
           </label>
           <label>
-            <span>小数精度(0为无穷)</span>
+            <span>小数精度(0为整数)</span>
             <input type="number" min="0"
                    defaultValue={this.props.preview.precision}
                    onChange={e => this.changePrecision(e)}/>

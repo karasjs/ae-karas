@@ -7,6 +7,10 @@ class Preview {
   base64 = false;
   iterations = 1;
   precision = 0;
+  time = 0;
+  total = 0;
+  isPlaying = false;
+  isBgBlack = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -34,6 +38,22 @@ class Preview {
 
   setPrecision(precision) {
     this.precision = precision;
+  }
+
+  setTime(time) {
+    this.time = time;
+  }
+
+  setTotal(total) {
+    this.total = total;
+  }
+
+  setPlay(isPlaying) {
+    this.isPlaying = isPlaying;
+  }
+
+  setBgBlack(isBgBlack) {
+    this.isBgBlack = isBgBlack;
   }
 }
 

@@ -411,7 +411,54 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 
 
-var root, canvas;
+
+function formatTime(duration) {
+  var str;
+
+  if (duration > 1000 * 60) {
+    var m = Math.floor(duration / (1000 * 60));
+
+    if (m < 10) {
+      m = '0' + s;
+    }
+
+    str = m + ':';
+    duration -= m * 1000 * 60;
+  } else {
+    str = '00:';
+  }
+
+  if (duration > 1000) {
+    var _s = Math.floor(duration / 1000);
+
+    if (_s < 10) {
+      _s = '0' + _s;
+    }
+
+    str += _s + '.';
+    duration -= _s * 1000;
+  } else {
+    str += '00.';
+  }
+
+  if (duration > 0) {
+    var ms = Math.round(duration / 10);
+
+    if (ms < 10) {
+      ms = '00' + ms;
+    } else if (ms < 100) {
+      ms = '0' + ms;
+    }
+
+    str += ms;
+  } else {
+    str += '000';
+  }
+
+  return str;
+}
+
+var root;
 var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.observer)(_class = /*#__PURE__*/function (_React$Component) {
   (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__["default"])(Preview, _React$Component);
 
@@ -427,16 +474,30 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
     key: "componentDidUpdate",
     value: function componentDidUpdate(nextProps, nextState, nextContext) {
       var data = this.props.preview.data;
+      console.log(data === nextProps.preview.data);
       var type = this.props.preview.type;
       var _data$props$style = data.props.style,
           width = _data$props$style.width,
           height = _data$props$style.height;
       var stage = this.stage;
+      var canvas = this.canvas;
+      var clientWidth = stage.clientWidth,
+          clientHeight = stage.clientHeight;
+      var rw = width / clientWidth;
+      var rh = height / clientHeight;
+      var max = Math.max(rw, rh);
+
+      if (max < 1) {
+        max = 1;
+      }
+
+      canvas.style.width = width / max + 'px';
+      canvas.style.height = height / max + 'px';
 
       if (root) {
         root.destroy();
         root = null;
-        stage.innerHTML = '';
+        canvas.innerHTML = '';
       }
 
       root = karas__WEBPACK_IMPORTED_MODULE_7___default().parse({
@@ -448,22 +509,10 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
         children: [karas__WEBPACK_IMPORTED_MODULE_7___default().parse(data, {// autoPlay: false,
         })],
         abbr: false
-      }, stage);
-      var clientWidth = stage.clientWidth,
-          clientHeight = stage.clientHeight;
-      var rw = width / clientWidth;
-      var rh = height / clientHeight;
-      var max = Math.max(rw, rh) * 1.05;
-      canvas = stage.querySelector('canvas');
-
-      if (canvas) {
-        canvas.style.width = width / max + 'px';
-        canvas.style.height = height / max + 'px';
-      } // let controller = root.animateController;
+      }, canvas); // let controller = root.animateController;
       // if(controller && controller.list.length) {
       //   controller.iterations = Infinity;
       // }
-
     }
   }, {
     key: "change",
@@ -493,11 +542,21 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
       _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPrecision(n);
     }
   }, {
+    key: "clickBg",
+    value: function clickBg(v) {
+      _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setBgBlack(v);
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this = this;
 
-      var type = this.props.preview.type;
+      var _this$props$preview = this.props.preview,
+          type = _this$props$preview.type,
+          time = _this$props$preview.time,
+          total = _this$props$preview.total,
+          isPlaying = _this$props$preview.isPlaying,
+          isBgBlack = _this$props$preview.isBgBlack;
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('preview-panel', {
           show: _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.isPreview
@@ -551,11 +610,50 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "menu"
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "view"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "stage",
         ref: function ref(el) {
           return _this.stage = el;
         }
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('canvas', {
+          mosaic: !isBgBlack
+        }),
+        ref: function ref(el) {
+          return _this.canvas = el;
+        }
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "control"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('bg', {
+          mosaic: !isBgBlack
+        }),
+        onClick: function onClick() {
+          return _this.clickBg(!isBgBlack);
+        }
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('play', {
+          show: !isPlaying
+        })
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('pause', {
+          show: isPlaying
+        })
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "time"
+      }, formatTime(time)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "progress"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "bar",
+        style: {
+          width: (time * 100 / total || 0) + '%'
+        }
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "drag"
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "time2"
+      }, formatTime(total)))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "side"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
         type: "checkbox",
@@ -576,7 +674,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
         onChange: function onChange(e) {
           return _this.changeIterations(e);
         }
-      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "\u5C0F\u6570\u7CBE\u5EA6(0\u4E3A\u65E0\u7A77)"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "\u5C0F\u6570\u7CBE\u5EA6(0\u4E3A\u6574\u6570)"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
         type: "number",
         min: "0",
         defaultValue: this.props.preview.precision,
@@ -588,10 +686,10 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "export",
         onClick: function onClick() {
-          var _this$props$preview = _this.props.preview,
-              data = _this$props$preview.data,
-              iterations = _this$props$preview.iterations,
-              precision = _this$props$preview.precision;
+          var _this$props$preview2 = _this.props.preview,
+              data = _this$props$preview2.data,
+              iterations = _this$props$preview2.iterations,
+              precision = _this$props$preview2.precision;
           var format = _this.format,
               base64 = _this.base64;
           data = JSON.parse(JSON.stringify(data));
@@ -617,10 +715,10 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
       }, "\u5BFC\u51FA"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "upload",
         onClick: function onClick() {
-          var _this$props$preview2 = _this.props.preview,
-              data = _this$props$preview2.data,
-              iterations = _this$props$preview2.iterations,
-              precision = _this$props$preview2.precision;
+          var _this$props$preview3 = _this.props.preview,
+              data = _this$props$preview3.data,
+              iterations = _this$props$preview3.iterations,
+              precision = _this$props$preview3.precision;
           var format = _this.format,
               base64 = _this.base64;
           var name = data.name;
@@ -845,6 +943,14 @@ var Preview = /*#__PURE__*/function () {
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "precision", 0);
 
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "time", 0);
+
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "total", 0);
+
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "isPlaying", false);
+
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "isBgBlack", false);
+
     (0,mobx__WEBPACK_IMPORTED_MODULE_3__.makeAutoObservable)(this);
   }
 
@@ -877,6 +983,26 @@ var Preview = /*#__PURE__*/function () {
     key: "setPrecision",
     value: function setPrecision(precision) {
       this.precision = precision;
+    }
+  }, {
+    key: "setTime",
+    value: function setTime(time) {
+      this.time = time;
+    }
+  }, {
+    key: "setTotal",
+    value: function setTotal(total) {
+      this.total = total;
+    }
+  }, {
+    key: "setPlay",
+    value: function setPlay(isPlaying) {
+      this.isPlaying = isPlaying;
+    }
+  }, {
+    key: "setBgBlack",
+    value: function setBgBlack(isBgBlack) {
+      this.isBgBlack = isBgBlack;
     }
   }]);
 
