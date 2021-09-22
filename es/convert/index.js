@@ -405,14 +405,27 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
       let temp = recursion(item, library, newLib, start, duration, offset, parentLink);
       if(temp) {
         res.children.push(temp);
-        // ppt应该放在父层
+        // ppt应该放在父层，如果有父级链接，则放在其上
         if(temp.init && temp.init.style && temp.init.style.perspective) {
           res.props.style.perspective = temp.init.style.perspective;
           temp.init.style.perspective = undefined;
         }
-        // 有mask分析mask
+        if(temp.children && temp.children.length === 1) {
+          let t = temp.children[0];
+          if(t.init && t.init.style && t.init.style.perspective) {
+            temp.props.style.perspective = t.init.style.perspective;
+            t.init.style.perspective = undefined;
+          }
+        }
+        // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻一级
         if(item.mask && item.mask.enabled) {
-          res.children.push(parseMask(item, temp));
+          let m = parseMask(item, temp);
+          if(temp.children && temp.children.length === 1) {
+            temp.children.push(m);
+          }
+          else {
+            res.children.push(m);
+          }
         }
       }
     }
@@ -649,8 +662,15 @@ function parseGeom(res, data, start, duration, offset) {
 }
 
 function parseMask(data, target) {
-  let left = target.init.style.left || 0;
-  let top = target.init.style.top || 0;
+  $.ae2karas.log(data);
+  $.ae2karas.log(target);
+  // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
+  if(target.children && target.children.length === 1) {
+    target = target.children[0];
+  }
+  let targetProps = target.init;
+  let left = targetProps.style.left || 0;
+  let top = targetProps.style.top || 0;
   let res = {
     tagName: '$polyline',
     props: {
@@ -682,7 +702,7 @@ function parseMask(data, target) {
     }
   }
   // 获取对象锚点，mask的锚点需保持相同
-  let transformOrigin = target.init.style.transformOrigin;
+  let transformOrigin = targetProps.style.transformOrigin;
   let cx = width * 0.5, cy = height * 0.5;
   if(transformOrigin) {
     let v = transformOrigin.split(' ');
@@ -696,7 +716,7 @@ function parseMask(data, target) {
   res.props.points = o.points
   res.props.controls = o.controls;
   // 样式和target一致
-  let style = target.init.style;
+  let style = targetProps.style;
   for(let i in style) {
     if(style.hasOwnProperty(i)) {
       res.props.style[i] = style[i];

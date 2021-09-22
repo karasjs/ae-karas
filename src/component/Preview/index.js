@@ -326,6 +326,7 @@ class Preview extends React.Component {
               let { data, iterations, precision } = this.props.preview;
               let { format, base64 } = this;
               data = JSON.parse(JSON.stringify(data));
+              data.uuid = undefined;
               output(data, {
                 iterations,
                 precision,
@@ -349,6 +350,7 @@ class Preview extends React.Component {
               let { format, base64 } = this;
               let name = data.name;
               data = JSON.parse(JSON.stringify(data));
+              data.uuid = undefined;
               output(data, {
                 iterations,
                 precision,

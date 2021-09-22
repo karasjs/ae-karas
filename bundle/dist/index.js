@@ -830,6 +830,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
           var format = _this.format,
               base64 = _this.base64;
           data = JSON.parse(JSON.stringify(data));
+          data.uuid = undefined;
           (0,_util_output__WEBPACK_IMPORTED_MODULE_10__["default"])(data, {
             iterations: iterations,
             precision: precision
@@ -860,6 +861,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
               base64 = _this.base64;
           var name = data.name;
           data = JSON.parse(JSON.stringify(data));
+          data.uuid = undefined;
           (0,_util_output__WEBPACK_IMPORTED_MODULE_10__["default"])(data, {
             iterations: iterations,
             precision: precision
