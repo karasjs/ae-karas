@@ -39,7 +39,7 @@ function formatTime(duration) {
     str += String(duration).slice(0, 1);
   }
   else {
-    str += '00';
+    str += '0';
   }
   return str;
 }
@@ -52,6 +52,7 @@ let isDrag, originX, W;
 @observer
 class Preview extends React.Component {
   componentDidMount() {
+    let self = this;
     let timeout;
     document.addEventListener('mousemove', function(e) {
       if(isDrag) {
@@ -66,8 +67,8 @@ class Preview extends React.Component {
             if(time < 0) {
               time = 0;
             }
-            else if(time > this.props.preview.total) {
-              time = total;
+            else if(time > self.props.preview.total) {
+              time = self.props.preview.total;
             }
             store.preview.setTime(time);
             animateController.gotoAndStop(time);
@@ -134,9 +135,16 @@ class Preview extends React.Component {
       store.preview.setTotal(0);
     }
     // 侦听root的refresh事件刷新时间和进度条
+    let first = true;
     root.on('refresh', function() {
       if(animateController.list.length) {
         store.preview.setTime(animateController.list[0].currentTime);
+        if(first) {
+          first = false;
+          animateController.list[0].on('finish', function() {
+            store.preview.setPlay(false);
+          });
+        }
       }
     });
   }
@@ -168,7 +176,12 @@ class Preview extends React.Component {
   clickPlay() {
     if(root) {
       store.preview.setPlay(true);
-      root.animateController.play();
+      if(this.props.preview.time === this.props.preview.total) {
+        root.animateController.gotoAndPlay(0);
+      }
+      else {
+        root.animateController.play();
+      }
     }
   }
 

@@ -722,6 +722,9 @@ function parseMask(data, target) {
       res.props.style[i] = style[i];
     }
   }
+  // 要显示mask，可能会被target同化
+  res.props.style.visibility = undefined;
+  res.props.style.pointerEvents = 'none';
   // 位置和锚点保持和mask相同，由于points可能不是0，0开始，需计算偏移
   res.props.style.transformOrigin = (cx - o.x2) + ' ' + (cy - o.y2);
   res.props.style.left = left + o.x2;

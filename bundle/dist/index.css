@@ -250,16 +250,20 @@
   position: absolute;
   left: 0;
   top: -4px;
-  margin-left: -10px;
+  opacity: 0.8;
+}
+.preview-panel .container .view .control .progress .drag:hover {
+  opacity: 1;
+}
+.preview-panel .container .view .control .progress .drag:before {
+  display: block;
   width: 8px;
   height: 8px;
   background: #000;
   border: 4px solid #008efe;
   border-radius: 8px;
-  opacity: 0.8;
-}
-.preview-panel .container .view .control .progress .drag:hover {
-  opacity: 1;
+  content: ' ';
+  transform: translateX(-10px);
 }
 .preview-panel .container .side {
   margin: 0 0 0 10px;

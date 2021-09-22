@@ -444,7 +444,7 @@ function formatTime(duration) {
   if (duration > 0) {
     str += String(duration).slice(0, 1);
   } else {
-    str += '00';
+    str += '0';
   }
 
   return str;
@@ -466,6 +466,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
   (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(Preview, [{
     key: "componentDidMount",
     value: function componentDidMount() {
+      var self = this;
       var timeout;
       document.addEventListener('mousemove', function (e) {
         if (isDrag) {
@@ -481,8 +482,8 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
 
               if (time < 0) {
                 time = 0;
-              } else if (time > this.props.preview.total) {
-                time = total;
+              } else if (time > self.props.preview.total) {
+                time = self.props.preview.total;
               }
 
               _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(time);
@@ -557,9 +558,17 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
       } // 侦听root的refresh事件刷新时间和进度条
 
 
+      var first = true;
       root.on('refresh', function () {
         if (animateController.list.length) {
           _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(animateController.list[0].currentTime);
+
+          if (first) {
+            first = false;
+            animateController.list[0].on('finish', function () {
+              _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(false);
+            });
+          }
         }
       });
     }
@@ -600,7 +609,12 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
     value: function clickPlay() {
       if (root) {
         _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(true);
-        root.animateController.play();
+
+        if (this.props.preview.time === this.props.preview.total) {
+          root.animateController.gotoAndPlay(0);
+        } else {
+          root.animateController.play();
+        }
       }
     }
   }, {
