@@ -1487,7 +1487,7 @@ function preParse(data, library, start, duration, offset) {
       height = data.height,
       inPoint = data.inPoint,
       outPoint = data.outPoint;
-  var begin = start + offset; // 图层在工作区外特殊处理，取最近的一帧内容 TODO
+  var begin = start + offset; // 图层在工作区外特殊处理，取最近的一帧内容
 
   if (inPoint >= begin + duration || outPoint <= begin) {
     return null;
