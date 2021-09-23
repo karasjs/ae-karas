@@ -326,6 +326,13 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
         });
       }
     }
+    else {
+      v.value.push({
+        offset: 1,
+        visibility: 'inherit',
+        pointerEvents: 'auto',
+      });
+    }
     res.animate.push(v);
   }
   parseAnimate(res, data, start, duration, offset, false, false);

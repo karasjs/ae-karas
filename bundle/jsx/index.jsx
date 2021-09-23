@@ -1515,11 +1515,11 @@ function transformPoints(list, begin, duration) {
   }; // 只有1帧没有动画，无需计算补间
 
   if (list.length === 1) {
-    var _list$0$value = list[0].value,
-        vertices = _list$0$value.vertices,
-        inTangents = _list$0$value.inTangents,
-        outTangents = _list$0$value.outTangents,
-        closed = _list$0$value.closed;
+    var _list$ = list[0],
+        vertices = _list$.vertices,
+        inTangents = _list$.inTangents,
+        outTangents = _list$.outTangents,
+        closed = _list$.closed;
     var o = path.parse(vertices, inTangents, outTangents, closed);
     res.value.push({
       points: o.points,
@@ -2221,6 +2221,12 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
           pointerEvents: 'none'
         });
       }
+    } else {
+      v.value.push({
+        offset: 1,
+        visibility: 'inherit',
+        pointerEvents: 'auto'
+      });
     }
 
     res.animate.push(v);

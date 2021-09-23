@@ -423,7 +423,7 @@ export function transformPoints(list, begin, duration) {
   };
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
-    let { vertices, inTangents, outTangents, closed } = list[0].value;
+    let { vertices, inTangents, outTangents, closed } = list[0];
     let o = path.parse(vertices, inTangents, outTangents, closed);
     res.value.push({
       points: o.points,
