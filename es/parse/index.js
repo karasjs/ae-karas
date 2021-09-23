@@ -219,8 +219,6 @@ function mask(prop) {
           res.enabled = true;
         }
         res.list = transformMask(item);
-        res.points = item.property('maskShape').value;
-        res.opacity = item.property('Mask Opacity').value;
         res.mode = item.maskMode;
         res.inverted = item.inverted;
       }

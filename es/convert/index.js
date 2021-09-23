@@ -732,11 +732,9 @@ function parseMask(data, target, start, duration, offset) {
         fill: '#FFF',
       },
     },
+    animate: [],
   };
-  let { width, height, mask: { list, points, opacity, mode, inverted } } = data;
-  // if(opacity < 100) {
-  //   res.props.style.opacity = opacity * 0.01;
-  // }
+  let { width, height, mask: { list: { points, opacity }, mode, inverted } } = data;
   // 相加之外都是相减
   if(mode === MaskMode.ADD) {
     if(inverted) {
@@ -754,6 +752,55 @@ function parseMask(data, target, start, duration, offset) {
       res.props.clip = true;
     }
   }
+  // 样式和target一致，只有位置信息需要
+  let style = targetProps.style;
+  for(let i in style) {
+    if(style.hasOwnProperty(i) && ['left', 'top', 'translateX', 'translateY'].indexOf(i) > -1) {
+      res.props.style[i] = style[i];
+    }
+  }
+  // 要显示mask，可能会被target同化
+  res.props.style.visibility = undefined;
+  res.props.style.pointerEvents = undefined;
+  // mask的2个动画，points和opacity
+  let o = {};
+  let begin2 = start - offset;
+  if(Array.isArray(points) && points.length) {
+    let t = transformPoints(points, begin2, duration);
+    o = t.data;
+    res.props.style.width = o.width;
+    res.props.style.height = o.height;
+    t.data = undefined;
+    let first = t.value[0];
+    res.props.points = first.points;
+    res.props.controls = first.controls;
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
+  else {
+    return res;
+  }
+  if(Array.isArray(opacity) && opacity.length) {
+    let t = transformOpacity(opacity, begin2, duration);
+    let first = t.value[0];
+    if(first.opacity !== 1) {
+      res.props.style.opacity = first.opacity;
+    }
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      res.animate.push(t);
+    }
+  }
   // 获取对象锚点，mask的锚点需保持相同
   let transformOrigin = targetProps.style.transformOrigin;
   let cx = width * 0.5, cy = height * 0.5;
@@ -762,24 +809,6 @@ function parseMask(data, target, start, duration, offset) {
     cx = parseFloat(v[0]);
     cy = parseFloat(v[1]);
   }
-  // 仅有points/controls和opacity的样式，同样可能为静态或动画
-  // $.ae2karas.log(list);
-  // let { vertices, inTangents, outTangents, closed } = points;
-  // let o = path.parse(vertices, inTangents, outTangents, closed);
-  // res.props.style.width = o.width;
-  // res.props.style.height = o.height;
-  // res.props.points = o.points
-  // res.props.controls = o.controls;
-  // 样式和target一致
-  let style = targetProps.style;
-  for(let i in style) {
-    if(style.hasOwnProperty(i)) {
-      res.props.style[i] = style[i];
-    }
-  }
-  // 要显示mask，可能会被target同化
-  res.props.style.visibility = undefined;
-  res.props.style.pointerEvents = undefined;
   // 位置和锚点保持和mask相同，由于points可能不是0，0开始，需计算偏移
   res.props.style.transformOrigin = (cx - o.x2) + ' ' + (cy - o.y2);
   res.props.style.left = left + o.x2;

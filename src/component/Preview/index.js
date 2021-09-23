@@ -141,9 +141,9 @@ class Preview extends React.Component {
         store.preview.setTime(animateController.list[0].currentTime);
         if(first) {
           first = false;
-          animateController.list[0].on('finish', function() {
-            store.preview.setPlay(false);
-          });
+          // animateController.list[0].on('finish', function() {
+          //   store.preview.setPlay(false);
+          // });
         }
       }
     });

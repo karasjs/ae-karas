@@ -860,8 +860,6 @@ function mask(prop) {
         }
 
         res.list = transformMask(item);
-        res.points = item.property('maskShape').value;
-        res.opacity = item.property('Mask Opacity').value;
         res.mode = item.maskMode;
         res.inverted = item.inverted;
       }
@@ -2338,7 +2336,7 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
 
 
         if (_item.mask && _item.mask.enabled) {
-          var m = parseMask(_item, temp);
+          var m = parseMask(_item, temp, start, duration, offset);
 
           if (temp.children && temp.children.length === 1) {
             temp.children.push(m);
@@ -2477,19 +2475,17 @@ function parseGeom(res, data, start, duration, offset) {
   if (type === 'rect') {
     child.props.style.width = size[0];
     child.props.style.height = size[1];
-
-    var _o = path.rect2polyline(size[0], size[1], roundness);
-
-    child.props.points = _o.points;
-    child.props.controls = _o.controls;
+    var o = path.rect2polyline(size[0], size[1], roundness);
+    child.props.points = o.points;
+    child.props.controls = o.controls;
   } else if (type === 'ellipse') {
     child.props.style.width = size[0];
     child.props.style.height = size[1];
 
-    var _o2 = path.ellipse2polyline();
+    var _o = path.ellipse2polyline();
 
-    child.props.points = _o2.points;
-    child.props.controls = _o2.controls;
+    child.props.points = _o.points;
+    child.props.controls = _o.controls;
   } else if (type === 'star') ; else if (type === 'path') {
     var _t11 = transformPoints(points, begin2, duration);
 
@@ -2723,19 +2719,17 @@ function parseMask(data, target, start, duration, offset) {
         position: 'absolute',
         fill: '#FFF'
       }
-    }
+    },
+    animate: []
   };
   var width = data.width,
       height = data.height,
-      _data$mask = data.mask;
-      _data$mask.list;
-      _data$mask.points;
-      _data$mask.opacity;
-      var mode = _data$mask.mode,
-      inverted = _data$mask.inverted; // if(opacity < 100) {
-  //   res.props.style.opacity = opacity * 0.01;
-  // }
-  // 相加之外都是相减
+      _data$mask = data.mask,
+      _data$mask$list = _data$mask.list,
+      points = _data$mask$list.points,
+      opacity = _data$mask$list.opacity,
+      mode = _data$mask.mode,
+      inverted = _data$mask.inverted; // 相加之外都是相减
 
   if (mode === MaskMode.ADD) {
     if (inverted) {
@@ -2749,6 +2743,65 @@ function parseMask(data, target, start, duration, offset) {
     } else {
       res.props.clip = true;
     }
+  } // 样式和target一致，只有位置信息需要
+
+
+  var style = targetProps.style;
+
+  for (var i in style) {
+    if (style.hasOwnProperty(i) && ['left', 'top', 'translateX', 'translateY'].indexOf(i) > -1) {
+      res.props.style[i] = style[i];
+    }
+  } // 要显示mask，可能会被target同化
+
+
+  res.props.style.visibility = undefined;
+  res.props.style.pointerEvents = undefined; // mask的2个动画，points和opacity
+
+  var o = {};
+  var begin2 = start - offset;
+
+  if (Array.isArray(points) && points.length) {
+    var t = transformPoints(points, begin2, duration);
+    o = t.data;
+    res.props.style.width = o.width;
+    res.props.style.height = o.height;
+    t.data = undefined;
+    var first = t.value[0];
+    res.props.points = first.points;
+    res.props.controls = first.controls;
+
+    if (t.value.length > 1) {
+      if (first.offset === 0) {
+        t.value[0] = {
+          offset: 0
+        };
+      }
+
+      res.animate.push(t);
+    }
+  } else {
+    return res;
+  }
+
+  if (Array.isArray(opacity) && opacity.length) {
+    var _t15 = transformOpacity(opacity, begin2, duration);
+
+    var _first15 = _t15.value[0];
+
+    if (_first15.opacity !== 1) {
+      res.props.style.opacity = _first15.opacity;
+    }
+
+    if (_t15.value.length > 1) {
+      if (_first15.offset === 0) {
+        _t15.value[0] = {
+          offset: 0
+        };
+      }
+
+      res.animate.push(_t15);
+    }
   } // 获取对象锚点，mask的锚点需保持相同
 
 
@@ -2760,28 +2813,8 @@ function parseMask(data, target, start, duration, offset) {
     var v = transformOrigin.split(' ');
     cx = parseFloat(v[0]);
     cy = parseFloat(v[1]);
-  } // 仅有points/controls和opacity的样式，同样可能为静态或动画
-  // $.ae2karas.log(list);
-  // let { vertices, inTangents, outTangents, closed } = points;
-  // let o = path.parse(vertices, inTangents, outTangents, closed);
-  // res.props.style.width = o.width;
-  // res.props.style.height = o.height;
-  // res.props.points = o.points
-  // res.props.controls = o.controls;
-  // 样式和target一致
+  } // 位置和锚点保持和mask相同，由于points可能不是0，0开始，需计算偏移
 
-
-  var style = targetProps.style;
-
-  for (var i in style) {
-    if (style.hasOwnProperty(i)) {
-      res.props.style[i] = style[i];
-    }
-  } // 要显示mask，可能会被target同化
-
-
-  res.props.style.visibility = undefined;
-  res.props.style.pointerEvents = undefined; // 位置和锚点保持和mask相同，由于points可能不是0，0开始，需计算偏移
 
   res.props.style.transformOrigin = cx - o.x2 + ' ' + (cy - o.y2);
   res.props.style.left = left + o.x2;

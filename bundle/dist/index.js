@@ -564,10 +564,9 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_14__.inject)('globa
           _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(animateController.list[0].currentTime);
 
           if (first) {
-            first = false;
-            animateController.list[0].on('finish', function () {
-              _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(false);
-            });
+            first = false; // animateController.list[0].on('finish', function() {
+            //   store.preview.setPlay(false);
+            // });
           }
         }
       });
