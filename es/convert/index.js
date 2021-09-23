@@ -7,6 +7,12 @@ import {
   transformRotateZ,
   transformScale,
   transformPath,
+  transformPoints,
+  transformFill,
+  transformStroke,
+  transformStrokeWidth,
+  transformLineJoin,
+  transformMiterLimit,
 } from './animate';
 import path from './path';
 
@@ -419,7 +425,7 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
         }
         // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻一级
         if(item.mask && item.mask.enabled) {
-          let m = parseMask(item, temp);
+          let m = parseMask(item, temp, start, duration, offset);
           if(temp.children && temp.children.length === 1) {
             temp.children.push(m);
           }
@@ -443,44 +449,82 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
 function parseGeom(res, data, start, duration, offset) {
   let { shape: { content, fill, gFill, stroke, transform }, trim } = data;
   let { type, direction, size, position, roundness, points } = content;
+  let begin2 = start - offset;
   let f;
-  if(fill) {
-    f = [
-      parseInt(fill.color[0] * 255),
-      parseInt(fill.color[1] * 255),
-      parseInt(fill.color[2] * 255),
-      fill.color[3]
-    ];
-    if(fill.opacity !== 100) {
-      f[3] *= fill.opacity * 0.01;
-    }
-  }
-  let s;
-  if(stroke) {
-    s = [
-      parseInt(stroke.color[0] * 255),
-      parseInt(stroke.color[1] * 255),
-      parseInt(stroke.color[2] * 255),
-      stroke.color[3]
-    ];
-    if(stroke.opacity !== 100) {
-      s[3] *= stroke.opacity * 0.01;
-    }
-  }
   let child = {
     tagName: '$polyline',
     props: {
       style: {
         position: 'absolute',
-        fill: f ? [f] : undefined,
-        strokeWidth: [stroke.width],
-        stroke: [s],
-        strokeLinejoin: [stroke.lineJoin],
-        strokeMiterlimit: [stroke.miterLimit],
       },
     },
     animate: [],
   };
+  if(Array.isArray(fill.color) && fill.color.length) {
+    let t = transformFill(fill, begin2, duration);
+    let first = t.value[0];
+    child.props.style.fill = first.fill;
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      child.animate.push(t);
+    }
+  }
+  if(Array.isArray(stroke.color) && stroke.color.length) {
+    let t = transformStroke(stroke, begin2, duration);
+    let first = t.value[0];
+    child.props.style.stroke = first.stroke;
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      child.animate.push(t);
+    }
+  }
+  if(Array.isArray(stroke.width) && stroke.width.length) {
+    let t = transformStrokeWidth(stroke.width, begin2, duration);
+    let first = t.value[0];
+    child.props.style.strokeWidth = first.strokeWidth;
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      child.animate.push(t);
+    }
+  }
+  if(Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
+    let t = transformLineJoin(stroke.lineJoin, begin2, duration);
+    let first = t.value[0];
+    child.props.style.strokeLineJoin = first.strokeLineJoin;
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      child.animate.push(t);
+    }
+  }
+  if(Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
+    let t = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+    let first = t.value[0];
+    child.props.style.strokeMiterlimit = first.strokeMiterlimit;
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      child.animate.push(t);
+    }
+  }
   if(stroke.dashes) {
     child.props.style.strokeDasharray = [stroke.dashes];
   }
@@ -502,15 +546,25 @@ function parseGeom(res, data, start, duration, offset) {
     // TODO
   }
   else if(type === 'path') {
-    let { vertices, inTangents, outTangents, closed } = points;
-    let o = path.parse(vertices, inTangents, outTangents, closed);
-    child.props.style.width = o.width;
-    child.props.style.height = o.height;
-    child.props.points = o.points
-    child.props.controls = o.controls;
+    let t = transformPoints(points, begin2, duration);
+    let data = t.data;
+    child.props.style.width = data.width;
+    child.props.style.height = data.height;
     // path的特殊位置计算
-    child.props.style.left = o.x2;
-    child.props.style.top = o.y2;
+    child.props.style.left = data.x2;
+    child.props.style.top = data.y2;
+    t.data = undefined;
+    let first = t.value[0];
+    child.props.points = first.points;
+    child.props.controls = first.controls;
+    if(t.value.length > 1) {
+      if(first.offset === 0) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
+      child.animate.push(t);
+    }
   }
   // path没有position
   if(position && position[0]) {
@@ -524,7 +578,6 @@ function parseGeom(res, data, start, duration, offset) {
   }
   // geom内嵌的transform单独分析，anchorPoint比较特殊
   let { anchorPoint } = transform;
-  let begin2 = start - offset;
   if(Array.isArray(anchorPoint) && anchorPoint.length) {
     let t = transformOrigin(anchorPoint, begin2, duration);
     let first = t.value[0];
@@ -661,7 +714,7 @@ function parseGeom(res, data, start, duration, offset) {
   res.children = [child];
 }
 
-function parseMask(data, target) {
+function parseMask(data, target, start, duration, offset) {
   $.ae2karas.log(data);
   $.ae2karas.log(target);
   // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
@@ -680,10 +733,10 @@ function parseMask(data, target) {
       },
     },
   };
-  let { width, height, mask: { points, opacity, mode, inverted } } = data;
-  if(opacity < 100) {
-    res.props.style.opacity = opacity * 0.01;
-  }
+  let { width, height, mask: { list, points, opacity, mode, inverted } } = data;
+  // if(opacity < 100) {
+  //   res.props.style.opacity = opacity * 0.01;
+  // }
   // 相加之外都是相减
   if(mode === MaskMode.ADD) {
     if(inverted) {
@@ -709,12 +762,14 @@ function parseMask(data, target) {
     cx = parseFloat(v[0]);
     cy = parseFloat(v[1]);
   }
-  let { vertices, inTangents, outTangents, closed } = points;
-  let o = path.parse(vertices, inTangents, outTangents, closed);
-  res.props.style.width = o.width;
-  res.props.style.height = o.height;
-  res.props.points = o.points
-  res.props.controls = o.controls;
+  // 仅有points/controls和opacity的样式，同样可能为静态或动画
+  // $.ae2karas.log(list);
+  // let { vertices, inTangents, outTangents, closed } = points;
+  // let o = path.parse(vertices, inTangents, outTangents, closed);
+  // res.props.style.width = o.width;
+  // res.props.style.height = o.height;
+  // res.props.points = o.points
+  // res.props.controls = o.controls;
   // 样式和target一致
   let style = targetProps.style;
   for(let i in style) {

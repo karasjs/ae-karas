@@ -1,3 +1,5 @@
+import path from './path';
+
 /**
  * 2个及以上的关键帧，获取区间，有可能有超过范围的无效关键帧，需滤除
  * 也有可能不及工作区间，需补充首尾，和原有首尾一样复制一个出来对齐区间
@@ -56,7 +58,7 @@ function getAreaList(list, begin, duration, reducer) {
     let next = list[1];
     let percent = (begin - first.time) / (next.time - first.time);
     first.time = begin;
-    first.value = reducer(first.value, next.value, percent);
+    first.value = reducer(first.value, next.value, percent, true);
     if(first.easing) {
       let points = sliceBezier([
         [0, 0],
@@ -405,6 +407,322 @@ export function transformPath(list, begin, duration, isEnd) {
         v.start = item.value * 0.01;
       }
       res.value.push(v);
+    }
+  }
+  return res;
+}
+
+export function transformPoints(list, begin, duration) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(list.length === 1) {
+    let { vertices, inTangents, outTangents, closed } = list[0].value;
+    let o = path.parse(vertices, inTangents, outTangents, closed);
+    res.value.push({
+      points: o.points,
+      controls: o.controls,
+    });
+    res.data = o;
+  }
+  else {
+    list = getAreaList(list, begin, duration, function(prev, next, percent, isStart) {
+      let { vertices1, inTangents1, outTangents1, closed } = prev;
+      let { vertices2, inTangents2, outTangents2 } = next;
+      let vertices = [], inTangents = [], outTangents = [];
+      for(let i = 0, len = vertices1.len; i < len; i++) {
+        let p = vertices1[i], n = vertices2[i];
+        let pIn = inTangents1[(i + 1) % len], nIn = inTangents2[(i + 1) % len];
+        let pOut = outTangents1[i], nOut = outTangents2[i];
+        // 直线切割或贝塞尔切割
+        if(pIn[0] === 0 && pIn[1] === 0
+          && nIn[0] === 0 && nIn[1] === 0
+          && pOut[0] === 0 && pOut[1] === 0
+          && nOut[0] === 0 && nOut[1] === 0) {
+          vertices.push([
+            p[0] + (n[0] - p[0]) * percent,
+            p[1] + (n[1] - p[1]) * percent
+          ]);
+          inTangents.push([0, 0]);
+          outTangents.push([0, 0]);
+        }
+        else {
+          let arr = [
+            p,
+            pOut,
+            pIn,
+            n,
+          ];
+          if(isStart) {
+            arr.reverse();
+          }
+          let s = sliceBezier(arr, percent);
+          vertices.push(s[3]);
+          if(isStart) {
+            inTangents.push(s[1]);
+            outTangents.push(s[2]);
+          }
+          else {
+            inTangents.push(s[2]);
+            outTangents.push(s[1]);
+          }
+        }
+      }
+      return {
+        vertices,
+        inTangents,
+        outTangents,
+        closed,
+      };
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      let { vertices, inTangents, outTangents, closed } = item.value;
+      let o;
+      if(i === 0) {
+        o = path.parse(vertices, inTangents, outTangents, closed);
+        res.data = o;
+      }
+      else {
+        o = path.parse(vertices, inTangents, outTangents, closed, res.data.x1, res.data.y1, res.data.x2, res.data.y2);
+      }
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        points: o.points,
+        controls: o.controls,
+      });
+    }
+  }
+  return res;
+}
+
+export function transformFill(fill, begin, duration) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(fill.color.length === 1) {
+    let first = fill.color[0];
+    let v = [
+      parseInt(first[0] * 255),
+      parseInt(first[1] * 255),
+      parseInt(first[2] * 255),
+      first[3],
+    ];
+    if(fill.opacity[0] < 100) {
+      v[3] *= fill.opacity[0] * 0.01;
+    }
+    res.value.push({
+      fill: [v],
+    });
+  }
+  else {
+    let len = fill.color[0].length;
+    let list = getAreaList(fill.color, begin, duration, function(prev, next, percent) {
+      let arr = [];
+      for(let i = 0; i < len; i++) {
+        arr[i] = prev[i] + (next[i] - prev[i]) * percent;
+      }
+      return arr;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      let v = [
+        parseInt(item[0] * 255),
+        parseInt(item[1] * 255),
+        parseInt(item[2] * 255),
+        item[3],
+      ];
+      if(fill.opacity[i] < 100) {
+        v[3] *= fill.opacity[i] * 0.01;
+      }
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        fill: [v],
+      });
+    }
+  }
+  return res;
+}
+
+export function transformStroke(stroke, begin, duration) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(stroke.color.length === 1) {
+    let first = stroke.color[0];
+    let v = [
+      parseInt(first[0] * 255),
+      parseInt(first[1] * 255),
+      parseInt(first[2] * 255),
+      first[3],
+    ];
+    if(stroke.opacity[0] < 100) {
+      v[3] *= stroke.opacity[0] * 0.01;
+    }
+    res.value.push({
+      stroke: [v],
+    });
+  }
+  else {
+    let list = getAreaList(stroke.color, begin, duration, function(prev, next, percent) {
+      return prev + (next - prev) * percent;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      let v = [
+        parseInt(item[0] * 255),
+        parseInt(item[1] * 255),
+        parseInt(item[2] * 255),
+        item[3],
+      ];
+      if(stroke.opacity[i] < 100) {
+        v[3] *= stroke.opacity[i] * 0.01;
+      }
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        stroke: [v],
+      });
+    }
+  }
+  return res;
+}
+
+export function transformStrokeWidth(list, begin, duration) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(list.length === 1) {
+    res.value.push({
+      strokeWidth: list,
+    });
+  }
+  else {
+    let len = list[0].length;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      let arr = [];
+      for(let i = 0; i < len; i++) {
+        arr[i] = prev[i] + (next[i] - prev[i]) * percent;
+      }
+      return arr;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        strokeWidth: item.value,
+      });
+    }
+  }
+  return res;
+}
+
+export function transformLineJoin(list, begin, duration) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(list.length === 1) {
+    let arr;
+    if(list[0] === 1) {
+      arr = ['miter'];
+    }
+    else if(list[0] === 2) {
+      arr = ['round'];
+    }
+    else {
+      arr = ['bevel'];
+    }
+    res.value.push({
+      strokeLinejoin: arr,
+    });
+  }
+  else {
+    list = getAreaList(list, begin, duration, function(prev, next, percent, isFirst) {
+      return isFirst ? prev : next;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      let arr = [];
+      for(let i = 0, len = item.value.length; i < len; i++) {
+        let item2 = item.value[i];
+        if(item2 === 1) {
+          arr.push('miter');
+        }
+        else if(item2 === 2) {
+          arr.push('round');
+        }
+        else {
+          arr.push('bevel');
+        }
+      }
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        strokeLinejoin: arr,
+      });
+    }
+  }
+  return res;
+}
+
+export function transformMiterLimit(list, begin, duration) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(list.length === 1) {
+    res.value.push({
+      strokeWidth: list,
+    });
+  }
+  else {
+    let len = list[0].length;
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      let arr = [];
+      for(let i = 0; i < len; i++) {
+        arr[i] = prev[i] + (next[i] - prev[i]) * percent;
+      }
+      return arr;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        strokeWidth: item.value,
+      });
     }
   }
   return res;

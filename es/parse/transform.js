@@ -24,17 +24,25 @@ const VECTOR_TRANSFORM = {
   'ADBE Vector Trim End': 'end',
 };
 
-function getPropertyValues(prop) {
+const MASK_TRANSFORM = {
+  'ADBE Mask Shape': 'points',
+  'ADBE Mask Opacity': 'opacity',
+};
+
+function getPropertyValues(prop, noEasing) {
   let { numKeys } = prop;
   // 根据关键帧数量，2+帧是普通变化，1帧等同于0帧value
   if(numKeys && numKeys > 1) {
     let arr = [];
     for(let i = 1; i <= numKeys; i++) {
-      arr.push({
+      let o = {
         time: prop.keyTime(i) * 1000,
         value: prop.keyValue(i),
-        easing: i === numKeys ? undefined : getEasing(prop, i, i + 1),
-      });
+      };
+      if(i !== numKeys && !noEasing) {
+        o.easing = getEasing(prop, i, i + 1);
+      }
+      arr.push(o);
     }
     return arr;
   }
@@ -94,7 +102,7 @@ export function transformLayer(prop) {
     if(item && item.enabled) {
       let matchName = item.matchName;
       if(LAYER_TRANSFORM.hasOwnProperty(matchName)) {
-        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item);
+        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item, false);
       }
     }
   }
@@ -108,9 +116,27 @@ export function transformVector(prop) {
     if(item && item.enabled) {
       let matchName = item.matchName;
       if(VECTOR_TRANSFORM.hasOwnProperty(matchName)) {
-        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item);
+        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item, false);
       }
     }
   }
   return res;
+}
+
+export function transformMask(prop) {
+  let res = {};
+  for(let i = 1; prop && i <= prop.numProperties; i++) {
+    let item = prop.property(i);
+    if(item && item.enabled) {
+      let matchName = item.matchName;
+      if(MASK_TRANSFORM.hasOwnProperty(matchName)) {
+        res[MASK_TRANSFORM[matchName]] = getPropertyValues(item, true);
+      }
+    }
+  }
+  return res;
+}
+
+export function transformGeom(prop) {
+  return getPropertyValues(prop, true);
 }

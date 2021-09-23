@@ -42,19 +42,28 @@ var VECTOR_TRANSFORM = {
   'ADBE Vector Trim Start': 'start',
   'ADBE Vector Trim End': 'end'
 };
+var MASK_TRANSFORM = {
+  'ADBE Mask Shape': 'points',
+  'ADBE Mask Opacity': 'opacity'
+};
 
-function getPropertyValues(prop) {
+function getPropertyValues(prop, noEasing) {
   var numKeys = prop.numKeys; // 根据关键帧数量，2+帧是普通变化，1帧等同于0帧value
 
   if (numKeys && numKeys > 1) {
     var arr = [];
 
     for (var i = 1; i <= numKeys; i++) {
-      arr.push({
+      var o = {
         time: prop.keyTime(i) * 1000,
-        value: prop.keyValue(i),
-        easing: i === numKeys ? undefined : getEasing(prop, i, i + 1)
-      });
+        value: prop.keyValue(i)
+      };
+
+      if (i !== numKeys && !noEasing) {
+        o.easing = getEasing(prop, i, i + 1);
+      }
+
+      arr.push(o);
     }
 
     return arr;
@@ -121,7 +130,7 @@ function transformLayer(prop) {
       var matchName = item.matchName;
 
       if (LAYER_TRANSFORM.hasOwnProperty(matchName)) {
-        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item);
+        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item, false);
       }
     }
   }
@@ -138,12 +147,32 @@ function transformVector(prop) {
       var matchName = item.matchName;
 
       if (VECTOR_TRANSFORM.hasOwnProperty(matchName)) {
-        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item);
+        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item, false);
       }
     }
   }
 
   return res;
+}
+function transformMask(prop) {
+  var res = {};
+
+  for (var i = 1; prop && i <= prop.numProperties; i++) {
+    var item = prop.property(i);
+
+    if (item && item.enabled) {
+      var matchName = item.matchName;
+
+      if (MASK_TRANSFORM.hasOwnProperty(matchName)) {
+        res[MASK_TRANSFORM[matchName]] = getPropertyValues(item, true);
+      }
+    }
+  }
+
+  return res;
+}
+function transformGeom(prop) {
+  return getPropertyValues(prop, true);
 }
 
 function group(prop) {
@@ -237,15 +266,15 @@ function rect(prop) {
           break;
 
         case 'ADBE Vector Rect Size':
-          res.size = item.value;
+          res.size = transformGeom(item);
           break;
 
         case 'ADBE Vector Rect Position':
-          res.position = item.value;
+          res.position = transformGeom(item);
           break;
 
         case 'ADBE Vector Rect Roundness':
-          res.roundness = item.value;
+          res.roundness = transformGeom(item);
           break;
       }
     }
@@ -271,11 +300,11 @@ function ellipse(prop) {
           break;
 
         case 'ADBE Vector Ellipse Size':
-          res.size = item.value;
+          res.size = transformGeom(item);
           break;
 
         case 'ADBE Vector Ellipse Position':
-          res.position = item.value;
+          res.position = transformGeom(item);
           break;
       }
     }
@@ -349,27 +378,27 @@ function stroke(prop) {
 
       switch (matchName) {
         case 'ADBE Vector Stroke Color':
-          res.color = item.value;
+          res.color = transformGeom(item);
           break;
 
         case 'ADBE Vector Stroke Opacity':
-          res.opacity = item.value;
+          res.opacity = transformGeom(item);
           break;
 
         case 'ADBE Vector Stroke Width':
-          res.width = item.value;
+          res.width = transformGeom(item);
           break;
 
         case 'ADBE Vector Line Cap':
-          res.lineCap = item.value;
+          res.lineCap = transformGeom(item);
           break;
 
         case 'ADBE Vector Stroke Line Join':
-          res.lineJoin = item.value;
+          res.lineJoin = transformGeom(item);
           break;
 
         case 'ADBE Vector Stroke Miter Limit':
-          res.miterLimit = item.value;
+          res.miterLimit = transformGeom(item);
           break;
         // case 'ADBE Vector Stroke Dashes':
         //   res.dashes = dash(item);
@@ -441,7 +470,7 @@ function path$1(prop) {
           break;
 
         case 'ADBE Vector Shape':
-          res.points = item.value;
+          res.points = transformGeom(item);
           break;
       }
     }
@@ -465,11 +494,11 @@ function fill(prop) {
           break;
 
         case 'ADBE Vector Fill Color':
-          res.color = item.value;
+          res.color = transformGeom(item);
           break;
 
         case 'ADBE Vector Fill Opacity':
-          res.opacity = item.value;
+          res.opacity = transformGeom(item);
           break;
       }
     }
@@ -830,6 +859,7 @@ function mask(prop) {
           res.enabled = true;
         }
 
+        res.list = transformMask(item);
         res.points = item.property('maskShape').value;
         res.opacity = item.property('Mask Opacity').value;
         res.mode = item.maskMode;
@@ -890,6 +920,179 @@ function parse$1 (composition) {
   };
 }
 
+var path = {
+  parse: function parse(vertices, inTangents, outTangents, closed, x1, y1, x2, y2) {
+    if (x1 === undefined) {
+      x1 = x2 = vertices[0][0];
+      y1 = y2 = vertices[0][1]; // 控制点是相对于顶点的坐标
+
+      var it = inTangents[0],
+          ot = outTangents[0];
+
+      if (it[0]) {
+        x1 = Math.max(x1, x1 + it[0]);
+        x2 = Math.min(x2, x1 + it[0]);
+      }
+
+      if (it[1]) {
+        y1 = Math.max(y1, y1 + it[1]);
+        y2 = Math.min(y2, y1 + it[1]);
+      }
+
+      if (ot[0]) {
+        x1 = Math.max(x1, x1 + ot[0]);
+        x2 = Math.min(x2, x1 + ot[0]);
+      }
+
+      if (ot[1]) {
+        y1 = Math.max(y1, y1 + ot[1]);
+        y2 = Math.min(y2, y1 + ot[1]);
+      } // 循环获取极值
+
+
+      for (var i = 1, len = vertices.length; i < len; i++) {
+        var item = vertices[i];
+        x1 = Math.max(x1, item[0]);
+        y1 = Math.max(y1, item[1]);
+        x2 = Math.min(x2, item[0]);
+        y2 = Math.min(y2, item[1]); // 控制点是相对于顶点的坐标
+
+        var _it = inTangents[i],
+            _ot = outTangents[i];
+
+        if (_it[0]) {
+          x1 = Math.max(x1, item[0] + _it[0]);
+          x2 = Math.min(x2, item[0] + _it[0]);
+        }
+
+        if (_it[1]) {
+          y1 = Math.max(y1, item[1] + _it[1]);
+          y2 = Math.min(y2, item[1] + _it[1]);
+        }
+
+        if (_ot[0]) {
+          x1 = Math.max(x1, item[0] + _ot[0]);
+          x2 = Math.min(x2, item[0] + _ot[0]);
+        }
+
+        if (_ot[1]) {
+          y1 = Math.max(y1, item[1] + _ot[1]);
+          y2 = Math.min(y2, item[1] + _ot[1]);
+        }
+      }
+    }
+
+    var w = x1 - x2,
+        h = y1 - y2;
+    var pts = [],
+        cts = [];
+
+    for (var _i = 0, _len = vertices.length; _i < _len; _i++) {
+      var _item = vertices[_i];
+      pts.push([(_item[0] - x2) / w, (_item[1] - y2) / h]);
+      var _it2 = inTangents[_i],
+          _ot2 = outTangents[_i]; // 上一个顶点到本顶点，即便控制点为空也要填补为顶点数据，为2帧之间动画过渡考虑
+
+      var j = _i - 1;
+
+      if (j === -1) {
+        j = _len - 1;
+      }
+
+      cts[j] = cts[j] || [];
+      cts[j].push(pts[_i][0] + _it2[0] / w);
+      cts[j].push(pts[_i][1] + _it2[1] / h); // 本顶点到下一个顶点，最后一个比较特殊是到第一个，需要调整顺序
+
+      cts[_i] = cts[_i] || [];
+      var x = pts[_i][0] + _ot2[0] / h,
+          y = pts[_i][1] + _ot2[1] / h;
+
+      if (_i === _len - 1) {
+        cts[_i].unshift(y);
+
+        cts[_i].unshift(x);
+      } else {
+        cts[_i].push(x);
+
+        cts[_i].push(y);
+      }
+    }
+
+    if (closed) {
+      pts.push(pts[0].slice(0));
+    }
+
+    return {
+      x1: x1,
+      y1: y1,
+      x2: x2,
+      y2: y2,
+      width: w,
+      height: h,
+      points: pts,
+      controls: cts
+    };
+  },
+  rect2polyline: function rect2polyline(width, height, roundness) {
+    roundness = roundness || 0;
+    var r = Math.min(width, height) * 0.5;
+    roundness = Math.min(roundness, r);
+    var pts = [],
+        cts = [];
+
+    if (roundness && roundness > 0) {
+      var h = roundness * 0.5522847498307936;
+      pts.push([(width - roundness) / width, 0]);
+      cts.push([(width - roundness + h) / width, 0, 1, (roundness - h) / height]);
+      pts.push([1, roundness / height]);
+      cts.push([]);
+      pts.push([1, (height - roundness) / height]);
+      cts.push([1, (height - roundness + h) / height, (width - roundness + h) / width, 1]);
+      pts.push([(width - roundness) / width, 1]);
+      cts.push([]);
+      pts.push([roundness / width, 1]);
+      cts.push([(roundness - h) / width, 1, 0, (height - roundness + h) / height]);
+      pts.push([0, (height - roundness) / height]);
+      cts.push([]);
+      pts.push([0, roundness / height]);
+      cts.push([0, (roundness - h) / height, (roundness - h) / width, 0]);
+      pts.push([roundness / width, 0]);
+      cts.push([]);
+      pts.push([(width - roundness) / width, 0]);
+    } else {
+      pts.push([1, 0]);
+      pts.push([1, 1]);
+      pts.push([0, 1]);
+      pts.push([0, 0]);
+      pts.push([1, 0]);
+    }
+
+    return {
+      points: pts,
+      controls: cts
+    };
+  },
+  ellipse2polyline: function ellipse2polyline() {
+    var pts = [],
+        cts = [];
+    var rx = 0.5 * 0.5522847498307936,
+        ry = 0.5 * 0.5522847498307936;
+    pts.push([0.5, 0]);
+    cts.push([0.5 + rx, 0, 1, 0.5 - ry]);
+    pts.push([1, 0.5]);
+    cts.push([1, 0.5 + ry, 0.5 + rx, 1]);
+    pts.push([0.5, 1]);
+    cts.push([0.5 - rx, 1, 0, 0.5 + ry]);
+    pts.push([0, 0.5]);
+    cts.push([0, 0.5 - ry, rx, 0]);
+    pts.push([0.5, 0]);
+    return {
+      points: pts,
+      controls: cts
+    };
+  }
+};
+
 /**
  * 2个及以上的关键帧，获取区间，有可能有超过范围的无效关键帧，需滤除
  * 也有可能不及工作区间，需补充首尾，和原有首尾一样复制一个出来对齐区间
@@ -900,6 +1103,7 @@ function parse$1 (composition) {
  * @param reducer 当关键帧范围在工作区间外时，每个特效传入的截取函数
  * @returns {(number|number)[]}
  */
+
 function getAreaList(list, begin, duration, reducer) {
   var len = list.length;
   var startIndex = 0,
@@ -950,7 +1154,7 @@ function getAreaList(list, begin, duration, reducer) {
     var next = list[1];
     var percent = (begin - first.time) / (next.time - first.time);
     first.time = begin;
-    first.value = reducer(first.value, next.value, percent);
+    first.value = reducer(first.value, next.value, percent, true);
 
     if (first.easing) {
       var points = sliceBezier([[0, 0], [first.easing[0], first.easing[1]], [first.easing[2], first.easing[3]], [1, 1]].reverse(), percent).reverse();
@@ -1302,175 +1506,329 @@ function transformPath(list, begin, duration, isEnd) {
 
   return res;
 }
-
-var path = {
-  parse: function parse(vertices, inTangents, outTangents, closed) {
-    var x1 = vertices[0][0],
-        y1 = vertices[0][1];
-    var x2 = x1,
-        y2 = y1; // 控制点是相对于顶点的坐标
-
-    var it = inTangents[0],
-        ot = outTangents[0];
-
-    if (it[0]) {
-      x1 = Math.max(x1, x1 + it[0]);
-      x2 = Math.min(x2, x1 + it[0]);
+function transformPoints(list, begin, duration) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
     }
+  }; // 只有1帧没有动画，无需计算补间
 
-    if (it[1]) {
-      y1 = Math.max(y1, y1 + it[1]);
-      y2 = Math.min(y2, y1 + it[1]);
-    }
+  if (list.length === 1) {
+    var _list$0$value = list[0].value,
+        vertices = _list$0$value.vertices,
+        inTangents = _list$0$value.inTangents,
+        outTangents = _list$0$value.outTangents,
+        closed = _list$0$value.closed;
+    var o = path.parse(vertices, inTangents, outTangents, closed);
+    res.value.push({
+      points: o.points,
+      controls: o.controls
+    });
+    res.data = o;
+  } else {
+    list = getAreaList(list, begin, duration, function (prev, next, percent, isStart) {
+      var vertices1 = prev.vertices1,
+          inTangents1 = prev.inTangents1,
+          outTangents1 = prev.outTangents1,
+          closed = prev.closed;
+      var vertices2 = next.vertices2,
+          inTangents2 = next.inTangents2,
+          outTangents2 = next.outTangents2;
+      var vertices = [],
+          inTangents = [],
+          outTangents = [];
 
-    if (ot[0]) {
-      x1 = Math.max(x1, x1 + ot[0]);
-      x2 = Math.min(x2, x1 + ot[0]);
-    }
+      for (var i = 0, len = vertices1.len; i < len; i++) {
+        var p = vertices1[i],
+            n = vertices2[i];
+        var pIn = inTangents1[(i + 1) % len],
+            nIn = inTangents2[(i + 1) % len];
+        var pOut = outTangents1[i],
+            nOut = outTangents2[i]; // 直线切割或贝塞尔切割
 
-    if (ot[1]) {
-      y1 = Math.max(y1, y1 + ot[1]);
-      y2 = Math.min(y2, y1 + ot[1]);
-    }
+        if (pIn[0] === 0 && pIn[1] === 0 && nIn[0] === 0 && nIn[1] === 0 && pOut[0] === 0 && pOut[1] === 0 && nOut[0] === 0 && nOut[1] === 0) {
+          vertices.push([p[0] + (n[0] - p[0]) * percent, p[1] + (n[1] - p[1]) * percent]);
+          inTangents.push([0, 0]);
+          outTangents.push([0, 0]);
+        } else {
+          var arr = [p, pOut, pIn, n];
 
-    for (var i = 1, len = vertices.length; i < len; i++) {
-      var item = vertices[i];
-      x1 = Math.max(x1, item[0]);
-      y1 = Math.max(y1, item[1]);
-      x2 = Math.min(x2, item[0]);
-      y2 = Math.min(y2, item[1]); // 控制点是相对于顶点的坐标
+          if (isStart) {
+            arr.reverse();
+          }
 
-      var _it = inTangents[i],
-          _ot = outTangents[i];
+          var s = sliceBezier(arr, percent);
+          vertices.push(s[3]);
 
-      if (_it[0]) {
-        x1 = Math.max(x1, item[0] + _it[0]);
-        x2 = Math.min(x2, item[0] + _it[0]);
-      }
-
-      if (_it[1]) {
-        y1 = Math.max(y1, item[1] + _it[1]);
-        y2 = Math.min(y2, item[1] + _it[1]);
-      }
-
-      if (_ot[0]) {
-        x1 = Math.max(x1, item[0] + _ot[0]);
-        x2 = Math.min(x2, item[0] + _ot[0]);
-      }
-
-      if (_ot[1]) {
-        y1 = Math.max(y1, item[1] + _ot[1]);
-        y2 = Math.min(y2, item[1] + _ot[1]);
-      }
-    }
-
-    var w = x1 - x2,
-        h = y1 - y2;
-    var pts = [],
-        cts = [];
-
-    for (var _i = 0, _len = vertices.length; _i < _len; _i++) {
-      var _item = vertices[_i];
-      pts.push([(_item[0] - x2) / w, (_item[1] - y2) / h]);
-      var _it2 = inTangents[_i],
-          _ot2 = outTangents[_i]; // 上一个顶点到本顶点
-
-      if (_it2[0] || _it2[1]) {
-        var j = _i - 1;
-
-        if (j === -1) {
-          j = _len - 1;
+          if (isStart) {
+            inTangents.push(s[1]);
+            outTangents.push(s[2]);
+          } else {
+            inTangents.push(s[2]);
+            outTangents.push(s[1]);
+          }
         }
-
-        cts[j] = cts[j] || [];
-        cts[j].push(pts[_i][0] + _it2[0] / w);
-        cts[j].push(pts[_i][1] + _it2[1] / h);
-      } // 本顶点到下一个顶点
-
-
-      if (_ot2[0] || _ot2[1]) {
-        cts[_i] = cts[_i] || [];
-
-        cts[_i].push(pts[_i][0] + _ot2[0] / h);
-
-        cts[_i].push(pts[_i][1] + _ot2[1] / h);
       }
+
+      return {
+        vertices: vertices,
+        inTangents: inTangents,
+        outTangents: outTangents,
+        closed: closed
+      };
+    });
+
+    for (var i = 0, len = list.length; i < len; i++) {
+      var item = list[i];
+      var _item$value = item.value,
+          _vertices = _item$value.vertices,
+          _inTangents = _item$value.inTangents,
+          _outTangents = _item$value.outTangents,
+          _closed = _item$value.closed;
+
+      var _o2 = void 0;
+
+      if (i === 0) {
+        _o2 = path.parse(_vertices, _inTangents, _outTangents, _closed);
+        res.data = _o2;
+      } else {
+        _o2 = path.parse(_vertices, _inTangents, _outTangents, _closed, res.data.x1, res.data.y1, res.data.x2, res.data.y2);
+      }
+
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        points: _o2.points,
+        controls: _o2.controls
+      });
     }
-
-    if (closed) {
-      pts.push(pts[0].slice(0));
-    }
-
-    return {
-      x1: x1,
-      y1: y1,
-      x2: x2,
-      y2: y2,
-      width: w,
-      height: h,
-      points: pts,
-      controls: cts
-    };
-  },
-  rect2polyline: function rect2polyline(width, height, roundness) {
-    roundness = roundness || 0;
-    var r = Math.min(width, height) * 0.5;
-    roundness = Math.min(roundness, r);
-    var pts = [],
-        cts = [];
-
-    if (roundness && roundness > 0) {
-      var h = roundness * 0.5522847498307936;
-      pts.push([(width - roundness) / width, 0]);
-      cts.push([(width - roundness + h) / width, 0, 1, (roundness - h) / height]);
-      pts.push([1, roundness / height]);
-      cts.push([]);
-      pts.push([1, (height - roundness) / height]);
-      cts.push([1, (height - roundness + h) / height, (width - roundness + h) / width, 1]);
-      pts.push([(width - roundness) / width, 1]);
-      cts.push([]);
-      pts.push([roundness / width, 1]);
-      cts.push([(roundness - h) / width, 1, 0, (height - roundness + h) / height]);
-      pts.push([0, (height - roundness) / height]);
-      cts.push([]);
-      pts.push([0, roundness / height]);
-      cts.push([0, (roundness - h) / height, (roundness - h) / width, 0]);
-      pts.push([roundness / width, 0]);
-      cts.push([]);
-      pts.push([(width - roundness) / width, 0]);
-    } else {
-      pts.push([1, 0]);
-      pts.push([1, 1]);
-      pts.push([0, 1]);
-      pts.push([0, 0]);
-      pts.push([1, 0]);
-    }
-
-    return {
-      points: pts,
-      controls: cts
-    };
-  },
-  ellipse2polyline: function ellipse2polyline() {
-    var pts = [],
-        cts = [];
-    var rx = 0.5 * 0.5522847498307936,
-        ry = 0.5 * 0.5522847498307936;
-    pts.push([0.5, 0]);
-    cts.push([0.5 + rx, 0, 1, 0.5 - ry]);
-    pts.push([1, 0.5]);
-    cts.push([1, 0.5 + ry, 0.5 + rx, 1]);
-    pts.push([0.5, 1]);
-    cts.push([0.5 - rx, 1, 0, 0.5 + ry]);
-    pts.push([0, 0.5]);
-    cts.push([0, 0.5 - ry, rx, 0]);
-    pts.push([0.5, 0]);
-    return {
-      points: pts,
-      controls: cts
-    };
   }
-};
+
+  return res;
+}
+function transformFill(fill, begin, duration) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
+    }
+  }; // 只有1帧没有动画，无需计算补间
+
+  if (fill.color.length === 1) {
+    var first = fill.color[0];
+    var v = [parseInt(first[0] * 255), parseInt(first[1] * 255), parseInt(first[2] * 255), first[3]];
+
+    if (fill.opacity[0] < 100) {
+      v[3] *= fill.opacity[0] * 0.01;
+    }
+
+    res.value.push({
+      fill: [v]
+    });
+  } else {
+    var len = fill.color[0].length;
+    var list = getAreaList(fill.color, begin, duration, function (prev, next, percent) {
+      var arr = [];
+
+      for (var i = 0; i < len; i++) {
+        arr[i] = prev[i] + (next[i] - prev[i]) * percent;
+      }
+
+      return arr;
+    });
+
+    for (var i = 0, _len = list.length; i < _len; i++) {
+      var item = list[i];
+      var _v3 = [parseInt(item[0] * 255), parseInt(item[1] * 255), parseInt(item[2] * 255), item[3]];
+
+      if (fill.opacity[i] < 100) {
+        _v3[3] *= fill.opacity[i] * 0.01;
+      }
+
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        fill: [_v3]
+      });
+    }
+  }
+
+  return res;
+}
+function transformStroke(stroke, begin, duration) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
+    }
+  }; // 只有1帧没有动画，无需计算补间
+
+  if (stroke.color.length === 1) {
+    var first = stroke.color[0];
+    var v = [parseInt(first[0] * 255), parseInt(first[1] * 255), parseInt(first[2] * 255), first[3]];
+
+    if (stroke.opacity[0] < 100) {
+      v[3] *= stroke.opacity[0] * 0.01;
+    }
+
+    res.value.push({
+      stroke: [v]
+    });
+  } else {
+    var list = getAreaList(stroke.color, begin, duration, function (prev, next, percent) {
+      return prev + (next - prev) * percent;
+    });
+
+    for (var i = 0, len = list.length; i < len; i++) {
+      var item = list[i];
+      var _v4 = [parseInt(item[0] * 255), parseInt(item[1] * 255), parseInt(item[2] * 255), item[3]];
+
+      if (stroke.opacity[i] < 100) {
+        _v4[3] *= stroke.opacity[i] * 0.01;
+      }
+
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        stroke: [_v4]
+      });
+    }
+  }
+
+  return res;
+}
+function transformStrokeWidth(list, begin, duration) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
+    }
+  }; // 只有1帧没有动画，无需计算补间
+
+  if (list.length === 1) {
+    res.value.push({
+      strokeWidth: list
+    });
+  } else {
+    var len = list[0].length;
+    list = getAreaList(list, begin, duration, function (prev, next, percent) {
+      var arr = [];
+
+      for (var i = 0; i < len; i++) {
+        arr[i] = prev[i] + (next[i] - prev[i]) * percent;
+      }
+
+      return arr;
+    });
+
+    for (var i = 0, _len2 = list.length; i < _len2; i++) {
+      var item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        strokeWidth: item.value
+      });
+    }
+  }
+
+  return res;
+}
+function transformLineJoin(list, begin, duration) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
+    }
+  }; // 只有1帧没有动画，无需计算补间
+
+  if (list.length === 1) {
+    var arr;
+
+    if (list[0] === 1) {
+      arr = ['miter'];
+    } else if (list[0] === 2) {
+      arr = ['round'];
+    } else {
+      arr = ['bevel'];
+    }
+
+    res.value.push({
+      strokeLinejoin: arr
+    });
+  } else {
+    list = getAreaList(list, begin, duration, function (prev, next, percent, isFirst) {
+      return isFirst ? prev : next;
+    });
+
+    for (var i = 0, len = list.length; i < len; i++) {
+      var item = list[i];
+      var _arr = [];
+
+      for (var _i2 = 0, _len3 = item.value.length; _i2 < _len3; _i2++) {
+        var item2 = item.value[_i2];
+
+        if (item2 === 1) {
+          _arr.push('miter');
+        } else if (item2 === 2) {
+          _arr.push('round');
+        } else {
+          _arr.push('bevel');
+        }
+      }
+
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        strokeLinejoin: _arr
+      });
+    }
+  }
+
+  return res;
+}
+function transformMiterLimit(list, begin, duration) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
+    }
+  }; // 只有1帧没有动画，无需计算补间
+
+  if (list.length === 1) {
+    res.value.push({
+      strokeWidth: list
+    });
+  } else {
+    var len = list[0].length;
+    list = getAreaList(list, begin, duration, function (prev, next, percent) {
+      var arr = [];
+
+      for (var i = 0; i < len; i++) {
+        arr[i] = prev[i] + (next[i] - prev[i]) * percent;
+      }
+
+      return arr;
+    });
+
+    for (var i = 0, _len4 = list.length; i < _len4; i++) {
+      var item = list[i];
+      res.value.push({
+        offset: (item.time - begin) / duration,
+        strokeWidth: item.value
+      });
+    }
+  }
+
+  return res;
+}
 
 /**
  * 预解析父级链接，不递归深入children，返回一个普通的div
@@ -2016,40 +2374,101 @@ function parseGeom(res, data, start, duration, offset) {
       position = content.position,
       roundness = content.roundness,
       points = content.points;
+  var begin2 = start - offset;
   var f;
-
-  if (fill) {
-    f = [parseInt(fill.color[0] * 255), parseInt(fill.color[1] * 255), parseInt(fill.color[2] * 255), fill.color[3]];
-
-    if (fill.opacity !== 100) {
-      f[3] *= fill.opacity * 0.01;
-    }
-  }
-
-  var s;
-
-  if (stroke) {
-    s = [parseInt(stroke.color[0] * 255), parseInt(stroke.color[1] * 255), parseInt(stroke.color[2] * 255), stroke.color[3]];
-
-    if (stroke.opacity !== 100) {
-      s[3] *= stroke.opacity * 0.01;
-    }
-  }
-
   var child = {
     tagName: '$polyline',
     props: {
       style: {
-        position: 'absolute',
-        fill: f ? [f] : undefined,
-        strokeWidth: [stroke.width],
-        stroke: [s],
-        strokeLinejoin: [stroke.lineJoin],
-        strokeMiterlimit: [stroke.miterLimit]
+        position: 'absolute'
       }
     },
     animate: []
   };
+
+  if (Array.isArray(fill.color) && fill.color.length) {
+    var t = transformFill(fill, begin2, duration);
+    var first = t.value[0];
+    child.props.style.fill = first.fill;
+
+    if (t.value.length > 1) {
+      if (first.offset === 0) {
+        t.value[0] = {
+          offset: 0
+        };
+      }
+
+      child.animate.push(t);
+    }
+  }
+
+  if (Array.isArray(stroke.color) && stroke.color.length) {
+    var _t7 = transformStroke(stroke, begin2, duration);
+
+    var _first7 = _t7.value[0];
+    child.props.style.stroke = _first7.stroke;
+
+    if (_t7.value.length > 1) {
+      if (_first7.offset === 0) {
+        _t7.value[0] = {
+          offset: 0
+        };
+      }
+
+      child.animate.push(_t7);
+    }
+  }
+
+  if (Array.isArray(stroke.width) && stroke.width.length) {
+    var _t8 = transformStrokeWidth(stroke.width, begin2, duration);
+
+    var _first8 = _t8.value[0];
+    child.props.style.strokeWidth = _first8.strokeWidth;
+
+    if (_t8.value.length > 1) {
+      if (_first8.offset === 0) {
+        _t8.value[0] = {
+          offset: 0
+        };
+      }
+
+      child.animate.push(_t8);
+    }
+  }
+
+  if (Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
+    var _t9 = transformLineJoin(stroke.lineJoin, begin2, duration);
+
+    var _first9 = _t9.value[0];
+    child.props.style.strokeLineJoin = _first9.strokeLineJoin;
+
+    if (_t9.value.length > 1) {
+      if (_first9.offset === 0) {
+        _t9.value[0] = {
+          offset: 0
+        };
+      }
+
+      child.animate.push(_t9);
+    }
+  }
+
+  if (Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
+    var _t10 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+
+    var _first10 = _t10.value[0];
+    child.props.style.strokeMiterlimit = _first10.strokeMiterlimit;
+
+    if (_t10.value.length > 1) {
+      if (_first10.offset === 0) {
+        _t10.value[0] = {
+          offset: 0
+        };
+      }
+
+      child.animate.push(_t10);
+    }
+  }
 
   if (stroke.dashes) {
     child.props.style.strokeDasharray = [stroke.dashes];
@@ -2058,32 +2477,42 @@ function parseGeom(res, data, start, duration, offset) {
   if (type === 'rect') {
     child.props.style.width = size[0];
     child.props.style.height = size[1];
-    var o = path.rect2polyline(size[0], size[1], roundness);
-    child.props.points = o.points;
-    child.props.controls = o.controls;
+
+    var _o = path.rect2polyline(size[0], size[1], roundness);
+
+    child.props.points = _o.points;
+    child.props.controls = _o.controls;
   } else if (type === 'ellipse') {
     child.props.style.width = size[0];
     child.props.style.height = size[1];
 
-    var _o = path.ellipse2polyline();
+    var _o2 = path.ellipse2polyline();
 
-    child.props.points = _o.points;
-    child.props.controls = _o.controls;
-  } else if (type === 'star') ; else if (type === 'path') {
-    var vertices = points.vertices,
-        inTangents = points.inTangents,
-        outTangents = points.outTangents,
-        closed = points.closed;
-
-    var _o2 = path.parse(vertices, inTangents, outTangents, closed);
-
-    child.props.style.width = _o2.width;
-    child.props.style.height = _o2.height;
     child.props.points = _o2.points;
-    child.props.controls = _o2.controls; // path的特殊位置计算
+    child.props.controls = _o2.controls;
+  } else if (type === 'star') ; else if (type === 'path') {
+    var _t11 = transformPoints(points, begin2, duration);
 
-    child.props.style.left = _o2.x2;
-    child.props.style.top = _o2.y2;
+    var _data = _t11.data;
+    child.props.style.width = _data.width;
+    child.props.style.height = _data.height; // path的特殊位置计算
+
+    child.props.style.left = _data.x2;
+    child.props.style.top = _data.y2;
+    _t11.data = undefined;
+    var _first11 = _t11.value[0];
+    child.props.points = _first11.points;
+    child.props.controls = _first11.controls;
+
+    if (_t11.value.length > 1) {
+      if (_first11.offset === 0) {
+        _t11.value[0] = {
+          offset: 0
+        };
+      }
+
+      child.animate.push(_t11);
+    }
   } // path没有position
 
 
@@ -2101,12 +2530,14 @@ function parseGeom(res, data, start, duration, offset) {
 
 
   var anchorPoint = transform.anchorPoint;
-  var begin2 = start - offset;
 
   if (Array.isArray(anchorPoint) && anchorPoint.length) {
-    var t = transformOrigin(anchorPoint, begin2, duration);
-    var first = t.value[0];
-    var v = first.transformOrigin.split(' ');
+    var _t12 = transformOrigin(anchorPoint, begin2, duration);
+
+    var _first12 = _t12.value[0];
+
+    var v = _first12.transformOrigin.split(' ');
+
     v[0] = parseFloat(v[0]);
     v[1] = parseFloat(v[1]);
     /**
@@ -2125,19 +2556,19 @@ function parseGeom(res, data, start, duration, offset) {
       v[1] += h * 0.5;
 
       if (v[0] !== w * 0.5 || v[1] !== h * 0.5) {
-        child.props.style.transformOrigin = first.transformOrigin;
+        child.props.style.transformOrigin = _first12.transformOrigin;
       }
 
-      if (t.value.length > 1) {
-        if (first.offset === 0) {
-          t.value[0] = {
+      if (_t12.value.length > 1) {
+        if (_first12.offset === 0) {
+          _t12.value[0] = {
             offset: 0
           };
         } // tfo的每个动画需考虑对坐标的影响
 
 
-        for (var i = 1, len = t.value.length; i < len; i++) {
-          var item = t.value[i];
+        for (var i = 1, len = _t12.value.length; i < len; i++) {
+          var item = _t12.value[i];
           var tfo = item.transformOrigin.split(' ');
           tfo[0] = parseFloat(tfo[0]);
           tfo[1] = parseFloat(tfo[1]);
@@ -2145,7 +2576,7 @@ function parseGeom(res, data, start, duration, offset) {
           item.top = top - tfo[1];
         }
 
-        child.animate.push(t);
+        child.animate.push(_t12);
       }
     } else {
       // tfo中心判断，加上尺寸*0.5
@@ -2153,17 +2584,17 @@ function parseGeom(res, data, start, duration, offset) {
       v[1] += size[1] * 0.5;
 
       if (v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
-        child.props.style.transformOrigin = first.transformOrigin;
+        child.props.style.transformOrigin = _first12.transformOrigin;
       }
 
-      if (t.value.length > 1) {
-        if (first.offset === 0) {
-          t.value[0] = {
+      if (_t12.value.length > 1) {
+        if (_first12.offset === 0) {
+          _t12.value[0] = {
             offset: 0
           };
         }
 
-        child.animate.push(t);
+        child.animate.push(_t12);
       }
 
       if (v[0]) {
@@ -2227,44 +2658,44 @@ function parseGeom(res, data, start, duration, offset) {
         _end = trim.end;
 
     if (_start2.length > 1) {
-      var _t7 = transformPath(_start2, begin2, duration, false);
+      var _t13 = transformPath(_start2, begin2, duration, false);
 
-      var _first7 = _t7.value[0];
+      var _first13 = _t13.value[0];
 
-      if (_first7.start !== 0) {
-        child.props.start = _first7.start;
+      if (_first13.start !== 0) {
+        child.props.start = _first13.start;
       }
 
-      if (_t7.value.length > 1) {
-        if (_first7.offset === 0) {
-          _t7.value[0] = {
+      if (_t13.value.length > 1) {
+        if (_first13.offset === 0) {
+          _t13.value[0] = {
             offset: 0
           };
         }
 
-        child.animate.push(_t7);
+        child.animate.push(_t13);
       }
     } else {
       child.props.start = _start2[0] * 0.01;
     }
 
     if (_end.length > 1) {
-      var _t8 = transformPath(_end, begin2, duration, true);
+      var _t14 = transformPath(_end, begin2, duration, true);
 
-      var _first8 = _t8.value[0];
+      var _first14 = _t14.value[0];
 
-      if (_first8.end !== 0) {
-        child.props.end = _first8.end;
+      if (_first14.end !== 0) {
+        child.props.end = _first14.end;
       }
 
-      if (_t8.value.length > 1) {
-        if (_first8.offset === 0) {
-          _t8.value[0] = {
+      if (_t14.value.length > 1) {
+        if (_first14.offset === 0) {
+          _t14.value[0] = {
             offset: 0
           };
         }
 
-        child.animate.push(_t8);
+        child.animate.push(_t14);
       }
     } else {
       child.props.end = _end[0] * 0.01;
@@ -2274,7 +2705,7 @@ function parseGeom(res, data, start, duration, offset) {
   res.children = [child];
 }
 
-function parseMask(data, target) {
+function parseMask(data, target, start, duration, offset) {
   $.ae2karas.log(data);
   $.ae2karas.log(target); // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
 
@@ -2296,16 +2727,15 @@ function parseMask(data, target) {
   };
   var width = data.width,
       height = data.height,
-      _data$mask = data.mask,
-      points = _data$mask.points,
-      opacity = _data$mask.opacity,
-      mode = _data$mask.mode,
-      inverted = _data$mask.inverted;
-
-  if (opacity < 100) {
-    res.props.style.opacity = opacity * 0.01;
-  } // 相加之外都是相减
-
+      _data$mask = data.mask;
+      _data$mask.list;
+      _data$mask.points;
+      _data$mask.opacity;
+      var mode = _data$mask.mode,
+      inverted = _data$mask.inverted; // if(opacity < 100) {
+  //   res.props.style.opacity = opacity * 0.01;
+  // }
+  // 相加之外都是相减
 
   if (mode === MaskMode.ADD) {
     if (inverted) {
@@ -2330,17 +2760,16 @@ function parseMask(data, target) {
     var v = transformOrigin.split(' ');
     cx = parseFloat(v[0]);
     cy = parseFloat(v[1]);
-  }
+  } // 仅有points/controls和opacity的样式，同样可能为静态或动画
+  // $.ae2karas.log(list);
+  // let { vertices, inTangents, outTangents, closed } = points;
+  // let o = path.parse(vertices, inTangents, outTangents, closed);
+  // res.props.style.width = o.width;
+  // res.props.style.height = o.height;
+  // res.props.points = o.points
+  // res.props.controls = o.controls;
+  // 样式和target一致
 
-  var vertices = points.vertices,
-      inTangents = points.inTangents,
-      outTangents = points.outTangents,
-      closed = points.closed;
-  var o = path.parse(vertices, inTangents, outTangents, closed);
-  res.props.style.width = o.width;
-  res.props.style.height = o.height;
-  res.props.points = o.points;
-  res.props.controls = o.controls; // 样式和target一致
 
   var style = targetProps.style;
 

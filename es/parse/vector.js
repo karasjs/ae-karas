@@ -1,4 +1,4 @@
-import { transformVector } from './transform';
+import { transformVector, transformGeom } from './transform';
 
 function group(prop) {
   let res = {};
@@ -73,13 +73,13 @@ function rect(prop) {
           res.direction = item.value;
           break;
         case 'ADBE Vector Rect Size':
-          res.size = item.value;
+          res.size = transformGeom(item);
           break;
         case 'ADBE Vector Rect Position':
-          res.position = item.value;
+          res.position = transformGeom(item);
           break;
         case 'ADBE Vector Rect Roundness':
-          res.roundness = item.value;
+          res.roundness = transformGeom(item);
           break;
       }
     }
@@ -100,10 +100,10 @@ function ellipse(prop) {
           res.direction = item.value;
           break;
         case 'ADBE Vector Ellipse Size':
-          res.size = item.value;
+          res.size = transformGeom(item);
           break;
         case 'ADBE Vector Ellipse Position':
-          res.position = item.value;
+          res.position = transformGeom(item);
           break;
       }
     }
@@ -161,22 +161,22 @@ function stroke(prop) {
       let matchName = item.matchName;
       switch(matchName) {
         case 'ADBE Vector Stroke Color':
-          res.color = item.value;
+          res.color = transformGeom(item);
           break;
         case 'ADBE Vector Stroke Opacity':
-          res.opacity = item.value;
+          res.opacity = transformGeom(item);
           break;
         case 'ADBE Vector Stroke Width':
-          res.width = item.value;
+          res.width = transformGeom(item);
           break;
         case 'ADBE Vector Line Cap':
-          res.lineCap = item.value;
+          res.lineCap = transformGeom(item);
           break;
         case 'ADBE Vector Stroke Line Join':
-          res.lineJoin = item.value;
+          res.lineJoin = transformGeom(item);
           break;
         case 'ADBE Vector Stroke Miter Limit':
-          res.miterLimit = item.value;
+          res.miterLimit = transformGeom(item);
           break;
         // case 'ADBE Vector Stroke Dashes':
         //   res.dashes = dash(item);
@@ -235,7 +235,7 @@ function path(prop) {
           res.direction = item.value;
           break;
         case 'ADBE Vector Shape':
-          res.points = item.value;
+          res.points = transformGeom(item);
           break;
       }
     }
@@ -254,10 +254,10 @@ function fill(prop) {
           res.rule = item.value;
           break;
         case 'ADBE Vector Fill Color':
-          res.color = item.value;
+          res.color = transformGeom(item);
           break;
         case 'ADBE Vector Fill Opacity':
-          res.opacity = item.value;
+          res.opacity = transformGeom(item);
           break;
       }
     }

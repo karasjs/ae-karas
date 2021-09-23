@@ -1,4 +1,4 @@
-import { transformLayer } from './transform';
+import { transformLayer, transformMask } from './transform';
 import vector from './vector';
 import render from '../render';
 
@@ -218,6 +218,7 @@ function mask(prop) {
         if(item.maskMode !== MaskMode.NONE) {
           res.enabled = true;
         }
+        res.list = transformMask(item);
         res.points = item.property('maskShape').value;
         res.opacity = item.property('Mask Opacity').value;
         res.mode = item.maskMode;
