@@ -243,6 +243,7 @@ function text(prop) {
             fontStyle: value.fontStyle,
             fontSize: value.fontSize,
             leading: value.leading,
+            baselineLocs: value.baselineLocs,
             text: value.text,
           };
           break;

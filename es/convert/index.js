@@ -388,6 +388,13 @@ function parse(library, assetId, newLib, start, duration, offset) {
     res.props.style.fontStyle = content.fontStyle;
     res.props.style.lineHeight = content.leading / content.fontSize;
     res.children = [content.text];
+    // 对齐方式
+    let baselineLocs = content.baselineLocs;
+    if(baselineLocs[0] !== 0) {
+      res.props.style.left = baselineLocs[0];
+      res.props.style.textAlign = 'center';
+    }
+    res.props.style.top = -content.fontSize - baselineLocs[1];
   }
   // 图片无children
   else if(type === 'img') {
