@@ -3,6 +3,7 @@ export default {
     FOLDER_ITEM: 'FolderItem',
     FOOTAGE_ITEM: 'FootageItem',
     COMP_ITEM: 'CompItem',
+    UNKNOWN: 'unknown',
   },
   EVENT: {
     INIT: 'ae2karas:init',

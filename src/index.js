@@ -10,6 +10,7 @@ import Loading from './component/Loading';
 import Alert from './component/Alert';
 import { csInterface } from './util/CSInterface';
 import enums from '../es/enums';
+import pkg from '../package.json';
 
 import './index.html';
 import './index.less';
@@ -20,6 +21,7 @@ ReactDom.render(
     <Preview/>
     <Loading/>
     <Alert/>
+    <div className="version">{pkg.version}</div>
   </Provider>,
   document.querySelector('#root')
 );

@@ -16,7 +16,8 @@ __webpack_require__.r(__webpack_exports__);
   ES_TYPE: {
     FOLDER_ITEM: 'FolderItem',
     FOOTAGE_ITEM: 'FootageItem',
-    COMP_ITEM: 'CompItem'
+    COMP_ITEM: 'CompItem',
+    UNKNOWN: 'unknown'
   },
   EVENT: {
     INIT: 'ae2karas:init',
@@ -76054,6 +76055,17 @@ function _typeof(obj) {
   return _typeof(obj);
 }
 
+/***/ }),
+
+/***/ "./package.json":
+/*!**********************!*\
+  !*** ./package.json ***!
+  \**********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"name":"ae-karas","version":"0.1.0","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.61.9","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
+
 /***/ })
 
 /******/ 	});
@@ -76166,8 +76178,8 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/_react@17.0.2@react/index.js");
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "./node_modules/_react-dom@17.0.2@react-dom/index.js");
-/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.3.3@mobx/dist/mobx.esm.js");
-/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.2.0@mobx-react/dist/mobxreact.esm.js");
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.3.3@mobx/dist/mobx.esm.js");
+/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.2.0@mobx-react/dist/mobxreact.esm.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./store */ "./src/store/index.js");
 /* harmony import */ var _component_List__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./component/List */ "./src/component/List/index.js");
 /* harmony import */ var _component_Preview__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./component/Preview */ "./src/component/Preview/index.js");
@@ -76175,8 +76187,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _component_Alert__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./component/Alert */ "./src/component/Alert/index.js");
 /* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util/CSInterface */ "./src/util/CSInterface.js");
 /* harmony import */ var _es_enums__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../es/enums */ "./es/enums.js");
-/* harmony import */ var _index_html__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./index.html */ "./src/index.html");
-/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./index.less */ "./src/index.less");
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../package.json */ "./package.json");
+/* harmony import */ var _index_html__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./index.html */ "./src/index.html");
+/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./index.less */ "./src/index.less");
 
 
 
@@ -76190,7 +76203,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-react_dom__WEBPACK_IMPORTED_MODULE_1__.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(mobx_react__WEBPACK_IMPORTED_MODULE_11__.Provider, _store__WEBPACK_IMPORTED_MODULE_2__["default"], /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_List__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Preview__WEBPACK_IMPORTED_MODULE_4__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Loading__WEBPACK_IMPORTED_MODULE_5__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Alert__WEBPACK_IMPORTED_MODULE_6__["default"], null)), document.querySelector('#root'));
+
+react_dom__WEBPACK_IMPORTED_MODULE_1__.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(mobx_react__WEBPACK_IMPORTED_MODULE_12__.Provider, _store__WEBPACK_IMPORTED_MODULE_2__["default"], /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_List__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Preview__WEBPACK_IMPORTED_MODULE_4__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Loading__WEBPACK_IMPORTED_MODULE_5__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Alert__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+  className: "version"
+}, _package_json__WEBPACK_IMPORTED_MODULE_9__.version)), document.querySelector('#root'));
 _util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.INIT, function (event) {
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].composition.update(event.data);
 });
@@ -76206,14 +76222,14 @@ _util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_
 _util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.FINISH, function (event) {
   console.warn(event.data);
   console.warn(JSON.stringify(event.data));
-  (0,mobx__WEBPACK_IMPORTED_MODULE_12__.transaction)(function () {
+  (0,mobx__WEBPACK_IMPORTED_MODULE_13__.transaction)(function () {
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setLoading(false);
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].preview.setData(event.data);
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setPreview(true);
   });
 });
 _util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.CANCEL, function () {
-  (0,mobx__WEBPACK_IMPORTED_MODULE_12__.transaction)(function () {
+  (0,mobx__WEBPACK_IMPORTED_MODULE_13__.transaction)(function () {
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setLoading(false);
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setPreview(false);
   });

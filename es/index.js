@@ -54,17 +54,16 @@ ae2karas.error = function(s) {
 };
 
 function getItemType(item) {
-  let getType = {};
-  let type = getType.toString.call(item);
-  switch(type) {
-    case '[object FolderItem]':
-      return ES_TYPE.FOLDER_ITEM;
-    case '[object FootageItem]':
-      return ES_TYPE.FOOTAGE_ITEM;
-    case '[object CompItem]':
-      return ES_TYPE.COMP_ITEM;
+  if(item instanceof CompItem) {
+    return ES_TYPE.COMP_ITEM;
   }
-  return type;
+  if(item instanceof FolderItem) {
+    return ES_TYPE.FOLDER_ITEM;
+  }
+  if(item instanceof FootageItem) {
+    return ES_TYPE.FOOTAGE_ITEM;
+  }
+  return ES_TYPE.UNKNOWN;
 }
 
 ae2karas.getCompositions = function() {
