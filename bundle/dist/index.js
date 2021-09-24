@@ -2199,7 +2199,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin'];
+var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective'];
 
 function recursion(data, params) {
   // 分为普通节点和library节点分别递归进行
@@ -2282,7 +2282,7 @@ function parseStyle(data, params) {
       } else if (['opacity', 'scaleX', 'scaleY', 'scaleZ'].indexOf(k) > -1) {
         v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
-      } else {
+      } else if (v !== null && v !== undefined && !Array.isArray(v)) {
         v = v.toFixed(params.precision);
         data[k] = parseFloat(v);
       }
@@ -2302,12 +2302,23 @@ function parseAnimate(data, params) {
       var v = item.offset.toFixed(params.precision + 2);
       item.offset = parseFloat(v);
     }
+
+    if (item.hasOwnProperty('easing')) {
+      var _v = item.easing;
+      var v2 = [];
+
+      for (var _i3 = 0, _len3 = _v.length; _i3 < _len3; _i3++) {
+        v2[_i3] = parseFloat(_v[_i3].toFixed(params.precision + 2));
+      }
+
+      item.easing = v2;
+    }
   }
 
   if (options.hasOwnProperty('duration')) {
-    var _v = options.duration.toFixed(params.precision);
+    var _v2 = options.duration.toFixed(params.precision);
 
-    options.duration = parseFloat(_v);
+    options.duration = parseFloat(_v2);
   }
 }
 

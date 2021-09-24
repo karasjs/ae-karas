@@ -19,6 +19,7 @@ const STYLE = [
   'start',
   'end',
   'begin',
+  'perspective',
 ];
 
 function recursion(data, params) {
@@ -93,7 +94,7 @@ function parseStyle(data, params) {
         v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
       }
-      else {
+      else if(v !== null && v !== undefined && !Array.isArray(v)) {
         v = v.toFixed(params.precision);
         data[k] = parseFloat(v);
       }
@@ -109,6 +110,14 @@ function parseAnimate(data, params) {
     if(item.hasOwnProperty('offset')) {
       let v = item.offset.toFixed(params.precision + 2);
       item.offset = parseFloat(v);
+    }
+    if(item.hasOwnProperty('easing')) {
+      let v = item.easing;
+      let v2 = [];
+      for(let i = 0, len = v.length; i < len; i++) {
+        v2[i] = parseFloat(v[i].toFixed(params.precision + 2));
+      }
+      item.easing = v2;
     }
   }
   if(options.hasOwnProperty('duration')) {
