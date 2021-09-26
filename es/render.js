@@ -1,5 +1,5 @@
 export default {
-  psd2png(source, psd, path, name) {
+  psd2png(source, psd, path, name) {return;
     let helperSequenceComp = app.project.items.addComp('tempConverterComp', source.width, source.height, 1, 1, 1);
     helperSequenceComp.layers.add(source);
     $.ae2karas.addTemp(helperSequenceComp);

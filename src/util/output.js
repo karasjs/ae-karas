@@ -94,7 +94,7 @@ function parseStyle(data, params) {
         v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
       }
-      else if(v !== null && v !== undefined && !Array.isArray(v)) {
+      else {
         v = v.toFixed(params.precision);
         data[k] = parseFloat(v);
       }

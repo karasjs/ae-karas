@@ -26,6 +26,7 @@ function content(prop) {
   // 矩形1下面会多出一层内容层看不见，就是本层，其下面则是可视的子属性层
   let res = {
     name: prop.name,
+    content: [],
   };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
@@ -33,16 +34,16 @@ function content(prop) {
       let matchName = item.matchName;
       switch(matchName) {
         case 'ADBE Vector Shape - Rect':
-          res.content = rect(item);
+          res.content.push(rect(item));
           break;
         case 'ADBE Vector Shape - Ellipse':
-          res.content = ellipse(item);
+          res.content.push(ellipse(item));
           break;
         case 'ADBE Vector Shape - Star':
-          res.content = star(item);
+          res.content.push(star(item));
           break;
         case 'ADBE Vector Shape - Group':
-          res.content = path(item);
+          res.content.push(path(item));
           break;
         case 'ADBE Vector Graphic - Stroke':
           res.stroke = stroke(item);

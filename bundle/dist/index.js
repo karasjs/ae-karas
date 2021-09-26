@@ -1998,8 +1998,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  UPLOAD_JSON: '',
-  UPLOAD_BASE64: ''
+  UPLOAD_JSON: 'https://karas.alipay.com/api/upload',
+  UPLOAD_BASE64: 'https://animconfig-office.alipay.net/api/ae2karas/upload'
 });
 
 /***/ }),
@@ -2282,7 +2282,7 @@ function parseStyle(data, params) {
       } else if (['opacity', 'scaleX', 'scaleY', 'scaleZ'].indexOf(k) > -1) {
         v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
-      } else if (v !== null && v !== undefined && !Array.isArray(v)) {
+      } else {
         v = v.toFixed(params.precision);
         data[k] = parseFloat(v);
       }
