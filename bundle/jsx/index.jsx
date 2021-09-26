@@ -1810,8 +1810,8 @@ function preParse(data, library, start, duration, offset) {
       style: {
         position: 'absolute',
         width: width,
-        height: height,
-        overflow: 'hidden'
+        height: height // overflow: 'hidden',
+
       }
     },
     children: [],
@@ -2861,8 +2861,8 @@ function convert (data) {
       style: {
         position: 'absolute',
         width: width,
-        height: height,
-        overflow: 'hidden'
+        height: height // overflow: 'hidden',
+
       }
     },
     children: [],
