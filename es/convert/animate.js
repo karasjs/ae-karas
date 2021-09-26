@@ -727,3 +727,36 @@ export function transformMiterLimit(list, begin, duration) {
   }
   return res;
 }
+
+// export function transformPosition(list, begin, duration) {}
+
+export function transformSize(list, begin, duration) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(list.length === 1) {
+    res.value.push({
+      size: list,
+    });
+  }
+  else {
+    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+      return [
+        prev[0] + (next[0] - prev[0]) * percent,
+        prev[1] + (next[1] - prev[1]) * percent,
+      ];
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      res.value.push({
+        size: list[i],
+      });
+    }
+  }
+  return res;
+}

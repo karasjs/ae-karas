@@ -132,7 +132,7 @@ function parseLayer(layer, library, hasSolo) {
     }
   }
   let source = layer.source;
-  if(geom && geom.shape && geom.shape.content && geom.shape.content.type) {
+  if(geom && geom.shape && geom.shape.content && geom.shape.content.length) {
     geom.geom = true; // 特殊标识
     geom.type = 'div';
     geom.id = library.length;
