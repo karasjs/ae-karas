@@ -2337,7 +2337,6 @@ function parseGeom(res, data, start, duration, offset) {
       var stroke = _data$shape.stroke;
       _data$shape.transform;
       data.trim;
-  $.ae2karas.log(123);
   $.ae2karas.log(content); // let { type, direction, size, position, roundness, points } = content;
 
   var begin2 = start - offset;
@@ -2364,7 +2363,8 @@ function parseGeom(res, data, start, duration, offset) {
         style: {
           position: 'absolute'
         }
-      }
+      },
+      animate: []
     };
     var child = {
       tagName: 'div',
@@ -2418,79 +2418,118 @@ function parseGeom(res, data, start, duration, offset) {
   if (Array.isArray(fill.color) && fill.color.length) {
     var _t7 = transformFill(fill, begin2, duration);
 
-    var _first7 = _t7.value[0]; // child.props.style.fill = first.fill;
+    var _first7 = _t7.value[0];
+
+    for (var _i3 = 0; _i3 < len; _i3++) {
+      children[_i3].children[0].style.fill = _first7.fill;
+    }
 
     if (_t7.value.length > 1) {
       if (_first7.offset === 0) {
         _t7.value[0] = {
           offset: 0
         };
-      } // child.animate.push(t);
+      }
 
+      for (var _i4 = 0; _i4 < len; _i4++) {
+        children[_i4].children[0].animate.push(_t7);
+      }
     }
   }
 
   if (Array.isArray(stroke.color) && stroke.color.length) {
     var _t8 = transformStroke(stroke, begin2, duration);
 
-    var _first8 = _t8.value[0]; // child.props.style.stroke = first.stroke;
+    var _first8 = _t8.value[0];
+
+    for (var _i5 = 0; _i5 < len; _i5++) {
+      children[_i5].children[0].style.stroke = _first8.stroke;
+    }
 
     if (_t8.value.length > 1) {
       if (_first8.offset === 0) {
         _t8.value[0] = {
           offset: 0
         };
-      } // child.animate.push(t);
+      }
 
+      for (var _i6 = 0; _i6 < len; _i6++) {
+        children[_i6].children[0].animate.push(_t8);
+      }
     }
   }
 
   if (Array.isArray(stroke.width) && stroke.width.length) {
     var _t9 = transformStrokeWidth(stroke.width, begin2, duration);
 
-    var _first9 = _t9.value[0]; // child.props.style.strokeWidth = first.strokeWidth;
+    var _first9 = _t9.value[0];
+
+    for (var _i7 = 0; _i7 < len; _i7++) {
+      children[_i7].children[0].style.strokeWidth = _first9.strokeWidth;
+    }
 
     if (_t9.value.length > 1) {
       if (_first9.offset === 0) {
         _t9.value[0] = {
           offset: 0
         };
-      } // child.animate.push(t);
+      }
 
+      for (var _i8 = 0; _i8 < len; _i8++) {
+        children[_i8].children[0].animate.push(_t9);
+      }
     }
   }
 
   if (Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
     var _t10 = transformLineJoin(stroke.lineJoin, begin2, duration);
 
-    var _first10 = _t10.value[0]; // child.props.style.strokeLineJoin = first.strokeLineJoin;
+    var _first10 = _t10.value[0];
+
+    for (var _i9 = 0; _i9 < len; _i9++) {
+      children[_i9].children[0].style.strokeLineJoin = _first10.strokeLineJoin;
+    }
 
     if (_t10.value.length > 1) {
       if (_first10.offset === 0) {
         _t10.value[0] = {
           offset: 0
         };
-      } // child.animate.push(t);
+      }
 
+      for (var _i10 = 0; _i10 < len; _i10++) {
+        children[_i10].children[0].animate.push(_t10);
+      }
     }
   }
 
   if (Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
     var _t11 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
 
-    var _first11 = _t11.value[0]; // child.props.style.strokeMiterlimit = first.strokeMiterlimit;
+    var _first11 = _t11.value[0];
+
+    for (var _i11 = 0; _i11 < len; _i11++) {
+      children[_i11].children[0].style.strokeMiterlimit = _first11.strokeMiterlimit;
+    }
 
     if (_t11.value.length > 1) {
       if (_first11.offset === 0) {
         _t11.value[0] = {
           offset: 0
         };
-      } // child.animate.push(t);
+      }
 
+      for (var _i12 = 0; _i12 < len; _i12++) {
+        children[_i12].children[0].animate.push(_t11);
+      }
     }
   }
 
-  if (stroke.dashes) ; // if(type === 'rect' || type === 'ellipse') {
+  if (stroke.dashes) {
+    for (var _i13 = 0; _i13 < len; _i13++) {
+      children[_i13].children[0].style.strokeDasharray = [stroke.dashes];
+    }
+  } // if(type === 'rect' || type === 'ellipse') {
   //   //
   // }
   // if(type === 'rect') {

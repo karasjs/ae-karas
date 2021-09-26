@@ -465,7 +465,6 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
  */
 function parseGeom(res, data, start, duration, offset) {
   let { shape: { content, fill, gFill, stroke, transform }, trim } = data;
-  $.ae2karas.log(123);
   $.ae2karas.log(content);
   // let { type, direction, size, position, roundness, points } = content;
   let begin2 = start - offset;
@@ -487,6 +486,7 @@ function parseGeom(res, data, start, duration, offset) {
           position: 'absolute',
         },
       },
+      animate: [],
     };
     let child = {
       tagName: 'div',
@@ -538,70 +538,92 @@ function parseGeom(res, data, start, duration, offset) {
   if(Array.isArray(fill.color) && fill.color.length) {
     let t = transformFill(fill, begin2, duration);
     let first = t.value[0];
-    // child.props.style.fill = first.fill;
+    for(let i = 0; i < len; i++) {
+      children[i].children[0].style.fill = first.fill;
+    }
     if(t.value.length > 1) {
       if(first.offset === 0) {
         t.value[0] = {
           offset: 0,
         };
       }
-      // child.animate.push(t);
+      for(let i = 0; i < len; i++) {
+        children[i].children[0].animate.push(t);
+      }
     }
   }
   if(Array.isArray(stroke.color) && stroke.color.length) {
     let t = transformStroke(stroke, begin2, duration);
     let first = t.value[0];
-    // child.props.style.stroke = first.stroke;
+    for(let i = 0; i < len; i++) {
+      children[i].children[0].style.stroke = first.stroke;
+    }
     if(t.value.length > 1) {
       if(first.offset === 0) {
         t.value[0] = {
           offset: 0,
         };
       }
-      // child.animate.push(t);
+      for(let i = 0; i < len; i++) {
+        children[i].children[0].animate.push(t);
+      }
     }
   }
   if(Array.isArray(stroke.width) && stroke.width.length) {
     let t = transformStrokeWidth(stroke.width, begin2, duration);
     let first = t.value[0];
-    // child.props.style.strokeWidth = first.strokeWidth;
+    for(let i = 0; i < len; i++) {
+      children[i].children[0].style.strokeWidth = first.strokeWidth;
+    }
     if(t.value.length > 1) {
       if(first.offset === 0) {
         t.value[0] = {
           offset: 0,
         };
       }
-      // child.animate.push(t);
+      for(let i = 0; i < len; i++) {
+        children[i].children[0].animate.push(t);
+      }
     }
   }
   if(Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
     let t = transformLineJoin(stroke.lineJoin, begin2, duration);
     let first = t.value[0];
-    // child.props.style.strokeLineJoin = first.strokeLineJoin;
+    for(let i = 0; i < len; i++) {
+      children[i].children[0].style.strokeLineJoin = first.strokeLineJoin;
+    }
     if(t.value.length > 1) {
       if(first.offset === 0) {
         t.value[0] = {
           offset: 0,
         };
       }
-      // child.animate.push(t);
+      for(let i = 0; i < len; i++) {
+        children[i].children[0].animate.push(t);
+      }
     }
   }
   if(Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
     let t = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
     let first = t.value[0];
-    // child.props.style.strokeMiterlimit = first.strokeMiterlimit;
+    for(let i = 0; i < len; i++) {
+      children[i].children[0].style.strokeMiterlimit = first.strokeMiterlimit;
+    }
     if(t.value.length > 1) {
       if(first.offset === 0) {
         t.value[0] = {
           offset: 0,
         };
       }
-      // child.animate.push(t);
+      for(let i = 0; i < len; i++) {
+        children[i].children[0].animate.push(t);
+      }
     }
   }
   if(stroke.dashes) {
-    // child.props.style.strokeDasharray = [stroke.dashes];
+    for(let i = 0; i < len; i++) {
+      children[i].children[0].style.strokeDasharray = [stroke.dashes];
+    }
   }
   // if(type === 'rect' || type === 'ellipse') {
   //   //
