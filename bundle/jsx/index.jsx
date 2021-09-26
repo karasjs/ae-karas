@@ -1858,7 +1858,8 @@ function preParse(data, library, start, duration, offset) {
       style: {
         position: 'absolute',
         width: width,
-        height: height
+        height: height,
+        overflow: 'hidden'
       }
     },
     children: [],
@@ -2279,7 +2280,8 @@ function parse(library, assetId, newLib, start, duration, offset) {
       style: {
         position: 'absolute',
         width: width,
-        height: height
+        height: height,
+        overflow: 'hidden'
       }
     }
   }; // 矢量图层特殊解析，添加
@@ -2859,7 +2861,8 @@ function convert (data) {
       style: {
         position: 'absolute',
         width: width,
-        height: height
+        height: height,
+        overflow: 'hidden'
       }
     },
     children: [],

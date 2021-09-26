@@ -39,6 +39,7 @@ function preParse(data, library, start, duration, offset) {
         position: 'absolute',
         width,
         height,
+        overflow: 'hidden',
       },
     },
     children: [],
@@ -369,6 +370,7 @@ function parse(library, assetId, newLib, start, duration, offset) {
         position: 'absolute',
         width,
         height,
+        overflow: 'hidden',
       },
     },
   };
@@ -846,6 +848,7 @@ export default function(data) {
         position: 'absolute',
         width,
         height,
+        overflow: 'hidden',
       },
     },
     children: [],
