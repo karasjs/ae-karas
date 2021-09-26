@@ -753,8 +753,10 @@ export function transformSize(list, begin, duration) {
       ];
     });
     for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
       res.value.push({
-        size: list[i],
+        offset: (item.time - begin) / duration,
+        size: item.value,
       });
     }
   }

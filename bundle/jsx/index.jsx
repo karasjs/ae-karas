@@ -1429,6 +1429,50 @@ function transformScale(list, begin, duration) {
 
   return res;
 }
+function transformPath(list, begin, duration, isEnd) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
+    }
+  }; // 只有1帧没有动画，无需计算补间
+
+  if (list.length === 1) {
+    var v = {};
+
+    if (isEnd) {
+      v.end = list[0] * 0.01;
+    } else {
+      v.start = list[0] * 0.01;
+    }
+
+    res.value.push(v);
+  } else {
+    list = getAreaList(list, begin, duration, function (prev, next, percent) {
+      return (prev + (next - prev) * percent) * 0.01;
+    });
+
+    for (var i = 0, len = list.length; i < len; i++) {
+      var item = list[i];
+      var _v2 = {
+        offset: (item.time - begin) / duration,
+        easing: item.easing
+      };
+
+      if (isEnd) {
+        _v2.end = item.value * 0.01;
+      } else {
+        _v2.start = item.value * 0.01;
+      }
+
+      res.value.push(_v2);
+    }
+  }
+
+  return res;
+}
 function transformPoints(list, begin, duration) {
   var res = {
     value: [],
@@ -1773,8 +1817,10 @@ function transformSize(list, begin, duration) {
     });
 
     for (var i = 0, len = list.length; i < len; i++) {
+      var item = list[i];
       res.value.push({
-        size: list[i]
+        offset: (item.time - begin) / duration,
+        size: item.value
       });
     }
   }
@@ -2313,12 +2359,13 @@ function parseGeom(res, data, start, duration, offset) {
       content = _data$shape.content,
       fill = _data$shape.fill,
       gFill = _data$shape.gFill,
-      stroke = _data$shape.stroke;
-      _data$shape.transform;
-      data.trim;
+      stroke = _data$shape.stroke,
+      transform = _data$shape.transform,
+      trim = data.trim;
   $.ae2karas.log(content); // let { type, direction, size, position, roundness, points } = content;
 
   var begin2 = start - offset;
+  var f; // 矢量可能有多个，但样式共用一个
 
   var children = [];
   var len = content.length;
@@ -2328,6 +2375,7 @@ function parseGeom(res, data, start, duration, offset) {
   }
 
   for (var i = 0, _len2 = content.length; i < _len2; i++) {
+    $.ae2karas.log(i);
     var item = content[i];
     var type = item.type;
         item.direction;
@@ -2360,8 +2408,8 @@ function parseGeom(res, data, start, duration, offset) {
     if (type === 'rect' || type === 'ellipse') {
       var t = transformSize(size, begin2, duration);
       var first = t.value[0];
-      child.props.style.width = first[0];
-      child.props.style.height = first[1];
+      $geom.props.style.width = first.size[0];
+      $geom.props.style.height = first.size[1];
 
       if (t.value.length > 1) {
         t.value[0] = {
@@ -2369,10 +2417,11 @@ function parseGeom(res, data, start, duration, offset) {
         }; // 用缩放代替尺寸变化
 
         for (var _i2 = 1, _len3 = t.value.length; _i2 < _len3; _i2++) {
-          var _size = t.value[_i2];
-          t.value[_i2].size = undefined;
-          t.value[_i2].scaleX = _size[0] / first[0];
-          t.value[_i2].scaleY = _size[1] / first[1];
+          var _item2 = t.value[_i2];
+          var _size = _item2.size;
+          _item2.size = undefined;
+          _item2.scaleX = _size[0] / first.size[0];
+          _item2.scaleY = _size[1] / first.size[1];
         }
 
         $geom.animate.push(t);
@@ -2424,9 +2473,9 @@ function parseGeom(res, data, start, duration, offset) {
         };
 
         for (var _i3 = 1; _i3 < position.length; _i3++) {
-          var _item2 = _t8.value[_i3];
-          _item2.translateX -= _first8.translateX;
-          _item2.translateY -= _first8.translateY;
+          var _item3 = _t8.value[_i3];
+          _item3.translateX -= _first8.translateX;
+          _item3.translateY -= _first8.translateY;
         }
 
         $geom.animate.push(_t8);
@@ -2435,76 +2484,195 @@ function parseGeom(res, data, start, duration, offset) {
 
     if (fill && fill.rule === 2 || gFill && gFill.rule === 2) {
       $geom.props.style.fillRule = 'evenodd';
+    } // geom内嵌的transform单独分析，都作用在中间层div上，anchorPoint比较特殊
+
+
+    var anchorPoint = transform.anchorPoint;
+
+    if (Array.isArray(anchorPoint) && anchorPoint.length) {
+      var _t9 = transformOrigin(anchorPoint, begin2, duration);
+
+      var _first9 = _t9.value[0];
+
+      var v = _first9.transformOrigin.split(' ');
+
+      v[0] = parseFloat(v[0]);
+      v[1] = parseFloat(v[1]);
+      /**
+       * path很特殊，原始没有宽高，ae是锚点0,0相对于自身左上角原点，定位则是锚点来进行定位
+       * 需记录最初的位置，发生锚点动画时，其会干扰left/top，同步形成位置动画
+       */
+
+      if (type === 'path') {
+        var left = $geom.props.style.left;
+        var top = $geom.props.style.top;
+        $geom.props.style.left -= v[0];
+        $geom.props.style.top -= v[1];
+        var w = $geom.props.style.width;
+        var h = $geom.props.style.height;
+        v[0] += w * 0.5;
+        v[1] += h * 0.5;
+
+        if (v[0] !== w * 0.5 || v[1] !== h * 0.5) {
+          $geom.props.style.transformOrigin = _first9.transformOrigin;
+        }
+
+        if (_t9.value.length > 1) {
+          if (_first9.offset === 0) {
+            _t9.value[0] = {
+              offset: 0
+            };
+          } // tfo的每个动画需考虑对坐标的影响
+
+
+          for (var _i4 = 1, _len4 = _t9.value.length; _i4 < _len4; _i4++) {
+            var _item4 = _t9.value[_i4];
+
+            var tfo = _item4.transformOrigin.split(' ');
+
+            tfo[0] = parseFloat(tfo[0]);
+            tfo[1] = parseFloat(tfo[1]);
+            _item4.left = left - tfo[0];
+            _item4.top = top - tfo[1];
+          }
+
+          $geom.animate.push(_t9);
+        }
+      } else {
+        // tfo中心判断，加上尺寸*0.5
+        v[0] += size[0] * 0.5;
+        v[1] += size[1] * 0.5;
+
+        if (v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
+          $geom.props.style.transformOrigin = _first9.transformOrigin;
+        }
+
+        if (_t9.value.length > 1) {
+          if (_first9.offset === 0) {
+            _t9.value[0] = {
+              offset: 0
+            };
+          }
+
+          $geom.animate.push(_t9);
+        }
+
+        if (v[0]) {
+          $geom.props.style.left = -v[0];
+        }
+
+        if (v[1]) {
+          $geom.props.style.top = -v[1];
+        }
+      }
+    }
+
+    parseAnimate(child, data.shape, start, duration, offset, true, true); // gradient需要根据transformOrigin来计算
+
+    if (gFill) {
+      var _transformOrigin = $geom.props.style.transformOrigin;
+      var _w = $geom.props.style.width,
+          _h = $geom.props.style.height;
+      var cx = void 0,
+          cy = void 0;
+
+      if (_transformOrigin) {
+        _transformOrigin = _transformOrigin.split(' ');
+        cx = parseFloat(_transformOrigin[0]);
+        cy = parseFloat(_transformOrigin[1]);
+      } else {
+        cx = _w * 0.5;
+        cy = _h * 0.5;
+      }
+
+      var _type = gFill.type,
+          _start = gFill.start,
+          end = gFill.end;
+
+      if (_type === 1) {
+        var x0 = position[0],
+            y0 = position[1];
+        var x1 = _start[0] + cx,
+            y1 = _start[1] + cy;
+        var x2 = end[0] + cx,
+            y2 = end[1] + cy;
+        f = "linearGradient(".concat((x1 - x0) / _w, " ").concat((y1 - y0) / _h, " ").concat((x2 - x0) / _w, " ").concat((y2 - y0) / _h, ", #FFF, #000)");
+      } else if (_type === 2) {
+        var _x = position[0],
+            _y = position[1];
+
+        var _x2 = _start[0] + cx,
+            _y2 = _start[1] + cy;
+
+        var _x3 = end[0] + cx,
+            _y3 = end[1] + cy;
+
+        f = "radialGradient(".concat((_x2 - _x) / _w, " ").concat((_y2 - _y) / _h, " ").concat((_x3 - _x) / _w, " ").concat((_y3 - _y) / _h, ", #FFF, #000)");
+      }
+
+      $geom.props.style.fill = [f];
+    } // trimPath裁剪动画或属性
+
+
+    if (trim && trim.hasOwnProperty('start') && trim.hasOwnProperty('end')) {
+      var _start2 = trim.start,
+          _end = trim.end;
+
+      if (_start2.length > 1) {
+        var _t10 = transformPath(_start2, begin2, duration, false);
+
+        var _first10 = _t10.value[0];
+
+        if (_first10.start !== 0) {
+          $geom.props.start = _first10.start;
+        }
+
+        if (_t10.value.length > 1) {
+          if (_first10.offset === 0) {
+            _t10.value[0] = {
+              offset: 0
+            };
+          }
+
+          $geom.animate.push(_t10);
+        }
+      } else {
+        $geom.props.start = _start2[0] * 0.01;
+      }
+
+      if (_end.length > 1) {
+        var _t11 = transformPath(_end, begin2, duration, true);
+
+        var _first11 = _t11.value[0];
+
+        if (_first11.end !== 0) {
+          $geom.props.end = _first11.end;
+        }
+
+        if (_t11.value.length > 1) {
+          if (_first11.offset === 0) {
+            _t11.value[0] = {
+              offset: 0
+            };
+          }
+
+          $geom.animate.push(_t11);
+        }
+      } else {
+        $geom.props.end = _end[0] * 0.01;
+      }
     }
   }
+
+  $.ae2karas.log('hh');
 
   if (Array.isArray(fill.color) && fill.color.length) {
-    var _t9 = transformFill(fill, begin2, duration);
-
-    var _first9 = _t9.value[0];
-
-    for (var _i4 = 0; _i4 < len; _i4++) {
-      children[_i4].children[0].style.fill = _first9.fill;
-    }
-
-    if (_t9.value.length > 1) {
-      _t9.value[0] = {
-        offset: 0
-      };
-
-      for (var _i5 = 0; _i5 < len; _i5++) {
-        children[_i5].children[0].animate.push(_t9);
-      }
-    }
-  }
-
-  if (Array.isArray(stroke.color) && stroke.color.length) {
-    var _t10 = transformStroke(stroke, begin2, duration);
-
-    var _first10 = _t10.value[0];
-
-    for (var _i6 = 0; _i6 < len; _i6++) {
-      children[_i6].children[0].style.stroke = _first10.stroke;
-    }
-
-    if (_t10.value.length > 1) {
-      _t10.value[0] = {
-        offset: 0
-      };
-
-      for (var _i7 = 0; _i7 < len; _i7++) {
-        children[_i7].children[0].animate.push(_t10);
-      }
-    }
-  }
-
-  if (Array.isArray(stroke.width) && stroke.width.length) {
-    var _t11 = transformStrokeWidth(stroke.width, begin2, duration);
-
-    var _first11 = _t11.value[0];
-
-    for (var _i8 = 0; _i8 < len; _i8++) {
-      children[_i8].children[0].style.strokeWidth = _first11.strokeWidth;
-    }
-
-    if (_t11.value.length > 1) {
-      _t11.value[0] = {
-        offset: 0
-      };
-
-      for (var _i9 = 0; _i9 < len; _i9++) {
-        children[_i9].children[0].animate.push(_t11);
-      }
-    }
-  }
-
-  if (Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
-    var _t12 = transformLineJoin(stroke.lineJoin, begin2, duration);
+    var _t12 = transformFill(fill, begin2, duration);
 
     var _first12 = _t12.value[0];
 
-    for (var _i10 = 0; _i10 < len; _i10++) {
-      children[_i10].children[0].style.strokeLineJoin = _first12.strokeLineJoin;
+    for (var _i5 = 0; _i5 < len; _i5++) {
+      children[_i5].children[0].style.fill = _first12.fill;
     }
 
     if (_t12.value.length > 1) {
@@ -2512,19 +2680,19 @@ function parseGeom(res, data, start, duration, offset) {
         offset: 0
       };
 
-      for (var _i11 = 0; _i11 < len; _i11++) {
-        children[_i11].children[0].animate.push(_t12);
+      for (var _i6 = 0; _i6 < len; _i6++) {
+        children[_i6].children[0].animate.push(_t12);
       }
     }
   }
 
-  if (Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
-    var _t13 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+  if (Array.isArray(stroke.color) && stroke.color.length) {
+    var _t13 = transformStroke(stroke, begin2, duration);
 
     var _first13 = _t13.value[0];
 
-    for (var _i12 = 0; _i12 < len; _i12++) {
-      children[_i12].children[0].style.strokeMiterlimit = _first13.strokeMiterlimit;
+    for (var _i7 = 0; _i7 < len; _i7++) {
+      children[_i7].children[0].style.stroke = _first13.stroke;
     }
 
     if (_t13.value.length > 1) {
@@ -2532,203 +2700,77 @@ function parseGeom(res, data, start, duration, offset) {
         offset: 0
       };
 
-      for (var _i13 = 0; _i13 < len; _i13++) {
-        children[_i13].children[0].animate.push(_t13);
+      for (var _i8 = 0; _i8 < len; _i8++) {
+        children[_i8].children[0].animate.push(_t13);
+      }
+    }
+  }
+
+  if (Array.isArray(stroke.width) && stroke.width.length) {
+    var _t14 = transformStrokeWidth(stroke.width, begin2, duration);
+
+    var _first14 = _t14.value[0];
+
+    for (var _i9 = 0; _i9 < len; _i9++) {
+      children[_i9].children[0].style.strokeWidth = _first14.strokeWidth;
+    }
+
+    if (_t14.value.length > 1) {
+      _t14.value[0] = {
+        offset: 0
+      };
+
+      for (var _i10 = 0; _i10 < len; _i10++) {
+        children[_i10].children[0].animate.push(_t14);
+      }
+    }
+  }
+
+  if (Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
+    var _t15 = transformLineJoin(stroke.lineJoin, begin2, duration);
+
+    var _first15 = _t15.value[0];
+
+    for (var _i11 = 0; _i11 < len; _i11++) {
+      children[_i11].children[0].style.strokeLineJoin = _first15.strokeLineJoin;
+    }
+
+    if (_t15.value.length > 1) {
+      _t15.value[0] = {
+        offset: 0
+      };
+
+      for (var _i12 = 0; _i12 < len; _i12++) {
+        children[_i12].children[0].animate.push(_t15);
+      }
+    }
+  }
+
+  if (Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
+    var _t16 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+
+    var _first16 = _t16.value[0];
+
+    for (var _i13 = 0; _i13 < len; _i13++) {
+      children[_i13].children[0].style.strokeMiterlimit = _first16.strokeMiterlimit;
+    }
+
+    if (_t16.value.length > 1) {
+      _t16.value[0] = {
+        offset: 0
+      };
+
+      for (var _i14 = 0; _i14 < len; _i14++) {
+        children[_i14].children[0].animate.push(_t16);
       }
     }
   }
 
   if (stroke.dashes) {
-    for (var _i14 = 0; _i14 < len; _i14++) {
-      children[_i14].children[0].style.strokeDasharray = [stroke.dashes];
+    for (var _i15 = 0; _i15 < len; _i15++) {
+      children[_i15].children[0].style.strokeDasharray = [stroke.dashes];
     }
-  } // if(type === 'rect' || type === 'ellipse') {
-  //   //
-  // }
-  // if(type === 'rect') {
-  //   child.props.style.width = size[0];
-  //   child.props.style.height = size[1];
-  //   let o = path.rect2polyline(size[0], size[1], roundness);
-  //   child.props.points = o.points;
-  //   child.props.controls = o.controls;
-  // }
-  // else if(type === 'ellipse') {
-  //   child.props.style.width = size[0];
-  //   child.props.style.height = size[1];
-  //   let o = path.ellipse2polyline();
-  //   child.props.points = o.points;
-  //   child.props.controls = o.controls;
-  // }
-  // else if(type === 'star') {
-  //   // TODO
-  // }
-  // else if(type === 'path') {
-  //   let t = transformPoints(points, begin2, duration);
-  //   let data = t.data;
-  //   child.props.style.width = data.width;
-  //   child.props.style.height = data.height;
-  //   // path的特殊位置计算
-  //   child.props.style.left = data.x2;
-  //   child.props.style.top = data.y2;
-  //   t.data = undefined;
-  //   let first = t.value[0];
-  //   child.props.points = first.points;
-  //   child.props.controls = first.controls;
-  //   if(t.value.length > 1) {
-  //     if(first.offset === 0) {
-  //       t.value[0] = {
-  //         offset: 0,
-  //       };
-  //     }
-  //     child.animate.push(t);
-  //   }
-  // }
-  // path没有position
-  // if(position && position[0]) {
-  //   child.props.style.left = -position[0];
-  // }
-  // if(position && position[1]) {
-  //   child.props.style.top = -position[1];
-  // }
-  // if(fill && fill.rule === 2 || gFill && gFill.rule === 2) {
-  //   child.props.style.fillRule = 'evenodd';
-  // }
-  // // geom内嵌的transform单独分析，anchorPoint比较特殊
-  // let { anchorPoint } = transform;
-  // if(Array.isArray(anchorPoint) && anchorPoint.length) {
-  //   let t = transformOrigin(anchorPoint, begin2, duration);
-  //   let first = t.value[0];
-  //   let v = first.transformOrigin.split(' ');
-  //   v[0] = parseFloat(v[0]);
-  //   v[1] = parseFloat(v[1]);
-  //   /**
-  //    * path很特殊，原始没有宽高，ae是锚点0,0相对于自身左上角原点，定位则是锚点来进行定位
-  //    * 需记录最初的位置，发生锚点动画时，其会干扰left/top，同步形成位置动画
-  //    */
-  //   if(type === 'path') {
-  //     let left = child.props.style.left;
-  //     let top = child.props.style.top;
-  //     child.props.style.left -= v[0];
-  //     child.props.style.top -= v[1];
-  //     let w = child.props.style.width;
-  //     let h = child.props.style.height;
-  //     v[0] += w * 0.5;
-  //     v[1] += h * 0.5;
-  //     if(v[0] !== w * 0.5 || v[1] !== h * 0.5) {
-  //       child.props.style.transformOrigin = first.transformOrigin;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // tfo的每个动画需考虑对坐标的影响
-  //       for(let i = 1, len = t.value.length; i < len; i++) {
-  //         let item = t.value[i];
-  //         let tfo = item.transformOrigin.split(' ');
-  //         tfo[0] = parseFloat(tfo[0]);
-  //         tfo[1] = parseFloat(tfo[1]);
-  //         item.left = left - tfo[0];
-  //         item.top = top - tfo[1];
-  //       }
-  //       child.animate.push(t);
-  //     }
-  //   }
-  //   else {
-  //     // tfo中心判断，加上尺寸*0.5
-  //     v[0] += size[0] * 0.5;
-  //     v[1] += size[1] * 0.5;
-  //     if(v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
-  //       // child.props.style.transformOrigin = first.transformOrigin;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // child.animate.push(t);
-  //     }
-  //     // if(v[0]) {
-  //     //   child.props.style.left = -v[0];
-  //     // }
-  //     // if(v[1]) {
-  //     //   child.props.style.top = -v[1];
-  //     // }
-  //   }
-  // }
-  // parseAnimate(child, data.shape, start, duration, offset, true, true);
-  // // gradient需要根据transformOrigin来计算
-  // if(gFill) {
-  //   let transformOrigin = child.props.style.transformOrigin;
-  //   let w = child.props.style.width, h = child.props.style.height;
-  //   let cx, cy;
-  //   if(transformOrigin) {
-  //     transformOrigin = transformOrigin.split(' ');
-  //     cx = parseFloat(transformOrigin[0]);
-  //     cy = parseFloat(transformOrigin[1]);
-  //   }
-  //   else {
-  //     cx = w * 0.5;
-  //     cy = h * 0.5;
-  //   }
-  //   let { type, start, end } = gFill;
-  //   if(type === 1) {
-  //     let x0 = position[0], y0 = position[1];
-  //     let x1 = start[0] + cx, y1 = start[1] + cy;
-  //     let x2 = end[0] + cx, y2 = end[1] + cy;
-  //     f = `linearGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
-  //   }
-  //   else if(type === 2) {
-  //     let x0 = position[0], y0 = position[1];
-  //     let x1 = start[0] + cx, y1 = start[1] + cy;
-  //     let x2 = end[0] + cx, y2 = end[1] + cy;
-  //     f = `radialGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
-  //   }
-  //   // child.props.style.fill = [f];
-  // }
-  // // trimPath裁剪动画或属性
-  // if(trim && trim.hasOwnProperty('start') && trim.hasOwnProperty('end')) {
-  //   let start = trim.start, end = trim.end;
-  //   if(start.length > 1) {
-  //     let t = transformPath(start, begin2, duration, false);
-  //     let first = t.value[0];
-  //     if(first.start !== 0) {
-  //       // child.props.start = first.start;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // child.animate.push(t);
-  //     }
-  //   }
-  //   else {
-  //     // child.props.start = start[0] * 0.01;
-  //   }
-  //   if(end.length > 1) {
-  //     let t = transformPath(end, begin2, duration, true);
-  //     let first = t.value[0];
-  //     if(first.end !== 0) {
-  //       // child.props.end = first.end;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // child.animate.push(t);
-  //     }
-  //   }
-  //   else {
-  //     // child.props.end = end[0] * 0.01;
-  //   }
-  // }
-
+  }
 
   res.children = children;
 }
@@ -2814,19 +2856,19 @@ function parseMask(data, target, start, duration, offset) {
   }
 
   if (Array.isArray(opacity) && opacity.length) {
-    var _t14 = transformOpacity(opacity, begin2, duration);
+    var _t17 = transformOpacity(opacity, begin2, duration);
 
-    var _first14 = _t14.value[0];
+    var _first17 = _t17.value[0];
 
-    if (_first14.opacity !== 1) {
-      res.props.style.opacity = _first14.opacity;
+    if (_first17.opacity !== 1) {
+      res.props.style.opacity = _first17.opacity;
     }
 
-    if (_t14.value.length > 1) {
-      _t14.value[0] = {
+    if (_t17.value.length > 1) {
+      _t17.value[0] = {
         offset: 0
       };
-      res.animate.push(_t14);
+      res.animate.push(_t17);
     }
   } // 获取对象锚点，mask的锚点需保持相同
 

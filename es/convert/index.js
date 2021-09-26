@@ -462,6 +462,7 @@ function parseGeom(res, data, start, duration, offset) {
     return;
   }
   for(let i = 0, len = content.length; i < len; i++) {
+    $.ae2karas.log(i);
     let item = content[i];
     let { type, direction, size, position, roundness, points } = item;
     // 由于动画的特殊性，无法直接用矢量标签，需嵌套一个中间层div
@@ -489,18 +490,19 @@ function parseGeom(res, data, start, duration, offset) {
     if(type === 'rect' || type === 'ellipse') {
       let t = transformSize(size, begin2, duration);
       let first = t.value[0];
-      child.props.style.width = first[0];
-      child.props.style.height = first[1];
+      $geom.props.style.width = first.size[0];
+      $geom.props.style.height = first.size[1];
       if(t.value.length > 1) {
         t.value[0] = {
           offset: 0,
         };
         // 用缩放代替尺寸变化
         for(let i = 1, len = t.value.length; i < len; i++) {
-          let size = t.value[i];
-          t.value[i].size = undefined;
-          t.value[i].scaleX = size[0] / first[0];
-          t.value[i].scaleY = size[1] / first[1];
+          let item = t.value[i];
+          let size = item.size;
+          item.size = undefined;
+          item.scaleX = size[0] / first.size[0];
+          item.scaleY = size[1] / first.size[1];
         }
         $geom.animate.push(t);
       }
@@ -558,7 +560,143 @@ function parseGeom(res, data, start, duration, offset) {
     if(fill && fill.rule === 2 || gFill && gFill.rule === 2) {
       $geom.props.style.fillRule = 'evenodd';
     }
+    // geom内嵌的transform单独分析，都作用在中间层div上，anchorPoint比较特殊
+    let { anchorPoint } = transform;
+    if(Array.isArray(anchorPoint) && anchorPoint.length) {
+      let t = transformOrigin(anchorPoint, begin2, duration);
+      let first = t.value[0];
+      let v = first.transformOrigin.split(' ');
+      v[0] = parseFloat(v[0]);
+      v[1] = parseFloat(v[1]);
+      /**
+       * path很特殊，原始没有宽高，ae是锚点0,0相对于自身左上角原点，定位则是锚点来进行定位
+       * 需记录最初的位置，发生锚点动画时，其会干扰left/top，同步形成位置动画
+       */
+      if(type === 'path') {
+        let left = $geom.props.style.left;
+        let top = $geom.props.style.top;
+        $geom.props.style.left -= v[0];
+        $geom.props.style.top -= v[1];
+        let w = $geom.props.style.width;
+        let h = $geom.props.style.height;
+        v[0] += w * 0.5;
+        v[1] += h * 0.5;
+        if(v[0] !== w * 0.5 || v[1] !== h * 0.5) {
+          $geom.props.style.transformOrigin = first.transformOrigin;
+        }
+        if(t.value.length > 1) {
+          if(first.offset === 0) {
+            t.value[0] = {
+              offset: 0,
+            };
+          }
+          // tfo的每个动画需考虑对坐标的影响
+          for(let i = 1, len = t.value.length; i < len; i++) {
+            let item = t.value[i];
+            let tfo = item.transformOrigin.split(' ');
+            tfo[0] = parseFloat(tfo[0]);
+            tfo[1] = parseFloat(tfo[1]);
+            item.left = left - tfo[0];
+            item.top = top - tfo[1];
+          }
+          $geom.animate.push(t);
+        }
+      }
+      else {
+        // tfo中心判断，加上尺寸*0.5
+        v[0] += size[0] * 0.5;
+        v[1] += size[1] * 0.5;
+        if(v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
+          $geom.props.style.transformOrigin = first.transformOrigin;
+        }
+        if(t.value.length > 1) {
+          if(first.offset === 0) {
+            t.value[0] = {
+              offset: 0,
+            };
+          }
+          $geom.animate.push(t);
+        }
+        if(v[0]) {
+          $geom.props.style.left = -v[0];
+        }
+        if(v[1]) {
+          $geom.props.style.top = -v[1];
+        }
+      }
+    }
+    parseAnimate(child, data.shape, start, duration, offset, true, true);
+    // gradient需要根据transformOrigin来计算
+    if(gFill) {
+      let transformOrigin = $geom.props.style.transformOrigin;
+      let w = $geom.props.style.width, h = $geom.props.style.height;
+      let cx, cy;
+      if(transformOrigin) {
+        transformOrigin = transformOrigin.split(' ');
+        cx = parseFloat(transformOrigin[0]);
+        cy = parseFloat(transformOrigin[1]);
+      }
+      else {
+        cx = w * 0.5;
+        cy = h * 0.5;
+      }
+      let { type, start, end } = gFill;
+      if(type === 1) {
+        let x0 = position[0], y0 = position[1];
+        let x1 = start[0] + cx, y1 = start[1] + cy;
+        let x2 = end[0] + cx, y2 = end[1] + cy;
+        f = `linearGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
+      }
+      else if(type === 2) {
+        let x0 = position[0], y0 = position[1];
+        let x1 = start[0] + cx, y1 = start[1] + cy;
+        let x2 = end[0] + cx, y2 = end[1] + cy;
+        f = `radialGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
+      }
+      $geom.props.style.fill = [f];
+    }
+    // trimPath裁剪动画或属性
+    if(trim && trim.hasOwnProperty('start') && trim.hasOwnProperty('end')) {
+      let start = trim.start, end = trim.end;
+      if(start.length > 1) {
+        let t = transformPath(start, begin2, duration, false);
+        let first = t.value[0];
+        if(first.start !== 0) {
+          $geom.props.start = first.start;
+        }
+        if(t.value.length > 1) {
+          if(first.offset === 0) {
+            t.value[0] = {
+              offset: 0,
+            };
+          }
+          $geom.animate.push(t);
+        }
+      }
+      else {
+        $geom.props.start = start[0] * 0.01;
+      }
+      if(end.length > 1) {
+        let t = transformPath(end, begin2, duration, true);
+        let first = t.value[0];
+        if(first.end !== 0) {
+          $geom.props.end = first.end;
+        }
+        if(t.value.length > 1) {
+          if(first.offset === 0) {
+            t.value[0] = {
+              offset: 0,
+            };
+          }
+          $geom.animate.push(t);
+        }
+      }
+      else {
+        $geom.props.end = end[0] * 0.01;
+      }
+    }
   }
+  $.ae2karas.log('hh')
   if(Array.isArray(fill.color) && fill.color.length) {
     let t = transformFill(fill, begin2, duration);
     let first = t.value[0];
@@ -639,192 +777,6 @@ function parseGeom(res, data, start, duration, offset) {
       children[i].children[0].style.strokeDasharray = [stroke.dashes];
     }
   }
-  // if(type === 'rect' || type === 'ellipse') {
-  //   //
-  // }
-  // if(type === 'rect') {
-  //   child.props.style.width = size[0];
-  //   child.props.style.height = size[1];
-  //   let o = path.rect2polyline(size[0], size[1], roundness);
-  //   child.props.points = o.points;
-  //   child.props.controls = o.controls;
-  // }
-  // else if(type === 'ellipse') {
-  //   child.props.style.width = size[0];
-  //   child.props.style.height = size[1];
-  //   let o = path.ellipse2polyline();
-  //   child.props.points = o.points;
-  //   child.props.controls = o.controls;
-  // }
-  // else if(type === 'star') {
-  //   // TODO
-  // }
-  // else if(type === 'path') {
-  //   let t = transformPoints(points, begin2, duration);
-  //   let data = t.data;
-  //   child.props.style.width = data.width;
-  //   child.props.style.height = data.height;
-  //   // path的特殊位置计算
-  //   child.props.style.left = data.x2;
-  //   child.props.style.top = data.y2;
-  //   t.data = undefined;
-  //   let first = t.value[0];
-  //   child.props.points = first.points;
-  //   child.props.controls = first.controls;
-  //   if(t.value.length > 1) {
-  //     if(first.offset === 0) {
-  //       t.value[0] = {
-  //         offset: 0,
-  //       };
-  //     }
-  //     child.animate.push(t);
-  //   }
-  // }
-  // path没有position
-  // if(position && position[0]) {
-  //   child.props.style.left = -position[0];
-  // }
-  // if(position && position[1]) {
-  //   child.props.style.top = -position[1];
-  // }
-  // if(fill && fill.rule === 2 || gFill && gFill.rule === 2) {
-  //   child.props.style.fillRule = 'evenodd';
-  // }
-  // // geom内嵌的transform单独分析，anchorPoint比较特殊
-  // let { anchorPoint } = transform;
-  // if(Array.isArray(anchorPoint) && anchorPoint.length) {
-  //   let t = transformOrigin(anchorPoint, begin2, duration);
-  //   let first = t.value[0];
-  //   let v = first.transformOrigin.split(' ');
-  //   v[0] = parseFloat(v[0]);
-  //   v[1] = parseFloat(v[1]);
-  //   /**
-  //    * path很特殊，原始没有宽高，ae是锚点0,0相对于自身左上角原点，定位则是锚点来进行定位
-  //    * 需记录最初的位置，发生锚点动画时，其会干扰left/top，同步形成位置动画
-  //    */
-  //   if(type === 'path') {
-  //     let left = child.props.style.left;
-  //     let top = child.props.style.top;
-  //     child.props.style.left -= v[0];
-  //     child.props.style.top -= v[1];
-  //     let w = child.props.style.width;
-  //     let h = child.props.style.height;
-  //     v[0] += w * 0.5;
-  //     v[1] += h * 0.5;
-  //     if(v[0] !== w * 0.5 || v[1] !== h * 0.5) {
-  //       child.props.style.transformOrigin = first.transformOrigin;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // tfo的每个动画需考虑对坐标的影响
-  //       for(let i = 1, len = t.value.length; i < len; i++) {
-  //         let item = t.value[i];
-  //         let tfo = item.transformOrigin.split(' ');
-  //         tfo[0] = parseFloat(tfo[0]);
-  //         tfo[1] = parseFloat(tfo[1]);
-  //         item.left = left - tfo[0];
-  //         item.top = top - tfo[1];
-  //       }
-  //       child.animate.push(t);
-  //     }
-  //   }
-  //   else {
-  //     // tfo中心判断，加上尺寸*0.5
-  //     v[0] += size[0] * 0.5;
-  //     v[1] += size[1] * 0.5;
-  //     if(v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
-  //       // child.props.style.transformOrigin = first.transformOrigin;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // child.animate.push(t);
-  //     }
-  //     // if(v[0]) {
-  //     //   child.props.style.left = -v[0];
-  //     // }
-  //     // if(v[1]) {
-  //     //   child.props.style.top = -v[1];
-  //     // }
-  //   }
-  // }
-  // parseAnimate(child, data.shape, start, duration, offset, true, true);
-  // // gradient需要根据transformOrigin来计算
-  // if(gFill) {
-  //   let transformOrigin = child.props.style.transformOrigin;
-  //   let w = child.props.style.width, h = child.props.style.height;
-  //   let cx, cy;
-  //   if(transformOrigin) {
-  //     transformOrigin = transformOrigin.split(' ');
-  //     cx = parseFloat(transformOrigin[0]);
-  //     cy = parseFloat(transformOrigin[1]);
-  //   }
-  //   else {
-  //     cx = w * 0.5;
-  //     cy = h * 0.5;
-  //   }
-  //   let { type, start, end } = gFill;
-  //   if(type === 1) {
-  //     let x0 = position[0], y0 = position[1];
-  //     let x1 = start[0] + cx, y1 = start[1] + cy;
-  //     let x2 = end[0] + cx, y2 = end[1] + cy;
-  //     f = `linearGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
-  //   }
-  //   else if(type === 2) {
-  //     let x0 = position[0], y0 = position[1];
-  //     let x1 = start[0] + cx, y1 = start[1] + cy;
-  //     let x2 = end[0] + cx, y2 = end[1] + cy;
-  //     f = `radialGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
-  //   }
-  //   // child.props.style.fill = [f];
-  // }
-  // // trimPath裁剪动画或属性
-  // if(trim && trim.hasOwnProperty('start') && trim.hasOwnProperty('end')) {
-  //   let start = trim.start, end = trim.end;
-  //   if(start.length > 1) {
-  //     let t = transformPath(start, begin2, duration, false);
-  //     let first = t.value[0];
-  //     if(first.start !== 0) {
-  //       // child.props.start = first.start;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // child.animate.push(t);
-  //     }
-  //   }
-  //   else {
-  //     // child.props.start = start[0] * 0.01;
-  //   }
-  //   if(end.length > 1) {
-  //     let t = transformPath(end, begin2, duration, true);
-  //     let first = t.value[0];
-  //     if(first.end !== 0) {
-  //       // child.props.end = first.end;
-  //     }
-  //     if(t.value.length > 1) {
-  //       if(first.offset === 0) {
-  //         t.value[0] = {
-  //           offset: 0,
-  //         };
-  //       }
-  //       // child.animate.push(t);
-  //     }
-  //   }
-  //   else {
-  //     // child.props.end = end[0] * 0.01;
-  //   }
-  // }
   res.children = children;
 }
 
