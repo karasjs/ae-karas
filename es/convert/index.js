@@ -66,11 +66,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       init.style.transformOrigin = first.transformOrigin;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       // tfo的每个动画需考虑对坐标的影响
       for(let i = 1, len = t.value.length; i < len; i++) {
         let item = t.value[i];
@@ -97,11 +95,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       init.style.opacity = first.opacity;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
     }
   }
@@ -115,11 +111,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       init.style.translateY = first.translateY;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
     }
   }
@@ -132,11 +126,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       is3d = true;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
       is3d = true;
     }
@@ -149,11 +141,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       is3d = true;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
       is3d = true;
     }
@@ -166,11 +156,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       is3d = true;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
       is3d = true;
     }
@@ -191,11 +179,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       init.style.scaleZ = first.scaleZ;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
     }
   }
@@ -506,11 +492,9 @@ function parseGeom(res, data, start, duration, offset) {
       child.props.style.width = first[0];
       child.props.style.height = first[1];
       if(t.value.length > 1) {
-        if(first.offset === 0) {
-          t.value[0] = {
-            offset: 0,
-          };
-        }
+        t.value[0] = {
+          offset: 0,
+        };
         // 用缩放代替尺寸变化
         for(let i = 1, len = t.value.length; i < len; i++) {
           let size = t.value[i];
@@ -534,6 +518,46 @@ function parseGeom(res, data, start, duration, offset) {
     else if(type === 'star') {
       // TODO
     }
+    else if(type === 'path') {
+      let t = transformPoints(points, begin2, duration);
+      let data = t.data;
+      $geom.props.style.width = data.width;
+      $geom.props.style.height = data.height;
+      // path的特殊位置计算，因为ae中尺寸为0
+      $geom.props.style.left = data.x2;
+      $geom.props.style.top = data.y2;
+      t.data = undefined;
+      let first = t.value[0];
+      $geom.props.points = first.points;
+      $geom.props.controls = first.controls;
+      if(t.value.length > 1) {
+        t.value[0] = {
+          offset: 0,
+        };
+        $geom.animate.push(t);
+      }
+    }
+    // path没有position
+    if(position && position.length) {
+      let t = transformPosition(position, begin2, duration);
+      let first = t.value[0];
+      $geom.props.style.left = -first.translateX;
+      $geom.props.style.top = -first.translateY;
+      if(position.length > 1) {
+        t.value[0] = {
+          offset: 0,
+        };
+        for(let i = 1; i < position.length; i++) {
+          let item = t.value[i];
+          item.translateX -= first.translateX;
+          item.translateY -= first.translateY;
+        }
+        $geom.animate.push(t);
+      }
+    }
+    if(fill && fill.rule === 2 || gFill && gFill.rule === 2) {
+      $geom.props.style.fillRule = 'evenodd';
+    }
   }
   if(Array.isArray(fill.color) && fill.color.length) {
     let t = transformFill(fill, begin2, duration);
@@ -542,11 +566,9 @@ function parseGeom(res, data, start, duration, offset) {
       children[i].children[0].style.fill = first.fill;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       for(let i = 0; i < len; i++) {
         children[i].children[0].animate.push(t);
       }
@@ -559,11 +581,9 @@ function parseGeom(res, data, start, duration, offset) {
       children[i].children[0].style.stroke = first.stroke;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       for(let i = 0; i < len; i++) {
         children[i].children[0].animate.push(t);
       }
@@ -576,11 +596,9 @@ function parseGeom(res, data, start, duration, offset) {
       children[i].children[0].style.strokeWidth = first.strokeWidth;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       for(let i = 0; i < len; i++) {
         children[i].children[0].animate.push(t);
       }
@@ -593,11 +611,9 @@ function parseGeom(res, data, start, duration, offset) {
       children[i].children[0].style.strokeLineJoin = first.strokeLineJoin;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       for(let i = 0; i < len; i++) {
         children[i].children[0].animate.push(t);
       }
@@ -610,11 +626,9 @@ function parseGeom(res, data, start, duration, offset) {
       children[i].children[0].style.strokeMiterlimit = first.strokeMiterlimit;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       for(let i = 0; i < len; i++) {
         children[i].children[0].animate.push(t);
       }
@@ -875,11 +889,9 @@ function parseMask(data, target, start, duration, offset) {
     res.props.points = first.points;
     res.props.controls = first.controls;
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
     }
   }
@@ -893,11 +905,9 @@ function parseMask(data, target, start, duration, offset) {
       res.props.style.opacity = first.opacity;
     }
     if(t.value.length > 1) {
-      if(first.offset === 0) {
-        t.value[0] = {
-          offset: 0,
-        };
-      }
+      t.value[0] = {
+        offset: 0,
+      };
       res.animate.push(t);
     }
   }

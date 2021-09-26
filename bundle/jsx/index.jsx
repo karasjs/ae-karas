@@ -1848,12 +1848,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
 
     if (t.value.length > 1) {
-      if (first.offset === 0) {
-        t.value[0] = {
-          offset: 0
-        };
-      } // tfo的每个动画需考虑对坐标的影响
-
+      t.value[0] = {
+        offset: 0
+      }; // tfo的每个动画需考虑对坐标的影响
 
       for (var i = 1, len = t.value.length; i < len; i++) {
         var item = t.value[i];
@@ -1887,12 +1884,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
 
     if (_t.value.length > 1) {
-      if (_first.offset === 0) {
-        _t.value[0] = {
-          offset: 0
-        };
-      }
-
+      _t.value[0] = {
+        offset: 0
+      };
       res.animate.push(_t);
     }
   }
@@ -1911,12 +1905,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
 
     if (_t2.value.length > 1) {
-      if (_first2.offset === 0) {
-        _t2.value[0] = {
-          offset: 0
-        };
-      }
-
+      _t2.value[0] = {
+        offset: 0
+      };
       res.animate.push(_t2);
     }
   }
@@ -1934,12 +1925,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
 
     if (_t3.value.length > 1) {
-      if (_first3.offset === 0) {
-        _t3.value[0] = {
-          offset: 0
-        };
-      }
-
+      _t3.value[0] = {
+        offset: 0
+      };
       res.animate.push(_t3);
       is3d = true;
     }
@@ -1956,12 +1944,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
 
     if (_t4.value.length > 1) {
-      if (_first4.offset === 0) {
-        _t4.value[0] = {
-          offset: 0
-        };
-      }
-
+      _t4.value[0] = {
+        offset: 0
+      };
       res.animate.push(_t4);
       is3d = true;
     }
@@ -1978,12 +1963,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
 
     if (_t5.value.length > 1) {
-      if (_first5.offset === 0) {
-        _t5.value[0] = {
-          offset: 0
-        };
-      }
-
+      _t5.value[0] = {
+        offset: 0
+      };
       res.animate.push(_t5);
       is3d = true;
     }
@@ -2011,12 +1993,9 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
     }
 
     if (_t6.value.length > 1) {
-      if (_first6.offset === 0) {
-        _t6.value[0] = {
-          offset: 0
-        };
-      }
-
+      _t6.value[0] = {
+        offset: 0
+      };
       res.animate.push(_t6);
     }
   }
@@ -2332,9 +2311,9 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
 function parseGeom(res, data, start, duration, offset) {
   var _data$shape = data.shape,
       content = _data$shape.content,
-      fill = _data$shape.fill;
-      _data$shape.gFill;
-      var stroke = _data$shape.stroke;
+      fill = _data$shape.fill,
+      gFill = _data$shape.gFill,
+      stroke = _data$shape.stroke;
       _data$shape.transform;
       data.trim;
   $.ae2karas.log(content); // let { type, direction, size, position, roundness, points } = content;
@@ -2352,10 +2331,10 @@ function parseGeom(res, data, start, duration, offset) {
     var item = content[i];
     var type = item.type;
         item.direction;
-        var size = item.size;
-        item.position;
-        var roundness = item.roundness;
-        item.points; // 由于动画的特殊性，无法直接用矢量标签，需嵌套一个中间层div
+        var size = item.size,
+        position = item.position,
+        roundness = item.roundness,
+        points = item.points; // 由于动画的特殊性，无法直接用矢量标签，需嵌套一个中间层div
 
     var $geom = {
       tagName: '$polyline',
@@ -2385,12 +2364,9 @@ function parseGeom(res, data, start, duration, offset) {
       child.props.style.height = first[1];
 
       if (t.value.length > 1) {
-        if (first.offset === 0) {
-          t.value[0] = {
-            offset: 0
-          };
-        } // 用缩放代替尺寸变化
-
+        t.value[0] = {
+          offset: 0
+        }; // 用缩放代替尺寸变化
 
         for (var _i2 = 1, _len3 = t.value.length; _i2 < _len3; _i2++) {
           var _size = t.value[_i2];
@@ -2412,122 +2388,159 @@ function parseGeom(res, data, start, duration, offset) {
         $geom.props.points = _o.points;
         $geom.props.controls = _o.controls;
       }
+    } else if (type === 'star') ; else if (type === 'path') {
+      var _t7 = transformPoints(points, begin2, duration);
+
+      var _data = _t7.data;
+      $geom.props.style.width = _data.width;
+      $geom.props.style.height = _data.height; // path的特殊位置计算，因为ae中尺寸为0
+
+      $geom.props.style.left = _data.x2;
+      $geom.props.style.top = _data.y2;
+      _t7.data = undefined;
+      var _first7 = _t7.value[0];
+      $geom.props.points = _first7.points;
+      $geom.props.controls = _first7.controls;
+
+      if (_t7.value.length > 1) {
+        _t7.value[0] = {
+          offset: 0
+        };
+        $geom.animate.push(_t7);
+      }
+    } // path没有position
+
+
+    if (position && position.length) {
+      var _t8 = transformPosition(position, begin2, duration);
+
+      var _first8 = _t8.value[0];
+      $geom.props.style.left = -_first8.translateX;
+      $geom.props.style.top = -_first8.translateY;
+
+      if (position.length > 1) {
+        _t8.value[0] = {
+          offset: 0
+        };
+
+        for (var _i3 = 1; _i3 < position.length; _i3++) {
+          var _item2 = _t8.value[_i3];
+          _item2.translateX -= _first8.translateX;
+          _item2.translateY -= _first8.translateY;
+        }
+
+        $geom.animate.push(_t8);
+      }
+    }
+
+    if (fill && fill.rule === 2 || gFill && gFill.rule === 2) {
+      $geom.props.style.fillRule = 'evenodd';
     }
   }
 
   if (Array.isArray(fill.color) && fill.color.length) {
-    var _t7 = transformFill(fill, begin2, duration);
+    var _t9 = transformFill(fill, begin2, duration);
 
-    var _first7 = _t7.value[0];
+    var _first9 = _t9.value[0];
 
-    for (var _i3 = 0; _i3 < len; _i3++) {
-      children[_i3].children[0].style.fill = _first7.fill;
+    for (var _i4 = 0; _i4 < len; _i4++) {
+      children[_i4].children[0].style.fill = _first9.fill;
     }
 
-    if (_t7.value.length > 1) {
-      if (_first7.offset === 0) {
-        _t7.value[0] = {
-          offset: 0
-        };
-      }
+    if (_t9.value.length > 1) {
+      _t9.value[0] = {
+        offset: 0
+      };
 
-      for (var _i4 = 0; _i4 < len; _i4++) {
-        children[_i4].children[0].animate.push(_t7);
+      for (var _i5 = 0; _i5 < len; _i5++) {
+        children[_i5].children[0].animate.push(_t9);
       }
     }
   }
 
   if (Array.isArray(stroke.color) && stroke.color.length) {
-    var _t8 = transformStroke(stroke, begin2, duration);
+    var _t10 = transformStroke(stroke, begin2, duration);
 
-    var _first8 = _t8.value[0];
+    var _first10 = _t10.value[0];
 
-    for (var _i5 = 0; _i5 < len; _i5++) {
-      children[_i5].children[0].style.stroke = _first8.stroke;
+    for (var _i6 = 0; _i6 < len; _i6++) {
+      children[_i6].children[0].style.stroke = _first10.stroke;
     }
 
-    if (_t8.value.length > 1) {
-      if (_first8.offset === 0) {
-        _t8.value[0] = {
-          offset: 0
-        };
-      }
+    if (_t10.value.length > 1) {
+      _t10.value[0] = {
+        offset: 0
+      };
 
-      for (var _i6 = 0; _i6 < len; _i6++) {
-        children[_i6].children[0].animate.push(_t8);
+      for (var _i7 = 0; _i7 < len; _i7++) {
+        children[_i7].children[0].animate.push(_t10);
       }
     }
   }
 
   if (Array.isArray(stroke.width) && stroke.width.length) {
-    var _t9 = transformStrokeWidth(stroke.width, begin2, duration);
+    var _t11 = transformStrokeWidth(stroke.width, begin2, duration);
 
-    var _first9 = _t9.value[0];
+    var _first11 = _t11.value[0];
 
-    for (var _i7 = 0; _i7 < len; _i7++) {
-      children[_i7].children[0].style.strokeWidth = _first9.strokeWidth;
+    for (var _i8 = 0; _i8 < len; _i8++) {
+      children[_i8].children[0].style.strokeWidth = _first11.strokeWidth;
     }
 
-    if (_t9.value.length > 1) {
-      if (_first9.offset === 0) {
-        _t9.value[0] = {
-          offset: 0
-        };
-      }
+    if (_t11.value.length > 1) {
+      _t11.value[0] = {
+        offset: 0
+      };
 
-      for (var _i8 = 0; _i8 < len; _i8++) {
-        children[_i8].children[0].animate.push(_t9);
+      for (var _i9 = 0; _i9 < len; _i9++) {
+        children[_i9].children[0].animate.push(_t11);
       }
     }
   }
 
   if (Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
-    var _t10 = transformLineJoin(stroke.lineJoin, begin2, duration);
+    var _t12 = transformLineJoin(stroke.lineJoin, begin2, duration);
 
-    var _first10 = _t10.value[0];
+    var _first12 = _t12.value[0];
 
-    for (var _i9 = 0; _i9 < len; _i9++) {
-      children[_i9].children[0].style.strokeLineJoin = _first10.strokeLineJoin;
+    for (var _i10 = 0; _i10 < len; _i10++) {
+      children[_i10].children[0].style.strokeLineJoin = _first12.strokeLineJoin;
     }
 
-    if (_t10.value.length > 1) {
-      if (_first10.offset === 0) {
-        _t10.value[0] = {
-          offset: 0
-        };
-      }
+    if (_t12.value.length > 1) {
+      _t12.value[0] = {
+        offset: 0
+      };
 
-      for (var _i10 = 0; _i10 < len; _i10++) {
-        children[_i10].children[0].animate.push(_t10);
+      for (var _i11 = 0; _i11 < len; _i11++) {
+        children[_i11].children[0].animate.push(_t12);
       }
     }
   }
 
   if (Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
-    var _t11 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+    var _t13 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
 
-    var _first11 = _t11.value[0];
+    var _first13 = _t13.value[0];
 
-    for (var _i11 = 0; _i11 < len; _i11++) {
-      children[_i11].children[0].style.strokeMiterlimit = _first11.strokeMiterlimit;
+    for (var _i12 = 0; _i12 < len; _i12++) {
+      children[_i12].children[0].style.strokeMiterlimit = _first13.strokeMiterlimit;
     }
 
-    if (_t11.value.length > 1) {
-      if (_first11.offset === 0) {
-        _t11.value[0] = {
-          offset: 0
-        };
-      }
+    if (_t13.value.length > 1) {
+      _t13.value[0] = {
+        offset: 0
+      };
 
-      for (var _i12 = 0; _i12 < len; _i12++) {
-        children[_i12].children[0].animate.push(_t11);
+      for (var _i13 = 0; _i13 < len; _i13++) {
+        children[_i13].children[0].animate.push(_t13);
       }
     }
   }
 
   if (stroke.dashes) {
-    for (var _i13 = 0; _i13 < len; _i13++) {
-      children[_i13].children[0].style.strokeDasharray = [stroke.dashes];
+    for (var _i14 = 0; _i14 < len; _i14++) {
+      children[_i14].children[0].style.strokeDasharray = [stroke.dashes];
     }
   } // if(type === 'rect' || type === 'ellipse') {
   //   //
@@ -2791,12 +2804,9 @@ function parseMask(data, target, start, duration, offset) {
     res.props.controls = first.controls;
 
     if (t.value.length > 1) {
-      if (first.offset === 0) {
-        t.value[0] = {
-          offset: 0
-        };
-      }
-
+      t.value[0] = {
+        offset: 0
+      };
       res.animate.push(t);
     }
   } else {
@@ -2804,22 +2814,19 @@ function parseMask(data, target, start, duration, offset) {
   }
 
   if (Array.isArray(opacity) && opacity.length) {
-    var _t12 = transformOpacity(opacity, begin2, duration);
+    var _t14 = transformOpacity(opacity, begin2, duration);
 
-    var _first12 = _t12.value[0];
+    var _first14 = _t14.value[0];
 
-    if (_first12.opacity !== 1) {
-      res.props.style.opacity = _first12.opacity;
+    if (_first14.opacity !== 1) {
+      res.props.style.opacity = _first14.opacity;
     }
 
-    if (_t12.value.length > 1) {
-      if (_first12.offset === 0) {
-        _t12.value[0] = {
-          offset: 0
-        };
-      }
-
-      res.animate.push(_t12);
+    if (_t14.value.length > 1) {
+      _t14.value[0] = {
+        offset: 0
+      };
+      res.animate.push(_t14);
     }
   } // 获取对象锚点，mask的锚点需保持相同
 
