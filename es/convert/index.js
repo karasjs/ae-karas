@@ -379,6 +379,7 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
   }
   else if(text) {
     let content = data.content;
+    // $.ae2karas.log(content);
     res.props.style.color = [
       parseInt(content.fillColor[0] * 255),
       parseInt(content.fillColor[1] * 255),
@@ -386,7 +387,7 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     ];
     res.props.style.fontFamily = content.fontFamily;
     res.props.style.fontSize = content.fontSize;
-    res.props.style.fontStyle = content.fontStyle;
+    // res.props.style.fontStyle = content.fontStyle;
     res.props.style.lineHeight = content.leading / content.fontSize;
     res.children = [content.text];
     // 对齐方式
@@ -465,7 +466,6 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
 function parseGeom(res, data, start, duration, displayStartTime, offset) {
   let { shape: { content, fill, gFill, stroke, transform }, trim } = data;
   let begin2 = start - offset - displayStartTime;
-  let f;
   // 矢量可能有多个，但样式共用一个
   let children = [];
   let len = content.length;
@@ -486,6 +486,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
   for(let i = 0, len = content.length; i < len; i++) {
     let item = content[i];
     let { type, direction, size, position, roundness, points } = item;
+    let f;
     // 由于动画的特殊性，无法直接用矢量标签，需嵌套一个中间层div
     let $geom = {
       tagName: '$polyline',
@@ -653,13 +654,13 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
       let { type, start, end } = gFill;
       if(type === 1) {
-        let x0 = position[0], y0 = position[1];
+        let x0 = $geom.props.style.translateX || 0, y0 = $geom.props.style.translateY || 0;
         let x1 = start[0] + cx, y1 = start[1] + cy;
         let x2 = end[0] + cx, y2 = end[1] + cy;
         f = `linearGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
       }
       else if(type === 2) {
-        let x0 = position[0], y0 = position[1];
+        let x0 = $geom.props.style.translateX || 0, y0 = $geom.props.style.translateY || 0;
         let x1 = start[0] + cx, y1 = start[1] + cy;
         let x2 = end[0] + cx, y2 = end[1] + cy;
         f = `radialGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
@@ -707,7 +708,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
     }
   }
-  if(Array.isArray(fill.color) && fill.color.length) {
+  if(fill && Array.isArray(fill.color) && fill.color.length) {
     let t = transformFill(fill, begin2, duration);
     let first = t.value[0];
     for(let i = 0; i < len; i++) {
@@ -722,7 +723,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
     }
   }
-  if(Array.isArray(stroke.color) && stroke.color.length) {
+  if(stroke && Array.isArray(stroke.color) && stroke.color.length) {
     let t = transformStroke(stroke, begin2, duration);
     let first = t.value[0];
     for(let i = 0; i < len; i++) {
@@ -737,7 +738,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
     }
   }
-  if(Array.isArray(stroke.width) && stroke.width.length) {
+  if(stroke && Array.isArray(stroke.width) && stroke.width.length) {
     let t = transformStrokeWidth(stroke.width, begin2, duration);
     let first = t.value[0];
     for(let i = 0; i < len; i++) {
@@ -752,7 +753,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
     }
   }
-  if(Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
+  if(stroke && Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
     let t = transformLineJoin(stroke.lineJoin, begin2, duration);
     let first = t.value[0];
     for(let i = 0; i < len; i++) {
@@ -767,7 +768,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
     }
   }
-  if(Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
+  if(stroke && Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
     let t = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
     let first = t.value[0];
     for(let i = 0; i < len; i++) {
@@ -782,17 +783,23 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
     }
   }
-  if(stroke.dashes) {
+  if(stroke && stroke.dashes) {
     for(let i = 0; i < len; i++) {
       children[i].props.style.strokeDasharray = [stroke.dashes];
     }
   }
+  if(!stroke) {
+    for(let i = 0; i < len; i++) {
+      children[i].props.style.strokeWidth = [0];
+    }
+  }
   res.children = [child];
+  $.ae2karas.log(res);
 }
 
 function parseMask(data, target, start, duration, displayStartTime, offset) {
-  $.ae2karas.log(data);
-  $.ae2karas.log(target);
+  // $.ae2karas.log(data);
+  // $.ae2karas.log(target);
   // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
   if(target.children && target.children.length === 1) {
     target = target.children[0];

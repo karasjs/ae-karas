@@ -16,7 +16,7 @@ function recursion(composition, library) {
       break;
     }
   }
-  // 再统计哪些层被作为父级链接
+  // 再统计哪些层被作为父级链接，asParent以索引为key是否父级链接为值，asChild以索引为key父级索引为值
   let asParent = {}, asChild = {};
   for(let i = 1; i <= layers.length; i++) {
     let item = layers[i];
@@ -121,89 +121,98 @@ function parseLayer(layer, library, hasSolo) {
           break;
         case 'ADBE Root Vectors Group':
           // 形状图层中的内容子属性
-          geom = vector(prop, library);
+          if(res.enabled) {
+            geom = vector(prop, library);
+          }
           break;
         case 'ADBE Mask Parade':
-          res.mask = mask(prop);
+          if(res.enabled) {
+            res.mask = mask(prop);
+          }
           break;
         case 'ADBE Text Properties':
-          txt = text(prop);
+          if(res.enabled) {
+            txt = text(prop);
+          }
           break;
       }
     }
   }
-  let source = layer.source;
-  if(geom && geom.shape && geom.shape.content && geom.shape.content.length) {
-    geom.geom = true; // 特殊标识
-    geom.type = 'div';
-    geom.id = library.length;
-    library.push(geom);
-    res.assetId = geom.id;
-  }
-  else if(txt) {
-    txt.text = true; // 特殊标识
-    txt.type = 'span';
-    txt.id = library.length;
-    library.push(txt);
-    res.assetId = txt.id;
-  }
-  else if(source) {
-    let asset;
-    // 图片图形等独立资源，将其解析为被link的放入library即可
-    if(source instanceof FootageItem) {
-      let src = source.file && source.file.fsName;
-      let name = source.name;
-      if(/\.psd$/.test(name)) {
-        let path = src.replace(/[^\/]*\.psd$/, '');
-        let newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
-        render.psd2png(source, src, path, newName);
-        src = path + newName;
-      }
-      if(!/\.jpg$/.test(src)
-        && !/\.jpeg$/.test(src)
-        && !/\.png/.test(src)
-        && !/\.webp/.test(src)
-        && !/\.gif/.test(src)) {
-        return;
-      }
-      let hasExist;
-      for(let i = 0; i < library.length; i++) {
-        let item = library[i];
-        if(item.src === src && item.type === 'img') {
-          asset = item;
-          hasExist = true;
-          break;
+  // 可能是作为父级链接，如果不可见则不需要内容
+  if(res.enabled) {
+    let source = layer.source;
+    if(geom && geom.shape && geom.shape.content && geom.shape.content.length) {
+      geom.geom = true; // 特殊标识
+      geom.type = 'div';
+      geom.id = library.length;
+      library.push(geom);
+      res.assetId = geom.id;
+    }
+    else if(txt) {
+      txt.text = true; // 特殊标识
+      txt.type = 'span';
+      txt.id = library.length;
+      library.push(txt);
+      res.assetId = txt.id;
+    }
+    else if(source) {
+      let asset;
+      // 图片图形等独立资源，将其解析为被link的放入library即可
+      if(source instanceof FootageItem) {
+        let src = source.file && source.file.fsName;
+        let name = source.name;
+        if(/\.psd$/.test(name)) {
+          let path = src.replace(/[^\/]*\.psd$/, '');
+          let newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
+          render.psd2png(source, src, path, newName);
+          src = path + newName;
         }
-      }
-      if(!hasExist) {
-        if(src) {
-          asset = {
-            type: 'img',
-            name,
-            width: source.width,
-            height: source.height,
-            src,
-          };
+        if(!/\.jpg$/.test(src)
+          && !/\.jpeg$/.test(src)
+          && !/\.png/.test(src)
+          && !/\.webp/.test(src)
+          && !/\.gif/.test(src)) {
+          return;
         }
-        // 颜色类型没有src
-        else {
-          asset = {
-            type: 'div',
-            width: source.width,
-            height: source.height,
+        let hasExist;
+        for(let i = 0; i < library.length; i++) {
+          let item = library[i];
+          if(item.src === src && item.type === 'img') {
+            asset = item;
+            hasExist = true;
+            break;
+          }
+        }
+        if(!hasExist) {
+          if(src) {
+            asset = {
+              type: 'img',
+              name,
+              width: source.width,
+              height: source.height,
+              src,
+            };
+          }
+          // 颜色类型没有src
+          else {
+            asset = {
+              type: 'div',
+              width: source.width,
+              height: source.height,
+            }
           }
         }
       }
-    }
-    // 合成，递归分析
-    else if(source instanceof CompItem) {
-      asset = recursion(source, library);
-      asset.type = 'div';
-    }
-    if(asset) {
-      asset.id = library.length;
-      library.push(asset);
-      res.assetId = asset.id;
+      // 合成，递归分析
+      else if(source instanceof CompItem) {
+        asset = recursion(source, library);
+        asset.type = 'div';
+      }
+      if(asset) {
+        asset.id = library.length;
+        library.push(asset);
+        res.assetId = asset.id;
+      }
     }
   }
   return res;

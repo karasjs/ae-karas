@@ -576,6 +576,39 @@ function vector (prop, library) {
   return res;
 }
 
+var render = {
+  psd2png: function psd2png(source, psd, path, name) {
+    var helperSequenceComp = app.project.items.addComp('tempConverterComp', source.width, source.height, 1, 1, 1);
+    helperSequenceComp.layers.add(source);
+    $.ae2karas.addTemp(helperSequenceComp);
+    var item = app.project.renderQueue.items.add(helperSequenceComp);
+    $.ae2karas.addTemp(item);
+    var outputModule = item.outputModule(1);
+    outputModule.applyTemplate("_HIDDEN X-Factor 8 Premul");
+    var fileName = path + name;
+    var file = new File(fileName);
+
+    if (file.exists) {
+      file.remove();
+    }
+
+    outputModule.file = new File(fileName);
+
+    item.onStatusChanged = function () {
+      // 完成后要重命名，因为ae会追加00000到文件名末尾
+      if (item.status === RQItemStatus.DONE) {
+        var bug = new File(fileName + '00000');
+
+        if (bug.exists) {
+          bug.rename(name);
+        }
+      }
+    };
+
+    app.project.renderQueue.render();
+  }
+};
+
 var uuid$1 = 0;
 
 function recursion$1(composition, library) {
@@ -596,7 +629,7 @@ function recursion$1(composition, library) {
       hasSolo = true;
       break;
     }
-  } // 再统计哪些层被作为父级链接
+  } // 再统计哪些层被作为父级链接，asParent以索引为key是否父级链接为值，asChild以索引为key父级索引为值
 
 
   var asParent = {},
@@ -723,93 +756,106 @@ function parseLayer(layer, library, hasSolo) {
 
         case 'ADBE Root Vectors Group':
           // 形状图层中的内容子属性
-          geom = vector(prop);
+          if (res.enabled) {
+            geom = vector(prop);
+          }
+
           break;
 
         case 'ADBE Mask Parade':
-          res.mask = mask(prop);
+          if (res.enabled) {
+            res.mask = mask(prop);
+          }
+
           break;
 
         case 'ADBE Text Properties':
-          txt = text(prop);
+          if (res.enabled) {
+            txt = text(prop);
+          }
+
           break;
       }
     }
-  }
+  } // 可能是作为父级链接，如果不可见则不需要内容
 
-  var source = layer.source;
 
-  if (geom && geom.shape && geom.shape.content && geom.shape.content.length) {
-    geom.geom = true; // 特殊标识
+  if (res.enabled) {
+    var source = layer.source;
 
-    geom.type = 'div';
-    geom.id = library.length;
-    library.push(geom);
-    res.assetId = geom.id;
-  } else if (txt) {
-    txt.text = true; // 特殊标识
+    if (geom && geom.shape && geom.shape.content && geom.shape.content.length) {
+      geom.geom = true; // 特殊标识
 
-    txt.type = 'span';
-    txt.id = library.length;
-    library.push(txt);
-    res.assetId = txt.id;
-  } else if (source) {
-    var asset; // 图片图形等独立资源，将其解析为被link的放入library即可
+      geom.type = 'div';
+      geom.id = library.length;
+      library.push(geom);
+      res.assetId = geom.id;
+    } else if (txt) {
+      txt.text = true; // 特殊标识
 
-    if (source instanceof FootageItem) {
-      var src = source.file && source.file.fsName;
-      var name = source.name;
+      txt.type = 'span';
+      txt.id = library.length;
+      library.push(txt);
+      res.assetId = txt.id;
+    } else if (source) {
+      var asset; // 图片图形等独立资源，将其解析为被link的放入library即可
 
-      if (/\.psd$/.test(name)) {
-        var path = src.replace(/[^\/]*\.psd$/, '');
-        var newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
-        src = path + newName;
-      }
+      if (source instanceof FootageItem) {
+        var src = source.file && source.file.fsName;
+        var name = source.name;
 
-      if (!/\.jpg$/.test(src) && !/\.jpeg$/.test(src) && !/\.png/.test(src) && !/\.webp/.test(src) && !/\.gif/.test(src)) {
-        return;
-      }
-
-      var hasExist;
-
-      for (var _i4 = 0; _i4 < library.length; _i4++) {
-        var item = library[_i4];
-
-        if (item.src === src && item.type === 'img') {
-          asset = item;
-          hasExist = true;
-          break;
+        if (/\.psd$/.test(name)) {
+          var path = src.replace(/[^\/]*\.psd$/, '');
+          var newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
+          render.psd2png(source, src, path, newName);
+          src = path + newName;
         }
-      }
 
-      if (!hasExist) {
-        if (src) {
-          asset = {
-            type: 'img',
-            name: name,
-            width: source.width,
-            height: source.height,
-            src: src
-          };
-        } // 颜色类型没有src
-        else {
-          asset = {
-            type: 'div',
-            width: source.width,
-            height: source.height
-          };
+        if (!/\.jpg$/.test(src) && !/\.jpeg$/.test(src) && !/\.png/.test(src) && !/\.webp/.test(src) && !/\.gif/.test(src)) {
+          return;
         }
-      }
-    } // 合成，递归分析
-    else if (source instanceof CompItem) {
-      asset = recursion$1(source, library);
-      asset.type = 'div';
-    }
 
-    if (asset) {
-      asset.id = library.length;
-      library.push(asset);
-      res.assetId = asset.id;
+        var hasExist;
+
+        for (var _i4 = 0; _i4 < library.length; _i4++) {
+          var item = library[_i4];
+
+          if (item.src === src && item.type === 'img') {
+            asset = item;
+            hasExist = true;
+            break;
+          }
+        }
+
+        if (!hasExist) {
+          if (src) {
+            asset = {
+              type: 'img',
+              name: name,
+              width: source.width,
+              height: source.height,
+              src: src
+            };
+          } // 颜色类型没有src
+          else {
+            asset = {
+              type: 'div',
+              width: source.width,
+              height: source.height
+            };
+          }
+        }
+      } // 合成，递归分析
+      else if (source instanceof CompItem) {
+        asset = recursion$1(source, library);
+        asset.type = 'div';
+      }
+
+      if (asset) {
+        asset.id = library.length;
+        library.push(asset);
+        res.assetId = asset.id;
+      }
     }
   }
 
@@ -1638,6 +1684,8 @@ function transformStroke(stroke, begin, duration) {
     }
   }; // 只有1帧没有动画，无需计算补间
 
+  $.ae2karas.log(stroke.color.length);
+
   if (stroke.color.length === 1) {
     var first = stroke.color[0];
     var v = [parseInt(first[0] * 255), parseInt(first[1] * 255), parseInt(first[2] * 255), first[3]];
@@ -2280,11 +2328,12 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
   if (geom) {
     parseGeom(res, data, start, duration, displayStartTime, offset);
   } else if (text) {
-    var content = data.content;
+    var content = data.content; // $.ae2karas.log(content);
+
     res.props.style.color = [parseInt(content.fillColor[0] * 255), parseInt(content.fillColor[1] * 255), parseInt(content.fillColor[2] * 255)];
     res.props.style.fontFamily = content.fontFamily;
-    res.props.style.fontSize = content.fontSize;
-    res.props.style.fontStyle = content.fontStyle;
+    res.props.style.fontSize = content.fontSize; // res.props.style.fontStyle = content.fontStyle;
+
     res.props.style.lineHeight = content.leading / content.fontSize;
     res.children = [content.text]; // 对齐方式
 
@@ -2377,8 +2426,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       stroke = _data$shape.stroke,
       transform = _data$shape.transform,
       trim = data.trim;
-  var begin2 = start - offset - displayStartTime;
-  var f; // 矢量可能有多个，但样式共用一个
+  var begin2 = start - offset - displayStartTime; // 矢量可能有多个，但样式共用一个
 
   var children = [];
   var len = content.length;
@@ -2406,7 +2454,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         var size = item.size,
         position = item.position,
         roundness = item.roundness,
-        points = item.points; // 由于动画的特殊性，无法直接用矢量标签，需嵌套一个中间层div
+        points = item.points;
+    var f = void 0; // 由于动画的特殊性，无法直接用矢量标签，需嵌套一个中间层div
 
     var $geom = {
       tagName: '$polyline',
@@ -2604,16 +2653,16 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           end = gFill.end;
 
       if (_type === 1) {
-        var x0 = position[0],
-            y0 = position[1];
+        var x0 = $geom.props.style.translateX || 0,
+            y0 = $geom.props.style.translateY || 0;
         var x1 = _start[0] + cx,
             y1 = _start[1] + cy;
         var x2 = end[0] + cx,
             y2 = end[1] + cy;
         f = "linearGradient(".concat((x1 - x0) / _w, " ").concat((y1 - y0) / _h, " ").concat((x2 - x0) / _w, " ").concat((y2 - y0) / _h, ", #FFF, #000)");
       } else if (_type === 2) {
-        var _x = position[0],
-            _y = position[1];
+        var _x = $geom.props.style.translateX || 0,
+            _y = $geom.props.style.translateY || 0;
 
         var _x2 = _start[0] + cx,
             _y2 = _start[1] + cy;
@@ -2678,7 +2727,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (Array.isArray(fill.color) && fill.color.length) {
+  if (fill && Array.isArray(fill.color) && fill.color.length) {
     var _t12 = transformFill(fill, begin2, duration);
 
     var _first12 = _t12.value[0];
@@ -2698,7 +2747,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (Array.isArray(stroke.color) && stroke.color.length) {
+  if (stroke && Array.isArray(stroke.color) && stroke.color.length) {
     var _t13 = transformStroke(stroke, begin2, duration);
 
     var _first13 = _t13.value[0];
@@ -2718,7 +2767,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (Array.isArray(stroke.width) && stroke.width.length) {
+  if (stroke && Array.isArray(stroke.width) && stroke.width.length) {
     var _t14 = transformStrokeWidth(stroke.width, begin2, duration);
 
     var _first14 = _t14.value[0];
@@ -2738,7 +2787,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
+  if (stroke && Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
     var _t15 = transformLineJoin(stroke.lineJoin, begin2, duration);
 
     var _first15 = _t15.value[0];
@@ -2758,7 +2807,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
+  if (stroke && Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
     var _t16 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
 
     var _first16 = _t16.value[0];
@@ -2778,19 +2827,26 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (stroke.dashes) {
+  if (stroke && stroke.dashes) {
     for (var _i15 = 0; _i15 < len; _i15++) {
       children[_i15].props.style.strokeDasharray = [stroke.dashes];
     }
   }
 
+  if (!stroke) {
+    for (var _i16 = 0; _i16 < len; _i16++) {
+      children[_i16].props.style.strokeWidth = [0];
+    }
+  }
+
   res.children = [child];
+  $.ae2karas.log(res);
 }
 
 function parseMask(data, target, start, duration, displayStartTime, offset) {
-  $.ae2karas.log(data);
-  $.ae2karas.log(target); // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
-
+  // $.ae2karas.log(data);
+  // $.ae2karas.log(target);
+  // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
   if (target.children && target.children.length === 1) {
     target = target.children[0];
   }
