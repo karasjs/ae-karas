@@ -2070,6 +2070,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   }
 
   if (is3d) {
+    // path没有width和height，在处理geom时会添加上
     init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
 
@@ -2380,7 +2381,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
         res.children.push(temp); // ppt应该放在父层，如果有父级链接，则放在其上
 
         if (temp.init && temp.init.style && temp.init.style.perspective) {
-          res.props.style.perspective = temp.init.style.perspective;
+          res.props.style.perspective = temp.init.style.perspective || undefined;
           temp.init.style.perspective = undefined;
         }
 
@@ -2388,7 +2389,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
           var t = temp.children[0];
 
           if (t.init && t.init.style && t.init.style.perspective) {
-            temp.props.style.perspective = t.init.style.perspective;
+            temp.props.style.perspective = t.init.style.perspective || undefined;
             t.init.style.perspective = undefined;
           }
         } // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻一级
@@ -2503,12 +2504,13 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     } else if (type === 'star') ; else if (type === 'path') {
       var _t7 = transformPoints(points, begin2, duration);
 
-      var _data = _t7.data;
-      $geom.props.style.width = _data.width;
-      $geom.props.style.height = _data.height; // path的特殊位置计算，因为ae中尺寸为0
+      var d = _t7.data; // path特殊没尺寸，3d等计算ppt需赋值
 
-      $geom.props.style.left = _data.x2;
-      $geom.props.style.top = _data.y2;
+      $geom.props.style.width = data.shape.width = d.width;
+      $geom.props.style.height = data.shape.height = d.height; // path的特殊位置计算，因为ae中尺寸为0
+
+      $geom.props.style.left = d.x2;
+      $geom.props.style.top = d.y2;
       _t7.data = undefined;
       var _first7 = _t7.value[0];
       $geom.props.points = _first7.points;

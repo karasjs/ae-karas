@@ -165,6 +165,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     }
   }
   if(is3d) {
+    // path没有width和height，在处理geom时会添加上
     init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
   if(Array.isArray(scale) && scale.length) {
@@ -429,13 +430,13 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
         res.children.push(temp);
         // ppt应该放在父层，如果有父级链接，则放在其上
         if(temp.init && temp.init.style && temp.init.style.perspective) {
-          res.props.style.perspective = temp.init.style.perspective;
+          res.props.style.perspective = temp.init.style.perspective || undefined;
           temp.init.style.perspective = undefined;
         }
         if(temp.children && temp.children.length === 1) {
           let t = temp.children[0];
           if(t.init && t.init.style && t.init.style.perspective) {
-            temp.props.style.perspective = t.init.style.perspective;
+            temp.props.style.perspective = t.init.style.perspective || undefined;
             t.init.style.perspective = undefined;
           }
         }
@@ -534,12 +535,13 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
     else if(type === 'path') {
       let t = transformPoints(points, begin2, duration);
-      let data = t.data;
-      $geom.props.style.width = data.width;
-      $geom.props.style.height = data.height;
+      let d = t.data;
+      // path特殊没尺寸，3d等计算ppt需赋值
+      $geom.props.style.width = data.shape.width = d.width;
+      $geom.props.style.height = data.shape.height = d.height;
       // path的特殊位置计算，因为ae中尺寸为0
-      $geom.props.style.left = data.x2;
-      $geom.props.style.top = data.y2;
+      $geom.props.style.left = d.x2;
+      $geom.props.style.top = d.y2;
       t.data = undefined;
       let first = t.value[0];
       $geom.props.points = first.points;
