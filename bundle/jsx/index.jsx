@@ -38,7 +38,7 @@ var VECTOR_TRANSFORM = {
   'ADBE Vector Scale': 'scale',
   'ADBE Vector Skew': 'skew',
   'ADBE Vector Skew Axis': 'skewAxis',
-  'ADBE Vector Rotation': 'rotation',
+  'ADBE Vector Rotation': 'rotateZ',
   'ADBE Vector Group Opacity': 'opacity',
   'ADBE Vector Trim Start': 'start',
   'ADBE Vector Trim End': 'end'
@@ -1414,7 +1414,7 @@ function transformRotateZ(list, begin, duration) {
 
   if (list.length === 1) {
     res.value.push({
-      rotateZ: -list[0]
+      rotateZ: list[0]
     });
   } else {
     list = getAreaList(list, begin, duration, function (prev, next, percent) {
@@ -1425,7 +1425,7 @@ function transformRotateZ(list, begin, duration) {
       var item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateZ: -item.value,
+        rotateZ: item.value,
         easing: item.easing
       });
     }
@@ -2840,7 +2840,6 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
   }
 
   res.children = [child];
-  $.ae2karas.log(res);
 }
 
 function parseMask(data, target, start, duration, displayStartTime, offset) {

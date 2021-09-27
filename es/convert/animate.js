@@ -305,7 +305,7 @@ export function transformRotateZ(list, begin, duration) {
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
     res.value.push({
-      rotateZ: -list[0],
+      rotateZ: list[0],
     });
   }
   else {
@@ -316,7 +316,7 @@ export function transformRotateZ(list, begin, duration) {
       let item = list[i];
       res.value.push({
         offset: (item.time - begin) / duration,
-        rotateZ: -item.value,
+        rotateZ: item.value,
         easing: item.easing,
       });
     }

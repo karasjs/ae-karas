@@ -18,7 +18,7 @@ const VECTOR_TRANSFORM = {
   'ADBE Vector Scale': 'scale',
   'ADBE Vector Skew': 'skew',
   'ADBE Vector Skew Axis': 'skewAxis',
-  'ADBE Vector Rotation': 'rotation',
+  'ADBE Vector Rotation': 'rotateZ',
   'ADBE Vector Group Opacity': 'opacity',
   'ADBE Vector Trim Start': 'start',
   'ADBE Vector Trim End': 'end',

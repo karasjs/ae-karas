@@ -794,7 +794,6 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
   res.children = [child];
-  $.ae2karas.log(res);
 }
 
 function parseMask(data, target, start, duration, displayStartTime, offset) {
