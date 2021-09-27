@@ -583,6 +583,7 @@ function recursion$1(composition, library) {
       layers = composition.layers,
       width = composition.width,
       height = composition.height,
+      displayStartTime = composition.displayStartTime,
       duration = composition.duration;
   $.ae2karas.error('composition: ' + name); // 是否是独奏模式
 
@@ -675,6 +676,8 @@ function recursion$1(composition, library) {
     name: name,
     width: width,
     height: height,
+    displayStartTime: displayStartTime * 1000,
+    // 开始时间码
     duration: duration * 1000,
     // 合成的总时长
     children: children
@@ -1809,7 +1812,7 @@ function transformSize(list, begin, duration) {
 
   if (list.length === 1) {
     res.value.push({
-      size: list
+      size: list[0]
     });
   } else {
     list = getAreaList(list, begin, duration, function (prev, next, percent) {
@@ -1834,10 +1837,11 @@ function transformSize(list, begin, duration) {
  * @param library
  * @param start
  * @param duration
+ * @param displayStartTime
  * @param offset
  */
 
-function preParse(data, library, start, duration, offset) {
+function preParse(data, library, start, duration, displayStartTime, offset) {
   var name = data.name,
       width = data.width,
       height = data.height,
@@ -1863,11 +1867,11 @@ function preParse(data, library, start, duration, offset) {
     children: [],
     animate: []
   };
-  parseAnimate(res, data, start, duration, offset, true, false);
+  parseAnimate(res, data, start, duration, displayStartTime, offset, true, false);
   return res;
 }
 
-function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
+function parseAnimate(res, data, start, duration, displayStartTime, offset, isDirect, isGeom) {
   var width = data.width,
       height = data.height,
       transform = data.transform; // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
@@ -1879,7 +1883,7 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
       rotateY = transform.rotateY,
       rotateZ = transform.rotateZ,
       scale = transform.scale;
-  var begin2 = start - offset;
+  var begin2 = start - offset - displayStartTime;
   var init = isDirect ? res.props : res.init;
 
   if (!isGeom && Array.isArray(anchorPoint) && anchorPoint.length) {
@@ -2055,12 +2059,13 @@ function parseAnimate(res, data, start, duration, offset, isDirect, isGeom) {
  * @param newLib
  * @param start
  * @param duration
+ * @param displayStartTime
  * @param offset
  * @param parentLink
  */
 
 
-function recursion(data, library, newLib, start, duration, offset, parentLink) {
+function recursion(data, library, newLib, start, duration, displayStartTime, offset, parentLink) {
   // 作为父级链接不可见时无需导出
   if (!data.enabled) {
     return null;
@@ -2079,7 +2084,9 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
     return null;
   }
 
-  var begin = start + offset; // 图层在工作区外可忽略
+  var begin = start + offset + displayStartTime;
+  inPoint += offset + displayStartTime;
+  outPoint += offset + displayStartTime; // 图层在工作区外可忽略
 
   if (inPoint >= begin + duration || outPoint <= begin) {
     return null;
@@ -2088,7 +2095,7 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
   var res = {
     name: name
   };
-  res.libraryId = parse(library, assetId, newLib, start, duration, offset + startTime);
+  res.libraryId = parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
   res.init = {
     style: {}
   }; // isMask代表是否是遮罩，isClip需在isMask的基础上判断，因为被遮罩层存储isClip值再赋给遮罩层
@@ -2179,7 +2186,13 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
         offset: 0
       });
       v.value.push({
-        offset: (inPoint - begin) / duration,
+        offset: inPoint / duration,
+        visibility: 'inherit',
+        pointerEvents: 'auto'
+      });
+    } else {
+      v.value.push({
+        offset: 0,
         visibility: 'inherit',
         pointerEvents: 'auto'
       });
@@ -2189,7 +2202,7 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
     if (outPoint < begin + duration) {
       // 可能是第一帧但offset不为0，不用担心karas会补充空首帧
       v.value.push({
-        offset: (outPoint - begin) / duration,
+        offset: outPoint / duration,
         visibility: 'hidden',
         pointerEvents: 'none'
       }); // 默认不是隐藏需补结束帧为隐藏，否则karas会填补空关键帧
@@ -2212,7 +2225,7 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
     res.animate.push(v);
   }
 
-  parseAnimate(res, data, start, duration, offset, false, false);
+  parseAnimate(res, data, start, duration, displayStartTime, offset, false, false);
 
   if (data.hasOwnProperty('asChild')) {
     var asChild = data.asChild;
@@ -2234,11 +2247,12 @@ function recursion(data, library, newLib, start, duration, offset, parentLink) {
  * @param newLib
  * @param start
  * @param duration
+ * @param displayStartTime
  * @param offset
  */
 
 
-function parse(library, assetId, newLib, start, duration, offset) {
+function parse(library, assetId, newLib, start, duration, displayStartTime, offset) {
   var data = library[assetId];
   var type = data.type,
       name = data.name,
@@ -2257,14 +2271,14 @@ function parse(library, assetId, newLib, start, duration, offset) {
       style: {
         position: 'absolute',
         width: width,
-        height: height,
-        overflow: 'hidden'
+        height: height // overflow: 'hidden',
+
       }
     }
   }; // 矢量图层特殊解析，添加
 
   if (geom) {
-    parseGeom(res, data, start, duration, offset);
+    parseGeom(res, data, start, duration, displayStartTime, offset);
   } else if (text) {
     var content = data.content;
     res.props.style.color = [parseInt(content.fillColor[0] * 255), parseInt(content.fillColor[1] * 255), parseInt(content.fillColor[2] * 255)];
@@ -2287,7 +2301,7 @@ function parse(library, assetId, newLib, start, duration, offset) {
     res.props.src = src;
   } else if (Array.isArray(children)) {
     res.children = [];
-    parseChildren(res, children, library, newLib, start, duration, offset);
+    parseChildren(res, children, library, newLib, start, duration, displayStartTime, offset);
   }
 
   res.id = newLib.length;
@@ -2295,7 +2309,7 @@ function parse(library, assetId, newLib, start, duration, offset) {
   return res.id;
 }
 
-function parseChildren(res, children, library, newLib, start, duration, offset) {
+function parseChildren(res, children, library, newLib, start, duration, displayStartTime, offset) {
   if (Array.isArray(children)) {
     // 先一遍解析父级链接，因为父级可能不展示或者只需要父级一层不递归解析父级的children
     var parentLink = {};
@@ -2304,14 +2318,14 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
       var item = children[i];
 
       if (item.hasOwnProperty('asParent')) {
-        parentLink[item.asParent] = preParse(item, library, start, duration, offset);
+        parentLink[item.asParent] = preParse(item, library, start, duration, displayStartTime, offset);
       }
     } // 再普通解析，遇到父级链接特殊处理
 
 
     for (var _i = 0, _len = children.length; _i < _len; _i++) {
       var _item = children[_i];
-      var temp = recursion(_item, library, newLib, start, duration, offset, parentLink);
+      var temp = recursion(_item, library, newLib, start, duration, displayStartTime, offset, parentLink);
 
       if (temp) {
         res.children.push(temp); // ppt应该放在父层，如果有父级链接，则放在其上
@@ -2332,7 +2346,7 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
 
 
         if (_item.mask && _item.mask.enabled) {
-          var m = parseMask(_item, temp, start, duration, offset);
+          var m = parseMask(_item, temp, start, duration, displayStartTime, offset);
 
           if (temp.children && temp.children.length === 1) {
             temp.children.push(m);
@@ -2350,11 +2364,12 @@ function parseChildren(res, children, library, newLib, start, duration, offset) 
  * @param data
  * @param start
  * @param duration
+ * @param displayStartTime
  * @param offset
  */
 
 
-function parseGeom(res, data, start, duration, offset) {
+function parseGeom(res, data, start, duration, displayStartTime, offset) {
   var _data$shape = data.shape,
       content = _data$shape.content,
       fill = _data$shape.fill,
@@ -2362,9 +2377,7 @@ function parseGeom(res, data, start, duration, offset) {
       stroke = _data$shape.stroke,
       transform = _data$shape.transform,
       trim = data.trim;
-  $.ae2karas.log(content); // let { type, direction, size, position, roundness, points } = content;
-
-  var begin2 = start - offset;
+  var begin2 = start - offset - displayStartTime;
   var f; // 矢量可能有多个，但样式共用一个
 
   var children = [];
@@ -2372,10 +2385,21 @@ function parseGeom(res, data, start, duration, offset) {
 
   if (!len) {
     return;
-  }
+  } // 由于动画的特殊性，无法直接用矢量标签，需嵌套一个中间层div
+
+
+  var child = {
+    tagName: 'div',
+    props: {
+      style: {
+        position: 'absolute'
+      }
+    },
+    children: children,
+    animate: []
+  };
 
   for (var i = 0, _len2 = content.length; i < _len2; i++) {
-    $.ae2karas.log(i);
     var item = content[i];
     var type = item.type;
         item.direction;
@@ -2393,17 +2417,7 @@ function parseGeom(res, data, start, duration, offset) {
       },
       animate: []
     };
-    var child = {
-      tagName: 'div',
-      props: {
-        style: {
-          position: 'absolute'
-        }
-      },
-      children: [$geom],
-      animate: []
-    };
-    children.push(child); // 分类处理矢量
+    children.push($geom); // 分类处理矢量
 
     if (type === 'rect' || type === 'ellipse') {
       var t = transformSize(size, begin2, duration);
@@ -2464,15 +2478,15 @@ function parseGeom(res, data, start, duration, offset) {
       var _t8 = transformPosition(position, begin2, duration);
 
       var _first8 = _t8.value[0];
-      $geom.props.style.left = -_first8.translateX;
-      $geom.props.style.top = -_first8.translateY;
+      $geom.props.style.translateX = _first8.translateX;
+      $geom.props.style.translateY = _first8.translateY;
 
-      if (position.length > 1) {
+      if (_t8.value.length > 1) {
         _t8.value[0] = {
           offset: 0
         };
 
-        for (var _i3 = 1; _i3 < position.length; _i3++) {
+        for (var _i3 = 1; _i3 < _t8.value.length; _i3++) {
           var _item3 = _t8.value[_i3];
           _item3.translateX -= _first8.translateX;
           _item3.translateY -= _first8.translateY;
@@ -2540,10 +2554,10 @@ function parseGeom(res, data, start, duration, offset) {
         }
       } else {
         // tfo中心判断，加上尺寸*0.5
-        v[0] += size[0] * 0.5;
-        v[1] += size[1] * 0.5;
+        v[0] += $geom.props.style.width * 0.5;
+        v[1] += $geom.props.style.height * 0.5;
 
-        if (v[0] !== size[0] * 0.5 || v[1] !== size[1] * 0.5) {
+        if (v[0] !== $geom.props.style.width * 0.5 || v[1] !== $geom.props.style.height * 0.5) {
           $geom.props.style.transformOrigin = _first9.transformOrigin;
         }
 
@@ -2664,15 +2678,13 @@ function parseGeom(res, data, start, duration, offset) {
     }
   }
 
-  $.ae2karas.log('hh');
-
   if (Array.isArray(fill.color) && fill.color.length) {
     var _t12 = transformFill(fill, begin2, duration);
 
     var _first12 = _t12.value[0];
 
     for (var _i5 = 0; _i5 < len; _i5++) {
-      children[_i5].children[0].style.fill = _first12.fill;
+      children[_i5].props.style.fill = _first12.fill;
     }
 
     if (_t12.value.length > 1) {
@@ -2681,7 +2693,7 @@ function parseGeom(res, data, start, duration, offset) {
       };
 
       for (var _i6 = 0; _i6 < len; _i6++) {
-        children[_i6].children[0].animate.push(_t12);
+        children[_i6].animate.push(_t12);
       }
     }
   }
@@ -2692,7 +2704,7 @@ function parseGeom(res, data, start, duration, offset) {
     var _first13 = _t13.value[0];
 
     for (var _i7 = 0; _i7 < len; _i7++) {
-      children[_i7].children[0].style.stroke = _first13.stroke;
+      children[_i7].props.style.stroke = _first13.stroke;
     }
 
     if (_t13.value.length > 1) {
@@ -2701,7 +2713,7 @@ function parseGeom(res, data, start, duration, offset) {
       };
 
       for (var _i8 = 0; _i8 < len; _i8++) {
-        children[_i8].children[0].animate.push(_t13);
+        children[_i8].animate.push(_t13);
       }
     }
   }
@@ -2712,7 +2724,7 @@ function parseGeom(res, data, start, duration, offset) {
     var _first14 = _t14.value[0];
 
     for (var _i9 = 0; _i9 < len; _i9++) {
-      children[_i9].children[0].style.strokeWidth = _first14.strokeWidth;
+      children[_i9].props.style.strokeWidth = _first14.strokeWidth;
     }
 
     if (_t14.value.length > 1) {
@@ -2721,7 +2733,7 @@ function parseGeom(res, data, start, duration, offset) {
       };
 
       for (var _i10 = 0; _i10 < len; _i10++) {
-        children[_i10].children[0].animate.push(_t14);
+        children[_i10].animate.push(_t14);
       }
     }
   }
@@ -2732,7 +2744,7 @@ function parseGeom(res, data, start, duration, offset) {
     var _first15 = _t15.value[0];
 
     for (var _i11 = 0; _i11 < len; _i11++) {
-      children[_i11].children[0].style.strokeLineJoin = _first15.strokeLineJoin;
+      children[_i11].props.style.strokeLineJoin = _first15.strokeLineJoin;
     }
 
     if (_t15.value.length > 1) {
@@ -2741,7 +2753,7 @@ function parseGeom(res, data, start, duration, offset) {
       };
 
       for (var _i12 = 0; _i12 < len; _i12++) {
-        children[_i12].children[0].animate.push(_t15);
+        children[_i12].animate.push(_t15);
       }
     }
   }
@@ -2752,7 +2764,7 @@ function parseGeom(res, data, start, duration, offset) {
     var _first16 = _t16.value[0];
 
     for (var _i13 = 0; _i13 < len; _i13++) {
-      children[_i13].children[0].style.strokeMiterlimit = _first16.strokeMiterlimit;
+      children[_i13].props.style.strokeMiterlimit = _first16.strokeMiterlimit;
     }
 
     if (_t16.value.length > 1) {
@@ -2761,21 +2773,21 @@ function parseGeom(res, data, start, duration, offset) {
       };
 
       for (var _i14 = 0; _i14 < len; _i14++) {
-        children[_i14].children[0].animate.push(_t16);
+        children[_i14].animate.push(_t16);
       }
     }
   }
 
   if (stroke.dashes) {
     for (var _i15 = 0; _i15 < len; _i15++) {
-      children[_i15].children[0].style.strokeDasharray = [stroke.dashes];
+      children[_i15].props.style.strokeDasharray = [stroke.dashes];
     }
   }
 
-  res.children = children;
+  res.children = [child];
 }
 
-function parseMask(data, target, start, duration, offset) {
+function parseMask(data, target, start, duration, displayStartTime, offset) {
   $.ae2karas.log(data);
   $.ae2karas.log(target); // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
 
@@ -2833,7 +2845,7 @@ function parseMask(data, target, start, duration, offset) {
   res.props.style.pointerEvents = undefined; // mask的2个动画，points和opacity
 
   var o = {};
-  var begin2 = start - offset;
+  var begin2 = start - offset - displayStartTime;
 
   if (Array.isArray(points) && points.length) {
     var t = transformPoints(points, begin2, duration);
@@ -2900,7 +2912,8 @@ function convert (data) {
   var name = result.name,
       width = result.width,
       height = result.height,
-      children = result.children;
+      children = result.children,
+      displayStartTime = result.displayStartTime;
   var newLib = [];
   var res = {
     uuid: uuid++,
@@ -2918,7 +2931,7 @@ function convert (data) {
     library: newLib,
     abbr: false
   };
-  parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, 0);
+  parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0);
   return res;
 }
 

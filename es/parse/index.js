@@ -5,7 +5,7 @@ import render from '../render';
 let uuid = 0;
 
 function recursion(composition, library) {
-  let { name, layers, width, height, duration } = composition;
+  let { name, layers, width, height, displayStartTime, duration } = composition;
   $.ae2karas.error('composition: ' + name);
   // 是否是独奏模式
   let hasSolo;
@@ -83,6 +83,7 @@ function recursion(composition, library) {
     name,
     width,
     height,
+    displayStartTime: displayStartTime * 1000, // 开始时间码
     duration: duration * 1000, // 合成的总时长
     children,
   };

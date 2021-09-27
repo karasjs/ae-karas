@@ -742,7 +742,7 @@ export function transformSize(list, begin, duration) {
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
     res.value.push({
-      size: list,
+      size: list[0],
     });
   }
   else {
