@@ -20,6 +20,7 @@ const STYLE = [
   'end',
   'begin',
   'perspective',
+  'lineHeight',
 ];
 
 function recursion(data, params) {

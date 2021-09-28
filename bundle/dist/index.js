@@ -2199,7 +2199,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective'];
+var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'lineHeight'];
 
 function recursion(data, params) {
   // 分为普通节点和library节点分别递归进行

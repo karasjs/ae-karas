@@ -2287,9 +2287,11 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
       var div = JSON.stringify(parentLink[asChild]);
       div = JSON.parse(div);
       var target = div;
+      target.asParent = target.asChild = undefined;
 
       while (target.children.length) {
         target = target.children[0];
+        target.asParent = target.asChild = undefined;
       }
 
       target.children.push(res);
@@ -2400,9 +2402,8 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
           parentLink[_i] = _item;
         }
       }
-    }
+    } // 再普通解析，遇到父级链接特殊处理
 
-    $.ae2karas.log(parentLink); // 再普通解析，遇到父级链接特殊处理
 
     for (var _i2 = 0, _len = children.length; _i2 < _len; _i2++) {
       var _item2 = children[_i2];
