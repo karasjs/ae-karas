@@ -17,7 +17,7 @@
 <ExtensionManifest Version="5.0" ExtensionBundleId="com.karas.ae-karas" ExtensionBundleVersion="0.1.0"
                    ExtensionBundleName="ae-karas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ExtensionList>
-        <Extension Id="com.karas.ae-karas" Version="0.1.0"/>
+        <Extension Id="com.karas.ae-karas" Version="0.1.5"/>
     </ExtensionList>
     <ExecutionEnvironment>
         <HostList>

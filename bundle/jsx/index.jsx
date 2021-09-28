@@ -2336,7 +2336,12 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
 
       }
     }
-  }; // 矢量图层特殊解析，添加
+  };
+
+  if (type === 'div') {
+    res.props.style.overflow = 'hidden';
+  } // 矢量图层特殊解析，添加
+
 
   if (geom) {
     parseGeom(res, data, start, duration, displayStartTime, offset);
@@ -2424,16 +2429,31 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
             temp.props.style.perspective = t.init.style.perspective || undefined;
             t.init.style.perspective = undefined;
           }
-        } // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻一级
+        } // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻
 
 
         if (_item2.mask && _item2.mask.enabled) {
           var m = parseMask(_item2, temp, start, duration, displayStartTime, offset);
+          var target = res;
 
-          if (temp.children && temp.children.length === 1) {
-            temp.children.push(m);
-          } else {
-            res.children.push(m);
+          while (temp.children && temp.children.length === 1) {
+            target = temp;
+            temp = temp.children[0];
+          }
+
+          target.children.push(m); // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
+
+          var style = target.children[0].init.style;
+
+          if (style) {
+            for (var _i3 in style) {
+              if (style.hasOwnProperty(_i3) && {
+                'scaleX': true,
+                'scaleY': true
+              }.hasOwnProperty(_i3)) {
+                m.props.style[_i3] = style[_i3];
+              }
+            }
           }
         }
       }
@@ -2512,8 +2532,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           offset: 0
         }; // 用缩放代替尺寸变化
 
-        for (var _i3 = 1, _len3 = t.value.length; _i3 < _len3; _i3++) {
-          var _item3 = t.value[_i3];
+        for (var _i4 = 1, _len3 = t.value.length; _i4 < _len3; _i4++) {
+          var _item3 = t.value[_i4];
           var _size = _item3.size;
           _item3.size = undefined;
           _item3.scaleX = _size[0] / first.size[0];
@@ -2569,8 +2589,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           offset: 0
         };
 
-        for (var _i4 = 1; _i4 < _t8.value.length; _i4++) {
-          var _item4 = _t8.value[_i4];
+        for (var _i5 = 1; _i5 < _t8.value.length; _i5++) {
+          var _item4 = _t8.value[_i5];
           _item4.translateX -= _first8.translateX;
           _item4.translateY -= _first8.translateY;
         }
@@ -2622,8 +2642,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           } // tfo的每个动画需考虑对坐标的影响
 
 
-          for (var _i5 = 1, _len4 = _t9.value.length; _i5 < _len4; _i5++) {
-            var _item5 = _t9.value[_i5];
+          for (var _i6 = 1, _len4 = _t9.value.length; _i6 < _len4; _i6++) {
+            var _item5 = _t9.value[_i6];
 
             var tfo = _item5.transformOrigin.split(' ');
 
@@ -2766,8 +2786,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first12 = _t12.value[0];
 
-    for (var _i6 = 0; _i6 < len; _i6++) {
-      children[_i6].props.style.fill = _first12.fill;
+    for (var _i7 = 0; _i7 < len; _i7++) {
+      children[_i7].props.style.fill = _first12.fill;
     }
 
     if (_t12.value.length > 1) {
@@ -2775,8 +2795,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i7 = 0; _i7 < len; _i7++) {
-        children[_i7].animate.push(_t12);
+      for (var _i8 = 0; _i8 < len; _i8++) {
+        children[_i8].animate.push(_t12);
       }
     }
   }
@@ -2786,8 +2806,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first13 = _t13.value[0];
 
-    for (var _i8 = 0; _i8 < len; _i8++) {
-      children[_i8].props.style.stroke = _first13.stroke;
+    for (var _i9 = 0; _i9 < len; _i9++) {
+      children[_i9].props.style.stroke = _first13.stroke;
     }
 
     if (_t13.value.length > 1) {
@@ -2795,8 +2815,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i9 = 0; _i9 < len; _i9++) {
-        children[_i9].animate.push(_t13);
+      for (var _i10 = 0; _i10 < len; _i10++) {
+        children[_i10].animate.push(_t13);
       }
     }
   }
@@ -2806,8 +2826,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first14 = _t14.value[0];
 
-    for (var _i10 = 0; _i10 < len; _i10++) {
-      children[_i10].props.style.strokeWidth = _first14.strokeWidth;
+    for (var _i11 = 0; _i11 < len; _i11++) {
+      children[_i11].props.style.strokeWidth = _first14.strokeWidth;
     }
 
     if (_t14.value.length > 1) {
@@ -2815,8 +2835,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i11 = 0; _i11 < len; _i11++) {
-        children[_i11].animate.push(_t14);
+      for (var _i12 = 0; _i12 < len; _i12++) {
+        children[_i12].animate.push(_t14);
       }
     }
   }
@@ -2826,8 +2846,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first15 = _t15.value[0];
 
-    for (var _i12 = 0; _i12 < len; _i12++) {
-      children[_i12].props.style.strokeLineJoin = _first15.strokeLineJoin;
+    for (var _i13 = 0; _i13 < len; _i13++) {
+      children[_i13].props.style.strokeLineJoin = _first15.strokeLineJoin;
     }
 
     if (_t15.value.length > 1) {
@@ -2835,8 +2855,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i13 = 0; _i13 < len; _i13++) {
-        children[_i13].animate.push(_t15);
+      for (var _i14 = 0; _i14 < len; _i14++) {
+        children[_i14].animate.push(_t15);
       }
     }
   }
@@ -2846,8 +2866,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first16 = _t16.value[0];
 
-    for (var _i14 = 0; _i14 < len; _i14++) {
-      children[_i14].props.style.strokeMiterlimit = _first16.strokeMiterlimit;
+    for (var _i15 = 0; _i15 < len; _i15++) {
+      children[_i15].props.style.strokeMiterlimit = _first16.strokeMiterlimit;
     }
 
     if (_t16.value.length > 1) {
@@ -2855,21 +2875,21 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i15 = 0; _i15 < len; _i15++) {
-        children[_i15].animate.push(_t16);
+      for (var _i16 = 0; _i16 < len; _i16++) {
+        children[_i16].animate.push(_t16);
       }
     }
   }
 
   if (stroke && stroke.dashes) {
-    for (var _i16 = 0; _i16 < len; _i16++) {
-      children[_i16].props.style.strokeDasharray = [stroke.dashes];
+    for (var _i17 = 0; _i17 < len; _i17++) {
+      children[_i17].props.style.strokeDasharray = [stroke.dashes];
     }
   }
 
   if (!stroke) {
-    for (var _i17 = 0; _i17 < len; _i17++) {
-      children[_i17].props.style.strokeWidth = [0];
+    for (var _i18 = 0; _i18 < len; _i18++) {
+      children[_i18].props.style.strokeWidth = [0];
     }
   }
 

@@ -383,6 +383,9 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
       },
     },
   };
+  if(type === 'div') {
+    res.props.style.overflow = 'hidden';
+  }
   // 矢量图层特殊解析，添加
   if(geom) {
     parseGeom(res, data, start, duration, displayStartTime, offset);
@@ -466,14 +469,26 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
             t.init.style.perspective = undefined;
           }
         }
-        // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻一级
+        // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻
         if(item.mask && item.mask.enabled) {
           let m = parseMask(item, temp, start, duration, displayStartTime, offset);
-          if(temp.children && temp.children.length === 1) {
-            temp.children.push(m);
+          let target = res;
+          while(temp.children && temp.children.length === 1) {
+            target = temp;
+            temp = temp.children[0];
           }
-          else {
-            res.children.push(m);
+          target.children.push(m);
+          // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
+          let style = target.children[0].init.style;
+          if(style) {
+            for(let i in style) {
+              if(style.hasOwnProperty(i) && {
+                'scaleX': true,
+                'scaleY': true,
+              }.hasOwnProperty(i)) {
+                m.props.style[i] = style[i];
+              }
+            }
           }
         }
       }
