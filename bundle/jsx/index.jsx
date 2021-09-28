@@ -1894,8 +1894,10 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
       width = data.width,
       height = data.height,
       inPoint = data.inPoint,
-      outPoint = data.outPoint;
-  var begin = start + offset; // 图层在工作区外特殊处理，取最近的一帧内容
+      outPoint = data.outPoint,
+      asParent = data.asParent,
+      asChild = data.asChild;
+  var begin = start + offset + displayStartTime; // 图层在工作区外特殊处理，取最近的一帧内容
 
   if (inPoint >= begin + duration || outPoint <= begin) {
     return null;
@@ -1913,7 +1915,9 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
       }
     },
     children: [],
-    animate: []
+    animate: [],
+    asParent: asParent,
+    asChild: asChild
   };
   parseAnimate(res, data, start, duration, displayStartTime, offset, true, false);
   return res;
@@ -2274,7 +2278,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     res.animate.push(v);
   }
 
-  parseAnimate(res, data, start, duration, displayStartTime, offset, false, false);
+  parseAnimate(res, data, start, duration, displayStartTime, offset, false, false); // 父级链接塞进父级作为唯一children，有可能父级是递归嵌套的，需到达最里层
 
   if (data.hasOwnProperty('asChild')) {
     var asChild = data.asChild;
@@ -2282,7 +2286,13 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     if (parentLink.hasOwnProperty(asChild)) {
       var div = JSON.stringify(parentLink[asChild]);
       div = JSON.parse(div);
-      div.children.push(res);
+      var target = div;
+
+      while (target.children.length) {
+        target = target.children[0];
+      }
+
+      target.children.push(res);
       res = div;
     }
   }
@@ -2370,12 +2380,33 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
       if (item.hasOwnProperty('asParent')) {
         parentLink[item.asParent] = preParse(item, library, start, duration, displayStartTime, offset);
       }
-    } // 再普通解析，遇到父级链接特殊处理
+    } // 因为父级链接可能产生递归嵌套，需要再循环处理一遍parentLink
 
 
-    for (var _i = 0, _len = children.length; _i < _len; _i++) {
-      var _item = children[_i];
-      var temp = recursion(_item, library, newLib, start, duration, displayStartTime, offset, parentLink);
+    for (var _i in parentLink) {
+      if (parentLink.hasOwnProperty(_i)) {
+        var _item = parentLink[_i];
+        var asChild = _item.asChild;
+
+        while (asChild !== undefined && parentLink[asChild]) {
+          var parent = JSON.stringify(parentLink[asChild]);
+          parent = JSON.parse(parent);
+          parent.children.push(_item);
+          _item = parent;
+          asChild = parent.asChild;
+        }
+
+        if (_item !== parentLink[_i]) {
+          parentLink[_i] = _item;
+        }
+      }
+    }
+
+    $.ae2karas.log(parentLink); // 再普通解析，遇到父级链接特殊处理
+
+    for (var _i2 = 0, _len = children.length; _i2 < _len; _i2++) {
+      var _item2 = children[_i2];
+      var temp = recursion(_item2, library, newLib, start, duration, displayStartTime, offset, parentLink);
 
       if (temp) {
         res.children.push(temp); // ppt应该放在父层，如果有父级链接，则放在其上
@@ -2395,8 +2426,8 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
         } // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻一级
 
 
-        if (_item.mask && _item.mask.enabled) {
-          var m = parseMask(_item, temp, start, duration, displayStartTime, offset);
+        if (_item2.mask && _item2.mask.enabled) {
+          var m = parseMask(_item2, temp, start, duration, displayStartTime, offset);
 
           if (temp.children && temp.children.length === 1) {
             temp.children.push(m);
@@ -2480,12 +2511,12 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           offset: 0
         }; // 用缩放代替尺寸变化
 
-        for (var _i2 = 1, _len3 = t.value.length; _i2 < _len3; _i2++) {
-          var _item2 = t.value[_i2];
-          var _size = _item2.size;
-          _item2.size = undefined;
-          _item2.scaleX = _size[0] / first.size[0];
-          _item2.scaleY = _size[1] / first.size[1];
+        for (var _i3 = 1, _len3 = t.value.length; _i3 < _len3; _i3++) {
+          var _item3 = t.value[_i3];
+          var _size = _item3.size;
+          _item3.size = undefined;
+          _item3.scaleX = _size[0] / first.size[0];
+          _item3.scaleY = _size[1] / first.size[1];
         }
 
         $geom.animate.push(t);
@@ -2537,10 +2568,10 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           offset: 0
         };
 
-        for (var _i3 = 1; _i3 < _t8.value.length; _i3++) {
-          var _item3 = _t8.value[_i3];
-          _item3.translateX -= _first8.translateX;
-          _item3.translateY -= _first8.translateY;
+        for (var _i4 = 1; _i4 < _t8.value.length; _i4++) {
+          var _item4 = _t8.value[_i4];
+          _item4.translateX -= _first8.translateX;
+          _item4.translateY -= _first8.translateY;
         }
 
         $geom.animate.push(_t8);
@@ -2590,15 +2621,15 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           } // tfo的每个动画需考虑对坐标的影响
 
 
-          for (var _i4 = 1, _len4 = _t9.value.length; _i4 < _len4; _i4++) {
-            var _item4 = _t9.value[_i4];
+          for (var _i5 = 1, _len4 = _t9.value.length; _i5 < _len4; _i5++) {
+            var _item5 = _t9.value[_i5];
 
-            var tfo = _item4.transformOrigin.split(' ');
+            var tfo = _item5.transformOrigin.split(' ');
 
             tfo[0] = parseFloat(tfo[0]);
             tfo[1] = parseFloat(tfo[1]);
-            _item4.left = left - tfo[0];
-            _item4.top = top - tfo[1];
+            _item5.left = left - tfo[0];
+            _item5.top = top - tfo[1];
           }
 
           $geom.animate.push(_t9);
@@ -2734,8 +2765,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first12 = _t12.value[0];
 
-    for (var _i5 = 0; _i5 < len; _i5++) {
-      children[_i5].props.style.fill = _first12.fill;
+    for (var _i6 = 0; _i6 < len; _i6++) {
+      children[_i6].props.style.fill = _first12.fill;
     }
 
     if (_t12.value.length > 1) {
@@ -2743,8 +2774,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i6 = 0; _i6 < len; _i6++) {
-        children[_i6].animate.push(_t12);
+      for (var _i7 = 0; _i7 < len; _i7++) {
+        children[_i7].animate.push(_t12);
       }
     }
   }
@@ -2754,8 +2785,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first13 = _t13.value[0];
 
-    for (var _i7 = 0; _i7 < len; _i7++) {
-      children[_i7].props.style.stroke = _first13.stroke;
+    for (var _i8 = 0; _i8 < len; _i8++) {
+      children[_i8].props.style.stroke = _first13.stroke;
     }
 
     if (_t13.value.length > 1) {
@@ -2763,8 +2794,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i8 = 0; _i8 < len; _i8++) {
-        children[_i8].animate.push(_t13);
+      for (var _i9 = 0; _i9 < len; _i9++) {
+        children[_i9].animate.push(_t13);
       }
     }
   }
@@ -2774,8 +2805,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first14 = _t14.value[0];
 
-    for (var _i9 = 0; _i9 < len; _i9++) {
-      children[_i9].props.style.strokeWidth = _first14.strokeWidth;
+    for (var _i10 = 0; _i10 < len; _i10++) {
+      children[_i10].props.style.strokeWidth = _first14.strokeWidth;
     }
 
     if (_t14.value.length > 1) {
@@ -2783,8 +2814,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i10 = 0; _i10 < len; _i10++) {
-        children[_i10].animate.push(_t14);
+      for (var _i11 = 0; _i11 < len; _i11++) {
+        children[_i11].animate.push(_t14);
       }
     }
   }
@@ -2794,8 +2825,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first15 = _t15.value[0];
 
-    for (var _i11 = 0; _i11 < len; _i11++) {
-      children[_i11].props.style.strokeLineJoin = _first15.strokeLineJoin;
+    for (var _i12 = 0; _i12 < len; _i12++) {
+      children[_i12].props.style.strokeLineJoin = _first15.strokeLineJoin;
     }
 
     if (_t15.value.length > 1) {
@@ -2803,8 +2834,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i12 = 0; _i12 < len; _i12++) {
-        children[_i12].animate.push(_t15);
+      for (var _i13 = 0; _i13 < len; _i13++) {
+        children[_i13].animate.push(_t15);
       }
     }
   }
@@ -2814,8 +2845,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first16 = _t16.value[0];
 
-    for (var _i13 = 0; _i13 < len; _i13++) {
-      children[_i13].props.style.strokeMiterlimit = _first16.strokeMiterlimit;
+    for (var _i14 = 0; _i14 < len; _i14++) {
+      children[_i14].props.style.strokeMiterlimit = _first16.strokeMiterlimit;
     }
 
     if (_t16.value.length > 1) {
@@ -2823,21 +2854,21 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i14 = 0; _i14 < len; _i14++) {
-        children[_i14].animate.push(_t16);
+      for (var _i15 = 0; _i15 < len; _i15++) {
+        children[_i15].animate.push(_t16);
       }
     }
   }
 
   if (stroke && stroke.dashes) {
-    for (var _i15 = 0; _i15 < len; _i15++) {
-      children[_i15].props.style.strokeDasharray = [stroke.dashes];
+    for (var _i16 = 0; _i16 < len; _i16++) {
+      children[_i16].props.style.strokeDasharray = [stroke.dashes];
     }
   }
 
   if (!stroke) {
-    for (var _i16 = 0; _i16 < len; _i16++) {
-      children[_i16].props.style.strokeWidth = [0];
+    for (var _i17 = 0; _i17 < len; _i17++) {
+      children[_i17].props.style.strokeWidth = [0];
     }
   }
 

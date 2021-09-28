@@ -27,8 +27,8 @@ import path from './path';
  * @param offset
  */
 function preParse(data, library, start, duration, displayStartTime, offset) {
-  let { name, width, height, inPoint, outPoint } = data;
-  let begin = start + offset;
+  let { name, width, height, inPoint, outPoint, asParent, asChild } = data;
+  let begin = start + offset + displayStartTime;
   // 图层在工作区外特殊处理，取最近的一帧内容
   if(inPoint >= begin + duration || outPoint <= begin) {
     return null;
@@ -46,6 +46,8 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     },
     children: [],
     animate: [],
+    asParent,
+    asChild,
   };
   parseAnimate(res, data, start, duration, displayStartTime, offset, true, false);
   return res;
@@ -336,12 +338,17 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     res.animate.push(v);
   }
   parseAnimate(res, data, start, duration, displayStartTime, offset, false, false);
+  // 父级链接塞进父级作为唯一children，有可能父级是递归嵌套的，需到达最里层
   if(data.hasOwnProperty('asChild')) {
     let asChild = data.asChild;
     if(parentLink.hasOwnProperty(asChild)) {
       let div = JSON.stringify(parentLink[asChild]);
       div = JSON.parse(div);
-      div.children.push(res);
+      let target = div;
+      while(target.children.length) {
+        target = target.children[0];
+      }
+      target.children.push(res);
       res = div;
     }
   }
@@ -422,6 +429,24 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
         parentLink[item.asParent] = preParse(item, library, start, duration, displayStartTime, offset);
       }
     }
+    // 因为父级链接可能产生递归嵌套，需要再循环处理一遍parentLink
+    for(let i in parentLink) {
+      if(parentLink.hasOwnProperty(i)) {
+        let item = parentLink[i];
+        let asChild = item.asChild;
+        while(asChild !== undefined && parentLink[asChild]) {
+          let parent = JSON.stringify(parentLink[asChild]);
+          parent = JSON.parse(parent);
+          parent.children.push(item);
+          item = parent;
+          asChild = parent.asChild;
+        }
+        if(item !== parentLink[i]) {
+          parentLink[i] = item;
+        }
+      }
+    }
+    $.ae2karas.log(parentLink);
     // 再普通解析，遇到父级链接特殊处理
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
