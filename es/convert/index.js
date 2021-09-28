@@ -383,7 +383,7 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
       },
     },
   };
-  if(type === 'div') {
+  if(type === 'div' && !geom && !text) {
     res.props.style.overflow = 'hidden';
   }
   // 矢量图层特殊解析，添加
@@ -392,7 +392,6 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
   }
   else if(text) {
     let content = data.content;
-    // $.ae2karas.log(content);
     res.props.style.color = [
       parseInt(content.fillColor[0] * 255),
       parseInt(content.fillColor[1] * 255),
