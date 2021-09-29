@@ -2384,6 +2384,8 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
 }
 
 function parseChildren(res, children, library, newLib, start, duration, displayStartTime, offset) {
+  $.ae2karas.log(1);
+
   if (Array.isArray(children)) {
     // 先一遍解析父级链接，因为父级可能不展示或者只需要父级一层不递归解析父级的children
     var parentLink = {};
@@ -3054,6 +3056,10 @@ function convert (data) {
 var ES_TYPE = enums.ES_TYPE,
     EVENT = enums.EVENT;
 var ae2karas = $.ae2karas = $.ae2karas || {};
+
+Array.isArray = Array.isArray || function (arr) {
+  return arr instanceof Array;
+};
 
 ae2karas.dispatch = function () {
   var xLib;

@@ -6,6 +6,10 @@ const { ES_TYPE, EVENT } = enums;
 
 let ae2karas = $.ae2karas = $.ae2karas || {};
 
+Array.isArray = Array.isArray || function(arr) {
+  return arr instanceof Array;
+};
+
 ae2karas.dispatch = (function() {
   let xLib;
   try {
