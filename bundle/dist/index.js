@@ -1998,8 +1998,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  UPLOAD_JSON: 'https://karas.alipay.com/api/upload',
-  UPLOAD_BASE64: 'https://animconfig-office.alipay.net/api/ae2karas/upload'
+  UPLOAD_JSON: '',
+  UPLOAD_BASE64: ''
 });
 
 /***/ }),
