@@ -404,8 +404,14 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     res.children = [content.text];
     // 对齐方式
     let baselineLocs = content.baselineLocs;
-    if(baselineLocs[0] !== 0) {
-      res.props.style.left = baselineLocs[0];
+    let left = 0, right = 0;
+    for(let i = 0, len = baselineLocs.length; i < len; i += 4) {
+      left = Math.min(left, baselineLocs[i]);
+      right = Math.max(right, baselineLocs[i + 2]);
+    }
+    if(left) {
+      res.props.style.left = left;
+      res.props.style.width = right - left;
       res.props.style.textAlign = 'center';
     }
     res.props.style.top = -content.fontSize - baselineLocs[1];
