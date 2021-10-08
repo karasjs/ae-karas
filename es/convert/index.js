@@ -107,16 +107,24 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   if(Array.isArray(position) && position.length) {
     let t = transformPosition(position, begin2, duration);
     let first = t.value[0];
-    if(first.translateX) {
-      init.style.translateX = first.translateX;
+    if(first.translatePath) {
+      init.style.translateX = first.translatePath[0];
+      init.style.translateY = first.translatePath[1];
     }
-    if(first.translateY) {
-      init.style.translateY = first.translateY;
+    else {
+      if(first.translateX) {
+        init.style.translateX = first.translateX;
+      }
+      if(first.translateY) {
+        init.style.translateY = first.translateY;
+      }
     }
     if(t.value.length > 1) {
-      t.value[0] = {
-        offset: 0,
-      };
+      if(!first.translatePath) {
+        t.value[0] = {
+          offset: 0,
+        };
+      }
       res.animate.push(t);
     }
   }

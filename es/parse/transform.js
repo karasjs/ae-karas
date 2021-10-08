@@ -29,12 +29,59 @@ const MASK_TRANSFORM = {
   'ADBE Mask Opacity': 'opacity',
 };
 
-function getPropertyValues(prop, noEasing) {
+function getPropertyValues(prop, matchName, noEasing) {
   let { numKeys } = prop;
   // 根据关键帧数量，2+帧是普通变化，1帧等同于0帧value
   if(numKeys && numKeys > 1) {
     let arr = [];
     for(let i = 1; i <= numKeys; i++) {
+      // 特殊的曲线位移动画用translatePath表示
+      if(i !== numKeys && (matchName === 'ADBE Position' || matchName === 'ADBE Vector Position')) {
+        let v1 = prop.keyValue(i), v2 = prop.keyValue(i + 1);
+        let c1 = prop.keyOutSpatialTangent(i), c2 = prop.keyInSpatialTangent(i + 1);
+        // y = kx + b，看是否有曲线，没有忽略
+        let x1 = v1[0], y1 = v1[1], x2 = v2[0], y2 = v2[1];
+        if((x1 !== x2 || y1 !== y2) && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
+          let p1 = [v1[0] + c1[0], v1[1] + c1[1]], p2 = [v2[0] + c2[0], v2[1] + c2[1]];
+          // 垂直特殊情况
+          if(x1 === 0 && x2 === 0) {
+            if(c1[0] !== 0 && c2[0] !== 0) {
+              //
+            }
+          }
+          // 二元一次方程
+          else {
+            let k, b;
+            if(x1 === 0) {
+              b = y1;
+              k = (y2 - b) / x2;
+            }
+            else if(x2 === 0) {
+              b = y2;
+              k = (y1 - b) / x1;
+            }
+            else {
+              let r = x1 / x2;
+              b = (y1 - y2 * r) / (1 - r);
+              k = (y1 - b) / x1;
+            }
+            // 精度小于一定认为无效
+            let is1 = Math.abs(k * c1[0] + b - c1[1]) > (1e-10);
+            let is2 = Math.abs(k * c2[0] + b - c2[1]) > (1e-10);
+            if(is1 || is2) {
+              let o = {
+                time: prop.keyTime(i) * 1000,
+                value: [x1, y1, p1[0], p1[1], p2[0], p2[1], x2, y2],
+              };
+              if(i !== numKeys && !noEasing) {
+                o.easing = getEasing(prop, i, i + 1);
+              }
+              arr.push(o);
+              continue;
+            }
+          }
+        }
+      }
       let o = {
         time: prop.keyTime(i) * 1000,
         value: prop.keyValue(i),
@@ -68,6 +115,9 @@ function getEasing(prop, start, end) {
   let t1 = prop.keyTime(start), t2 = prop.keyTime(end);
   let v1 = prop.keyValue(start), v2 = prop.keyValue(end);
   let e1 = prop.keyOutTemporalEase(start)[0], e2 = prop.keyInTemporalEase(end)[0];
+  // let c1 = prop.keyOutSpatialTangent(start), c2 = prop.keyInSpatialTangent(end);
+  // $.ae2karas.log(c1);
+  // $.ae2karas.log(c2);
   let x1 = e1.influence * 0.01, x2 = 1 - e2.influence * 0.01;
   let y1, y2;
   let matchName = prop.matchName;
@@ -102,7 +152,7 @@ export function transformLayer(prop) {
     if(item && item.enabled) {
       let matchName = item.matchName;
       if(LAYER_TRANSFORM.hasOwnProperty(matchName)) {
-        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item, false);
+        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item, matchName, false);
       }
     }
   }
@@ -116,7 +166,7 @@ export function transformVector(prop) {
     if(item && item.enabled) {
       let matchName = item.matchName;
       if(VECTOR_TRANSFORM.hasOwnProperty(matchName)) {
-        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item, false);
+        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item, matchName, false);
       }
     }
   }
@@ -130,7 +180,7 @@ export function transformMask(prop) {
     if(item && item.enabled) {
       let matchName = item.matchName;
       if(MASK_TRANSFORM.hasOwnProperty(matchName)) {
-        res[MASK_TRANSFORM[matchName]] = getPropertyValues(item, true);
+        res[MASK_TRANSFORM[matchName]] = getPropertyValues(item, matchName, true);
       }
     }
   }
@@ -138,5 +188,5 @@ export function transformMask(prop) {
 }
 
 export function transformGeom(prop) {
-  return getPropertyValues(prop, true);
+  return getPropertyValues(prop, '', true);
 }

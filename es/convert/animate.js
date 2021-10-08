@@ -210,7 +210,22 @@ export function transformPosition(list, begin, duration) {
     });
   }
   else {
-    list = getAreaList(list, begin, duration, function(prev, next, percent) {
+    list = getAreaList(list, begin, duration, function(prev, next, percent, isStart) {
+      // 特殊的translatePath曲线动画
+      if(prev.length === 8) {
+        if(isStart) {
+          let points = [];
+          for(let i = 0, len = prev.length; i < len; i++) {
+            let item = prev[i];
+            points.push(item.slice(0));
+          }
+          points = sliceBezier(points.reverse(), percent);
+          return points.reverse();
+        }
+        else {
+          return sliceBezier(prev, percent);
+        }
+      }
       return [
         prev[0] + (next[0] - prev[0]) * percent,
         prev[1] + (next[1] - prev[1]) * percent,
@@ -219,12 +234,18 @@ export function transformPosition(list, begin, duration) {
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      res.value.push({
+      let o = {
         offset: (item.time - begin) / duration,
-        translateX: item.value[0],
-        translateY: item.value[1],
         easing: item.easing,
-      });
+      };
+      if(item.value.length === 8) {
+        o.translatePath = item.value;
+      }
+      else {
+        o.translateX = item.value[0];
+        o.translateY = item.value[1];
+      }
+      res.value.push(o);
     }
   }
   return res;

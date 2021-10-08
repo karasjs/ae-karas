@@ -48,13 +48,69 @@ var MASK_TRANSFORM = {
   'ADBE Mask Opacity': 'opacity'
 };
 
-function getPropertyValues(prop, noEasing) {
+function getPropertyValues(prop, matchName, noEasing) {
   var numKeys = prop.numKeys; // 根据关键帧数量，2+帧是普通变化，1帧等同于0帧value
 
   if (numKeys && numKeys > 1) {
     var arr = [];
 
     for (var i = 1; i <= numKeys; i++) {
+      // 特殊的曲线位移动画用translatePath表示
+      if (i !== numKeys && (matchName === 'ADBE Position' || matchName === 'ADBE Vector Position')) {
+        var v1 = prop.keyValue(i),
+            v2 = prop.keyValue(i + 1);
+        var c1 = prop.keyOutSpatialTangent(i),
+            c2 = prop.keyInSpatialTangent(i + 1); // y = kx + b，看是否有曲线，没有忽略
+
+        var x1 = v1[0],
+            y1 = v1[1],
+            x2 = v2[0],
+            y2 = v2[1];
+
+        if ((x1 !== x2 || y1 !== y2) && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
+          var p1 = [v1[0] + c1[0], v1[1] + c1[1]],
+              p2 = [v2[0] + c2[0], v2[1] + c2[1]]; // 垂直特殊情况
+
+          if (x1 === 0 && x2 === 0) {
+            if (c1[0] !== 0 && c2[0] !== 0) ;
+          } // 二元一次方程
+          else {
+            var k = void 0,
+                b = void 0;
+
+            if (x1 === 0) {
+              b = y1;
+              k = (y2 - b) / x2;
+            } else if (x2 === 0) {
+              b = y2;
+              k = (y1 - b) / x1;
+            } else {
+              var r = x1 / x2;
+              b = (y1 - y2 * r) / (1 - r);
+              k = (y1 - b) / x1;
+            } // 精度小于一定认为无效
+
+
+            var is1 = Math.abs(k * c1[0] + b - c1[1]) > 1e-10;
+            var is2 = Math.abs(k * c2[0] + b - c2[1]) > 1e-10;
+
+            if (is1 || is2) {
+              var _o = {
+                time: prop.keyTime(i) * 1000,
+                value: [x1, y1, p1[0], p1[1], p2[0], p2[1], x2, y2]
+              };
+
+              if (i !== numKeys && !noEasing) {
+                _o.easing = getEasing(prop, i, i + 1);
+              }
+
+              arr.push(_o);
+              continue;
+            }
+          }
+        }
+      }
+
       var o = {
         time: prop.keyTime(i) * 1000,
         value: prop.keyValue(i)
@@ -92,7 +148,10 @@ function getEasing(prop, start, end) {
   var v1 = prop.keyValue(start),
       v2 = prop.keyValue(end);
   var e1 = prop.keyOutTemporalEase(start)[0],
-      e2 = prop.keyInTemporalEase(end)[0];
+      e2 = prop.keyInTemporalEase(end)[0]; // let c1 = prop.keyOutSpatialTangent(start), c2 = prop.keyInSpatialTangent(end);
+  // $.ae2karas.log(c1);
+  // $.ae2karas.log(c2);
+
   var x1 = e1.influence * 0.01,
       x2 = 1 - e2.influence * 0.01;
   var y1, y2;
@@ -131,7 +190,7 @@ function transformLayer(prop) {
       var matchName = item.matchName;
 
       if (LAYER_TRANSFORM.hasOwnProperty(matchName)) {
-        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item, false);
+        res[LAYER_TRANSFORM[matchName]] = getPropertyValues(item, matchName, false);
       }
     }
   }
@@ -148,7 +207,7 @@ function transformVector(prop) {
       var matchName = item.matchName;
 
       if (VECTOR_TRANSFORM.hasOwnProperty(matchName)) {
-        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item, false);
+        res[VECTOR_TRANSFORM[matchName]] = getPropertyValues(item, matchName, false);
       }
     }
   }
@@ -165,7 +224,7 @@ function transformMask(prop) {
       var matchName = item.matchName;
 
       if (MASK_TRANSFORM.hasOwnProperty(matchName)) {
-        res[MASK_TRANSFORM[matchName]] = getPropertyValues(item, true);
+        res[MASK_TRANSFORM[matchName]] = getPropertyValues(item, matchName, true);
       }
     }
   }
@@ -173,7 +232,7 @@ function transformMask(prop) {
   return res;
 }
 function transformGeom(prop) {
-  return getPropertyValues(prop, true);
+  return getPropertyValues(prop, '', true);
 }
 
 function group(prop) {
@@ -1323,18 +1382,42 @@ function transformPosition(list, begin, duration) {
       translateY: list[0][1]
     });
   } else {
-    list = getAreaList(list, begin, duration, function (prev, next, percent) {
+    list = getAreaList(list, begin, duration, function (prev, next, percent, isStart) {
+      // 特殊的translatePath曲线动画
+      if (prev.length === 8) {
+        if (isStart) {
+          var points = [];
+
+          for (var i = 0, len = prev.length; i < len; i++) {
+            var item = prev[i];
+            points.push(item.slice(0));
+          }
+
+          points = sliceBezier(points.reverse(), percent);
+          return points.reverse();
+        } else {
+          return sliceBezier(prev, percent);
+        }
+      }
+
       return [prev[0] + (next[0] - prev[0]) * percent, prev[1] + (next[1] - prev[1]) * percent, prev[2] + (next[2] - prev[2]) * percent];
     });
 
     for (var i = 0, len = list.length; i < len; i++) {
       var item = list[i];
-      res.value.push({
+      var o = {
         offset: (item.time - begin) / duration,
-        translateX: item.value[0],
-        translateY: item.value[1],
         easing: item.easing
-      });
+      };
+
+      if (item.value.length === 8) {
+        o.translatePath = item.value;
+      } else {
+        o.translateX = item.value[0];
+        o.translateY = item.value[1];
+      }
+
+      res.value.push(o);
     }
   }
 
@@ -1998,18 +2081,26 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
 
     var _first2 = _t2.value[0];
 
-    if (_first2.translateX) {
-      init.style.translateX = _first2.translateX;
-    }
+    if (_first2.translatePath) {
+      init.style.translateX = _first2.translatePath[0];
+      init.style.translateY = _first2.translatePath[1];
+    } else {
+      if (_first2.translateX) {
+        init.style.translateX = _first2.translateX;
+      }
 
-    if (_first2.translateY) {
-      init.style.translateY = _first2.translateY;
+      if (_first2.translateY) {
+        init.style.translateY = _first2.translateY;
+      }
     }
 
     if (_t2.value.length > 1) {
-      _t2.value[0] = {
-        offset: 0
-      };
+      if (!_first2.translatePath) {
+        _t2.value[0] = {
+          offset: 0
+        };
+      }
+
       res.animate.push(_t2);
     }
   }
