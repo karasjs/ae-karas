@@ -13,7 +13,7 @@ import './index.less';
 
 function formatTime(duration) {
   let str;
-  if(duration > 1000 * 60) {
+  if(duration >= 1000 * 60) {
     let m = Math.floor(duration / (1000 * 60));
     if(m < 10) {
       m = '0' + s;
@@ -24,7 +24,7 @@ function formatTime(duration) {
   else {
     str = '00:';
   }
-  if(duration > 1000) {
+  if(duration >= 1000) {
     let s = Math.floor(duration / 1000);
     if(s < 10) {
       s = '0' + s;
@@ -135,17 +135,11 @@ class Preview extends React.Component {
       store.preview.setTotal(0);
     }
     // 侦听root的refresh事件刷新时间和进度条
-    let first = true;
-    root.on('refresh', function() {
-      if(animateController.list.length) {
-        store.preview.setTime(animateController.list[0].currentTime);
-        if(first) {
-          first = false;
-          // animateController.list[0].on('finish', function() {
-          //   store.preview.setPlay(false);
-          // });
-        }
-      }
+    animateController.on('frame', function() {
+      store.preview.setTime(animateController.list[0].currentTime);
+    });
+    animateController.on('finish', function() {
+      store.preview.setPlay(false);
     });
   }
 
