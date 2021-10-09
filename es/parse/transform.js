@@ -45,8 +45,16 @@ function getPropertyValues(prop, matchName, noEasing) {
           let p1 = [v1[0] + c1[0], v1[1] + c1[1]], p2 = [v2[0] + c2[0], v2[1] + c2[1]];
           // 垂直特殊情况
           if(x1 === 0 && x2 === 0) {
-            if(c1[0] !== 0 && c2[0] !== 0) {
-              //
+            if(Math.abs(c1[0]) > (1e-10) || Math.abs(c2[0]) > (1e-10)) {
+              let o = {
+                time: prop.keyTime(i) * 1000,
+                value: [x1, y1, p1[0], p1[1], p2[0], p2[1], x2, y2],
+              };
+              if(i !== numKeys && !noEasing) {
+                o.easing = getEasing(prop, i, i + 1);
+              }
+              arr.push(o);
+              continue;
             }
           }
           // 二元一次方程

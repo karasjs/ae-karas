@@ -21,6 +21,7 @@ const STYLE = [
   'begin',
   'perspective',
   'lineHeight',
+  'translatePath',
 ];
 
 function recursion(data, params) {
@@ -91,6 +92,12 @@ function parseStyle(data, params) {
         v[1] = parseFloat(parseFloat(v[1]).toFixed(params.precision));
         data[k] = v.join(' ');
       }
+      else if(k === 'translatePath') {
+        for(let j = 0; j < v.length; j++) {
+          let v2 = v[j].toFixed(params.precision);
+          v[j] = parseFloat(v2);
+        }
+      }
       else if(['opacity', 'scaleX', 'scaleY', 'scaleZ'].indexOf(k) > -1) {
         v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
@@ -119,6 +126,12 @@ function parseAnimate(data, params) {
         v2[i] = parseFloat(v[i].toFixed(params.precision + 2));
       }
       item.easing = v2;
+    }
+    if(item.hasOwnProperty('points')) {
+      parsePoint(item.points, params);
+    }
+    if(item.hasOwnProperty('controls')) {
+      parsePoint(item.controls, params);
     }
   }
   if(options.hasOwnProperty('duration')) {

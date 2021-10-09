@@ -8155,11 +8155,11 @@ var List = (List_dec = inject('global'), List_dec(List_class = mobxreact_esm_obs
   return List;
 }(_react_17_0_2_react.Component)) || List_class) || List_class);
 /* harmony default export */ const component_List = (List);
-// EXTERNAL MODULE: ./node_modules/_karas@0.62.2@karas/index.js
-var _karas_0_62_2_karas = __webpack_require__(966);
-var _karas_0_62_2_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_62_2_karas);
+// EXTERNAL MODULE: ./node_modules/_karas@0.62.3@karas/index.js
+var _karas_0_62_3_karas = __webpack_require__(83);
+var _karas_0_62_3_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_62_3_karas);
 ;// CONCATENATED MODULE: ./src/util/output.js
-var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'lineHeight'];
+var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'lineHeight', 'translatePath'];
 
 function recursion(data, params) {
   // 分为普通节点和library节点分别递归进行
@@ -8239,6 +8239,11 @@ function parseStyle(data, params) {
         v[0] = parseFloat(parseFloat(v[0]).toFixed(params.precision));
         v[1] = parseFloat(parseFloat(v[1]).toFixed(params.precision));
         data[k] = v.join(' ');
+      } else if (k === 'translatePath') {
+        for (var j = 0; j < v.length; j++) {
+          var v2 = v[j].toFixed(params.precision);
+          v[j] = parseFloat(v2);
+        }
       } else if (['opacity', 'scaleX', 'scaleY', 'scaleZ'].indexOf(k) > -1) {
         v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
@@ -8272,6 +8277,14 @@ function parseAnimate(data, params) {
       }
 
       item.easing = v2;
+    }
+
+    if (item.hasOwnProperty('points')) {
+      parsePoint(item.points, params);
+    }
+
+    if (item.hasOwnProperty('controls')) {
+      parsePoint(item.controls, params);
     }
   }
 
@@ -8614,13 +8627,13 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
 
 
       var type = this.props.preview.type;
-      root = _karas_0_62_2_karas_default().parse({
+      root = _karas_0_62_3_karas_default().parse({
         tagName: type,
         props: {
           width: width,
           height: height
         },
-        children: [_karas_0_62_2_karas_default().parse(data, {
+        children: [_karas_0_62_3_karas_default().parse(data, {
           autoPlay: false
         })],
         abbr: false
@@ -9113,7 +9126,7 @@ var Alert = (Alert_dec = inject('global'), Alert_dec(Alert_class = mobxreact_esm
   }
 });
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"0.1.8"};
+const package_namespaceObject = {"i8":"0.1.9"};
 ;// CONCATENATED MODULE: ./src/index.html
 /* harmony default export */ const src = (__webpack_require__.p + "index.html");
 ;// CONCATENATED MODULE: ./src/index.js
@@ -9230,7 +9243,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 /***/ }),
 
-/***/ 966:
+/***/ 83:
 /***/ (function(module) {
 
 (function (global, factory) {
@@ -24285,7 +24298,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   var I_END_TIME = 42;
   var I_NODE_CONFIG = 43;
   var I_ROOT_CONFIG = 44;
-  var I_OUT_BEGIN_DELAY = 45; // const I_NEXT_END = 46;
+  var I_OUT_BEGIN_DELAY = 45;
+  var I_TIME_STAMP = 46;
 
   var Animation = /*#__PURE__*/function (_Event) {
     _inherits(Animation, _Event);
@@ -24414,7 +24428,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       config[I_CURRENT_FRAMES] = {
         reverse: true,
         'alternate-reverse': true
-      }.hasOwnProperty(op.direction) ? framesR : frames; // 性能优化访问
+      }.hasOwnProperty(op.direction) ? framesR : frames; // 时间戳
+
+      config[I_TIME_STAMP] = frame.__now; // 性能优化访问
 
       _this[0] = _this.__before;
       _this[1] = _this.__after;
@@ -24738,6 +24754,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       key: "__before",
       value: function __before(diff) {
         var __config = this.__config;
+        __config[I_TIME_STAMP] = frame.__now;
         var target = __config[I_TARGET];
         var fps = __config[I_FPS];
         var playCount = __config[I_PLAY_COUNT];
@@ -25545,6 +25562,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         return v;
+      }
+    }, {
+      key: "timestamp",
+      get: function get() {
+        return this.__config[I_TIME_STAMP];
       }
     }, {
       key: "pending",
@@ -36505,9 +36527,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       this.__onList = []; // list中已存在的侦听事件，list2初始化时也需要增加上
 
-      this.__timeList = []; // on侦听事件时，每个动画可能都会触发一次，记录帧时间防重
-
-      this.__timeHash = {}; // 同上，同时防止过长列表每次清除上帧记录
+      this.__lastTime = -1; // this.__timeList = []; // on侦听事件时，每个动画可能都会触发一次，记录帧时间防重
+      // this.__timeHash = {}; // 同上，同时防止过长列表每次清除上帧记录
     }
 
     _createClass(Controller, [{
@@ -36734,51 +36755,46 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (Array.isArray(id)) {
           for (var i = 0, len = id.length; i < len; i++) {
-            this.list.forEach(function (item) {
-              item.on(id, handle);
-            });
+            this.__on(id[i], handle);
           }
 
           this.__onList.push([id, handle]);
         } else {
-          this.list.forEach(function (item) {
-            item.on(id, handle);
-          });
+          this.__on(id, handle);
 
           this.__onList.push([id, handle]);
         }
       }
     }, {
+      key: "__on",
+      value: function __on(id, handle) {
+        var _this2 = this;
+
+        this.list.forEach(function (item) {
+          var cb = function cb() {
+            var time = item.timestamp;
+
+            if (time !== _this2.__lastTime) {
+              _this2.__lastTime = time;
+              handle();
+            }
+          };
+
+          cb.__karasEventCb = handle;
+          item.on(id, cb);
+        });
+      }
+    }, {
       key: "off",
       value: function off(id, handle) {
-        var onList = this.__onList;
-
         if (Array.isArray(id)) {
           for (var i = 0, len = id.length; i < len; i++) {
-            this.list.forEach(function (item) {
-              item.off(id, handle);
-            });
-          }
-
-          for (var _i = onList.length - 1; _i >= 0; _i--) {
-            var item = onList[_i];
-
-            if (id === item[0] && handle === item[1]) {
-              onList.splice(_i, 1);
-            }
+            this.off(id[i], handle);
           }
         } else {
           this.list.forEach(function (item) {
             item.off(id, handle);
           });
-
-          for (var _i2 = onList.length - 1; _i2 >= 0; _i2--) {
-            var _item = onList[_i2];
-
-            if (id === _item[0] && handle === _item[1]) {
-              onList.splice(_i2, 1);
-            }
-          }
         }
       }
     }, {
@@ -45291,7 +45307,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     Cache: Cache
   };
 
-  var version = "0.62.2";
+  var version = "0.62.3";
 
   Geom$1.register('$line', Line);
   Geom$1.register('$polyline', Polyline);
