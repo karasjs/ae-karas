@@ -20,6 +20,7 @@ const STYLE = [
   'end',
   'begin',
   'perspective',
+  'fontSize',
   'lineHeight',
   'translatePath',
 ];
@@ -36,12 +37,6 @@ function recursion(data, params) {
       }
       if(data.init.style) {
         parseStyle(data.init.style, params);
-      }
-    }
-    let animate = data.animate;
-    if(Array.isArray(animate)) {
-      for(let i = 0, len = animate.length; i < len; i++) {
-        parseAnimate(animate[i], params);
       }
     }
   }
@@ -64,6 +59,15 @@ function recursion(data, params) {
       }
     }
   }
+  let animate = data.animate;
+  if(Array.isArray(animate)) {
+    for(let i = 0, len = animate.length; i < len; i++) {
+      parseAnimate(animate[i], params);
+    }
+  }
+  else if(animate) {
+    parseAnimate(animate, params);
+  }
 }
 
 function parsePoint(data, params) {
@@ -82,28 +86,85 @@ function parsePoint(data, params) {
 }
 
 function parseStyle(data, params) {
+  let { unit, rem = 0, vw = 0, vh = 0 } = params;
   for(let i = 0, len = STYLE.length; i < len; i++) {
     let k = STYLE[i];
     if(data.hasOwnProperty(k)) {
       let v = data[k];
       if(k === 'transformOrigin') {
         v = v.split(' ');
-        v[0] = parseFloat(parseFloat(v[0]).toFixed(params.precision));
-        v[1] = parseFloat(parseFloat(v[1]).toFixed(params.precision));
+        v[0] = parseFloat(v[0]);
+        v[1] = parseFloat(v[1]);
+        if(unit === 'rem') {
+          v[0] /= rem;
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[0] += 'rem';
+          v[1] /= rem;
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+          v[1] += 'rem';
+        }
+        else if(unit === 'vw') {
+          v[0] *= 100 / vw;
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[0] += 'vw';
+          v[1] *= 100 / vw;
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+          v[1] += 'vw';
+        }
+        else if(unit === 'vh') {
+          v[0] *= 100 / vh;
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[0] += 'vh';
+          v[1] *= 100 / vh;
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+          v[1] += 'vh';
+        }
+        else {
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+        }
         data[k] = v.join(' ');
       }
       else if(k === 'translatePath') {
         for(let j = 0; j < v.length; j++) {
-          let v2 = v[j].toFixed(params.precision);
-          v[j] = parseFloat(v2);
+          let v2;
+          if(unit === 'rem') {
+            v2 = parseFloat((v[j] / rem).toFixed(params.precision)) + 'rem';
+          }
+          else if(unit === 'vw') {
+            v2 = parseFloat((v[j] * 100 / vw).toFixed(params.precision)) + 'vw';
+          }
+          else if(unit === 'vh') {
+            v2 = parseFloat((v[j] * 100 / vw).toFixed(params.precision)) + 'vh';
+          }
+          else {
+            v2 = parseFloat(v[j].toFixed(params.precision));
+          }
+          v[j] = v2;
         }
       }
-      else if(['opacity', 'scaleX', 'scaleY', 'scaleZ'].indexOf(k) > -1) {
-        v = v.toFixed(params.precision + 2);
-        data[k] = parseFloat(v);
+      else if([
+        'top', 'right', 'bottom', 'left', 'width', 'height',
+        'translateX', 'translateY', 'translateZ', 'perspective', 'fontSize',
+      ].indexOf(k) > -1) {
+        let v2;
+        if(unit === 'rem') {
+          v2 = parseFloat((v / rem).toFixed(params.precision)) + 'rem';
+        }
+        else if(unit === 'vw') {
+          v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vw';
+        }
+        else if(unit === 'vh') {
+          v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vh';
+        }
+        else {
+          v2 = parseFloat(v.toFixed(params.precision));
+        }
+        data[k] = v2;
       }
+      // 无单位的小数
       else {
-        v = v.toFixed(params.precision);
+        v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
       }
     }

@@ -12,10 +12,11 @@
 
   .btn{
     display:flex;
+    align-items:center;
     margin:10px;
     font-size:14px;
 
-    div{
+    .return{
       width:100px;
       height:30px;
       background:#005df7;
@@ -28,18 +29,18 @@
         background:#336dff;
       }
     }
-  }
 
-  .type{
-    display:flex;
-    margin:0 10px 10px;
+    .type{
+      display:flex;
+      margin:0 10px 0 20px;
 
-    label{
-      margin-right:10px;
-    }
+      label{
+        margin-right:10px;
+      }
 
-    input{
-      margin-right:2px;
+      input{
+        margin-right:2px;
+      }
     }
   }
 
@@ -48,11 +49,11 @@
     display:flex;
     padding:0 10px 10px;
 
-    .menu{
-      margin:0 10px 0 0;
-      width:100px;
-      background:#313131;
-    }
+    //.menu{
+    //  margin:0 10px 0 0;
+    //  width:100px;
+    //  background:#313131;
+    //}
 
     .view{
       flex:1;
@@ -61,6 +62,7 @@
       justify-content:space-between;
       position:relative;
       background:#313131;
+      box-shadow:0 0 1px rgba(0, 0, 0, 0.5);
 
       .stage{
         flex:1;
@@ -208,27 +210,51 @@
     .side{
       margin:0 0 0 10px;
       padding:10px;
-      width:140px;
+      width:160px;
       background:#313131;
+      box-shadow:0 0 1px rgba(0, 0, 0, 0.5);
 
-      label{
+      .block{
         display:block;
         margin-bottom:5px;
+
+        &.hidden{
+          display:none;
+        }
 
         input[type=number]{
           margin-left:5px;
           padding:0 5px;
-          width:24px;
+          width:32px;
           height:24px;
           background:#000;
           border:none;
           border-radius:3px;
           color:#FFF;
           text-align:center;
+
+          &.big{
+            width:48px;
+          }
         }
 
         input[type=checkbox]{
           margin-right:2px;
+          vertical-align:middle;
+        }
+      }
+
+      .inline{
+        display:inline-block;
+        margin:0 10px 3px 0;
+
+        &.last{
+          margin-right:0;
+        }
+
+        input[type=radio]{
+          margin-right:2px;
+          vertical-align:middle;
         }
       }
 
@@ -236,9 +262,11 @@
         display:flex;
         justify-content:space-between;
         margin:10px 0;
+        padding-top:10px;
+        border-top:1px solid rgba(0, 0, 0, 0.5);
 
         .export, .upload{
-          width:65px;
+          width:75px;
           height:30px;
           background:#005df7;
           border-radius:3px;

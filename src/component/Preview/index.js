@@ -10,6 +10,7 @@ import img from '../../util/img';
 import config from '../../util/config';
 
 import './index.less';
+import preview from '../../store/preview';
 
 function formatTime(duration) {
   let str;
@@ -91,6 +92,9 @@ class Preview extends React.Component {
     uuid = data.uuid;
     // 缩放画布显示保持宽高比
     let { width, height } = data.props.style;
+    console.log(width,height);
+    store.preview.setVw(width);
+    store.preview.setVh(height);
     let stage = this.stage;
     let canvas = this.canvas;
     let { clientWidth, clientHeight } = stage;
@@ -145,6 +149,22 @@ class Preview extends React.Component {
 
   change(v) {
     store.preview.setType(v);
+  }
+
+  unit(v) {
+    store.preview.setUnit(v);
+  }
+
+  changeRem(rem) {
+    store.preview.setRem(rem);
+  }
+
+  changeVw(vw) {
+    store.preview.setVw(vw);
+  }
+
+  changeVh(vh) {
+    store.preview.setVh(vh);
   }
 
   changeIterations(e) {
@@ -233,7 +253,7 @@ class Preview extends React.Component {
   }
 
   render() {
-    let { type, time, total, isPlaying, isBgBlack } = this.props.preview;
+    let { type, unit, rem, vw, vh, time, total, isPlaying, isBgBlack } = this.props.preview;
     return <div className={classnames('preview-panel', {
       show: store.global.isPreview,
     })}>
@@ -245,35 +265,35 @@ class Preview extends React.Component {
           }
           store.global.setPreview(false);
         }}>返回</div>
-      </div>
-      <div className="type">
-        <label onClick={() => this.change('canvas')}>
-          <input type="radio"
-                 name="type"
-                 value="canvas"
-                 checked={type === 'canvas'}
-                 readOnly={true}/>
-          <span>canvas</span>
-        </label>
-        <label onClick={() => this.change('svg')}>
-          <input type="radio"
-                 name="type"
-                 value="svg"
-                 checked={type === 'svg'}
-                 readOnly={true}/>
-          <span>svg</span>
-        </label>
-        <label onClick={() => this.change('webgl')}>
-          <input type="radio"
-                 name="type"
-                 value="webgl"
-                 checked={type === 'webgl'}
-                 readOnly={true}/>
-          <span>webgl</span>
-        </label>
+        <div className="type">
+          <label onClick={() => this.change('canvas')}>
+            <input type="radio"
+                   name="type"
+                   value="canvas"
+                   checked={type === 'canvas'}
+                   readOnly={true}/>
+            <span>canvas</span>
+          </label>
+          <label onClick={() => this.change('svg')}>
+            <input type="radio"
+                   name="type"
+                   value="svg"
+                   checked={type === 'svg'}
+                   readOnly={true}/>
+            <span>svg</span>
+          </label>
+          <label onClick={() => this.change('webgl')}>
+            <input type="radio"
+                   name="type"
+                   value="webgl"
+                   checked={type === 'webgl'}
+                   readOnly={true}/>
+            <span>webgl</span>
+          </label>
+        </div>
       </div>
       <div className="container">
-        <div className="menu"/>
+        {/*<div className="menu"/>*/}
         <div className="view">
           <div className="stage"
                ref={el => this.stage = el}>
@@ -304,29 +324,80 @@ class Preview extends React.Component {
           </div>
         </div>
         <div className="side">
-          <label>
+          <label className="block">
             <input type="checkbox"
                    ref={el => this.format = el}
                    defaultChecked={this.props.preview.format}/>
-            <span>格式化</span>
+            <span>JSON格式化</span>
           </label>
-          <label>
+          <label className="block">
             <input type="checkbox"
                    ref={el => this.base64 = el}
                    defaultChecked={this.props.preview.base64}/>
             <span>图片base64</span>
           </label>
-          <label>
+          <label className="block">
             <span>循环次数(0为无穷)</span>
             <input type="number" min="0"
-                   defaultValue={this.props.preview.iterations}
+                   value={this.props.preview.iterations}
                    onChange={e => this.changeIterations(e)}/>
           </label>
-          <label>
+          <label className="block">
             <span>小数精度(0为整数)</span>
             <input type="number" min="0"
-                   defaultValue={this.props.preview.precision}
+                   value={this.props.preview.precision}
                    onChange={e => this.changePrecision(e)}/>
+          </label>
+          <p>输出单位</p>
+          <label className="inline" onClick={() => this.unit('px')}>
+            <input type="radio"
+                   name="unit"
+                   value="px"
+                   checked={unit === 'px'}
+                   readOnly={true}/>
+            <span>px</span>
+          </label>
+          <label className="inline" onClick={() => this.unit('rem')}>
+            <input type="radio"
+                   name="unit"
+                   value="rem"
+                   checked={unit === 'rem'}
+                   readOnly={true}/>
+            <span>rem</span>
+          </label>
+          <label className="inline" onClick={() => this.unit('vw')}>
+            <input type="radio"
+                   name="unit"
+                   value="vw"
+                   checked={unit === 'vw'}
+                   readOnly={true}/>
+            <span>vw</span>
+          </label>
+          <label className="inline last" onClick={() => this.unit('vh')}>
+            <input type="radio"
+                   name="unit"
+                   value="vh"
+                   checked={unit === 'vh'}
+                   readOnly={true}/>
+            <span>vh</span>
+          </label>
+          <label className={classnames('block', { hidden: unit !== 'rem' })}>
+            <span>Root FontSize</span>
+            <input type="number" min="0" className="big"
+                   value={rem}
+                   onChange={e => this.changeRem(e)}/>
+          </label>
+          <label className={classnames('block', { hidden: unit !== 'vw' })}>
+            <span>Root Width</span>
+            <input type="number" min="0" className="big"
+                   value={vw}
+                   onChange={e => this.changeVw(e)}/>
+          </label>
+          <label className={classnames('block', { hidden: unit !== 'vh' })}>
+            <span>Root Height</span>
+            <input type="number" min="0" className="big"
+                   value={vh}
+                   onChange={e => this.changeVh(e)}/>
           </label>
           <div className="btn">
             <div className="export" onClick={() => {
@@ -337,6 +408,10 @@ class Preview extends React.Component {
               output(data, {
                 iterations,
                 precision,
+                unit,
+                rem,
+                vw,
+                vh,
               });
               function cb() {
                 let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
@@ -361,6 +436,10 @@ class Preview extends React.Component {
               output(data, {
                 iterations,
                 precision,
+                unit,
+                rem,
+                vw,
+                vh,
               });
               function cb() {
                 store.global.setLoading(true);

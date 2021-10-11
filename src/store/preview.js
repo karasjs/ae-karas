@@ -3,6 +3,10 @@ import { makeAutoObservable } from 'mobx';
 class Preview {
   data = null;
   type = 'canvas';
+  unit = 'px';
+  rem = 16;
+  vw = 750;
+  vh = 1334;
   format = false;
   base64 = false;
   iterations = 1;
@@ -24,12 +28,32 @@ class Preview {
     this.type = type;
   }
 
+  setUnit(unit) {
+    this.unit = unit;
+  }
+
   setFormat(format) {
     this.format = format;
   }
 
   setBase64(base64) {
     this.base64 = base64;
+  }
+
+  setFontSize(fontSize) {
+    this.fontSize = fontSize;
+  }
+
+  setRem(rem) {
+    this.rem = rem;
+  }
+
+  setVw(vw) {
+    this.vw = vw;
+  }
+
+  setVh(vh) {
+    this.vh = vh;
   }
 
   setIterations(iterations) {

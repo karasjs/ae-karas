@@ -7059,6 +7059,14 @@ var Preview = /*#__PURE__*/function () {
 
     _defineProperty(this, "type", 'canvas');
 
+    _defineProperty(this, "unit", 'px');
+
+    _defineProperty(this, "rem", 16);
+
+    _defineProperty(this, "vw", 750);
+
+    _defineProperty(this, "vh", 1334);
+
     _defineProperty(this, "format", false);
 
     _defineProperty(this, "base64", false);
@@ -7089,6 +7097,11 @@ var Preview = /*#__PURE__*/function () {
       this.type = type;
     }
   }, {
+    key: "setUnit",
+    value: function setUnit(unit) {
+      this.unit = unit;
+    }
+  }, {
     key: "setFormat",
     value: function setFormat(format) {
       this.format = format;
@@ -7097,6 +7110,26 @@ var Preview = /*#__PURE__*/function () {
     key: "setBase64",
     value: function setBase64(base64) {
       this.base64 = base64;
+    }
+  }, {
+    key: "setFontSize",
+    value: function setFontSize(fontSize) {
+      this.fontSize = fontSize;
+    }
+  }, {
+    key: "setRem",
+    value: function setRem(rem) {
+      this.rem = rem;
+    }
+  }, {
+    key: "setVw",
+    value: function setVw(vw) {
+      this.vw = vw;
+    }
+  }, {
+    key: "setVh",
+    value: function setVh(vh) {
+      this.vh = vh;
     }
   }, {
     key: "setIterations",
@@ -8155,11 +8188,11 @@ var List = (List_dec = inject('global'), List_dec(List_class = mobxreact_esm_obs
   return List;
 }(_react_17_0_2_react.Component)) || List_class) || List_class);
 /* harmony default export */ const component_List = (List);
-// EXTERNAL MODULE: ./node_modules/_karas@0.62.3@karas/index.js
-var _karas_0_62_3_karas = __webpack_require__(83);
-var _karas_0_62_3_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_62_3_karas);
+// EXTERNAL MODULE: ./node_modules/_karas@0.62.4@karas/index.js
+var _karas_0_62_4_karas = __webpack_require__(555);
+var _karas_0_62_4_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_62_4_karas);
 ;// CONCATENATED MODULE: ./src/util/output.js
-var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'lineHeight', 'translatePath'];
+var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'fontSize', 'lineHeight', 'translatePath'];
 
 function recursion(data, params) {
   // 分为普通节点和library节点分别递归进行
@@ -8175,14 +8208,6 @@ function recursion(data, params) {
 
       if (data.init.style) {
         parseStyle(data.init.style, params);
-      }
-    }
-
-    var animate = data.animate;
-
-    if (Array.isArray(animate)) {
-      for (var i = 0, len = animate.length; i < len; i++) {
-        parseAnimate(animate[i], params);
       }
     }
   } else {
@@ -8203,10 +8228,20 @@ function recursion(data, params) {
     var children = data.children;
 
     if (Array.isArray(children)) {
-      for (var _i = 0, _len = children.length; _i < _len; _i++) {
-        recursion(children[_i], params);
+      for (var i = 0, len = children.length; i < len; i++) {
+        recursion(children[i], params);
       }
     }
+  }
+
+  var animate = data.animate;
+
+  if (Array.isArray(animate)) {
+    for (var _i = 0, _len = animate.length; _i < _len; _i++) {
+      parseAnimate(animate[_i], params);
+    }
+  } else if (animate) {
+    parseAnimate(animate, params);
   }
 }
 
@@ -8228,6 +8263,14 @@ function parsePoint(data, params) {
 }
 
 function parseStyle(data, params) {
+  var unit = params.unit,
+      _params$rem = params.rem,
+      rem = _params$rem === void 0 ? 0 : _params$rem,
+      _params$vw = params.vw,
+      vw = _params$vw === void 0 ? 0 : _params$vw,
+      _params$vh = params.vh,
+      vh = _params$vh === void 0 ? 0 : _params$vh;
+
   for (var i = 0, len = STYLE.length; i < len; i++) {
     var k = STYLE[i];
 
@@ -8236,19 +8279,69 @@ function parseStyle(data, params) {
 
       if (k === 'transformOrigin') {
         v = v.split(' ');
-        v[0] = parseFloat(parseFloat(v[0]).toFixed(params.precision));
-        v[1] = parseFloat(parseFloat(v[1]).toFixed(params.precision));
+        v[0] = parseFloat(v[0]);
+        v[1] = parseFloat(v[1]);
+
+        if (unit === 'rem') {
+          v[0] /= rem;
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[0] += 'rem';
+          v[1] /= rem;
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+          v[1] += 'rem';
+        } else if (unit === 'vw') {
+          v[0] *= 100 / vw;
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[0] += 'vw';
+          v[1] *= 100 / vw;
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+          v[1] += 'vw';
+        } else if (unit === 'vh') {
+          v[0] *= 100 / vh;
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[0] += 'vh';
+          v[1] *= 100 / vh;
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+          v[1] += 'vh';
+        } else {
+          v[0] = parseFloat(v[0].toFixed(params.precision));
+          v[1] = parseFloat(v[1].toFixed(params.precision));
+        }
+
         data[k] = v.join(' ');
       } else if (k === 'translatePath') {
         for (var j = 0; j < v.length; j++) {
-          var v2 = v[j].toFixed(params.precision);
-          v[j] = parseFloat(v2);
+          var v2 = void 0;
+
+          if (unit === 'rem') {
+            v2 = parseFloat((v[j] / rem).toFixed(params.precision)) + 'rem';
+          } else if (unit === 'vw') {
+            v2 = parseFloat((v[j] * 100 / vw).toFixed(params.precision)) + 'vw';
+          } else if (unit === 'vh') {
+            v2 = parseFloat((v[j] * 100 / vw).toFixed(params.precision)) + 'vh';
+          } else {
+            v2 = parseFloat(v[j].toFixed(params.precision));
+          }
+
+          v[j] = v2;
         }
-      } else if (['opacity', 'scaleX', 'scaleY', 'scaleZ'].indexOf(k) > -1) {
+      } else if (['top', 'right', 'bottom', 'left', 'width', 'height', 'translateX', 'translateY', 'translateZ', 'perspective', 'fontSize'].indexOf(k) > -1) {
+        var _v = void 0;
+
+        if (unit === 'rem') {
+          _v = parseFloat((v / rem).toFixed(params.precision)) + 'rem';
+        } else if (unit === 'vw') {
+          _v = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vw';
+        } else if (unit === 'vh') {
+          _v = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vh';
+        } else {
+          _v = parseFloat(v.toFixed(params.precision));
+        }
+
+        data[k] = _v;
+      } // 无单位的小数
+      else {
         v = v.toFixed(params.precision + 2);
-        data[k] = parseFloat(v);
-      } else {
-        v = v.toFixed(params.precision);
         data[k] = parseFloat(v);
       }
     }
@@ -8269,11 +8362,11 @@ function parseAnimate(data, params) {
     }
 
     if (item.hasOwnProperty('easing')) {
-      var _v = item.easing;
+      var _v2 = item.easing;
       var v2 = [];
 
-      for (var _i3 = 0, _len3 = _v.length; _i3 < _len3; _i3++) {
-        v2[_i3] = parseFloat(_v[_i3].toFixed(params.precision + 2));
+      for (var _i3 = 0, _len3 = _v2.length; _i3 < _len3; _i3++) {
+        v2[_i3] = parseFloat(_v2[_i3].toFixed(params.precision + 2));
       }
 
       item.easing = v2;
@@ -8289,9 +8382,9 @@ function parseAnimate(data, params) {
   }
 
   if (options.hasOwnProperty('duration')) {
-    var _v2 = options.duration.toFixed(params.precision);
+    var _v3 = options.duration.toFixed(params.precision);
 
-    options.duration = parseFloat(_v2);
+    options.duration = parseFloat(_v3);
   }
 }
 
@@ -8505,6 +8598,7 @@ function Preview_isNativeReflectConstruct() { if (typeof Reflect === "undefined"
 
 
 
+
 function formatTime(duration) {
   var str;
 
@@ -8604,6 +8698,9 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       var _data$props$style = data.props.style,
           width = _data$props$style.width,
           height = _data$props$style.height;
+      console.log(width, height);
+      store.preview.setVw(width);
+      store.preview.setVh(height);
       var stage = this.stage;
       var canvas = this.canvas;
       var clientWidth = stage.clientWidth,
@@ -8627,13 +8724,13 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
 
 
       var type = this.props.preview.type;
-      root = _karas_0_62_3_karas_default().parse({
+      root = _karas_0_62_4_karas_default().parse({
         tagName: type,
         props: {
           width: width,
           height: height
         },
-        children: [_karas_0_62_3_karas_default().parse(data, {
+        children: [_karas_0_62_4_karas_default().parse(data, {
           autoPlay: false
         })],
         abbr: false
@@ -8662,6 +8759,26 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
     key: "change",
     value: function change(v) {
       store.preview.setType(v);
+    }
+  }, {
+    key: "unit",
+    value: function unit(v) {
+      store.preview.setUnit(v);
+    }
+  }, {
+    key: "changeRem",
+    value: function changeRem(rem) {
+      store.preview.setRem(rem);
+    }
+  }, {
+    key: "changeVw",
+    value: function changeVw(vw) {
+      store.preview.setVw(vw);
+    }
+  }, {
+    key: "changeVh",
+    value: function changeVh(vh) {
+      store.preview.setVh(vh);
     }
   }, {
     key: "changeIterations",
@@ -8775,6 +8892,10 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
 
       var _this$props$preview = this.props.preview,
           type = _this$props$preview.type,
+          unit = _this$props$preview.unit,
+          rem = _this$props$preview.rem,
+          vw = _this$props$preview.vw,
+          vh = _this$props$preview.vh,
           time = _this$props$preview.time,
           total = _this$props$preview.total,
           isPlaying = _this$props$preview.isPlaying,
@@ -8795,7 +8916,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
 
           store.global.setPreview(false);
         }
-      }, "\u8FD4\u56DE")), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
+      }, "\u8FD4\u56DE"), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "type"
       }, /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         onClick: function onClick() {
@@ -8827,11 +8948,9 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         value: "webgl",
         checked: type === 'webgl',
         readOnly: true
-      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "webgl"))), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
+      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "webgl")))), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "container"
       }, /*#__PURE__*/_react_17_0_2_react.createElement("div", {
-        className: "menu"
-      }), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "view"
       }, /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "stage",
@@ -8892,31 +9011,119 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         className: "time2"
       }, formatTime(total || 0)))), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "side"
-      }, /*#__PURE__*/_react_17_0_2_react.createElement("label", null, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "block"
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "checkbox",
         ref: function ref(el) {
           return _this.format = el;
         },
         defaultChecked: this.props.preview.format
-      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u683C\u5F0F\u5316")), /*#__PURE__*/_react_17_0_2_react.createElement("label", null, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "JSON\u683C\u5F0F\u5316")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "block"
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "checkbox",
         ref: function ref(el) {
           return _this.base64 = el;
         },
         defaultChecked: this.props.preview.base64
-      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u56FE\u7247base64")), /*#__PURE__*/_react_17_0_2_react.createElement("label", null, /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u5FAA\u73AF\u6B21\u6570(0\u4E3A\u65E0\u7A77)"), /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u56FE\u7247base64")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "block"
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u5FAA\u73AF\u6B21\u6570(0\u4E3A\u65E0\u7A77)"), /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "number",
         min: "0",
-        defaultValue: this.props.preview.iterations,
+        value: this.props.preview.iterations,
         onChange: function onChange(e) {
           return _this.changeIterations(e);
         }
-      })), /*#__PURE__*/_react_17_0_2_react.createElement("label", null, /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u5C0F\u6570\u7CBE\u5EA6(0\u4E3A\u6574\u6570)"), /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+      })), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "block"
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u5C0F\u6570\u7CBE\u5EA6(0\u4E3A\u6574\u6570)"), /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "number",
         min: "0",
-        defaultValue: this.props.preview.precision,
+        value: this.props.preview.precision,
         onChange: function onChange(e) {
           return _this.changePrecision(e);
+        }
+      })), /*#__PURE__*/_react_17_0_2_react.createElement("p", null, "\u8F93\u51FA\u5355\u4F4D"), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "inline",
+        onClick: function onClick() {
+          return _this.unit('px');
+        }
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+        type: "radio",
+        name: "unit",
+        value: "px",
+        checked: unit === 'px',
+        readOnly: true
+      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "px")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "inline",
+        onClick: function onClick() {
+          return _this.unit('rem');
+        }
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+        type: "radio",
+        name: "unit",
+        value: "rem",
+        checked: unit === 'rem',
+        readOnly: true
+      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "rem")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "inline",
+        onClick: function onClick() {
+          return _this.unit('vw');
+        }
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+        type: "radio",
+        name: "unit",
+        value: "vw",
+        checked: unit === 'vw',
+        readOnly: true
+      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "vw")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: "inline last",
+        onClick: function onClick() {
+          return _this.unit('vh');
+        }
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+        type: "radio",
+        name: "unit",
+        value: "vh",
+        checked: unit === 'vh',
+        readOnly: true
+      }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "vh")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: _classnames_2_3_1_classnames_default()('block', {
+          hidden: unit !== 'rem'
+        })
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "Root FontSize"), /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+        type: "number",
+        min: "0",
+        className: "big",
+        value: rem,
+        onChange: function onChange(e) {
+          return _this.changeRem(e);
+        }
+      })), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: _classnames_2_3_1_classnames_default()('block', {
+          hidden: unit !== 'vw'
+        })
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "Root Width"), /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+        type: "number",
+        min: "0",
+        className: "big",
+        value: vw,
+        onChange: function onChange(e) {
+          return _this.changeVw(e);
+        }
+      })), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
+        className: _classnames_2_3_1_classnames_default()('block', {
+          hidden: unit !== 'vh'
+        })
+      }, /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "Root Height"), /*#__PURE__*/_react_17_0_2_react.createElement("input", {
+        type: "number",
+        min: "0",
+        className: "big",
+        value: vh,
+        onChange: function onChange(e) {
+          return _this.changeVh(e);
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "btn"
@@ -8933,7 +9140,11 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
           data.uuid = undefined;
           output(data, {
             iterations: iterations,
-            precision: precision
+            precision: precision,
+            unit: unit,
+            rem: rem,
+            vw: vw,
+            vh: vh
           });
 
           function cb() {
@@ -8964,7 +9175,11 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
           data.uuid = undefined;
           output(data, {
             iterations: iterations,
-            precision: precision
+            precision: precision,
+            unit: unit,
+            rem: rem,
+            vw: vw,
+            vh: vh
           });
 
           function cb() {
@@ -9126,7 +9341,7 @@ var Alert = (Alert_dec = inject('global'), Alert_dec(Alert_class = mobxreact_esm
   }
 });
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"0.1.9"};
+const package_namespaceObject = {"i8":"0.2.0"};
 ;// CONCATENATED MODULE: ./src/index.html
 /* harmony default export */ const src = (__webpack_require__.p + "index.html");
 ;// CONCATENATED MODULE: ./src/index.js
@@ -9243,7 +9458,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 /***/ }),
 
-/***/ 83:
+/***/ 555:
 /***/ (function(module) {
 
 (function (global, factory) {
@@ -36527,8 +36742,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       this.__onList = []; // list中已存在的侦听事件，list2初始化时也需要增加上
 
-      this.__lastTime = -1; // this.__timeList = []; // on侦听事件时，每个动画可能都会触发一次，记录帧时间防重
-      // this.__timeHash = {}; // 同上，同时防止过长列表每次清除上帧记录
+      this.__lastTime = {}; // 每个类型的上次触发时间，防止重复emit
     }
 
     _createClass(Controller, [{
@@ -36774,8 +36988,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var cb = function cb() {
             var time = item.timestamp;
 
-            if (time !== _this2.__lastTime) {
-              _this2.__lastTime = time;
+            if (time !== _this2.__lastTime[id]) {
+              _this2.__lastTime[id] = time;
               handle();
             }
           };
@@ -45202,9 +45416,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     },
     loadAndParse: function loadAndParse(karas, json, dom, options) {
       var fonts = json.fonts,
-          components = json.components;
+          components = json.components,
+          imgs = json.imgs;
       var list1 = [];
       var list2 = [];
+      var list3 = [];
 
       if (fonts) {
         if (!Array.isArray(fonts)) {
@@ -45241,11 +45457,29 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         });
       }
 
-      if (list1.length || list2.length) {
+      if (imgs) {
+        if (!Array.isArray(imgs)) {
+          imgs = [imgs];
+        }
+
+        imgs.forEach(function (item) {
+          var url = item.url;
+
+          if (url) {
+            list3.push(url);
+          }
+        });
+      }
+
+      var a = list1.length,
+          b = list2.length,
+          c = list3.length;
+
+      if (a || b || c) {
         var count = 0;
 
         var cb = function cb() {
-          if (count === list1.length + list2.length) {
+          if (count === a + b + c) {
             var res = o$4.parse(karas, json, dom, options);
 
             if (options && util.isFunction(options.callback)) {
@@ -45255,13 +45489,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         };
 
         karas.inject.loadFont(list1, function () {
-          count += list1.length;
+          count += a;
           cb();
         });
         karas.inject.loadComponent(list2.map(function (item) {
           return item.url;
         }), function () {
-          count += list2.length; // 默认约定加载的js组件会在全局变量申明同名tagName，已有不覆盖，防止组件代码内部本身有register
+          count += b; // 默认约定加载的js组件会在全局变量申明同名tagName，已有不覆盖，防止组件代码内部本身有register
 
           list2.forEach(function (item) {
             var tagName = item.tagName;
@@ -45270,6 +45504,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               karas.Component.register(tagName, window[tagName]);
             }
           });
+          cb();
+        });
+        karas.inject.measureImg(list3, function () {
+          count += c;
           cb();
         });
       } else {
@@ -45307,7 +45545,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     Cache: Cache
   };
 
-  var version = "0.62.3";
+  var version = "0.62.4";
 
   Geom$1.register('$line', Line);
   Geom$1.register('$polyline', Polyline);
