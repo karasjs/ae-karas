@@ -574,7 +574,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         $geom.animate.push(t);
       }
       if(type === 'rect') {
-        let o = path.rect2polyline(first[0], first[1], roundness);
+        let o = path.rect2polyline(first.size[0], first.size[1], roundness[0]);
         $geom.props.points = o.points;
         $geom.props.controls = o.controls;
       }

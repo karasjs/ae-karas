@@ -1799,8 +1799,6 @@ function transformStroke(stroke, begin, duration) {
     }
   }; // 只有1帧没有动画，无需计算补间
 
-  $.ae2karas.log(stroke.color.length);
-
   if (stroke.color.length === 1) {
     var first = stroke.color[0];
     var v = [parseInt(first[0] * 255), parseInt(first[1] * 255), parseInt(first[2] * 255), first[3]];
@@ -2674,7 +2672,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       }
 
       if (type === 'rect') {
-        var o = path.rect2polyline(first[0], first[1], roundness);
+        var o = path.rect2polyline(first.size[0], first.size[1], roundness[0]);
         $geom.props.points = o.points;
         $geom.props.controls = o.controls;
       } else if (type === 'ellipse') {

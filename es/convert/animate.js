@@ -587,7 +587,6 @@ export function transformStroke(stroke, begin, duration) {
     },
   };
   // 只有1帧没有动画，无需计算补间
-  $.ae2karas.log(stroke.color.length);
   if(stroke.color.length === 1) {
     let first = stroke.color[0];
     let v = [
