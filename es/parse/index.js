@@ -35,8 +35,9 @@ function recursion(composition, library) {
       asChild[item.index] = item.parent.index;
     }
   }
-  let children = [];
   // 遍历分析图层，独奏时只看独奏图层，否则看可见图层
+  let children = [];
+  outer:
   for(let i = 1; i <= layers.length; i++) {
     let item = layers[i];
     let index = item.index;
@@ -50,6 +51,24 @@ function recursion(composition, library) {
       else {
         if(!item.enabled && !item.isTrackMatte) {
           continue;
+        }
+      }
+    }
+    // mask看应用图层对象是否可见
+    if(item.isTrackMatte) {
+      for(let j = i + 1; j <= layers.length; j++) {
+        let item2 = layers[j];
+        if(!item2.isTrackMatte) {
+          if(hasSolo) {
+            if(!item2.solo) {
+              continue outer;
+            }
+          }
+          else {
+            if(!item2.enabled) {
+              continue outer;
+            }
+          }
         }
       }
     }

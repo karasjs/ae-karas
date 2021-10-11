@@ -723,11 +723,12 @@ function recursion$1(composition, library) {
       asParent[_item.parent.index] = true;
       asChild[_item.index] = _item.parent.index;
     }
-  }
+  } // 遍历分析图层，独奏时只看独奏图层，否则看可见图层
 
-  var children = []; // 遍历分析图层，独奏时只看独奏图层，否则看可见图层
 
-  for (var _i2 = 1; _i2 <= layers.length; _i2++) {
+  var children = [];
+
+  outer: for (var _i2 = 1; _i2 <= layers.length; _i2++) {
     var _item2 = layers[_i2];
     var index = _item2.index; // 根据是否独奏或可见决定是否分析或跳过，被作为父级链接的即便不可见也要统计
 
@@ -739,6 +740,25 @@ function recursion$1(composition, library) {
       } else {
         if (!_item2.enabled && !_item2.isTrackMatte) {
           continue;
+        }
+      }
+    } // mask看应用图层对象是否可见
+
+
+    if (_item2.isTrackMatte) {
+      for (var j = _i2 + 1; j <= layers.length; j++) {
+        var item2 = layers[j];
+
+        if (!item2.isTrackMatte) {
+          if (hasSolo) {
+            if (!item2.solo) {
+              continue outer;
+            }
+          } else {
+            if (!item2.enabled) {
+              continue outer;
+            }
+          }
         }
       }
     }
@@ -1087,12 +1107,12 @@ var path = {
       }
 
       cts[j] = cts[j] || [];
-      cts[j].push(pts[_i][0] + _it2[0] / w);
-      cts[j].push(pts[_i][1] + _it2[1] / h); // 本顶点到下一个顶点，最后一个比较特殊是到第一个，需要调整顺序
+      cts[j].push((vertices[_i][0] + _it2[0] - x2) / w);
+      cts[j].push((vertices[_i][1] + _it2[1] - y2) / h); // 本顶点到下一个顶点，最后一个比较特殊是到第一个，需要调整顺序
 
       cts[_i] = cts[_i] || [];
-      var x = pts[_i][0] + _ot2[0] / h,
-          y = pts[_i][1] + _ot2[1] / h;
+      var x = (vertices[_i][0] + _ot2[0] - x2) / w,
+          y = (vertices[_i][1] + _ot2[1] - y2) / h;
 
       if (_i === _len - 1) {
         cts[_i].unshift(y);

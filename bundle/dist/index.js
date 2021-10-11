@@ -8653,6 +8653,8 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
   createClass_createClass(Preview, [{
     key: "componentDidMount",
     value: function componentDidMount() {
+      var _this = this;
+
       var self = this;
       var timeout;
       document.addEventListener('mousemove', function (e) {
@@ -8683,6 +8685,29 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         isDrag = false;
         clearTimeout(timeout);
       });
+      window.addEventListener('resize', function () {
+        if (root) {
+          var data = _this.props.preview.data;
+          var _data$props$style = data.props.style,
+              width = _data$props$style.width,
+              height = _data$props$style.height;
+          var stage = _this.stage;
+          var canvas = _this.canvas;
+          var clientWidth = stage.clientWidth,
+              clientHeight = stage.clientHeight;
+          var rw = width / clientWidth;
+          var rh = height / clientHeight;
+          var max = Math.max(rw, rh);
+
+          if (max < 1) {
+            max = 1;
+          }
+
+          canvas.style.width = width / max + 'px';
+          canvas.style.height = height / max + 'px';
+          root.resize(width, height);
+        }
+      });
     }
   }, {
     key: "componentDidUpdate",
@@ -8695,10 +8720,9 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
 
       uuid = data.uuid; // 缩放画布显示保持宽高比
 
-      var _data$props$style = data.props.style,
-          width = _data$props$style.width,
-          height = _data$props$style.height;
-      console.log(width, height);
+      var _data$props$style2 = data.props.style,
+          width = _data$props$style2.width,
+          height = _data$props$style2.height;
       store.preview.setVw(width);
       store.preview.setVh(height);
       var stage = this.stage;
@@ -8888,7 +8912,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
   }, {
     key: "render",
     value: function render() {
-      var _this = this;
+      var _this2 = this;
 
       var _this$props$preview = this.props.preview,
           type = _this$props$preview.type,
@@ -8920,7 +8944,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         className: "type"
       }, /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         onClick: function onClick() {
-          return _this.change('canvas');
+          return _this2.change('canvas');
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "radio",
@@ -8930,7 +8954,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         readOnly: true
       }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "canvas")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         onClick: function onClick() {
-          return _this.change('svg');
+          return _this2.change('svg');
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "radio",
@@ -8940,7 +8964,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         readOnly: true
       }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "svg")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         onClick: function onClick() {
-          return _this.change('webgl');
+          return _this2.change('webgl');
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "radio",
@@ -8955,14 +8979,14 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       }, /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "stage",
         ref: function ref(el) {
-          return _this.stage = el;
+          return _this2.stage = el;
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: _classnames_2_3_1_classnames_default()('canvas', {
           mosaic: !isBgBlack
         }),
         ref: function ref(el) {
-          return _this.canvas = el;
+          return _this2.canvas = el;
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "control"
@@ -8971,28 +8995,28 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
           mosaic: !isBgBlack
         }),
         onClick: function onClick() {
-          return _this.clickBg(!isBgBlack);
+          return _this2.clickBg(!isBgBlack);
         }
       }), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: _classnames_2_3_1_classnames_default()('play', {
           show: !isPlaying
         }),
         onClick: function onClick() {
-          return _this.clickPlay();
+          return _this2.clickPlay();
         }
       }), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: _classnames_2_3_1_classnames_default()('pause', {
           show: isPlaying
         }),
         onClick: function onClick() {
-          return _this.clickPause();
+          return _this2.clickPause();
         }
       }), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "time"
       }, formatTime(time || 0)), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "progress",
         onClick: function onClick(e) {
-          return _this.clickProgress(e);
+          return _this2.clickProgress(e);
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "bar",
@@ -9005,7 +9029,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
           left: (time * 100 / total || 0) + '%'
         },
         onMouseDown: function onMouseDown(e) {
-          return _this.mouseDown(e);
+          return _this2.mouseDown(e);
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "time2"
@@ -9016,7 +9040,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "checkbox",
         ref: function ref(el) {
-          return _this.format = el;
+          return _this2.format = el;
         },
         defaultChecked: this.props.preview.format
       }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "JSON\u683C\u5F0F\u5316")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
@@ -9024,7 +9048,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "checkbox",
         ref: function ref(el) {
-          return _this.base64 = el;
+          return _this2.base64 = el;
         },
         defaultChecked: this.props.preview.base64
       }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "\u56FE\u7247base64")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
@@ -9034,7 +9058,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         min: "0",
         value: this.props.preview.iterations,
         onChange: function onChange(e) {
-          return _this.changeIterations(e);
+          return _this2.changeIterations(e);
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         className: "block"
@@ -9043,12 +9067,12 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         min: "0",
         value: this.props.preview.precision,
         onChange: function onChange(e) {
-          return _this.changePrecision(e);
+          return _this2.changePrecision(e);
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("p", null, "\u8F93\u51FA\u5355\u4F4D"), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         className: "inline",
         onClick: function onClick() {
-          return _this.unit('px');
+          return _this2.unit('px');
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "radio",
@@ -9059,7 +9083,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "px")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         className: "inline",
         onClick: function onClick() {
-          return _this.unit('rem');
+          return _this2.unit('rem');
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "radio",
@@ -9070,7 +9094,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "rem")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         className: "inline",
         onClick: function onClick() {
-          return _this.unit('vw');
+          return _this2.unit('vw');
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "radio",
@@ -9081,7 +9105,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       }), /*#__PURE__*/_react_17_0_2_react.createElement("span", null, "vw")), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         className: "inline last",
         onClick: function onClick() {
-          return _this.unit('vh');
+          return _this2.unit('vh');
         }
       }, /*#__PURE__*/_react_17_0_2_react.createElement("input", {
         type: "radio",
@@ -9099,7 +9123,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         className: "big",
         value: rem,
         onChange: function onChange(e) {
-          return _this.changeRem(e);
+          return _this2.changeRem(e);
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         className: _classnames_2_3_1_classnames_default()('block', {
@@ -9111,7 +9135,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         className: "big",
         value: vw,
         onChange: function onChange(e) {
-          return _this.changeVw(e);
+          return _this2.changeVw(e);
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("label", {
         className: _classnames_2_3_1_classnames_default()('block', {
@@ -9123,19 +9147,19 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
         className: "big",
         value: vh,
         onChange: function onChange(e) {
-          return _this.changeVh(e);
+          return _this2.changeVh(e);
         }
       })), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "btn"
       }, /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "export",
         onClick: function onClick() {
-          var _this$props$preview2 = _this.props.preview,
-              data = _this$props$preview2.data,
-              iterations = _this$props$preview2.iterations,
-              precision = _this$props$preview2.precision;
-          var format = _this.format,
-              base64 = _this.base64;
+          var _this2$props$preview = _this2.props.preview,
+              data = _this2$props$preview.data,
+              iterations = _this2$props$preview.iterations,
+              precision = _this2$props$preview.precision;
+          var format = _this2.format,
+              base64 = _this2.base64;
           data = JSON.parse(JSON.stringify(data));
           data.uuid = undefined;
           output(data, {
@@ -9164,12 +9188,12 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       }, "\u5BFC\u51FA"), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "upload",
         onClick: function onClick() {
-          var _this$props$preview3 = _this.props.preview,
-              data = _this$props$preview3.data,
-              iterations = _this$props$preview3.iterations,
-              precision = _this$props$preview3.precision;
-          var format = _this.format,
-              base64 = _this.base64;
+          var _this2$props$preview2 = _this2.props.preview,
+              data = _this2$props$preview2.data,
+              iterations = _this2$props$preview2.iterations,
+              precision = _this2$props$preview2.precision;
+          var format = _this2.format,
+              base64 = _this2.base64;
           var name = data.name;
           data = JSON.parse(JSON.stringify(data));
           data.uuid = undefined;

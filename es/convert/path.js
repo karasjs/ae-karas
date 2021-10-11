@@ -63,11 +63,11 @@ export default {
         j = len - 1;
       }
       cts[j] = cts[j] || [];
-      cts[j].push(pts[i][0] + it[0] / w);
-      cts[j].push(pts[i][1] + it[1] / h);
+      cts[j].push((vertices[i][0] + it[0] - x2) / w);
+      cts[j].push((vertices[i][1] + it[1] - y2) / h);
       // 本顶点到下一个顶点，最后一个比较特殊是到第一个，需要调整顺序
       cts[i] = cts[i] || [];
-      let x = pts[i][0] + ot[0] / h, y = pts[i][1] + ot[1] / h;
+      let x = (vertices[i][0] + ot[0] - x2) / w, y = (vertices[i][1] + ot[1] - y2) / h;
       if(i === len - 1) {
         cts[i].unshift(y);
         cts[i].unshift(x);

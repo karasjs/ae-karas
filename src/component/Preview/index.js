@@ -81,6 +81,24 @@ class Preview extends React.Component {
       isDrag = false;
       clearTimeout(timeout);
     });
+    window.addEventListener('resize', () => {
+      if(root) {
+        let data = this.props.preview.data;
+        let { width, height } = data.props.style;
+        let stage = this.stage;
+        let canvas = this.canvas;
+        let { clientWidth, clientHeight } = stage;
+        let rw = width / clientWidth;
+        let rh = height / clientHeight;
+        let max = Math.max(rw, rh);
+        if(max < 1) {
+          max = 1;
+        }
+        canvas.style.width = width / max + 'px';
+        canvas.style.height = height / max + 'px';
+        root.resize(width, height);
+      }
+    });
   }
 
   componentDidUpdate(nextProps, nextState, nextContext) {
@@ -92,7 +110,6 @@ class Preview extends React.Component {
     uuid = data.uuid;
     // 缩放画布显示保持宽高比
     let { width, height } = data.props.style;
-    console.log(width,height);
     store.preview.setVw(width);
     store.preview.setVh(height);
     let stage = this.stage;
