@@ -2472,7 +2472,7 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     res.props.style.fontFamily = content.fontFamily;
     res.props.style.fontSize = content.fontSize; // res.props.style.fontStyle = content.fontStyle;
 
-    res.props.style.lineHeight = content.leading / content.fontSize;
+    res.props.style.lineHeight = (content.fontSize + content.leading) / content.fontSize;
     res.children = [content.text]; // 对齐方式
 
     var baselineLocs = content.baselineLocs;
