@@ -51,9 +51,9 @@ function recursion(data, params) {
       if(data.props.style) {
         parseStyle(data.props.style, params);
       }
-      if(data.tagName === 'img' && data.props.url && !/^data:/.test(data.props.url)) {
-        params[data.props.url] = {
-          url: data.props.url,
+      if(data.tagName === 'img' && data.props.src && !/^data:/.test(data.props.src)) {
+        params.imgHash[data.props.src] = {
+          url: data.props.src,
         };
       }
     }
