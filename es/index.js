@@ -133,10 +133,14 @@ ae2karas.export = function(data) {
   if(!file) {
     return;
   }
-  (new Folder(file)).create();
-  let f = new File(file.fsName + '.json');
+  let name = file.fsName;
+  if(!/\.json$/.test(name)) {
+    name += '.json';
+  }
+  let f = new File(name);
   f.open('w');
   f.encoding = 'utf-8';
   f.write(data);
   f.close();
+  return true;
 };

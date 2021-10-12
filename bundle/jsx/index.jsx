@@ -3314,11 +3314,17 @@ ae2karas["export"] = function (data) {
     return;
   }
 
-  new Folder(file).create();
-  var f = new File(file.fsName + '.json');
+  var name = file.fsName;
+
+  if (!/\.json$/.test(name)) {
+    name += '.json';
+  }
+
+  var f = new File(name);
   f.open('w');
   f.encoding = 'utf-8';
   f.write(data);
   f.close();
+  return true;
 };
 //# sourceMappingURL=index.jsx.map
