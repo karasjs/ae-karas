@@ -8445,8 +8445,8 @@ function parseAnimate(data, params) {
 ;
 ;// CONCATENATED MODULE: ./src/util/config.js
 /* harmony default export */ const config = ({
-  UPLOAD_JSON: '',
-  UPLOAD_BASE64: ''
+  UPLOAD_JSON: 'https://karas.alipay.com/api/upload',
+  UPLOAD_BASE64: 'https://animconfig-office.alipay.net/api/ae2karas/upload'
 });
 ;// CONCATENATED MODULE: ./src/util/img.js
 
@@ -8630,6 +8630,7 @@ var Preview_dec, _dec2, Preview_class;
 function Preview_createSuper(Derived) { var hasNativeReflectConstruct = Preview_isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
 function Preview_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 
 
 
@@ -8982,7 +8983,11 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
             root = null;
           }
 
-          store.global.setPreview(false);
+          transaction(function () {
+            store.preview.setPlay(false);
+            store.preview.setTime(0);
+            store.global.setPreview(false);
+          });
         }
       }, "\u8FD4\u56DE"), /*#__PURE__*/_react_17_0_2_react.createElement("div", {
         className: "type"
@@ -9409,7 +9414,7 @@ var Alert = (Alert_dec = inject('global'), Alert_dec(Alert_class = mobxreact_esm
   }
 });
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"0.2.2"};
+const package_namespaceObject = {"i8":"0.2.3"};
 ;// CONCATENATED MODULE: ./src/index.html
 /* harmony default export */ const src = (__webpack_require__.p + "index.html");
 ;// CONCATENATED MODULE: ./src/index.js

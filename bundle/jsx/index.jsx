@@ -999,6 +999,12 @@ function text(prop) {
             baselineLocs: value.baselineLocs,
             text: value.text
           };
+
+          if (value.boxText) {
+            res.content.size = value.boxTextSize;
+            res.content.position = value.boxTextPos;
+          }
+
           break;
       }
     }
@@ -1254,7 +1260,12 @@ function getAreaList(list, begin, duration, reducer) {
     var o = {
       time: begin,
       value: Array.isArray(first.value) ? first.value.slice(0) : first.value
-    };
+    }; // translatePath特殊处理，前补第一帧转为translate
+
+    if (Array.isArray(first.value) && first.value.length === 8) {
+      o.value = first.value.slice(0, 2);
+    }
+
     list.unshift(o);
   } // 截取首帧部分
   else if (first.time < begin) {
@@ -1304,10 +1315,20 @@ function getAreaList(list, begin, duration, reducer) {
 
 
 function sliceBezier(points, t) {
-  var p1 = points[0],
-      p2 = points[1],
-      p3 = points[2],
-      p4 = points[3];
+  var p1, p2, p3, p4;
+
+  if (points.length === 8) {
+    p1 = points.slice(0, 2);
+    p2 = points.slice(2, 4);
+    p3 = points.slice(4, 8);
+    p4 = points.slice(6, 8);
+  } else {
+    p1 = points[0];
+    p2 = points[1];
+    p3 = points[2];
+    p4 = points[3];
+  }
+
   var x1 = p1[0],
       y1 = p1[1];
   var x2 = p2[0],
@@ -1321,7 +1342,7 @@ function sliceBezier(points, t) {
   var x123 = (x23 - x12) * t + x12;
   var y123 = (y23 - y12) * t + y12;
 
-  if (points.length === 4) {
+  if (points.length === 4 || points.length === 8) {
     var x4 = p4[0],
         y4 = p4[1];
     var x34 = (x4 - x3) * t + x3;
@@ -1330,6 +1351,11 @@ function sliceBezier(points, t) {
     var y234 = (y34 - y23) * t + y23;
     var x1234 = (x234 - x123) * t + x123;
     var y1234 = (y234 - y123) * t + y123;
+
+    if (points.length === 8) {
+      return [x1, y1, x12, y12, x123, y123, x1234, y1234];
+    }
+
     return [[x1, y1], [x12, y12], [x123, y123], [x1234, y1234]];
   } else if (points.length === 3) {
     return [[x1, y1], [x12, y12], [x123, y123]];
@@ -1422,7 +1448,7 @@ function transformPosition(list, begin, duration) {
 
           for (var i = 0, len = prev.length; i < len; i++) {
             var item = prev[i];
-            points.push(item.slice(0));
+            points.push(item);
           }
 
           points = sliceBezier(points.reverse(), percent);
@@ -2486,7 +2512,17 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     res.animate.push(v);
   }
 
-  parseAnimate(res, data, start, duration, displayStartTime, offset, false, false); // 父级链接塞进父级作为唯一children，有可能父级是递归嵌套的，需到达最里层
+  parseAnimate(res, data, start, duration, displayStartTime, offset, false, false); // text的位置修正，init的left/top会覆盖props的，多嵌套一层也可以但麻烦
+
+  var lib = newLib[res.libraryId];
+
+  if (lib && lib.tagName === 'span') {
+    res.init.style.left = res.init.style.left || 0;
+    res.init.style.left += lib.props.style.left || 0;
+    res.init.style.top = res.init.style.top || 0;
+    res.init.style.top += lib.props.style.top || 0;
+  } // 父级链接塞进父级作为唯一children，有可能父级是递归嵌套的，需到达最里层
+
 
   if (data.hasOwnProperty('asChild')) {
     var asChild = data.asChild;
@@ -2558,8 +2594,9 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     res.props.style.color = [parseInt(content.fillColor[0] * 255), parseInt(content.fillColor[1] * 255), parseInt(content.fillColor[2] * 255)];
     res.props.style.fontFamily = content.fontFamily;
     res.props.style.fontSize = content.fontSize; // res.props.style.fontStyle = content.fontStyle;
+    // res.props.style.lineHeight = (content.fontSize + content.leading) / content.fontSize;
 
-    res.props.style.lineHeight = (content.fontSize + content.leading) / content.fontSize;
+    res.props.style.lineHeight = 1.2;
     res.children = [content.text]; // 对齐方式
 
     var baselineLocs = content.baselineLocs;
@@ -2571,13 +2608,18 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
       right = Math.max(right, baselineLocs[i + 2]);
     }
 
-    if (left) {
-      res.props.style.left = left;
-      res.props.style.width = right - left;
-      res.props.style.textAlign = 'center';
-    }
+    if (content.position) {
+      res.props.style.left = content.position[0];
+      res.props.style.top = content.position[1];
+    } else {
+      if (left) {
+        res.props.style.left = left;
+        res.props.style.width = right - left;
+        res.props.style.textAlign = 'center';
+      }
 
-    res.props.style.top = -content.fontSize - baselineLocs[1];
+      res.props.style.top = -content.fontSize - baselineLocs[1];
+    }
   } // 图片无children
   else if (type === 'img') {
     res.props.src = src;
