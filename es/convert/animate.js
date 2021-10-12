@@ -749,8 +749,6 @@ export function transformMiterLimit(list, begin, duration) {
   return res;
 }
 
-// export function transformPosition(list, begin, duration) {}
-
 export function transformSize(list, begin, duration) {
   let res = {
     value: [],

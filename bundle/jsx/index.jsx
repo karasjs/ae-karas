@@ -1959,8 +1959,7 @@ function transformMiterLimit(list, begin, duration) {
   }
 
   return res;
-} // export function transformPosition(list, begin, duration) {}
-
+}
 function transformSize(list, begin, duration) {
   var res = {
     value: [],

@@ -45,7 +45,7 @@ function formatTime(duration) {
   return str;
 }
 
-let root, uuid;
+let root, uuid, type;
 let isDrag, originX, W;
 
 @inject('global')
@@ -104,9 +104,10 @@ class Preview extends React.Component {
   componentDidUpdate(nextProps, nextState, nextContext) {
     let data = this.props.preview.data;
     // 每次重新转换后新的才生成新的root
-    if(data.uuid === uuid) {
+    if(data.uuid === uuid && this.props.preview.type === type) {
       return;
     }
+    type = this.props.preview.type;
     uuid = data.uuid;
     // 缩放画布显示保持宽高比
     let { width, height } = data.props.style;
@@ -129,7 +130,6 @@ class Preview extends React.Component {
       canvas.innerHTML = '';
     }
     // 不同类型type根节点
-    let type = this.props.preview.type;
     root = karas.parse({
       tagName: type,
       props: {
