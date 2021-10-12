@@ -1455,6 +1455,38 @@ function transformPosition(list, begin, duration) {
 
   return res;
 }
+function translateXY(list, begin, duration, key) {
+  var res = {
+    value: [],
+    options: {
+      duration: duration,
+      fill: 'forwards',
+      iterations: 1
+    }
+  }; // 只有1帧没有动画，无需计算补间
+
+  if (list.length === 1) {
+    var o = {};
+    o[key] = list[0];
+    res.value.push(o);
+  } else {
+    list = getAreaList(list, begin, duration, function (prev, next, percent, isStart) {
+      return prev + (next - prev) * percent;
+    });
+
+    for (var i = 0, len = list.length; i < len; i++) {
+      var item = list[i];
+      var _o2 = {
+        offset: (item.time - begin) / duration,
+        easing: item.easing
+      };
+      _o2[key] = item.value;
+      res.value.push(_o2);
+    }
+  }
+
+  return res;
+}
 function transformRotateX(list, begin, duration) {
   var res = {
     value: [],
@@ -1720,19 +1752,19 @@ function transformPoints(list, begin, duration) {
           _outTangents = _item$value.outTangents,
           _closed = _item$value.closed;
 
-      var _o2 = void 0;
+      var _o3 = void 0;
 
       if (i === 0) {
-        _o2 = path.parse(_vertices, _inTangents, _outTangents, _closed);
-        res.data = _o2;
+        _o3 = path.parse(_vertices, _inTangents, _outTangents, _closed);
+        res.data = _o3;
       } else {
-        _o2 = path.parse(_vertices, _inTangents, _outTangents, _closed, res.data.x1, res.data.y1, res.data.x2, res.data.y2);
+        _o3 = path.parse(_vertices, _inTangents, _outTangents, _closed, res.data.x1, res.data.y1, res.data.x2, res.data.y2);
       }
 
       res.value.push({
         offset: (item.time - begin) / duration,
-        points: _o2.points,
-        controls: _o2.controls
+        points: _o3.points,
+        controls: _o3.controls
       });
     }
   }
@@ -2043,6 +2075,8 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   var anchorPoint = transform.anchorPoint,
       opacity = transform.opacity,
       position = transform.position,
+      position_0 = transform.position_0,
+      position_1 = transform.position_1,
       rotateX = transform.rotateX,
       rotateY = transform.rotateY,
       rotateZ = transform.rotateZ,
@@ -2063,7 +2097,8 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
 
     if (t.value.length > 1) {
       t.value[0] = {
-        offset: 0
+        offset: 0,
+        easing: first.easing
       }; // tfo的每个动画需考虑对坐标的影响
 
       for (var i = 1, len = t.value.length; i < len; i++) {
@@ -2099,13 +2134,25 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
 
     if (_t.value.length > 1) {
       _t.value[0] = {
-        offset: 0
+        offset: 0,
+        easing: _first.easing
       };
       res.animate.push(_t);
     }
+  } // position要考虑x/y拆开
+
+
+  var translateAbbr = true;
+
+  if (Array.isArray(position_0) && position_0.length > 1) {
+    translateAbbr = false;
   }
 
-  if (Array.isArray(position) && position.length) {
+  if (Array.isArray(position_1) && position_1.length > 1) {
+    translateAbbr = false;
+  }
+
+  if (Array.isArray(position) && position.length && translateAbbr) {
     var _t2 = transformPosition(position, begin2, duration);
 
     var _first2 = _t2.value[0];
@@ -2126,69 +2173,109 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     if (_t2.value.length > 1) {
       if (!_first2.translatePath) {
         _t2.value[0] = {
-          offset: 0
+          offset: 0,
+          easing: _first2.easing
         };
       }
 
       res.animate.push(_t2);
+    }
+  } else {
+    if (Array.isArray(position_0) && position_0.length) {
+      var _t3 = translateXY(position_0, begin2, duration, 'translateX');
+
+      var _first3 = _t3.value[0];
+
+      if (_first3.translateX) {
+        init.style.translateX = _first3.translateX;
+      }
+
+      if (_t3.value.length > 1) {
+        _t3.value[0] = {
+          offset: 0,
+          easing: _first3.easing
+        };
+        res.animate.push(_t3);
+      }
+    }
+
+    if (Array.isArray(position_1) && position_1.length) {
+      var _t4 = translateXY(position_1, begin2, duration, 'translateY');
+
+      var _first4 = _t4.value[0];
+
+      if (_first4.translateY) {
+        init.style.translateY = _first4.translateY;
+      }
+
+      if (_t4.value.length > 1) {
+        _t4.value[0] = {
+          offset: 0,
+          easing: _first4.easing
+        };
+        res.animate.push(_t4);
+      }
     }
   }
 
   var is3d;
 
   if (Array.isArray(rotateX) && rotateX.length) {
-    var _t3 = transformRotateX(rotateX, begin2, duration);
-
-    var _first3 = _t3.value[0];
-
-    if (_first3.rotateX) {
-      init.style.rotateX = _first3.rotateX;
-      is3d = true;
-    }
-
-    if (_t3.value.length > 1) {
-      _t3.value[0] = {
-        offset: 0
-      };
-      res.animate.push(_t3);
-      is3d = true;
-    }
-  }
-
-  if (Array.isArray(rotateY) && rotateY.length) {
-    var _t4 = transformRotateY(rotateY, begin2, duration);
-
-    var _first4 = _t4.value[0];
-
-    if (_first4.rotateY) {
-      init.style.rotateY = _first4.rotateY;
-      is3d = true;
-    }
-
-    if (_t4.value.length > 1) {
-      _t4.value[0] = {
-        offset: 0
-      };
-      res.animate.push(_t4);
-      is3d = true;
-    }
-  }
-
-  if (Array.isArray(rotateZ) && rotateZ.length) {
-    var _t5 = transformRotateZ(rotateZ, begin2, duration);
+    var _t5 = transformRotateX(rotateX, begin2, duration);
 
     var _first5 = _t5.value[0];
 
-    if (_first5.rotateZ) {
-      init.style.rotateZ = _first5.rotateZ;
+    if (_first5.rotateX) {
+      init.style.rotateX = _first5.rotateX;
       is3d = true;
     }
 
     if (_t5.value.length > 1) {
       _t5.value[0] = {
-        offset: 0
+        offset: 0,
+        easing: _first5.easing
       };
       res.animate.push(_t5);
+      is3d = true;
+    }
+  }
+
+  if (Array.isArray(rotateY) && rotateY.length) {
+    var _t6 = transformRotateY(rotateY, begin2, duration);
+
+    var _first6 = _t6.value[0];
+
+    if (_first6.rotateY) {
+      init.style.rotateY = _first6.rotateY;
+      is3d = true;
+    }
+
+    if (_t6.value.length > 1) {
+      _t6.value[0] = {
+        offset: 0,
+        easing: _first6.easing
+      };
+      res.animate.push(_t6);
+      is3d = true;
+    }
+  }
+
+  if (Array.isArray(rotateZ) && rotateZ.length) {
+    var _t7 = transformRotateZ(rotateZ, begin2, duration);
+
+    var _first7 = _t7.value[0];
+
+    if (_first7.rotateZ) {
+      init.style.rotateZ = _first7.rotateZ;
+      is3d = true;
+    }
+
+    if (_t7.value.length > 1) {
+      _t7.value[0] = {
+        offset: 0,
+        easing: _first7.easing
+      };
+      res.animate.push(_t7);
       is3d = true;
     }
   }
@@ -2199,27 +2286,28 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   }
 
   if (Array.isArray(scale) && scale.length) {
-    var _t6 = transformScale(scale, begin2, duration);
+    var _t8 = transformScale(scale, begin2, duration);
 
-    var _first6 = _t6.value[0];
+    var _first8 = _t8.value[0];
 
-    if (_first6.scaleX !== 1) {
-      init.style.scaleX = _first6.scaleX;
+    if (_first8.scaleX !== 1) {
+      init.style.scaleX = _first8.scaleX;
     }
 
-    if (_first6.scaleY !== 1) {
-      init.style.scaleY = _first6.scaleY;
+    if (_first8.scaleY !== 1) {
+      init.style.scaleY = _first8.scaleY;
     }
 
-    if (_first6.scaleZ !== 1) {
-      init.style.scaleZ = _first6.scaleZ;
+    if (_first8.scaleZ !== 1) {
+      init.style.scaleZ = _first8.scaleZ;
     }
 
-    if (_t6.value.length > 1) {
-      _t6.value[0] = {
-        offset: 0
+    if (_t8.value.length > 1) {
+      _t8.value[0] = {
+        offset: 0,
+        easing: _first8.easing
       };
-      res.animate.push(_t6);
+      res.animate.push(_t8);
     }
   }
 
@@ -2681,48 +2769,48 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         $geom.props.controls = _o.controls;
       }
     } else if (type === 'star') ; else if (type === 'path') {
-      var _t7 = transformPoints(points, begin2, duration);
+      var _t9 = transformPoints(points, begin2, duration);
 
-      var d = _t7.data; // path特殊没尺寸，3d等计算ppt需赋值
+      var d = _t9.data; // path特殊没尺寸，3d等计算ppt需赋值
 
       $geom.props.style.width = data.shape.width = d.width;
       $geom.props.style.height = data.shape.height = d.height; // path的特殊位置计算，因为ae中尺寸为0
 
       $geom.props.style.left = d.x2;
       $geom.props.style.top = d.y2;
-      _t7.data = undefined;
-      var _first7 = _t7.value[0];
-      $geom.props.points = _first7.points;
-      $geom.props.controls = _first7.controls;
+      _t9.data = undefined;
+      var _first9 = _t9.value[0];
+      $geom.props.points = _first9.points;
+      $geom.props.controls = _first9.controls;
 
-      if (_t7.value.length > 1) {
-        _t7.value[0] = {
+      if (_t9.value.length > 1) {
+        _t9.value[0] = {
           offset: 0
         };
-        $geom.animate.push(_t7);
+        $geom.animate.push(_t9);
       }
     } // path没有position
 
 
     if (position && position.length) {
-      var _t8 = transformPosition(position, begin2, duration);
+      var _t10 = transformPosition(position, begin2, duration);
 
-      var _first8 = _t8.value[0];
-      $geom.props.style.translateX = _first8.translateX;
-      $geom.props.style.translateY = _first8.translateY;
+      var _first10 = _t10.value[0];
+      $geom.props.style.translateX = _first10.translateX;
+      $geom.props.style.translateY = _first10.translateY;
 
-      if (_t8.value.length > 1) {
-        _t8.value[0] = {
+      if (_t10.value.length > 1) {
+        _t10.value[0] = {
           offset: 0
         };
 
-        for (var _i5 = 1; _i5 < _t8.value.length; _i5++) {
-          var _item4 = _t8.value[_i5];
-          _item4.translateX -= _first8.translateX;
-          _item4.translateY -= _first8.translateY;
+        for (var _i5 = 1; _i5 < _t10.value.length; _i5++) {
+          var _item4 = _t10.value[_i5];
+          _item4.translateX -= _first10.translateX;
+          _item4.translateY -= _first10.translateY;
         }
 
-        $geom.animate.push(_t8);
+        $geom.animate.push(_t10);
       }
     }
 
@@ -2734,11 +2822,11 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     var anchorPoint = transform.anchorPoint;
 
     if (Array.isArray(anchorPoint) && anchorPoint.length) {
-      var _t9 = transformOrigin(anchorPoint, begin2, duration);
+      var _t11 = transformOrigin(anchorPoint, begin2, duration);
 
-      var _first9 = _t9.value[0];
+      var _first11 = _t11.value[0];
 
-      var v = _first9.transformOrigin.split(' ');
+      var v = _first11.transformOrigin.split(' ');
 
       v[0] = parseFloat(v[0]);
       v[1] = parseFloat(v[1]);
@@ -2758,19 +2846,19 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         v[1] += h * 0.5;
 
         if (v[0] !== w * 0.5 || v[1] !== h * 0.5) {
-          $geom.props.style.transformOrigin = _first9.transformOrigin;
+          $geom.props.style.transformOrigin = _first11.transformOrigin;
         }
 
-        if (_t9.value.length > 1) {
-          if (_first9.offset === 0) {
-            _t9.value[0] = {
+        if (_t11.value.length > 1) {
+          if (_first11.offset === 0) {
+            _t11.value[0] = {
               offset: 0
             };
           } // tfo的每个动画需考虑对坐标的影响
 
 
-          for (var _i6 = 1, _len4 = _t9.value.length; _i6 < _len4; _i6++) {
-            var _item5 = _t9.value[_i6];
+          for (var _i6 = 1, _len4 = _t11.value.length; _i6 < _len4; _i6++) {
+            var _item5 = _t11.value[_i6];
 
             var tfo = _item5.transformOrigin.split(' ');
 
@@ -2780,7 +2868,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
             _item5.top = top - tfo[1];
           }
 
-          $geom.animate.push(_t9);
+          $geom.animate.push(_t11);
         }
       } else {
         // tfo中心判断，加上尺寸*0.5
@@ -2788,17 +2876,17 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         v[1] += $geom.props.style.height * 0.5;
 
         if (v[0] !== $geom.props.style.width * 0.5 || v[1] !== $geom.props.style.height * 0.5) {
-          $geom.props.style.transformOrigin = _first9.transformOrigin;
+          $geom.props.style.transformOrigin = _first11.transformOrigin;
         }
 
-        if (_t9.value.length > 1) {
-          if (_first9.offset === 0) {
-            _t9.value[0] = {
+        if (_t11.value.length > 1) {
+          if (_first11.offset === 0) {
+            _t11.value[0] = {
               offset: 0
             };
           }
 
-          $geom.animate.push(_t9);
+          $geom.animate.push(_t11);
         }
 
         if (v[0]) {
@@ -2863,44 +2951,44 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           _end = trim.end;
 
       if (_start2.length > 1) {
-        var _t10 = transformPath(_start2, begin2, duration, false);
+        var _t12 = transformPath(_start2, begin2, duration, false);
 
-        var _first10 = _t10.value[0];
+        var _first12 = _t12.value[0];
 
-        if (_first10.start !== 0) {
-          $geom.props.start = _first10.start;
+        if (_first12.start !== 0) {
+          $geom.props.start = _first12.start;
         }
 
-        if (_t10.value.length > 1) {
-          if (_first10.offset === 0) {
-            _t10.value[0] = {
+        if (_t12.value.length > 1) {
+          if (_first12.offset === 0) {
+            _t12.value[0] = {
               offset: 0
             };
           }
 
-          $geom.animate.push(_t10);
+          $geom.animate.push(_t12);
         }
       } else {
         $geom.props.start = _start2[0] * 0.01;
       }
 
       if (_end.length > 1) {
-        var _t11 = transformPath(_end, begin2, duration, true);
+        var _t13 = transformPath(_end, begin2, duration, true);
 
-        var _first11 = _t11.value[0];
+        var _first13 = _t13.value[0];
 
-        if (_first11.end !== 0) {
-          $geom.props.end = _first11.end;
+        if (_first13.end !== 0) {
+          $geom.props.end = _first13.end;
         }
 
-        if (_t11.value.length > 1) {
-          if (_first11.offset === 0) {
-            _t11.value[0] = {
+        if (_t13.value.length > 1) {
+          if (_first13.offset === 0) {
+            _t13.value[0] = {
               offset: 0
             };
           }
 
-          $geom.animate.push(_t11);
+          $geom.animate.push(_t13);
         }
       } else {
         $geom.props.end = _end[0] * 0.01;
@@ -2909,52 +2997,12 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
   }
 
   if (fill && Array.isArray(fill.color) && fill.color.length) {
-    var _t12 = transformFill(fill, begin2, duration);
-
-    var _first12 = _t12.value[0];
-
-    for (var _i7 = 0; _i7 < len; _i7++) {
-      children[_i7].props.style.fill = _first12.fill;
-    }
-
-    if (_t12.value.length > 1) {
-      _t12.value[0] = {
-        offset: 0
-      };
-
-      for (var _i8 = 0; _i8 < len; _i8++) {
-        children[_i8].animate.push(_t12);
-      }
-    }
-  }
-
-  if (stroke && Array.isArray(stroke.color) && stroke.color.length) {
-    var _t13 = transformStroke(stroke, begin2, duration);
-
-    var _first13 = _t13.value[0];
-
-    for (var _i9 = 0; _i9 < len; _i9++) {
-      children[_i9].props.style.stroke = _first13.stroke;
-    }
-
-    if (_t13.value.length > 1) {
-      _t13.value[0] = {
-        offset: 0
-      };
-
-      for (var _i10 = 0; _i10 < len; _i10++) {
-        children[_i10].animate.push(_t13);
-      }
-    }
-  }
-
-  if (stroke && Array.isArray(stroke.width) && stroke.width.length) {
-    var _t14 = transformStrokeWidth(stroke.width, begin2, duration);
+    var _t14 = transformFill(fill, begin2, duration);
 
     var _first14 = _t14.value[0];
 
-    for (var _i11 = 0; _i11 < len; _i11++) {
-      children[_i11].props.style.strokeWidth = _first14.strokeWidth;
+    for (var _i7 = 0; _i7 < len; _i7++) {
+      children[_i7].props.style.fill = _first14.fill;
     }
 
     if (_t14.value.length > 1) {
@@ -2962,19 +3010,19 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i12 = 0; _i12 < len; _i12++) {
-        children[_i12].animate.push(_t14);
+      for (var _i8 = 0; _i8 < len; _i8++) {
+        children[_i8].animate.push(_t14);
       }
     }
   }
 
-  if (stroke && Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
-    var _t15 = transformLineJoin(stroke.lineJoin, begin2, duration);
+  if (stroke && Array.isArray(stroke.color) && stroke.color.length) {
+    var _t15 = transformStroke(stroke, begin2, duration);
 
     var _first15 = _t15.value[0];
 
-    for (var _i13 = 0; _i13 < len; _i13++) {
-      children[_i13].props.style.strokeLineJoin = _first15.strokeLineJoin;
+    for (var _i9 = 0; _i9 < len; _i9++) {
+      children[_i9].props.style.stroke = _first15.stroke;
     }
 
     if (_t15.value.length > 1) {
@@ -2982,19 +3030,19 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i14 = 0; _i14 < len; _i14++) {
-        children[_i14].animate.push(_t15);
+      for (var _i10 = 0; _i10 < len; _i10++) {
+        children[_i10].animate.push(_t15);
       }
     }
   }
 
-  if (stroke && Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
-    var _t16 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+  if (stroke && Array.isArray(stroke.width) && stroke.width.length) {
+    var _t16 = transformStrokeWidth(stroke.width, begin2, duration);
 
     var _first16 = _t16.value[0];
 
-    for (var _i15 = 0; _i15 < len; _i15++) {
-      children[_i15].props.style.strokeMiterlimit = _first16.strokeMiterlimit;
+    for (var _i11 = 0; _i11 < len; _i11++) {
+      children[_i11].props.style.strokeWidth = _first16.strokeWidth;
     }
 
     if (_t16.value.length > 1) {
@@ -3002,8 +3050,48 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
+      for (var _i12 = 0; _i12 < len; _i12++) {
+        children[_i12].animate.push(_t16);
+      }
+    }
+  }
+
+  if (stroke && Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
+    var _t17 = transformLineJoin(stroke.lineJoin, begin2, duration);
+
+    var _first17 = _t17.value[0];
+
+    for (var _i13 = 0; _i13 < len; _i13++) {
+      children[_i13].props.style.strokeLineJoin = _first17.strokeLineJoin;
+    }
+
+    if (_t17.value.length > 1) {
+      _t17.value[0] = {
+        offset: 0
+      };
+
+      for (var _i14 = 0; _i14 < len; _i14++) {
+        children[_i14].animate.push(_t17);
+      }
+    }
+  }
+
+  if (stroke && Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
+    var _t18 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+
+    var _first18 = _t18.value[0];
+
+    for (var _i15 = 0; _i15 < len; _i15++) {
+      children[_i15].props.style.strokeMiterlimit = _first18.strokeMiterlimit;
+    }
+
+    if (_t18.value.length > 1) {
+      _t18.value[0] = {
+        offset: 0
+      };
+
       for (var _i16 = 0; _i16 < len; _i16++) {
-        children[_i16].animate.push(_t16);
+        children[_i16].animate.push(_t18);
       }
     }
   }
@@ -3104,19 +3192,19 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
   }
 
   if (Array.isArray(opacity) && opacity.length) {
-    var _t17 = transformOpacity(opacity, begin2, duration);
+    var _t19 = transformOpacity(opacity, begin2, duration);
 
-    var _first17 = _t17.value[0];
+    var _first19 = _t19.value[0];
 
-    if (_first17.opacity !== 1) {
-      res.props.style.opacity = _first17.opacity;
+    if (_first19.opacity !== 1) {
+      res.props.style.opacity = _first19.opacity;
     }
 
-    if (_t17.value.length > 1) {
-      _t17.value[0] = {
+    if (_t19.value.length > 1) {
+      _t19.value[0] = {
         offset: 0
       };
-      res.animate.push(_t17);
+      res.animate.push(_t19);
     }
   } // 获取对象锚点，mask的锚点需保持相同
 

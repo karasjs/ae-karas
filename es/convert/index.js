@@ -14,6 +14,7 @@ import {
   transformLineJoin,
   transformMiterLimit,
   transformSize,
+  translateXY,
 } from './animate';
 import path from './path';
 
@@ -56,7 +57,7 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
 function parseAnimate(res, data, start, duration, displayStartTime, offset, isDirect, isGeom) {
   let { width, height, transform } = data;
   // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
-  let { anchorPoint, opacity, position, rotateX, rotateY, rotateZ, scale } = transform;
+  let { anchorPoint, opacity, position, position_0, position_1, rotateX, rotateY, rotateZ, scale } = transform;
   let begin2 = start - offset - displayStartTime;
   let init = isDirect ? res.props : res.init;
   if(!isGeom && Array.isArray(anchorPoint) && anchorPoint.length) {
@@ -71,6 +72,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     if(t.value.length > 1) {
       t.value[0] = {
         offset: 0,
+        easing: first.easing,
       };
       // tfo的每个动画需考虑对坐标的影响
       for(let i = 1, len = t.value.length; i < len; i++) {
@@ -100,11 +102,20 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     if(t.value.length > 1) {
       t.value[0] = {
         offset: 0,
+        easing: first.easing,
       };
       res.animate.push(t);
     }
   }
-  if(Array.isArray(position) && position.length) {
+  // position要考虑x/y拆开
+  let translateAbbr = true;
+  if(Array.isArray(position_0) && position_0.length > 1) {
+    translateAbbr = false;
+  }
+  if(Array.isArray(position_1) && position_1.length > 1) {
+    translateAbbr = false;
+  }
+  if(Array.isArray(position) && position.length && translateAbbr) {
     let t = transformPosition(position, begin2, duration);
     let first = t.value[0];
     if(first.translatePath) {
@@ -123,9 +134,40 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       if(!first.translatePath) {
         t.value[0] = {
           offset: 0,
+          easing: first.easing,
         };
       }
       res.animate.push(t);
+    }
+  }
+  else {
+    if(Array.isArray(position_0) && position_0.length) {
+      let t = translateXY(position_0, begin2, duration, 'translateX');
+      let first = t.value[0];
+      if(first.translateX) {
+        init.style.translateX = first.translateX;
+      }
+      if(t.value.length > 1) {
+        t.value[0] = {
+          offset: 0,
+          easing: first.easing,
+        };
+        res.animate.push(t);
+      }
+    }
+    if(Array.isArray(position_1) && position_1.length) {
+      let t = translateXY(position_1, begin2, duration, 'translateY');
+      let first = t.value[0];
+      if(first.translateY) {
+        init.style.translateY = first.translateY;
+      }
+      if(t.value.length > 1) {
+        t.value[0] = {
+          offset: 0,
+          easing: first.easing,
+        };
+        res.animate.push(t);
+      }
     }
   }
   let is3d;
@@ -139,6 +181,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     if(t.value.length > 1) {
       t.value[0] = {
         offset: 0,
+        easing: first.easing,
       };
       res.animate.push(t);
       is3d = true;
@@ -154,6 +197,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     if(t.value.length > 1) {
       t.value[0] = {
         offset: 0,
+        easing: first.easing,
       };
       res.animate.push(t);
       is3d = true;
@@ -169,6 +213,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     if(t.value.length > 1) {
       t.value[0] = {
         offset: 0,
+        easing: first.easing,
       };
       res.animate.push(t);
       is3d = true;
@@ -193,6 +238,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     if(t.value.length > 1) {
       t.value[0] = {
         offset: 0,
+        easing: first.easing,
       };
       res.animate.push(t);
     }

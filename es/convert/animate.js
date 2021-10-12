@@ -251,6 +251,38 @@ export function transformPosition(list, begin, duration) {
   return res;
 }
 
+export function translateXY(list, begin, duration, key) {
+  let res = {
+    value: [],
+    options: {
+      duration,
+      fill: 'forwards',
+      iterations: 1,
+    },
+  };
+  // 只有1帧没有动画，无需计算补间
+  if(list.length === 1) {
+    let o = {};
+    o[key] = list[0];
+    res.value.push(o);
+  }
+  else {
+    list = getAreaList(list, begin, duration, function(prev, next, percent, isStart) {
+      return prev + (next - prev) * percent;
+    });
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      let o = {
+        offset: (item.time - begin) / duration,
+        easing: item.easing,
+      };
+      o[key] = item.value;
+      res.value.push(o);
+    }
+  }
+  return res;
+}
+
 export function transformRotateX(list, begin, duration) {
   let res = {
     value: [],
