@@ -178,24 +178,26 @@ function parseStyle(data, params) {
   ['fill', 'stroke'].forEach(k => {
     if(data.hasOwnProperty(k)) {
       let v = data[k];
-      v.forEach((item, i) => {
-        if(/Gradient/i.test(item)) {
-          v[i] = v[i].replace(/([\s(])([+-]?[\d.]+)/g, function($0, $1, $2) {
-            if(unit === 'rem') {
-              return $1 + (parseFloat($2) / rem).toFixed(params.precision + 2);
-            }
-            else if(unit === 'vw') {
-              return $1 + (parseFloat($2) * 100 / vw).toFixed(params.precision + 2);
-            }
-            else if(unit === 'vh') {
-              return $1 + (parseFloat($2) * 100 / vh).toFixed(params.precision + 2);
-            }
-            else {
-              return $1 + parseFloat($2).toFixed(params.precision + 2);
-            }
-          });
-        }
-      });
+      if(Array.isArray(v)) {
+        v.forEach((item, i) => {
+          if(/Gradient/i.test(item)) {
+            v[i] = v[i].replace(/([\s(])([+-]?[\d.]+)/g, function($0, $1, $2) {
+              if(unit === 'rem') {
+                return $1 + (parseFloat($2) / rem).toFixed(params.precision + 2);
+              }
+              else if(unit === 'vw') {
+                return $1 + (parseFloat($2) * 100 / vw).toFixed(params.precision + 2);
+              }
+              else if(unit === 'vh') {
+                return $1 + (parseFloat($2) * 100 / vh).toFixed(params.precision + 2);
+              }
+              else {
+                return $1 + parseFloat($2).toFixed(params.precision + 2);
+              }
+            });
+          }
+        });
+      }
     }
   });
 }
