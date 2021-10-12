@@ -51,6 +51,10 @@ function getAreaList(list, begin, duration, reducer) {
       time: begin,
       value: Array.isArray(first.value) ? first.value.slice(0) : first.value,
     };
+    // translatePath特殊处理，前补第一帧转为translate
+    if(Array.isArray(first.value) && first.value.length === 8) {
+      o.value = first.value.slice(0, 2);
+    }
     list.unshift(o);
   }
   // 截取首帧部分

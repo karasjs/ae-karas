@@ -392,6 +392,14 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     res.animate.push(v);
   }
   parseAnimate(res, data, start, duration, displayStartTime, offset, false, false);
+  // text的位置修正，init的left/top会覆盖props的，多嵌套一层也可以但麻烦
+  let lib = newLib[res.libraryId];
+  if(lib && lib.tagName === 'span') {
+    res.init.style.left = res.init.style.left || 0;
+    res.init.style.left += lib.props.style.left || 0;
+    res.init.style.top = res.init.style.top || 0;
+    res.init.style.top += lib.props.style.top || 0;
+  }
   // 父级链接塞进父级作为唯一children，有可能父级是递归嵌套的，需到达最里层
   if(data.hasOwnProperty('asChild')) {
     let asChild = data.asChild;
@@ -454,7 +462,8 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     res.props.style.fontFamily = content.fontFamily;
     res.props.style.fontSize = content.fontSize;
     // res.props.style.fontStyle = content.fontStyle;
-    res.props.style.lineHeight = (content.fontSize + content.leading) / content.fontSize;
+    // res.props.style.lineHeight = (content.fontSize + content.leading) / content.fontSize;
+    res.props.style.lineHeight = 1.2;
     res.children = [content.text];
     // 对齐方式
     let baselineLocs = content.baselineLocs;
@@ -463,12 +472,18 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
       left = Math.min(left, baselineLocs[i]);
       right = Math.max(right, baselineLocs[i + 2]);
     }
-    if(left) {
-      res.props.style.left = left;
-      res.props.style.width = right - left;
-      res.props.style.textAlign = 'center';
+    if(content.position) {
+      res.props.style.left = content.position[0];
+      res.props.style.top = content.position[1];
     }
-    res.props.style.top = -content.fontSize - baselineLocs[1];
+    else {
+      if(left) {
+        res.props.style.left = left;
+        res.props.style.width = right - left;
+        res.props.style.textAlign = 'center';
+      }
+      res.props.style.top = -content.fontSize - baselineLocs[1];
+    }
   }
   // 图片无children
   else if(type === 'img') {

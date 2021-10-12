@@ -1,5 +1,6 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
+import { transaction } from 'mobx';
 import classnames from 'classnames';
 import karas from 'karas';
 
@@ -280,7 +281,11 @@ class Preview extends React.Component {
             root.destroy();
             root = null;
           }
-          store.global.setPreview(false);
+          transaction(() => {
+            store.preview.setPlay(false);
+            store.preview.setTime(0);
+            store.global.setPreview(false);
+          });
         }}>返回</div>
         <div className="type">
           <label onClick={() => this.change('canvas')}>

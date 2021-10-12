@@ -275,6 +275,10 @@ function text(prop) {
             baselineLocs: value.baselineLocs,
             text: value.text,
           };
+          if(value.boxText) {
+            res.content.size = value.boxTextSize;
+            res.content.position = value.boxTextPos;
+          }
           break;
       }
     }
