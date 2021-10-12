@@ -51,6 +51,11 @@ function recursion(data, params) {
       if(data.props.style) {
         parseStyle(data.props.style, params);
       }
+      if(data.tagName === 'img' && data.props.url && !/^data:/.test(data.props.url)) {
+        params[data.props.url] = {
+          url: data.props.url,
+        };
+      }
     }
     let children = data.children;
     if(Array.isArray(children)) {
@@ -202,11 +207,21 @@ function parseAnimate(data, params) {
 }
 
 export default function(data, params) {
+  let imgHash = params.imgHash = {};
   recursion(data, params);
   let library = data.library;
   if(Array.isArray(library)) {
     for(let i = 0, len = library.length; i < len; i++) {
       recursion(library[i], params);
     }
+  }
+  let imgs = [];
+  for(let i in imgHash) {
+    if(imgHash.hasOwnProperty(i)) {
+      imgs.push(imgHash[i]);
+    }
+  }
+  if(imgs.length) {
+    data.imgs = imgs;
   }
 };
