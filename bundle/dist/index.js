@@ -2261,29 +2261,34 @@ function base64(data, cb) {
   }
 }
 
-function recursionUpload(data, cb) {
+function recursionUpload(data, imgHash, cb) {
   // 分为普通节点和library节点
   if (data.hasOwnProperty('libraryId')) {} else {
     if (data.props) {
-      upload(data.name, data.props, cb);
+      upload(data.name, data.props, imgHash, cb);
     }
 
     var children = data.children;
 
     if (Array.isArray(children)) {
       for (var i = 0, len = children.length; i < len; i++) {
-        recursionUpload(children[i], cb);
+        recursionUpload(children[i], imgHash, cb);
       }
     }
   }
 }
 
-function upload(name, data, cb) {
+function upload(name, data, imgHash, cb) {
   if (data.hasOwnProperty('src')) {
     var src = data.src,
         _data$style2 = data.style,
         width = _data$style2.width,
         height = _data$style2.height;
+
+    if (src.indexOf('data:') === 0) {
+      return;
+    }
+
     total++;
     var img = document.createElement('img');
 
@@ -2321,6 +2326,7 @@ function upload(name, data, cb) {
       }).then(function (res) {
         if (res.success) {
           data.src = res.url;
+          imgHash[res.url] = res.url;
         }
 
         if (++count === total) {
@@ -2353,15 +2359,30 @@ function upload(name, data, cb) {
         recursionBase64(library[i], cb);
       }
     }
+
+    data.imgs = undefined;
   },
   upload: function upload(data, cb) {
+    var imgHash = {};
     count = total = maxW = maxH = 0;
     var library = data.library;
 
     if (Array.isArray(library)) {
       for (var i = 0, len = library.length; i < len; i++) {
-        recursionUpload(library[i], cb);
+        recursionUpload(library[i], imgHash, cb);
       }
+    }
+
+    var imgs = [];
+
+    for (var _i in imgHash) {
+      if (imgHash.hasOwnProperty(_i)) {
+        imgs.push(imgHash[_i]);
+      }
+    }
+
+    if (imgs.length) {
+      data.imgs = imgs;
     }
   }
 });
