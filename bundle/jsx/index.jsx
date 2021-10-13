@@ -103,8 +103,8 @@ function getPropertyValues(prop, matchName, noEasing) {
             } // 精度小于一定认为无效
 
 
-            var is1 = Math.abs(k * c1[0] + b - c1[1]) > 1e-10;
-            var is2 = Math.abs(k * c2[0] + b - c2[1]) > 1e-10;
+            var is1 = Math.abs(k * p1[0] + b - p1[1]) > 0.5;
+            var is2 = Math.abs(k * p2[0] + b - p2[1]) > 0.5;
 
             if (is1 || is2) {
               var _o2 = {
