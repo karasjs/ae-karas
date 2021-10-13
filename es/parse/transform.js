@@ -45,7 +45,7 @@ function getPropertyValues(prop, matchName, noEasing) {
           let p1 = [v1[0] + c1[0], v1[1] + c1[1]], p2 = [v2[0] + c2[0], v2[1] + c2[1]];
           // 垂直特殊情况
           if(x1 === 0 && x2 === 0) {
-            if(Math.abs(c1[0]) > (1e-10) || Math.abs(c2[0]) > (1e-10)) {
+            if(Math.abs(c1[0]) >= 1 || Math.abs(c2[0]) >= 1) {
               let o = {
                 time: prop.keyTime(i) * 1000,
                 value: [x1, y1, p1[0], p1[1], p2[0], p2[1], x2, y2],
@@ -74,8 +74,8 @@ function getPropertyValues(prop, matchName, noEasing) {
               k = (y1 - b) / x1;
             }
             // 精度小于一定认为无效
-            let is1 = Math.abs(k * p1[0] + b - p1[1]) > 0.5;
-            let is2 = Math.abs(k * p2[0] + b - p2[1]) > 0.5;
+            let is1 = Math.abs(k * p1[0] + b - p1[1]) >= 1;
+            let is2 = Math.abs(k * p2[0] + b - p2[1]) >= 1;
             if(is1 || is2) {
               let o = {
                 time: prop.keyTime(i) * 1000,
