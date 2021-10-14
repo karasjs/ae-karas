@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "classnames": "^2.3.1",
-    "karas": "~0.62.4",
+    "karas": "~0.62.5",
     "mobx": "^6.3.2",
     "mobx-react": "^7.2.0",
     "react": "^17.0.2",
