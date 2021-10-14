@@ -1,14 +1,16 @@
 import enums from './enums';
 import parse from './parse/index';
 import convert from './convert/index';
+import json from './json';
 
 const { ES_TYPE, EVENT } = enums;
-
-let ae2karas = $.ae2karas = $.ae2karas || {};
 
 Array.isArray = Array.isArray || function(arr) {
   return arr instanceof Array;
 };
+
+let ae2karas = $.ae2karas = $.ae2karas || {};
+json(ae2karas);
 
 ae2karas.dispatch = (function() {
   let xLib;
@@ -20,7 +22,7 @@ ae2karas.dispatch = (function() {
   return function(type, data) {
     if(xLib) {
       if(data && data instanceof Object) {
-        data = JSON.stringify(data);
+        data = ae2karas.JSON.stringify(data);
       }
       else if(data === undefined) {
         data = 'undefined';
@@ -34,9 +36,6 @@ ae2karas.dispatch = (function() {
       else if(data === false) {
         data = 'false';
       }
-      // if(typeof data === 'number') {
-      //   data = data.toString();
-      // }
       var eventObj = new CSXSEvent();
       eventObj.type = type;
       eventObj.data = data;

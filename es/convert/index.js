@@ -404,8 +404,8 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   if(data.hasOwnProperty('asChild')) {
     let asChild = data.asChild;
     if(parentLink.hasOwnProperty(asChild)) {
-      let div = JSON.stringify(parentLink[asChild]);
-      div = JSON.parse(div);
+      let div = $.ae2karas.JSON.stringify(parentLink[asChild]);
+      div = $.ae2karas.JSON.parse(div);
       let target = div;
       target.asParent = target.asChild = undefined;
       while(target.children.length) {
@@ -514,8 +514,8 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
         let item = parentLink[i];
         let asChild = item.asChild;
         while(asChild !== undefined && parentLink[asChild]) {
-          let parent = JSON.stringify(parentLink[asChild]);
-          parent = JSON.parse(parent);
+          let parent = $.ae2karas.JSON.stringify(parentLink[asChild]);
+          parent = $.ae2karas.JSON.parse(parent);
           parent.children.push(item);
           item = parent;
           asChild = parent.asChild;
