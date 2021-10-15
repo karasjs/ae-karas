@@ -275,6 +275,7 @@ function text(prop) {
             baselineLocs: value.baselineLocs,
             text: value.text,
           };
+          // 固定已知尺寸时有
           if(value.boxText) {
             res.content.size = value.boxTextSize;
             res.content.position = value.boxTextPos;

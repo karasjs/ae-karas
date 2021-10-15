@@ -8188,9 +8188,9 @@ var List = (List_dec = inject('global'), List_dec(List_class = mobxreact_esm_obs
   return List;
 }(_react_17_0_2_react.Component)) || List_class) || List_class);
 /* harmony default export */ const component_List = (List);
-// EXTERNAL MODULE: ./node_modules/_karas@0.62.5@karas/index.js
-var _karas_0_62_5_karas = __webpack_require__(154);
-var _karas_0_62_5_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_62_5_karas);
+// EXTERNAL MODULE: ./node_modules/_karas@0.62.6@karas/index.js
+var _karas_0_62_6_karas = __webpack_require__(990);
+var _karas_0_62_6_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_62_6_karas);
 ;// CONCATENATED MODULE: ./src/util/output.js
 var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'fontSize', 'lineHeight', 'translatePath'];
 
@@ -8814,13 +8814,13 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       } // 不同类型type根节点
 
 
-      root = _karas_0_62_5_karas_default().parse({
+      root = _karas_0_62_6_karas_default().parse({
         tagName: type,
         props: {
           width: width,
           height: height
         },
-        children: [_karas_0_62_5_karas_default().parse(data, {
+        children: [_karas_0_62_6_karas_default().parse(data, {
           autoPlay: false
         })],
         abbr: false
@@ -9552,7 +9552,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 /***/ }),
 
-/***/ 154:
+/***/ 990:
 /***/ (function(module) {
 
 (function (global, factory) {
@@ -41383,6 +41383,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       value: function destroy() {
         this.__destroy();
 
+        this.animateController.__destroy();
+
         var n = this.dom;
 
         if (n) {
@@ -45647,7 +45649,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     Cache: Cache
   };
 
-  var version = "0.62.5";
+  var version = "0.62.6";
 
   Geom$1.register('$line', Line);
   Geom$1.register('$polyline', Polyline);

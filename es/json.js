@@ -24,7 +24,7 @@ export default function(ae2karas) {
         return n < 10 ? '0' + n : n;
       }
 
-      if(typeof Date.prototype.toJSON !== 'function') {
+      if(!isFunction(Date.prototype.toJSON)) {
 
         Date.prototype.toJSON = function() {
 
@@ -56,7 +56,7 @@ export default function(ae2karas) {
         escapable.lastIndex = 0;
         return escapable.test(string) ? '"' + string.replace(escapable, function(a) {
           var c = meta[a];
-          return typeof c === 'string'
+          return isString(c)
             ? c
             : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
         }) + '"' : '"' + string + '"';
