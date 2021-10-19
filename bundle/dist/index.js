@@ -760,6 +760,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_15__.inject)('globa
             _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(false);
             _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(0);
             _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setPreview(false);
+            _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].reset();
           });
         }
       }, "\u8FD4\u56DE"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
