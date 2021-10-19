@@ -998,7 +998,7 @@ function text(prop) {
             leading: value.leading,
             baselineLocs: value.baselineLocs,
             text: value.text
-          };
+          }; // 固定已知尺寸时有
 
           if (value.boxText) {
             res.content.size = value.boxTextSize;
@@ -3328,7 +3328,7 @@ function json (ae2karas) {
         return n < 10 ? '0' + n : n;
       }
 
-      if (typeof Date.prototype.toJSON !== 'function') {
+      if (!isFunction(Date.prototype.toJSON)) {
         Date.prototype.toJSON = function () {
           return isFinite(this.valueOf()) ? this.getUTCFullYear() + '-' + f(this.getUTCMonth() + 1) + '-' + f(this.getUTCDate()) + 'T' + f(this.getUTCHours()) + ':' + f(this.getUTCMinutes()) + ':' + f(this.getUTCSeconds()) + 'Z' : null;
         };
@@ -3344,7 +3344,7 @@ function json (ae2karas) {
         escapable.lastIndex = 0;
         return escapable.test(string) ? '"' + string.replace(escapable, function (a) {
           var c = meta[a];
-          return typeof c === 'string' ? c : "\\u" + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+          return isString(c) ? c : "\\u" + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
         }) + '"' : '"' + string + '"';
       }
 

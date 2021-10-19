@@ -162,13 +162,13 @@ function parseStyle(data, params) {
         else if(unit === 'vh') {
           v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vh';
         }
-        else {
+        else if(v2) {
           v2 = parseFloat(v.toFixed(params.precision));
         }
         data[k] = v2;
       }
       // 无单位的小数
-      else {
+      else if(v) {
         v = v.toFixed(params.precision + 2);
         data[k] = parseFloat(v);
       }
@@ -213,11 +213,13 @@ function parseAnimate(data, params) {
     }
     if(item.hasOwnProperty('easing')) {
       let v = item.easing;
-      let v2 = [];
-      for(let i = 0, len = v.length; i < len; i++) {
-        v2[i] = parseFloat(v[i].toFixed(params.precision + 2));
+      if(v) {
+        let v2 = [];
+        for(let i = 0, len = v.length; i < len; i++) {
+          v2[i] = parseFloat(v[i].toFixed(params.precision + 2));
+        }
+        item.easing = v2;
       }
-      item.easing = v2;
     }
     if(item.hasOwnProperty('points')) {
       parsePoint(item.points, params);
