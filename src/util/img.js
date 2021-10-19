@@ -27,6 +27,8 @@ function base64(data, cb) {
     total++;
     let img = document.createElement('img');
     img.onload = function() {
+      width = width || img.width;
+      height = height || img.height;
       maxW = Math.max(maxW, width);
       maxH = Math.max(maxH, height);
       let ctx = canvas.getContext('2d')
@@ -162,5 +164,8 @@ export default {
     if(imgs.length) {
       data.imgs = imgs;
     }
+  },
+  reset() {
+    maxW = maxH = 0;
   },
 };

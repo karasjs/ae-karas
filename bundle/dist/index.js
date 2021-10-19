@@ -2230,6 +2230,8 @@ function base64(data, cb) {
     var img = document.createElement('img');
 
     img.onload = function () {
+      width = width || img.width;
+      height = height || img.height;
       maxW = Math.max(maxW, width);
       maxH = Math.max(maxH, height);
       var ctx = canvas.getContext('2d');
@@ -2384,6 +2386,9 @@ function upload(name, data, imgHash, cb) {
     if (imgs.length) {
       data.imgs = imgs;
     }
+  },
+  reset: function reset() {
+    maxW = maxH = 0;
   }
 });
 
