@@ -2553,7 +2553,7 @@ function parseStyle(data, params) {
           _v = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vw';
         } else if (unit === 'vh') {
           _v = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vh';
-        } else if (_v) {
+        } else if (v) {
           _v = parseFloat(v.toFixed(params.precision));
         }
 

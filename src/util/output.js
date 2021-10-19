@@ -162,7 +162,7 @@ function parseStyle(data, params) {
         else if(unit === 'vh') {
           v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vh';
         }
-        else if(v2) {
+        else if(v) {
           v2 = parseFloat(v.toFixed(params.precision));
         }
         data[k] = v2;
