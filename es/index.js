@@ -9,6 +9,15 @@ Array.isArray = Array.isArray || function(arr) {
   return arr instanceof Array;
 };
 
+Array.prototype.indexOf = Array.prototype.indexOf || function(o) {
+  for(let i = 0, len = this.length; i < len; i++) {
+    if(this[i] === o) {
+      return i;
+    }
+  }
+  return -1;
+};
+
 let ae2karas = $.ae2karas = $.ae2karas || {};
 json(ae2karas);
 
