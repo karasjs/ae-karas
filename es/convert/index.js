@@ -769,18 +769,32 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         cx = w * 0.5;
         cy = h * 0.5;
       }
-      let { type, start, end } = gFill;
+      let { type, start, end, colors: { m, p } } = gFill;
+      let steps = '';
+      for(let i = 0; i < p; i++) {
+        if(i) {
+          steps += ', ';
+        }
+        steps += 'rgb(' + Math.floor(m[i * 4 + 1] * 255);
+        steps += ',' + Math.floor(m[i * 4 + 2] * 255);
+        steps += ',' + Math.floor(m[i * 4 + 3] * 255);
+        steps += ') ';
+        steps += m[i * 4] * 100 + '%';
+      }
+      if(!steps) {
+        steps = '#F00, #00F';
+      }
       if(type === 1) {
         let x0 = $geom.props.style.translateX || 0, y0 = $geom.props.style.translateY || 0;
         let x1 = start[0] + cx, y1 = start[1] + cy;
         let x2 = end[0] + cx, y2 = end[1] + cy;
-        f = `linearGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
+        f = `linearGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, ${steps})`;
       }
       else if(type === 2) {
         let x0 = $geom.props.style.translateX || 0, y0 = $geom.props.style.translateY || 0;
         let x1 = start[0] + cx, y1 = start[1] + cy;
         let x2 = end[0] + cx, y2 = end[1] + cy;
-        f = `radialGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, #FFF, #000)`;
+        f = `radialGradient(${(x1 - x0) / w} ${(y1 - y0) / h} ${(x2 - x0) / w} ${(y2 - y0)/ h}, ${steps})`;
       }
       $geom.props.style.fill = [f];
     }

@@ -4,7 +4,7 @@ import render from '../render';
 
 let uuid = 0;
 
-function recursion(composition, library) {
+function recursion(composition, library, navigationShapeTree) {
   let { name, layers, width, height, displayStartTime, duration } = composition;
   $.ae2karas.error('composition: ' + name);
   // 是否是独奏模式
@@ -72,7 +72,7 @@ function recursion(composition, library) {
         }
       }
     }
-    let o = parseLayer(item, library, hasSolo);
+    let o = parseLayer(item, library, navigationShapeTree, hasSolo);
     if(o) {
       // 父级打标uuid的同时，之前记录的hash也记录下来
       if(asParent.hasOwnProperty(index)) {
@@ -108,7 +108,7 @@ function recursion(composition, library) {
   };
 }
 
-function parseLayer(layer, library, hasSolo) {
+function parseLayer(layer, library, navigationShapeTree, hasSolo) {
   let res = {
     name: layer.name,
     index: layer.index,
@@ -121,6 +121,7 @@ function parseLayer(layer, library, hasSolo) {
     isMask: layer.isTrackMatte,
     isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED,
   };
+  navigationShapeTree.push(res.name);
   // 标明图层是否可见，也许不可见但作为父级链接也要分析
   if(hasSolo) {
     res.enabled = layer.solo || layer.isTrackMatte;
@@ -134,6 +135,7 @@ function parseLayer(layer, library, hasSolo) {
     let prop = layer.property(i);
     if(prop && prop.enabled) {
       let matchName = prop.matchName;
+      navigationShapeTree.push(prop.name);
       switch(matchName) {
         case 'ADBE Transform Group':
           res.transform = transformLayer(prop);
@@ -141,7 +143,7 @@ function parseLayer(layer, library, hasSolo) {
         case 'ADBE Root Vectors Group':
           // 形状图层中的内容子属性
           if(res.enabled) {
-            geom = vector(prop, library);
+            geom = vector(prop, navigationShapeTree);
           }
           break;
         case 'ADBE Mask Parade':
@@ -155,6 +157,7 @@ function parseLayer(layer, library, hasSolo) {
           }
           break;
       }
+      navigationShapeTree.pop();
     }
   }
   // 可能是作为父级链接，如果不可见则不需要内容
@@ -234,6 +237,7 @@ function parseLayer(layer, library, hasSolo) {
       }
     }
   }
+  navigationShapeTree.pop();
   return res;
 }
 
@@ -294,8 +298,8 @@ export default function(composition) {
   workAreaStart *= 1000;
   workAreaDuration *= 1000;
   $.ae2karas.log('workArea: ' + workAreaStart + ',' + workAreaDuration);
-  let library = [];
-  let result = recursion(composition, library);
+  let library = [], navigationShapeTree = [];
+  let result = recursion(composition, library, navigationShapeTree);
   $.ae2karas.log(result);
   $.ae2karas.log(library);
   return {

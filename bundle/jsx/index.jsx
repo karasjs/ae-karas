@@ -247,7 +247,7 @@ function transformGeom(prop) {
   return getPropertyValues(prop, '', true);
 }
 
-function group(prop) {
+function group(prop, navigationShapeTree) {
   var res = {}; // 这里是矩形1层，主要关注Groups属性即可，blendMode暂时无视，transform被上钻2层提前
 
   for (var i = 1; i <= prop.numProperties; i++) {
@@ -255,10 +255,11 @@ function group(prop) {
 
     if (item && item.enabled) {
       var matchName = item.matchName;
+      navigationShapeTree.push(item.name);
 
       switch (matchName) {
         case 'ADBE Vectors Group':
-          res.content = content(item);
+          res.content = content(item, navigationShapeTree);
           break;
 
         case 'ADBE Vector Transform Group':
@@ -266,6 +267,8 @@ function group(prop) {
           res.transform = transformVector(item);
           break;
       }
+
+      navigationShapeTree.pop();
     }
   }
 
@@ -273,7 +276,7 @@ function group(prop) {
   return res.content;
 }
 
-function content(prop) {
+function content(prop, navigationShapeTree) {
   // 矩形1下面会多出一层内容层看不见，就是本层，其下面则是可视的子属性层
   var res = {
     name: prop.name,
@@ -285,6 +288,7 @@ function content(prop) {
 
     if (item && item.enabled) {
       var matchName = item.matchName;
+      navigationShapeTree.push(item.name);
 
       switch (matchName) {
         case 'ADBE Vector Shape - Rect':
@@ -312,9 +316,11 @@ function content(prop) {
           break;
 
         case 'ADBE Vector Graphic - G-Fill':
-          res.gFill = gFill(item);
+          res.gFill = gFill(item, navigationShapeTree);
           break;
       }
+
+      navigationShapeTree.pop();
     }
   }
 
@@ -580,7 +586,7 @@ function fill(prop) {
   return res;
 }
 
-function gFill(prop) {
+function gFill(prop, navigationShapeTree) {
   var res = {};
 
   for (var i = 1; i <= prop.numProperties; i++) {
@@ -588,6 +594,7 @@ function gFill(prop) {
 
     if (item && item.enabled) {
       var matchName = item.matchName;
+      navigationShapeTree.push(item.name);
 
       switch (matchName) {
         case 'ADBE Vector Composite Order':
@@ -610,20 +617,297 @@ function gFill(prop) {
           break;
 
         case 'ADBE Vector Grad Colors':
-          // 拿不到
+          res.colors = gradient(item, navigationShapeTree);
           break;
 
         case 'ADBE Vector Fill Opacity':
           res.opacity = item.value;
           break;
       }
+
+      navigationShapeTree.pop();
     }
   }
 
   return res;
 }
 
-function vector (prop, library) {
+function gradient(prop, navigationShapeTree) {
+  var numKeys = prop.numKeys || 1;
+  var ff = app.project.file;
+
+  if (ff) {
+    var demoFile = new File(ff.absoluteURI);
+    demoFile.open('r', 'TEXT', '????');
+    var fileString = demoFile.read(demoFile.length);
+    fileString = fileString.replace('渐变填充', 'Gradient Fill').replace('渐变描边', 'Gradient Stroke');
+    var hasNoGradColorData = false;
+
+    if (fileString.indexOf('ADBE Vector Grad Colors') === -1) {
+      hasNoGradColorData = true;
+    }
+
+    var gradientIndex = 0,
+        navigationIndex = 0;
+    var i = 0,
+        len = navigationShapeTree.length;
+
+    while (i < len) {
+      var encoded = unescape(encodeURIComponent(navigationShapeTree[i] + 'LIST'));
+      var stringIndex = fileString.indexOf(encoded, navigationIndex + 1);
+
+      if (stringIndex === -1) {
+        encoded = unescape(encodeURIComponent(navigationShapeTree[i] + ' LIST'));
+        stringIndex = fileString.indexOf(encoded, navigationIndex + 1);
+      }
+
+      if (stringIndex === -1) {
+        encoded = unescape(encodeURIComponent(navigationShapeTree[i]));
+        stringIndex = fileString.indexOf(encoded, navigationIndex + 1);
+      }
+
+      navigationIndex = stringIndex;
+      i += 1;
+    }
+
+    gradientIndex = fileString.indexOf('ADBE Vector Grad Colors', navigationIndex);
+    var gradFillIndex = fileString.indexOf('ADBE Vector Graphic - G-Fill', navigationIndex);
+    var gradStrokeIndex = fileString.indexOf('ADBE Vector Graphic - G-Stroke', navigationIndex);
+    var limitIndex;
+
+    if (gradStrokeIndex !== -1 && gradFillIndex !== -1) {
+      limitIndex = Math.min(gradFillIndex, gradStrokeIndex);
+    } else {
+      limitIndex = Math.max(gradFillIndex, gradStrokeIndex);
+    }
+
+    if (limitIndex === -1) {
+      limitIndex = Number.MAX_VALUE;
+    }
+
+    var lastIndex;
+    var currentKey = 0,
+        keyframes = [],
+        hasOpacity = false,
+        maxOpacities = 0,
+        maxColors = 0;
+
+    while (currentKey < numKeys) {
+      var gradientData = {};
+      gradientIndex = fileString.indexOf('<prop.map', gradientIndex);
+
+      if (hasNoGradColorData || gradientIndex > limitIndex || gradientIndex === -1 && limitIndex === Number.MAX_VALUE) {
+        gradientData.c = [[0, 1, 1, 1], [1, 0, 0, 0]];
+        maxColors = Math.max(maxColors, 2);
+      } else {
+        var endMatch = '</prop.map>';
+        lastIndex = fileString.indexOf(endMatch, gradientIndex);
+        var xmlString = fileString.substr(gradientIndex, lastIndex + endMatch.length - gradientIndex);
+        xmlString = xmlString.replace(/\n/g, '');
+        var XML_Ob = new XML(xmlString);
+        var stops = XML_Ob['prop.list'][0]['prop.pair'][0]['prop.list'][0]['prop.pair'][0]['prop.list'][0]['prop.pair'][0]['prop.list'][0]['prop.pair'];
+        var colors = XML_Ob['prop.list'][0]['prop.pair'][0]['prop.list'][0]['prop.pair'][1]['prop.list'][0]['prop.pair'][0]['prop.list'][0]['prop.pair'];
+        i = 0;
+        len = stops.length();
+        var opacitiesArr = [],
+            op = void 0,
+            floats = void 0,
+            nextFloats = void 0,
+            midPoint = void 0,
+            midPosition = void 0;
+
+        while (i < len) {
+          floats = stops[i]['prop.list'][0]['prop.pair'][0]['array'][0]["float"];
+          op = [];
+          op.push(roundNumber(Number(floats[0].toString()), 3));
+          op.push(roundNumber(Number(floats[2].toString()), 3));
+
+          if (op[1] !== 1) {
+            hasOpacity = true;
+          }
+
+          opacitiesArr.push(op);
+          midPosition = roundNumber(Number(floats[1].toString()), 3);
+
+          if (i < len - 1
+          /*&& midPosition !== 0.5*/
+          ) {
+            op = [];
+            nextFloats = stops[i + 1]['prop.list'][0]['prop.pair'][0]['array'][0]["float"];
+            midPoint = Number(floats[0].toString()) + (Number(nextFloats[0].toString()) - Number(floats[0].toString())) * midPosition;
+            var midPointValue = Number(floats[2].toString()) + (Number(nextFloats[2].toString()) - Number(floats[2].toString())) * 0.5;
+            op.push(roundNumber(midPoint, 3));
+            op.push(roundNumber(midPointValue, 3));
+            opacitiesArr.push(op);
+          }
+
+          i += 1;
+        }
+
+        i = 0;
+        len = colors.length();
+        var colorsArr = [];
+        var sortedColors = [];
+
+        while (i < len) {
+          sortedColors.push(colors[i]['prop.list'][0]['prop.pair'][0]['array'][0]["float"]);
+          i += 1;
+        }
+
+        sortedColors.sort(sortFunction);
+        i = 0;
+
+        while (i < len) {
+          floats = sortedColors[i];
+          op = [];
+          op.push(roundNumber(Number(floats[0].toString()), 3));
+          op.push(roundNumber(Number(floats[2].toString()), 3));
+          op.push(roundNumber(Number(floats[3].toString()), 3));
+          op.push(roundNumber(Number(floats[4].toString()), 3));
+          colorsArr.push(op);
+          midPosition = roundNumber(Number(floats[1].toString()), 3);
+
+          if (i < len - 1
+          /*&& midPosition !== 0.5*/
+          ) {
+            op = [];
+            nextFloats = sortedColors[i + 1];
+            midPoint = Number(floats[0].toString()) + (Number(nextFloats[0].toString()) - Number(floats[0].toString())) * midPosition;
+            var midPointValueR = Number(floats[2].toString()) + (Number(nextFloats[2].toString()) - Number(floats[2].toString())) * 0.5;
+            var midPointValueG = Number(floats[3].toString()) + (Number(nextFloats[3].toString()) - Number(floats[3].toString())) * 0.5;
+            var midPointValueB = Number(floats[4].toString()) + (Number(nextFloats[4].toString()) - Number(floats[4].toString())) * 0.5;
+            op.push(roundNumber(midPoint, 3));
+            op.push(roundNumber(midPointValueR, 3));
+            op.push(roundNumber(midPointValueG, 3));
+            op.push(roundNumber(midPointValueB, 3));
+            colorsArr.push(op);
+          }
+
+          i += 1;
+        }
+
+        gradientData.c = colorsArr;
+        gradientData.o = opacitiesArr;
+        maxOpacities = Math.max(maxOpacities, opacitiesArr.length);
+        maxColors = Math.max(maxColors, colorsArr.length);
+      }
+
+      gradientIndex = lastIndex;
+      keyframes.push(gradientData);
+      currentKey += 1;
+    }
+
+    i = 0;
+    var arr,
+        arrayLength,
+        count,
+        lastValue,
+        offsetValue,
+        mergedKeys = [],
+        mergedArr,
+        j;
+
+    while (i < numKeys) {
+      mergedArr = [];
+
+      if (keyframes[i].c.length < maxColors) {
+        arr = keyframes[i].c;
+        arrayLength = arr.length;
+        lastValue = arr[arrayLength - 1];
+        offsetValue = lastValue[0];
+        count = 0;
+
+        while (arrayLength + count < maxColors) {
+          offsetValue -= 0.001;
+          arr.splice(arrayLength - 1, 0, [offsetValue, lastValue[1], lastValue[2], lastValue[3]]);
+          count += 1;
+        }
+      }
+
+      for (j = 0; j < maxColors; j += 1) {
+        for (var k = 0; k < 4; k += 1) {
+          mergedArr.push(keyframes[i].c[j][k]);
+        }
+      }
+
+      if (!hasOpacity) {
+        delete keyframes[i].o;
+      } else {
+        if (keyframes[i].o.length < maxOpacities) {
+          arr = keyframes[i].o;
+          arrayLength = arr.length;
+          lastValue = arr[arrayLength - 1];
+          offsetValue = lastValue[0];
+          count = 0;
+
+          while (arrayLength + count < maxOpacities) {
+            offsetValue -= 0.001;
+            arr.splice(arrayLength - 1, 0, [offsetValue, lastValue[1], lastValue[2], lastValue[3]]);
+            count += 1;
+          }
+        }
+
+        for (j = 0; j < maxOpacities; j += 1) {
+          for (var l = 0; l < 2; l += 1) {
+            mergedArr.push(keyframes[i].o[j][l]);
+          }
+        }
+      }
+
+      if (numKeys <= 1) {
+        mergedKeys = mergedArr;
+      } else {
+        mergedKeys.push(mergedArr);
+      }
+
+      i += 1;
+    }
+
+    return {
+      m: mergedKeys,
+      p: maxColors
+    };
+  }
+}
+
+function roundNumber(num, decimals) {
+  num = num || 0;
+
+  if (typeof num === 'number') {
+    return parseFloat(num.toFixed(decimals));
+  } else {
+    return roundArray(num, decimals);
+  }
+}
+
+function roundArray(arr, decimals) {
+  var i,
+      len = arr.length;
+  var retArray = [];
+
+  for (i = 0; i < len; i += 1) {
+    if (typeof arr[i] === 'number') {
+      retArray.push(roundNumber(arr[i], decimals));
+    } else {
+      retArray.push(roundArray(arr[i], decimals));
+    }
+  }
+
+  return retArray;
+}
+
+function sortFunction(a, b) {
+  var a_0 = Number(a[0].toString());
+  var b_0 = Number(b[0].toString());
+
+  if (a_0 === b_0) {
+    return 0;
+  } else {
+    return a_0 < b_0 ? -1 : 1;
+  }
+}
+
+function vector (prop, navigationShapeTree) {
   var res = {}; // 这里是内容层，一般只有1个属性，如矩形1
 
   for (var i = 1; i <= prop.numProperties; i++) {
@@ -631,16 +915,19 @@ function vector (prop, library) {
 
     if (item && item.enabled) {
       var matchName = item.matchName;
+      navigationShapeTree.push(item.name);
 
       switch (matchName) {
         case 'ADBE Vector Group':
-          res.shape = group(item);
+          res.shape = group(item, navigationShapeTree);
           break;
 
         case 'ADBE Vector Filter - Trim':
           res.trim = transformVector(item);
           break;
       }
+
+      navigationShapeTree.pop();
     }
   }
 
@@ -682,7 +969,7 @@ var render = {
 
 var uuid$1 = 0;
 
-function recursion$1(composition, library) {
+function recursion$1(composition, library, navigationShapeTree) {
   var name = composition.name,
       layers = composition.layers,
       width = composition.width,
@@ -763,7 +1050,7 @@ function recursion$1(composition, library) {
       }
     }
 
-    var o = parseLayer(_item2, library, hasSolo);
+    var o = parseLayer(_item2, library, navigationShapeTree, hasSolo);
 
     if (o) {
       // 父级打标uuid的同时，之前记录的hash也记录下来
@@ -808,7 +1095,7 @@ function recursion$1(composition, library) {
   };
 }
 
-function parseLayer(layer, library, hasSolo) {
+function parseLayer(layer, library, navigationShapeTree, hasSolo) {
   var res = {
     name: layer.name,
     index: layer.index,
@@ -823,7 +1110,8 @@ function parseLayer(layer, library, hasSolo) {
     blendingMode: layer.blendingMode,
     isMask: layer.isTrackMatte,
     isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED
-  }; // 标明图层是否可见，也许不可见但作为父级链接也要分析
+  };
+  navigationShapeTree.push(res.name); // 标明图层是否可见，也许不可见但作为父级链接也要分析
 
   if (hasSolo) {
     res.enabled = layer.solo || layer.isTrackMatte;
@@ -839,6 +1127,7 @@ function parseLayer(layer, library, hasSolo) {
 
     if (prop && prop.enabled) {
       var matchName = prop.matchName;
+      navigationShapeTree.push(prop.name);
 
       switch (matchName) {
         case 'ADBE Transform Group':
@@ -848,7 +1137,7 @@ function parseLayer(layer, library, hasSolo) {
         case 'ADBE Root Vectors Group':
           // 形状图层中的内容子属性
           if (res.enabled) {
-            geom = vector(prop);
+            geom = vector(prop, navigationShapeTree);
           }
 
           break;
@@ -867,6 +1156,8 @@ function parseLayer(layer, library, hasSolo) {
 
           break;
       }
+
+      navigationShapeTree.pop();
     }
   } // 可能是作为父级链接，如果不可见则不需要内容
 
@@ -950,6 +1241,7 @@ function parseLayer(layer, library, hasSolo) {
     }
   }
 
+  navigationShapeTree.pop();
   return res;
 }
 
@@ -1021,8 +1313,9 @@ function parse$1 (composition) {
   workAreaStart *= 1000;
   workAreaDuration *= 1000;
   $.ae2karas.log('workArea: ' + workAreaStart + ',' + workAreaDuration);
-  var library = [];
-  var result = recursion$1(composition, library);
+  var library = [],
+      navigationShapeTree = [];
+  var result = recursion$1(composition, library, navigationShapeTree);
   $.ae2karas.log(result);
   $.ae2karas.log(library);
   return {
@@ -2961,7 +3254,27 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
       var _type = gFill.type,
           _start = gFill.start,
-          end = gFill.end;
+          end = gFill.end,
+          _gFill$colors = gFill.colors,
+          m = _gFill$colors.m,
+          p = _gFill$colors.p;
+      var steps = '';
+
+      for (var _i7 = 0; _i7 < p; _i7++) {
+        if (_i7) {
+          steps += ', ';
+        }
+
+        steps += 'rgb(' + Math.floor(m[_i7 * 4 + 1] * 255);
+        steps += ',' + Math.floor(m[_i7 * 4 + 2] * 255);
+        steps += ',' + Math.floor(m[_i7 * 4 + 3] * 255);
+        steps += ') ';
+        steps += m[_i7 * 4] * 100 + '%';
+      }
+
+      if (!steps) {
+        steps = '#F00, #00F';
+      }
 
       if (_type === 1) {
         var x0 = $geom.props.style.translateX || 0,
@@ -2970,7 +3283,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
             y1 = _start[1] + cy;
         var x2 = end[0] + cx,
             y2 = end[1] + cy;
-        f = "linearGradient(".concat((x1 - x0) / _w, " ").concat((y1 - y0) / _h, " ").concat((x2 - x0) / _w, " ").concat((y2 - y0) / _h, ", #FFF, #000)");
+        f = "linearGradient(".concat((x1 - x0) / _w, " ").concat((y1 - y0) / _h, " ").concat((x2 - x0) / _w, " ").concat((y2 - y0) / _h, ", ").concat(steps, ")");
       } else if (_type === 2) {
         var _x = $geom.props.style.translateX || 0,
             _y = $geom.props.style.translateY || 0;
@@ -2981,7 +3294,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         var _x3 = end[0] + cx,
             _y3 = end[1] + cy;
 
-        f = "radialGradient(".concat((_x2 - _x) / _w, " ").concat((_y2 - _y) / _h, " ").concat((_x3 - _x) / _w, " ").concat((_y3 - _y) / _h, ", #FFF, #000)");
+        f = "radialGradient(".concat((_x2 - _x) / _w, " ").concat((_y2 - _y) / _h, " ").concat((_x3 - _x) / _w, " ").concat((_y3 - _y) / _h, ", ").concat(steps, ")");
       }
 
       $geom.props.style.fill = [f];
@@ -3043,8 +3356,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first14 = _t14.value[0];
 
-    for (var _i7 = 0; _i7 < len; _i7++) {
-      children[_i7].props.style.fill = _first14.fill;
+    for (var _i8 = 0; _i8 < len; _i8++) {
+      children[_i8].props.style.fill = _first14.fill;
     }
 
     if (_t14.value.length > 1) {
@@ -3052,8 +3365,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i8 = 0; _i8 < len; _i8++) {
-        children[_i8].animate.push(_t14);
+      for (var _i9 = 0; _i9 < len; _i9++) {
+        children[_i9].animate.push(_t14);
       }
     }
   }
@@ -3063,8 +3376,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first15 = _t15.value[0];
 
-    for (var _i9 = 0; _i9 < len; _i9++) {
-      children[_i9].props.style.stroke = _first15.stroke;
+    for (var _i10 = 0; _i10 < len; _i10++) {
+      children[_i10].props.style.stroke = _first15.stroke;
     }
 
     if (_t15.value.length > 1) {
@@ -3072,8 +3385,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i10 = 0; _i10 < len; _i10++) {
-        children[_i10].animate.push(_t15);
+      for (var _i11 = 0; _i11 < len; _i11++) {
+        children[_i11].animate.push(_t15);
       }
     }
   }
@@ -3083,8 +3396,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first16 = _t16.value[0];
 
-    for (var _i11 = 0; _i11 < len; _i11++) {
-      children[_i11].props.style.strokeWidth = _first16.strokeWidth;
+    for (var _i12 = 0; _i12 < len; _i12++) {
+      children[_i12].props.style.strokeWidth = _first16.strokeWidth;
     }
 
     if (_t16.value.length > 1) {
@@ -3092,8 +3405,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i12 = 0; _i12 < len; _i12++) {
-        children[_i12].animate.push(_t16);
+      for (var _i13 = 0; _i13 < len; _i13++) {
+        children[_i13].animate.push(_t16);
       }
     }
   }
@@ -3103,8 +3416,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first17 = _t17.value[0];
 
-    for (var _i13 = 0; _i13 < len; _i13++) {
-      children[_i13].props.style.strokeLineJoin = _first17.strokeLineJoin;
+    for (var _i14 = 0; _i14 < len; _i14++) {
+      children[_i14].props.style.strokeLineJoin = _first17.strokeLineJoin;
     }
 
     if (_t17.value.length > 1) {
@@ -3112,8 +3425,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i14 = 0; _i14 < len; _i14++) {
-        children[_i14].animate.push(_t17);
+      for (var _i15 = 0; _i15 < len; _i15++) {
+        children[_i15].animate.push(_t17);
       }
     }
   }
@@ -3123,8 +3436,8 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
 
     var _first18 = _t18.value[0];
 
-    for (var _i15 = 0; _i15 < len; _i15++) {
-      children[_i15].props.style.strokeMiterlimit = _first18.strokeMiterlimit;
+    for (var _i16 = 0; _i16 < len; _i16++) {
+      children[_i16].props.style.strokeMiterlimit = _first18.strokeMiterlimit;
     }
 
     if (_t18.value.length > 1) {
@@ -3132,21 +3445,21 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         offset: 0
       };
 
-      for (var _i16 = 0; _i16 < len; _i16++) {
-        children[_i16].animate.push(_t18);
+      for (var _i17 = 0; _i17 < len; _i17++) {
+        children[_i17].animate.push(_t18);
       }
     }
   }
 
   if (stroke && stroke.dashes) {
-    for (var _i17 = 0; _i17 < len; _i17++) {
-      children[_i17].props.style.strokeDasharray = [stroke.dashes];
+    for (var _i18 = 0; _i18 < len; _i18++) {
+      children[_i18].props.style.strokeDasharray = [stroke.dashes];
     }
   }
 
   if (!stroke) {
-    for (var _i18 = 0; _i18 < len; _i18++) {
-      children[_i18].props.style.strokeWidth = [0];
+    for (var _i19 = 0; _i19 < len; _i19++) {
+      children[_i19].props.style.strokeWidth = [0];
     }
   }
 
