@@ -9292,7 +9292,7 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
             var blob = new Blob([str], {
               type: 'application/json'
             });
-            var file = new File([blob], name + '.json', {
+            var file = new File([blob], name + Date.now() + '.json', {
               type: 'application/json'
             });
             var formData = new FormData();
@@ -9308,6 +9308,8 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
 
               if (res.success && res.result) {
                 store.global.setAlert('已上传至：\n' + res.result);
+              } else {
+                store.global.setAlert('上传失败！');
               }
             })["catch"](function (e) {
               store.global.setLoading(false);
@@ -9444,7 +9446,7 @@ var Alert = (Alert_dec = inject('global'), Alert_dec(Alert_class = mobxreact_esm
   }
 });
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"0.2.6"};
+const package_namespaceObject = {"i8":"0.2.7"};
 ;// CONCATENATED MODULE: ./src/index.html
 /* harmony default export */ const src = (__webpack_require__.p + "index.html");
 ;// CONCATENATED MODULE: ./src/index.js

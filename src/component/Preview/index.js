@@ -471,7 +471,7 @@ class Preview extends React.Component {
                 let blob = new Blob([str], {
                   type: 'application/json',
                 });
-                let file = new File([blob], name + '.json', {
+                let file = new File([blob], name + Date.now() + '.json', {
                   type: 'application/json',
                 });
                 let formData = new FormData();
@@ -484,6 +484,9 @@ class Preview extends React.Component {
                   store.global.setLoading(false);
                   if(res.success && res.result) {
                     store.global.setAlert('已上传至：\n' + res.result);
+                  }
+                  else {
+                    store.global.setAlert('上传失败！');
                   }
                 }).catch(function(e) {
                   store.global.setLoading(false);
