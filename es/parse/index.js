@@ -227,7 +227,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
       }
       // 合成，递归分析
       else if(source instanceof CompItem) {
-        asset = recursion(source, library);
+        asset = recursion(source, library, navigationShapeTree);
         asset.type = 'div';
       }
       if(asset) {
