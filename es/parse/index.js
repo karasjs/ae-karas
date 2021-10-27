@@ -63,10 +63,16 @@ function recursion(composition, library, navigationShapeTree) {
             if(!item2.solo) {
               continue outer;
             }
+            else {
+              break;
+            }
           }
           else {
             if(!item2.enabled) {
               continue outer;
+            }
+            else {
+              break;
             }
           }
         }

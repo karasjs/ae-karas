@@ -1040,10 +1040,14 @@ function recursion$1(composition, library, navigationShapeTree) {
           if (hasSolo) {
             if (!item2.solo) {
               continue outer;
+            } else {
+              break;
             }
           } else {
             if (!item2.enabled) {
               continue outer;
+            } else {
+              break;
             }
           }
         }

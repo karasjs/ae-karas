@@ -220,6 +220,9 @@ function parseAnimate(data, params) {
         }
         item.easing = v2;
       }
+      else {
+        delete item.easing;
+      }
     }
     if(item.hasOwnProperty('points')) {
       parsePoint(item.points, params);
