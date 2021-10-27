@@ -226,13 +226,13 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   if(Array.isArray(scale) && scale.length) {
     let t = transformScale(scale, begin2, duration);
     let first = t.value[0];
-    if(first.scaleX !== 1) {
+    if(first.scaleX !== 1 && first.scaleX !== undefined && first.scaleX !== null) {
       init.style.scaleX = first.scaleX;
     }
-    if(first.scaleY !== 1) {
+    if(first.scaleY !== 1 && first.scaleY !== undefined && first.scaleY !== null) {
       init.style.scaleY = first.scaleY;
     }
-    if(first.scaleZ !== 1) {
+    if(first.scaleZ !== 1 && first.scaleZ !== undefined && first.scaleZ !== null) {
       init.style.scaleZ = first.scaleZ;
     }
     if(t.value.length > 1) {
@@ -439,12 +439,18 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     props: {
       style: {
         position: 'absolute',
-        width,
-        height,
+        // width,
+        // height,
         // overflow: 'hidden',
       },
     },
   };
+  if(width) {
+    res.props.style.width = width;
+  }
+  if(height) {
+    res.props.style.height = height;
+  }
   if(type === 'div' && !geom && !text) {
     res.props.style.overflow = 'hidden';
   }
@@ -454,11 +460,27 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
   }
   else if(text) {
     let content = data.content;
-    res.props.style.color = [
-      parseInt(content.fillColor[0] * 255),
-      parseInt(content.fillColor[1] * 255),
-      parseInt(content.fillColor[2] * 255),
-    ];
+    if(content.fillColor) {
+      res.props.style.color = [
+        parseInt(content.fillColor[0] * 255),
+        parseInt(content.fillColor[1] * 255),
+        parseInt(content.fillColor[2] * 255),
+      ];
+    }
+    else {
+      res.props.style.color = 'transparent';
+    }
+    if(content.stroke && content.strokeWidth) {
+      res.props.style.textStrokeColor = [
+        parseInt(content.stroke[0] * 255),
+        parseInt(content.stroke[1] * 255),
+        parseInt(content.stroke[2] * 255),
+      ];
+      res.props.style.textStrokeWidth = content.strokeWidth;
+      if(content.strokeOver) {
+        res.props.style.textStrokeOver = 'fill';
+      }
+    }
     res.props.style.fontFamily = content.fontFamily;
     res.props.style.fontSize = content.fontSize;
     // res.props.style.fontStyle = content.fontStyle;
@@ -559,6 +581,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
               if(style.hasOwnProperty(i) && {
                 'scaleX': true,
                 'scaleY': true,
+                'scaleZ': true,
               }.hasOwnProperty(i)) {
                 m.props.style[i] = style[i];
               }
@@ -775,9 +798,16 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         if(i) {
           steps += ', ';
         }
-        steps += 'rgb(' + Math.floor(m[i * 4 + 1] * 255);
+        steps += 'rgba(' + Math.floor(m[i * 4 + 1] * 255);
         steps += ',' + Math.floor(m[i * 4 + 2] * 255);
         steps += ',' + Math.floor(m[i * 4 + 3] * 255);
+        // 可能有透明度
+        if(m.length >= p * 4 + (i + 1) * 2) {
+          steps += ',' + m[p * 4 + (i + 1) * 2 - 1];
+        }
+        else {
+          steps += ',1';
+        }
         steps += ') ';
         steps += m[i * 4] * 100 + '%';
       }

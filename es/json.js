@@ -18,7 +18,6 @@ export default function(ae2karas) {
       let isFunction = isType('Function');
       let isNumber = isType('Number');
       let isBoolean = isType('Boolean');
-      let isDate = isType('Date');
 
       function f(n) {
         return n < 10 ? '0' + n : n;

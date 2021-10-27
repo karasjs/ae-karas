@@ -1109,7 +1109,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
     // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
     isMask: layer.isTrackMatte,
-    isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED
+    isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED || layer.trackMatteType === TrackMatteType.LUMA_INVERTED
   };
   navigationShapeTree.push(res.name); // 标明图层是否可见，也许不可见但作为父级链接也要分析
 
@@ -1282,7 +1282,6 @@ function text(prop) {
         case 'ADBE Text Document':
           var value = item.value;
           res.content = {
-            fillColor: value.fillColor,
             font: value.font,
             fontFamily: value.fontFamily,
             fontStyle: value.fontStyle,
@@ -1290,7 +1289,18 @@ function text(prop) {
             leading: value.leading,
             baselineLocs: value.baselineLocs,
             text: value.text
-          }; // 固定已知尺寸时有
+          };
+
+          if (value.applyFill) {
+            res.content.fillColor = value.fillColor;
+            res.content.strokeOver = value.strokeOverFill;
+          }
+
+          if (value.applyStroke) {
+            res.content.stroke = value.strokeColor;
+            res.content.strokeWidth = value.strokeWidth;
+          } // 固定已知尺寸时有
+
 
           if (value.boxText) {
             res.content.size = value.boxTextSize;
@@ -2609,15 +2619,15 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
 
     var _first8 = _t8.value[0];
 
-    if (_first8.scaleX !== 1) {
+    if (_first8.scaleX !== 1 && _first8.scaleX !== undefined && _first8.scaleX !== null) {
       init.style.scaleX = _first8.scaleX;
     }
 
-    if (_first8.scaleY !== 1) {
+    if (_first8.scaleY !== 1 && _first8.scaleY !== undefined && _first8.scaleY !== null) {
       init.style.scaleY = _first8.scaleY;
     }
 
-    if (_first8.scaleZ !== 1) {
+    if (_first8.scaleZ !== 1 && _first8.scaleZ !== undefined && _first8.scaleZ !== null) {
       init.style.scaleZ = _first8.scaleZ;
     }
 
@@ -2867,13 +2877,21 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     tagName: type,
     props: {
       style: {
-        position: 'absolute',
-        width: width,
-        height: height // overflow: 'hidden',
+        position: 'absolute' // width,
+        // height,
+        // overflow: 'hidden',
 
       }
     }
   };
+
+  if (width) {
+    res.props.style.width = width;
+  }
+
+  if (height) {
+    res.props.style.height = height;
+  }
 
   if (type === 'div' && !geom && !text) {
     res.props.style.overflow = 'hidden';
@@ -2884,7 +2902,22 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     parseGeom(res, data, start, duration, displayStartTime, offset);
   } else if (text) {
     var content = data.content;
-    res.props.style.color = [parseInt(content.fillColor[0] * 255), parseInt(content.fillColor[1] * 255), parseInt(content.fillColor[2] * 255)];
+
+    if (content.fillColor) {
+      res.props.style.color = [parseInt(content.fillColor[0] * 255), parseInt(content.fillColor[1] * 255), parseInt(content.fillColor[2] * 255)];
+    } else {
+      res.props.style.color = 'transparent';
+    }
+
+    if (content.stroke && content.strokeWidth) {
+      res.props.style.textStrokeColor = [parseInt(content.stroke[0] * 255), parseInt(content.stroke[1] * 255), parseInt(content.stroke[2] * 255)];
+      res.props.style.textStrokeWidth = content.strokeWidth;
+
+      if (content.strokeOver) {
+        res.props.style.textStrokeOver = 'fill';
+      }
+    }
+
     res.props.style.fontFamily = content.fontFamily;
     res.props.style.fontSize = content.fontSize; // res.props.style.fontStyle = content.fontStyle;
     // res.props.style.lineHeight = (content.fontSize + content.leading) / content.fontSize;
@@ -2999,7 +3032,8 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
             for (var _i3 in style) {
               if (style.hasOwnProperty(_i3) && {
                 'scaleX': true,
-                'scaleY': true
+                'scaleY': true,
+                'scaleZ': true
               }.hasOwnProperty(_i3)) {
                 m.props.style[_i3] = style[_i3];
               }
@@ -3265,9 +3299,16 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           steps += ', ';
         }
 
-        steps += 'rgb(' + Math.floor(m[_i7 * 4 + 1] * 255);
+        steps += 'rgba(' + Math.floor(m[_i7 * 4 + 1] * 255);
         steps += ',' + Math.floor(m[_i7 * 4 + 2] * 255);
-        steps += ',' + Math.floor(m[_i7 * 4 + 3] * 255);
+        steps += ',' + Math.floor(m[_i7 * 4 + 3] * 255); // 可能有透明度
+
+        if (m.length >= p * 4 + (_i7 + 1) * 2) {
+          steps += ',' + m[p * 4 + (_i7 + 1) * 2 - 1];
+        } else {
+          steps += ',1';
+        }
+
         steps += ') ';
         steps += m[_i7 * 4] * 100 + '%';
       }

@@ -119,7 +119,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
     isMask: layer.isTrackMatte,
-    isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED,
+    isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED || layer.trackMatteType === TrackMatteType.LUMA_INVERTED,
   };
   navigationShapeTree.push(res.name);
   // 标明图层是否可见，也许不可见但作为父级链接也要分析
@@ -270,7 +270,6 @@ function text(prop) {
         case 'ADBE Text Document':
           let value = item.value;
           res.content = {
-            fillColor: value.fillColor,
             font: value.font,
             fontFamily: value.fontFamily,
             fontStyle: value.fontStyle,
@@ -279,6 +278,14 @@ function text(prop) {
             baselineLocs: value.baselineLocs,
             text: value.text,
           };
+          if(value.applyFill) {
+            res.content.fillColor = value.fillColor;
+            res.content.strokeOver = value.strokeOverFill;
+          }
+          if(value.applyStroke) {
+            res.content.stroke = value.strokeColor;
+            res.content.strokeWidth = value.strokeWidth;
+          }
           // 固定已知尺寸时有
           if(value.boxText) {
             res.content.size = value.boxTextSize;
