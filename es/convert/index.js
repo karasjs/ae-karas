@@ -51,6 +51,10 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     asChild,
   };
   parseAnimate(res, data, start, duration, displayStartTime, offset, true, false);
+  // 附链接不跟随透明度，所以删掉opacity的静态属性
+  if(res.props.style.hasOwnProperty('opacity')) {
+    delete res.props.style.opacity;
+  }
   return res;
 }
 

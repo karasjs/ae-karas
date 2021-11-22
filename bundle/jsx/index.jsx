@@ -1187,48 +1187,51 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
       var asset; // 图片图形等独立资源，将其解析为被link的放入library即可
 
       if (source instanceof FootageItem) {
-        var src = source.file && source.file.fsName;
-        var name = source.name;
+        var src = source.file && source.file.fsName; // 空图层偶现有source但无source.file，视作空图层
 
-        if (/\.psd$/.test(name)) {
-          var path = src.replace(/[^\/]*\.psd$/, '');
-          var newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
-          render.psd2png(source, src, path, newName);
-          src = path + newName;
-        }
+        if (src) {
+          var name = source.name;
 
-        if (!/\.jpg$/.test(src) && !/\.jpeg$/.test(src) && !/\.png/.test(src) && !/\.webp/.test(src) && !/\.gif/.test(src)) {
-          return;
-        }
-
-        var hasExist;
-
-        for (var _i4 = 0; _i4 < library.length; _i4++) {
-          var item = library[_i4];
-
-          if (item.src === src && item.type === 'img') {
-            asset = item;
-            hasExist = true;
-            break;
+          if (/\.psd$/.test(name)) {
+            var path = src.replace(/[^\/]*\.psd$/, '');
+            var newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
+            render.psd2png(source, src, path, newName);
+            src = path + newName;
           }
-        }
 
-        if (!hasExist) {
-          if (src) {
-            asset = {
-              type: 'img',
-              name: name,
-              width: source.width,
-              height: source.height,
-              src: src
-            };
-          } // 颜色类型没有src
-          else {
-            asset = {
-              type: 'div',
-              width: source.width,
-              height: source.height
-            };
+          if (!/\.jpg$/.test(src) && !/\.jpeg$/.test(src) && !/\.png/.test(src) && !/\.webp/.test(src) && !/\.gif/.test(src)) {
+            return;
+          }
+
+          var hasExist;
+
+          for (var _i4 = 0; _i4 < library.length; _i4++) {
+            var item = library[_i4];
+
+            if (item.src === src && item.type === 'img') {
+              asset = item;
+              hasExist = true;
+              break;
+            }
+          }
+
+          if (!hasExist) {
+            if (src) {
+              asset = {
+                type: 'img',
+                name: name,
+                width: source.width,
+                height: source.height,
+                src: src
+              };
+            } // 颜色类型没有src
+            else {
+              asset = {
+                type: 'div',
+                width: source.width,
+                height: source.height
+              };
+            }
           }
         }
       } // 合成，递归分析
@@ -2396,7 +2399,12 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     asParent: asParent,
     asChild: asChild
   };
-  parseAnimate(res, data, start, duration, displayStartTime, offset, true, false);
+  parseAnimate(res, data, start, duration, displayStartTime, offset, true, false); // 附链接不跟随透明度，所以删掉opacity的静态属性
+
+  if (res.props.style.hasOwnProperty('opacity')) {
+    delete res.props.style.opacity;
+  }
+
   return res;
 }
 

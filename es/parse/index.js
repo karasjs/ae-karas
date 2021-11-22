@@ -188,45 +188,48 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
       // 图片图形等独立资源，将其解析为被link的放入library即可
       if(source instanceof FootageItem) {
         let src = source.file && source.file.fsName;
-        let name = source.name;
-        if(/\.psd$/.test(name)) {
-          let path = src.replace(/[^\/]*\.psd$/, '');
-          let newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
-          render.psd2png(source, src, path, newName);
-          src = path + newName;
-        }
-        if(!/\.jpg$/.test(src)
-          && !/\.jpeg$/.test(src)
-          && !/\.png/.test(src)
-          && !/\.webp/.test(src)
-          && !/\.gif/.test(src)) {
-          return;
-        }
-        let hasExist;
-        for(let i = 0; i < library.length; i++) {
-          let item = library[i];
-          if(item.src === src && item.type === 'img') {
-            asset = item;
-            hasExist = true;
-            break;
+        // 空图层偶现有source但无source.file，视作空图层
+        if(src) {
+          let name = source.name;
+          if(/\.psd$/.test(name)) {
+            let path = src.replace(/[^\/]*\.psd$/, '');
+            let newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
+            render.psd2png(source, src, path, newName);
+            src = path + newName;
           }
-        }
-        if(!hasExist) {
-          if(src) {
-            asset = {
-              type: 'img',
-              name,
-              width: source.width,
-              height: source.height,
-              src,
-            };
+          if(!/\.jpg$/.test(src)
+            && !/\.jpeg$/.test(src)
+            && !/\.png/.test(src)
+            && !/\.webp/.test(src)
+            && !/\.gif/.test(src)) {
+            return;
           }
-          // 颜色类型没有src
-          else {
-            asset = {
-              type: 'div',
-              width: source.width,
-              height: source.height,
+          let hasExist;
+          for(let i = 0; i < library.length; i++) {
+            let item = library[i];
+            if(item.src === src && item.type === 'img') {
+              asset = item;
+              hasExist = true;
+              break;
+            }
+          }
+          if(!hasExist) {
+            if(src) {
+              asset = {
+                type: 'img',
+                name,
+                width: source.width,
+                height: source.height,
+                src,
+              };
+            }
+            // 颜色类型没有src
+            else {
+              asset = {
+                type: 'div',
+                width: source.width,
+                height: source.height,
+              }
             }
           }
         }
