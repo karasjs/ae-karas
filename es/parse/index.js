@@ -270,7 +270,9 @@ function mask(prop) {
 }
 
 function text(prop) {
-  let res = {};
+  let res = {
+    name: prop.name,
+  };
   for(let i = 1; i <= prop.numProperties; i++) {
     let item = prop.property(i);
     if(item && item.enabled) {

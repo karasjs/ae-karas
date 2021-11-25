@@ -150,19 +150,22 @@ export default {
     let imgHash = {};
     count = total = maxW = maxH = 0;
     let library = data.library;
+    function wrap() {
+      let imgs = [];
+      for(let i in imgHash) {
+        if(imgHash.hasOwnProperty(i)) {
+          imgs.push(imgHash[i]);
+        }
+      }
+      if(imgs.length) {
+        data.imgs = imgs;
+      }
+      cb();
+    }
     if(Array.isArray(library)) {
       for(let i = 0, len = library.length; i < len; i++) {
-        recursionUpload(library[i], imgHash, cb);
+        recursionUpload(library[i], imgHash, wrap);
       }
-    }
-    let imgs = [];
-    for(let i in imgHash) {
-      if(imgHash.hasOwnProperty(i)) {
-        imgs.push(imgHash[i]);
-      }
-    }
-    if(imgs.length) {
-      data.imgs = imgs;
     }
   },
   reset() {

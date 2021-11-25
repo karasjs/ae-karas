@@ -1277,7 +1277,9 @@ function mask(prop) {
 }
 
 function text(prop) {
-  var res = {};
+  var res = {
+    name: prop.name
+  };
 
   for (var i = 1; i <= prop.numProperties; i++) {
     var item = prop.property(i);
@@ -2846,11 +2848,13 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
       var div = $.ae2karas.JSON.stringify(parentLink[asChild]);
       div = $.ae2karas.JSON.parse(div);
       var target = div;
-      target.asParent = target.asChild = undefined;
+      delete target.asParent;
+      delete target.asChild;
 
       while (target.children.length) {
         target = target.children[0];
-        target.asParent = target.asChild = undefined;
+        delete target.asParent;
+        delete target.asChild;
       }
 
       target.children.push(res);
@@ -3014,7 +3018,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
 
         if (temp.init && temp.init.style && temp.init.style.perspective) {
           res.props.style.perspective = temp.init.style.perspective || undefined;
-          temp.init.style.perspective = undefined;
+          delete temp.init.style.perspective;
         }
 
         if (temp.children && temp.children.length === 1) {
@@ -3022,7 +3026,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
 
           if (t.init && t.init.style && t.init.style.perspective) {
             temp.props.style.perspective = t.init.style.perspective || undefined;
-            t.init.style.perspective = undefined;
+            delete t.init.style.perspective;
           }
         } // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻
 
@@ -3050,6 +3054,12 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
                 m.props.style[_i3] = style[_i3];
               }
             }
+          }
+
+          var a = target.children[0].animate;
+
+          if (a && a.length) {
+            m.animate = a;
           }
         }
       }
@@ -3573,8 +3583,8 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
   } // 要显示mask，可能会被target同化
 
 
-  res.props.style.visibility = undefined;
-  res.props.style.pointerEvents = undefined; // mask的2个动画，points和opacity
+  delete res.props.style.visibility;
+  delete res.props.style.pointerEvents; // mask的2个动画，points和opacity
 
   var o = {};
   var begin2 = start - offset - displayStartTime;

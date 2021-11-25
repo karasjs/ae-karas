@@ -411,10 +411,12 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
       let div = $.ae2karas.JSON.stringify(parentLink[asChild]);
       div = $.ae2karas.JSON.parse(div);
       let target = div;
-      target.asParent = target.asChild = undefined;
+      delete target.asParent;
+      delete target.asChild;
       while(target.children.length) {
         target = target.children[0];
-        target.asParent = target.asChild = undefined;
+        delete target.asParent;
+        delete target.asChild;
       }
       target.children.push(res);
       res = div;
@@ -560,13 +562,13 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
         // ppt应该放在父层，如果有父级链接，则放在其上
         if(temp.init && temp.init.style && temp.init.style.perspective) {
           res.props.style.perspective = temp.init.style.perspective || undefined;
-          temp.init.style.perspective = undefined;
+          delete temp.init.style.perspective;
         }
         if(temp.children && temp.children.length === 1) {
           let t = temp.children[0];
           if(t.init && t.init.style && t.init.style.perspective) {
             temp.props.style.perspective = t.init.style.perspective || undefined;
-            t.init.style.perspective = undefined;
+            delete t.init.style.perspective;
           }
         }
         // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻
@@ -590,6 +592,10 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
                 m.props.style[i] = style[i];
               }
             }
+          }
+          let a = target.children[0].animate;
+          if(a && a.length) {
+            m.animate = a;
           }
         }
       }
@@ -1007,8 +1013,8 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
     }
   }
   // 要显示mask，可能会被target同化
-  res.props.style.visibility = undefined;
-  res.props.style.pointerEvents = undefined;
+  delete res.props.style.visibility;
+  delete res.props.style.pointerEvents;
   // mask的2个动画，points和opacity
   let o = {};
   let begin2 = start - offset - displayStartTime;
