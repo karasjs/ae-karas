@@ -2375,16 +2375,8 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
   var name = data.name,
       width = data.width,
       height = data.height,
-      inPoint = data.inPoint,
-      outPoint = data.outPoint,
       asParent = data.asParent,
       asChild = data.asChild;
-  var begin = start + offset + displayStartTime; // 图层在工作区外特殊处理，取最近的一帧内容
-
-  if (inPoint >= begin + duration || outPoint <= begin) {
-    return null;
-  }
-
   var res = {
     name: name,
     tagName: 'div',

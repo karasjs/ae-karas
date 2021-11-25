@@ -28,12 +28,7 @@ import path from './path';
  * @param offset
  */
 function preParse(data, library, start, duration, displayStartTime, offset) {
-  let { name, width, height, inPoint, outPoint, asParent, asChild } = data;
-  let begin = start + offset + displayStartTime;
-  // 图层在工作区外特殊处理，取最近的一帧内容
-  if(inPoint >= begin + duration || outPoint <= begin) {
-    return null;
-  }
+  let { name, width, height, asParent, asChild } = data;
   let res = {
     name,
     tagName: 'div',
