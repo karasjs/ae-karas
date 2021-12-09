@@ -124,9 +124,18 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
     inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
-    isMask: layer.isTrackMatte,
-    isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED || layer.trackMatteType === TrackMatteType.LUMA_INVERTED,
+    // isMask: layer.isTrackMatte,
+    // isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED || layer.trackMatteType === TrackMatteType.LUMA_INVERTED,
   };
+  let matchName = layer.matchName;
+  if(matchName === 'ADBE Camera Layer') {
+    res.isCamera = true;
+  }
+  else if(layer.isTrackMatte) {
+    res.isMask = true;
+    res.isClip = layer.trackMatteType === TrackMatteType.ALPHA_INVERTED
+      || layer.trackMatteType === TrackMatteType.LUMA_INVERTED;
+  }
   navigationShapeTree.push(res.name);
   // 标明图层是否可见，也许不可见但作为父级链接也要分析
   if(hasSolo) {
@@ -160,6 +169,31 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
         case 'ADBE Text Properties':
           if(res.enabled) {
             txt = text(prop);
+          }
+          break;
+        case 'ADBE Camera Options Group':
+          if(res.isCamera) {
+            for(let i = 1; prop && i <= prop.numProperties; i++) {
+              let item = prop.property(i);
+              if(item && item.enabled) {
+                let matchName = item.matchName;
+                if(matchName === 'ADBE Camera Zoom') {
+                  res.cameraZoom = item.value;
+                }
+                else if(matchName === 'ADBE Camera Depth of Field') {
+                  res.cameraDepthOfField = item.value;
+                }
+                else if(matchName === 'ADBE Camera Focus Distance') {
+                  res.cameraFocusDistance = item.value;
+                }
+                else if(matchName === 'ADBE Camera Aperture') {
+                  res.cameraAperture = item.value;
+                }
+                else if(matchName === 'ADBE Camera Blur Level') {
+                  res.cameraBlurLevel = item.value;
+                }
+              }
+            }
           }
           break;
       }

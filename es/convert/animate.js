@@ -158,24 +158,39 @@ export function transformOrigin(list, begin, duration) {
   };
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
+    let r = list[0][0] + ' ' + list[0][1];
+    if(list[0].length > 2) {
+      r += ' ' + list[0][2];
+    }
     res.value.push({
-      transformOrigin: list[0][0] + ' ' + list[0][1],
+      transformOrigin: r,
     });
   }
   else {
     list = getAreaList(list, begin, duration, function(prev, next, percent) {
-      return [
+      let r = [
         prev[0] + (next[0] - prev[0]) * percent,
         prev[1] + (next[1] - prev[1]) * percent,
       ];
+      if(prev.length > 2) {
+        r.push(prev[2] + (next[2] - prev[2]) * percent);
+      }
+      return r;
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      res.value.push({
+      let r = item.value[0] + ' ' + item.value[1];
+      if(item.value.length > 2) {
+        r += ' ' + item.value[2];
+      }
+      let o = {
         offset: (item.time - begin) / duration,
-        transformOrigin: item.value[0] + ' ' + item.value[1],
-        easing: item.easing,
-      });
+        transformOrigin: r,
+      };
+      if(item.easing) {
+        o.easing = item.easing;
+      }
+      res.value.push(o);
     }
   }
   return res;
@@ -202,11 +217,14 @@ export function transformOpacity(list, begin, duration) {
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      res.value.push({
+      let o = {
         offset: (item.time - begin) / duration,
         opacity: item.value * 0.01,
-        easing: item.easing,
-      });
+      };
+      if(item.easing) {
+        o.easing = item.easing;
+      }
+      res.value.push(o);
     }
   }
   return res;
@@ -223,10 +241,14 @@ export function transformPosition(list, begin, duration) {
   };
   // 只有1帧没有动画，无需计算补间
   if(list.length === 1) {
-    res.value.push({
+    let r = {
       translateX: list[0][0],
       translateY: list[0][1],
-    });
+    };
+    if(list[0].length > 2) {
+      r.translateZ = -list[0][2];
+    }
+    res.value.push(r);
   }
   else {
     list = getAreaList(list, begin, duration, function(prev, next, percent, isStart) {
@@ -245,24 +267,32 @@ export function transformPosition(list, begin, duration) {
           return sliceBezier(prev, percent);
         }
       }
-      return [
+      let r = [
         prev[0] + (next[0] - prev[0]) * percent,
         prev[1] + (next[1] - prev[1]) * percent,
-        prev[2] + (next[2] - prev[2]) * percent,
       ];
+      if(prev.length > 2) {
+        r.push(prev[2] + (next[2] - prev[2]) * percent);
+      }
+      return r;
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
       let o = {
         offset: (item.time - begin) / duration,
-        easing: item.easing,
       };
+      if(item.easing) {
+        o.easing = item.easing;
+      }
       if(item.value.length === 8) {
         o.translatePath = item.value;
       }
       else {
         o.translateX = item.value[0];
         o.translateY = item.value[1];
+        if(item.value.length > 2) {
+          o.translateZ = -item.value[2];
+        }
       }
       res.value.push(o);
     }
@@ -293,8 +323,10 @@ export function translateXY(list, begin, duration, key) {
       let item = list[i];
       let o = {
         offset: (item.time - begin) / duration,
-        easing: item.easing,
       };
+      if(item.easing) {
+        o.easing = item.easing;
+      }
       o[key] = item.value;
       res.value.push(o);
     }
@@ -323,11 +355,14 @@ export function transformRotateX(list, begin, duration) {
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      res.value.push({
+      let o = {
         offset: (item.time - begin) / duration,
         rotateX: -item.value,
-        easing: item.easing,
-      });
+      };
+      if(item.easing) {
+        o.easing = item.easing;
+      }
+      res.value.push(o);
     }
   }
   return res;
@@ -354,11 +389,14 @@ export function transformRotateY(list, begin, duration) {
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      res.value.push({
+      let o = {
         offset: (item.time - begin) / duration,
         rotateY: -item.value,
-        easing: item.easing,
-      });
+      };
+      if(item.easing) {
+        o.easing = item.easing;
+      }
+      res.value.push(o);
     }
   }
   return res;
@@ -386,11 +424,14 @@ export function transformRotateZ(list, begin, duration) {
     });
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      res.value.push({
+      let o = {
         offset: (item.time - begin) / duration,
         rotateZ: item.value,
-        easing: item.easing,
-      });
+      };
+      if(item.easing) {
+        o.easing = item.easing;
+      }
+      res.value.push(o);
     }
   }
   return res;
@@ -430,8 +471,10 @@ export function transformScale(list, begin, duration) {
         offset: (item.time - begin) / duration,
         scaleX: item.value[0] * 0.01,
         scaleY: item.value[1] * 0.01,
-        easing: item.easing,
       };
+      if(item.easing) {
+        v.easing = item.easing;
+      }
       if(item.value.length > 2) {
         v.scaleZ = item.value[2] * 0.01;
       }
@@ -470,8 +513,10 @@ export function transformPath(list, begin, duration, isEnd) {
       let item = list[i];
       let v = {
         offset: (item.time - begin) / duration,
-        easing: item.easing,
       };
+      if(item.easing) {
+        v.easing = item.easing;
+      }
       if(isEnd) {
         v.end = item.value * 0.01;
       }

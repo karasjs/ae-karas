@@ -51,7 +51,10 @@ function getPropertyValues(prop, matchName, noEasing) {
                 value: [x1, y1, p1[0], p1[1], p2[0], p2[1], x2, y2],
               };
               if(i !== numKeys && !noEasing) {
-                o.easing = getEasing(prop, i, i + 1);
+                let e = getEasing(prop, i, i + 1);
+                if(e) {
+                  o.easing = e;
+                }
               }
               arr.push(o);
               continue;
@@ -82,7 +85,10 @@ function getPropertyValues(prop, matchName, noEasing) {
                 value: [x1, y1, p1[0], p1[1], p2[0], p2[1], x2, y2],
               };
               if(i !== numKeys && !noEasing) {
-                o.easing = getEasing(prop, i, i + 1);
+                let e = getEasing(prop, i, i + 1);
+                if(e) {
+                  o.easing = e;
+                }
               }
               arr.push(o);
               continue;
@@ -95,7 +101,10 @@ function getPropertyValues(prop, matchName, noEasing) {
         value: prop.keyValue(i),
       };
       if(i !== numKeys && !noEasing) {
-        o.easing = getEasing(prop, i, i + 1);
+        let e = getEasing(prop, i, i + 1);
+        if(e) {
+          o.easing = e;
+        }
       }
       arr.push(o);
     }

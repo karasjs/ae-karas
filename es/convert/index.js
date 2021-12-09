@@ -56,7 +56,7 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
 function parseAnimate(res, data, start, duration, displayStartTime, offset, isDirect, isGeom) {
   let { width, height, transform } = data;
   // 分别分析每个变换，过程很相似，当为单帧时需合并到init.style，多帧第一帧需合并且置空
-  let { anchorPoint, opacity, position, position_0, position_1, rotateX, rotateY, rotateZ, scale } = transform;
+  let { anchorPoint, opacity, position, position_0, position_1, position_2, rotateX, rotateY, rotateZ, scale } = transform;
   let begin2 = start - offset - displayStartTime;
   let init = isDirect ? res.props : res.init;
   if(!isGeom && Array.isArray(anchorPoint) && anchorPoint.length) {
@@ -106,12 +106,16 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       res.animate.push(t);
     }
   }
+  let is3d;
   // position要考虑x/y拆开
   let translateAbbr = true;
   if(Array.isArray(position_0) && position_0.length > 1) {
     translateAbbr = false;
   }
   if(Array.isArray(position_1) && position_1.length > 1) {
+    translateAbbr = false;
+  }
+  if(Array.isArray(position_2) && position_2.length > 1) {
     translateAbbr = false;
   }
   if(Array.isArray(position) && position.length && translateAbbr) {
@@ -128,6 +132,10 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       if(first.translateY) {
         init.style.translateY = first.translateY;
       }
+      if(first.translateZ) {
+        init.style.translateZ = first.translateZ;
+        is3d = true;
+      }
     }
     if(t.value.length > 1) {
       if(!first.translatePath) {
@@ -135,6 +143,9 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
           offset: 0,
           easing: first.easing,
         };
+        if(t.value[1].length > 2) {
+          is3d = true;
+        }
       }
       res.animate.push(t);
     }
@@ -168,8 +179,23 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         res.animate.push(t);
       }
     }
+    if(Array.isArray(position_2) && position_2.length) {
+      let t = translateXY(position_2, begin2, duration, 'translateZ');
+      let first = t.value[0];
+      if(first.translateZ) {
+        init.style.translateZ = first.translateZ;
+        is3d = true;
+      }
+      if(t.value.length > 1) {
+        t.value[0] = {
+          offset: 0,
+          easing: first.easing,
+        };
+        res.animate.push(t);
+        is3d = true;
+      }
+    }
   }
-  let is3d;
   if(Array.isArray(rotateX) && rotateX.length) {
     let t = transformRotateX(rotateX, begin2, duration);
     let first = t.value[0];
@@ -261,8 +287,8 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   if(!data.enabled) {
     return null;
   }
-  let { name, assetId, startTime, inPoint, outPoint, blendingMode, isMask, isClip } = data;
-  if(assetId === undefined || assetId === null) {
+  let { name, assetId, startTime, inPoint, outPoint, blendingMode, isCamera, isMask, isClip } = data;
+  if(!isCamera && (assetId === undefined || assetId === null)) {
     return null;
   }
   let begin = start + offset + displayStartTime;
@@ -275,7 +301,23 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   let res = {
     name,
   };
-  res.libraryId = parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
+  if(isCamera) {
+    res.tagName = 'div';
+    res.isCamera = isCamera;
+    res.cameraZoom = data.cameraZoom;
+    res.cameraDepthOfField = data.cameraDepthOfField;
+    res.cameraFocusDistance = data.cameraFocusDistance;
+    res.cameraAperture = data.cameraAperture;
+    res.cameraBlurLevel = data.cameraBlurLevel;
+    res.props = {
+      style: {
+        display: 'none',
+      },
+    };
+  }
+  else {
+    res.libraryId = parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
+  }
   res.init = {
     style: {},
   };
@@ -289,49 +331,51 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     }
   }
   // 混合模式
-  switch(blendingMode) {
-    case BlendingMode.MULTIPLY:
-      res.init.style.mixBlendMode = 'multiply';
-      break;
-    case BlendingMode.SCREEN:
-      res.init.style.mixBlendMode = 'screen';
-      break;
-    case BlendingMode.OVERLAY:
-      res.init.style.mixBlendMode = 'overlay';
-      break;
-    case BlendingMode.DARKEN:
-      res.init.style.mixBlendMode = 'darken';
-      break;
-    case BlendingMode.COLOR_DODGE:
-      res.init.style.mixBlendMode = 'color-dodge';
-      break;
-    case BlendingMode.COLOR_BURN:
-      res.init.style.mixBlendMode = 'color-burn';
-      break;
-    case BlendingMode.HARD_LIGHT:
-      res.init.style.mixBlendMode = 'hard-light';
-      break;
-    case BlendingMode.SOFT_LIGHT:
-      res.init.style.mixBlendMode = 'soft-light';
-      break;
-    case BlendingMode.DIFFERENCE:
-      res.init.style.mixBlendMode = 'difference';
-      break;
-    case BlendingMode.EXCLUSION:
-      res.init.style.mixBlendMode = 'exclusion';
-      break;
-    case BlendingMode.HUE:
-      res.init.style.mixBlendMode = 'hue';
-      break;
-    case BlendingMode.SATURATION:
-      res.init.style.mixBlendMode = 'saturation';
-      break;
-    case BlendingMode.COLOR:
-      res.init.style.mixBlendMode = 'color';
-      break;
-    case BlendingMode.LUMINOSITY:
-      res.init.style.mixBlendMode = 'luminosity';
-      break;
+  if(!isCamera) {
+    switch(blendingMode) {
+      case BlendingMode.MULTIPLY:
+        res.init.style.mixBlendMode = 'multiply';
+        break;
+      case BlendingMode.SCREEN:
+        res.init.style.mixBlendMode = 'screen';
+        break;
+      case BlendingMode.OVERLAY:
+        res.init.style.mixBlendMode = 'overlay';
+        break;
+      case BlendingMode.DARKEN:
+        res.init.style.mixBlendMode = 'darken';
+        break;
+      case BlendingMode.COLOR_DODGE:
+        res.init.style.mixBlendMode = 'color-dodge';
+        break;
+      case BlendingMode.COLOR_BURN:
+        res.init.style.mixBlendMode = 'color-burn';
+        break;
+      case BlendingMode.HARD_LIGHT:
+        res.init.style.mixBlendMode = 'hard-light';
+        break;
+      case BlendingMode.SOFT_LIGHT:
+        res.init.style.mixBlendMode = 'soft-light';
+        break;
+      case BlendingMode.DIFFERENCE:
+        res.init.style.mixBlendMode = 'difference';
+        break;
+      case BlendingMode.EXCLUSION:
+        res.init.style.mixBlendMode = 'exclusion';
+        break;
+      case BlendingMode.HUE:
+        res.init.style.mixBlendMode = 'hue';
+        break;
+      case BlendingMode.SATURATION:
+        res.init.style.mixBlendMode = 'saturation';
+        break;
+      case BlendingMode.COLOR:
+        res.init.style.mixBlendMode = 'color';
+        break;
+      case BlendingMode.LUMINOSITY:
+        res.init.style.mixBlendMode = 'luminosity';
+        break;
+    }
   }
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
@@ -702,6 +746,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       let first = t.value[0];
       $geom.props.style.translateX = first.translateX;
       $geom.props.style.translateY = first.translateY;
+      $geom.props.style.translateZ = first.translateZ;
       if(t.value.length > 1) {
         t.value[0] = {
           offset: 0,
@@ -710,6 +755,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           let item = t.value[i];
           item.translateX -= first.translateX;
           item.translateY -= first.translateY;
+          item.translateZ -= first.translateZ;
         }
         $geom.animate.push(t);
       }
@@ -1003,7 +1049,7 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
   // 样式和target一致，只有位置信息需要
   let style = targetProps.style;
   for(let i in style) {
-    if(style.hasOwnProperty(i) && ['left', 'top', 'translateX', 'translateY'].indexOf(i) > -1) {
+    if(style.hasOwnProperty(i) && ['left', 'top', 'translateX', 'translateY', 'translateZ'].indexOf(i) > -1) {
       res.props.style[i] = style[i];
     }
   }
@@ -1084,5 +1130,24 @@ export default function(data) {
     abbr: false,
   };
   parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0);
+  // 检查直接孩子中的camera，删除并存放属性在根节点上
+  let cd = res.children;
+  for(let i = 0, len = cd.length; i < len; i++) {
+    let child = cd[i];
+    if(child.isCamera) {
+      res.camera = {
+        name: child.name,
+        cameraZoom: child.cameraZoom,
+        cameraDepthOfField: child.cameraDepthOfField,
+        cameraFocusDistance: child.cameraFocusDistance,
+        cameraAperture: child.cameraAperture,
+        cameraBlurLevel: child.cameraBlurLevel,
+        init: child.init,
+        animate: child.animate,
+      };
+      cd.splice(i, 1);
+      break;
+    }
+  }
   return res;
 }
