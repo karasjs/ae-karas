@@ -3847,16 +3847,16 @@ function convert (data) {
     var child = cd[i];
 
     if (child.isCamera) {
-      res.camera = {
-        name: child.name,
-        cameraZoom: child.cameraZoom,
-        cameraDepthOfField: child.cameraDepthOfField,
-        cameraFocusDistance: child.cameraFocusDistance,
-        cameraAperture: child.cameraAperture,
-        cameraBlurLevel: child.cameraBlurLevel,
-        init: child.init,
-        animate: child.animate
-      };
+      // res.camera = {
+      //   name: child.name,
+      //   cameraZoom: child.cameraZoom,
+      //   cameraDepthOfField: child.cameraDepthOfField,
+      //   cameraFocusDistance: child.cameraFocusDistance,
+      //   cameraAperture: child.cameraAperture,
+      //   cameraBlurLevel: child.cameraBlurLevel,
+      //   init: child.init,
+      //   animate: child.animate,
+      // };
       cd.splice(i, 1);
       break;
     }
