@@ -65,9 +65,11 @@ function getPropertyValues(prop, matchName, noEasing) {
         var x1 = v1[0],
             y1 = v1[1],
             x2 = v2[0],
-            y2 = v2[1];
+            y2 = v2[1]; // 有z失效，因为是3d空间变换
 
-        if ((x1 !== x2 || y1 !== y2) && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
+        var isZ = v1.length > 2 && v1[2] || v2.length > 2 && v2[2];
+
+        if ((x1 !== x2 || y1 !== y2) && !isZ && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
           var p1 = [v1[0] + c1[0], v1[1] + c1[1]],
               p2 = [v2[0] + c2[0], v2[1] + c2[1]]; // 垂直特殊情况
 
@@ -1565,6 +1567,60 @@ var path = {
 };
 
 /**
+ * 百分比截取贝塞尔中的一段，t为[0, 1]
+ * @param points
+ * @param t
+ */
+
+function sliceBezier(points, t) {
+  var p1, p2, p3, p4;
+
+  if (points.length === 8) {
+    p1 = points.slice(0, 2);
+    p2 = points.slice(2, 4);
+    p3 = points.slice(4, 8);
+    p4 = points.slice(6, 8);
+  } else {
+    p1 = points[0];
+    p2 = points[1];
+    p3 = points[2];
+    p4 = points[3];
+  }
+
+  var x1 = p1[0],
+      y1 = p1[1];
+  var x2 = p2[0],
+      y2 = p2[1];
+  var x3 = p3[0],
+      y3 = p3[1];
+  var x12 = (x2 - x1) * t + x1;
+  var y12 = (y2 - y1) * t + y1;
+  var x23 = (x3 - x2) * t + x2;
+  var y23 = (y3 - y2) * t + y2;
+  var x123 = (x23 - x12) * t + x12;
+  var y123 = (y23 - y12) * t + y12;
+
+  if (points.length === 4 || points.length === 8) {
+    var x4 = p4[0],
+        y4 = p4[1];
+    var x34 = (x4 - x3) * t + x3;
+    var y34 = (y4 - y3) * t + y3;
+    var x234 = (x34 - x23) * t + x23;
+    var y234 = (y34 - y23) * t + y23;
+    var x1234 = (x234 - x123) * t + x123;
+    var y1234 = (y234 - y123) * t + y123;
+
+    if (points.length === 8) {
+      return [x1, y1, x12, y12, x123, y123, x1234, y1234];
+    }
+
+    return [[x1, y1], [x12, y12], [x123, y123], [x1234, y1234]];
+  } else if (points.length === 3) {
+    return [[x1, y1], [x12, y12], [x123, y123]];
+  }
+}
+
+/**
  * 2个及以上的关键帧，获取区间，有可能有超过范围的无效关键帧，需滤除
  * 也有可能不及工作区间，需补充首尾，和原有首尾一样复制一个出来对齐区间
  * 也有可能虽然在范围外，但范围上无关键帧，需截取至范围内，由每个特效传入截取回调
@@ -1664,61 +1720,52 @@ function getAreaList(list, begin, duration, reducer) {
   }
 
   return list;
-}
-/**
- * 百分比截取贝塞尔中的一段，t为[0, 1]
- * @param points
- * @param t
- */
+} // /**
+//  * 百分比截取贝塞尔中的一段，t为[0, 1]
+//  * @param points
+//  * @param t
+//  */
+// function sliceBezier(points, t) {
+//   let p1, p2, p3, p4;
+//   if(points.length === 8) {
+//     p1 = points.slice(0, 2);
+//     p2 = points.slice(2, 4);
+//     p3 = points.slice(4, 8);
+//     p4 = points.slice(6, 8);
+//   }
+//   else {
+//     p1 = points[0];
+//     p2 = points[1];
+//     p3 = points[2];
+//     p4 = points[3];
+//   }
+//   let x1 = p1[0], y1 = p1[1];
+//   let x2 = p2[0], y2 = p2[1];
+//   let x3 = p3[0], y3 = p3[1];
+//   let x12 = (x2 - x1) * t + x1;
+//   let y12 = (y2 - y1) * t + y1;
+//   let x23 = (x3 - x2) * t + x2;
+//   let y23 = (y3 - y2) * t + y2;
+//   let x123 = (x23 - x12) * t + x12;
+//   let y123 = (y23 - y12) * t + y12;
+//   if(points.length === 4 || points.length === 8) {
+//     let x4 = p4[0], y4 = p4[1];
+//     let x34 = (x4 - x3) * t + x3;
+//     let y34 = (y4 - y3) * t + y3;
+//     let x234 = (x34 - x23) * t + x23;
+//     let y234 = (y34 - y23) * t + y23;
+//     let x1234 = (x234 - x123) * t + x123;
+//     let y1234 = (y234 - y123) * t + y123;
+//     if(points.length === 8) {
+//       return [x1, y1, x12, y12, x123, y123, x1234, y1234];
+//     }
+//     return [[x1, y1], [x12, y12], [x123, y123], [x1234, y1234]];
+//   }
+//   else if(points.length === 3) {
+//     return [[x1, y1], [x12, y12], [x123, y123]];
+//   }
+// }
 
-
-function sliceBezier(points, t) {
-  var p1, p2, p3, p4;
-
-  if (points.length === 8) {
-    p1 = points.slice(0, 2);
-    p2 = points.slice(2, 4);
-    p3 = points.slice(4, 8);
-    p4 = points.slice(6, 8);
-  } else {
-    p1 = points[0];
-    p2 = points[1];
-    p3 = points[2];
-    p4 = points[3];
-  }
-
-  var x1 = p1[0],
-      y1 = p1[1];
-  var x2 = p2[0],
-      y2 = p2[1];
-  var x3 = p3[0],
-      y3 = p3[1];
-  var x12 = (x2 - x1) * t + x1;
-  var y12 = (y2 - y1) * t + y1;
-  var x23 = (x3 - x2) * t + x2;
-  var y23 = (y3 - y2) * t + y2;
-  var x123 = (x23 - x12) * t + x12;
-  var y123 = (y23 - y12) * t + y12;
-
-  if (points.length === 4 || points.length === 8) {
-    var x4 = p4[0],
-        y4 = p4[1];
-    var x34 = (x4 - x3) * t + x3;
-    var y34 = (y4 - y3) * t + y3;
-    var x234 = (x34 - x23) * t + x23;
-    var y234 = (y34 - y23) * t + y23;
-    var x1234 = (x234 - x123) * t + x123;
-    var y1234 = (y234 - y123) * t + y123;
-
-    if (points.length === 8) {
-      return [x1, y1, x12, y12, x123, y123, x1234, y1234];
-    }
-
-    return [[x1, y1], [x12, y12], [x123, y123], [x1234, y1234]];
-  } else if (points.length === 3) {
-    return [[x1, y1], [x12, y12], [x123, y123]];
-  }
-}
 
 function transformOrigin(list, begin, duration) {
   var res = {
@@ -2478,6 +2525,300 @@ function transformSize(list, begin, duration) {
   }
 
   return res;
+}
+
+/**
+ * https://github.com/gre/bezier-easing
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ */
+// These values are established by empiricism with tests (tradeoff: performance VS precision)
+var NEWTON_ITERATIONS = 4;
+var NEWTON_MIN_SLOPE = 0.001;
+var SUBDIVISION_PRECISION = 0.0000001;
+var SUBDIVISION_MAX_ITERATIONS = 10;
+var kSplineTableSize = 11;
+var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+var float32ArraySupported = typeof Float32Array === 'function';
+
+function A(aA1, aA2) {
+  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
+}
+
+function B(aA1, aA2) {
+  return 3.0 * aA2 - 6.0 * aA1;
+}
+
+function C(aA1) {
+  return 3.0 * aA1;
+} // Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+
+
+function calcBezier(aT, aA1, aA2) {
+  return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
+} // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+
+
+function getSlope(aT, aA1, aA2) {
+  return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+}
+
+function binarySubdivide(aX, aA, aB, mX1, mX2) {
+  var currentX,
+      currentT,
+      i = 0;
+
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier(currentT, mX1, mX2) - aX;
+
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
+    }
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+
+  return currentT;
+}
+
+function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
+  for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+    var currentSlope = getSlope(aGuessT, mX1, mX2);
+
+    if (currentSlope === 0.0) {
+      return aGuessT;
+    }
+
+    var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+    aGuessT -= currentX / currentSlope;
+  }
+
+  return aGuessT;
+}
+
+function LinearEasing(x) {
+  return x;
+}
+
+function bezier(mX1, mY1, mX2, mY2) {
+  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+    throw new Error('bezier x values must be in [0, 1] range');
+  }
+
+  if (mX1 === mY1 && mX2 === mY2) {
+    return LinearEasing;
+  } // Precompute samples table
+
+
+  var sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+
+  for (var i = 0; i < kSplineTableSize; ++i) {
+    sampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
+  }
+
+  function getTForX(aX) {
+    var intervalStart = 0.0;
+    var currentSample = 1;
+    var lastSample = kSplineTableSize - 1;
+
+    for (; currentSample !== lastSample && sampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+
+    --currentSample; // Interpolate to provide an initial guess for t
+
+    var dist = (aX - sampleValues[currentSample]) / (sampleValues[currentSample + 1] - sampleValues[currentSample]);
+    var guessForT = intervalStart + dist * kSampleStepSize;
+    var initialSlope = getSlope(guessForT, mX1, mX2);
+
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    } else {
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
+    }
+  }
+
+  return function BezierEasing(x) {
+    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+    if (x === 0 || x === 1) {
+      return x;
+    }
+
+    return calcBezier(getTForX(x), mY1, mY2);
+  };
+}
+
+var easing = {
+  linear: bezier(1, 1, 0, 0),
+  easeIn: bezier(0.42, 0, 1, 1),
+  easeOut: bezier(0, 0, 0.58, 1),
+  ease: bezier(0.25, 0.1, 0.25, 1),
+  easeInOut: bezier(0.42, 0, 0.58, 1),
+  cubicBezier: bezier,
+  getEasing: function getEasing(v, v1, v2, v3) {
+    if (arguments.length === 4) {
+      return bezier(v, v1, v2, v3);
+    } else if (Array.isArray(v) && v.length === 4) {
+      return bezier(v[0], v[1], v[2], v[3]);
+    } else if (v) {
+      v = v.toString();
+      var timingFunction;
+
+      if (/^\s*(?:cubic-bezier\s*)?\(\s*[\d.]+\s*,\s*[-\d.]+\s*,\s*[\d.]+\s*,\s*[-\d.]+\s*\)\s*$/i.test(v)) {
+        v = v.match(/[\d.]+/g);
+        timingFunction = bezier(v[0], v[1], v[2], v[3]);
+      } else if (v !== 'getEasing') {
+        timingFunction = this[v];
+      }
+
+      return timingFunction;
+    }
+  }
+};
+easing['ease-in'] = easing.easeIn;
+easing['ease-out'] = easing.easeOut;
+easing['ease-in-out'] = easing.easeInOut;
+
+function getOffset(offsetList, offsetHash, list, key) {
+  for (var i = 0, len = list.length; i < len; i++) {
+    var item = list[i].value;
+    var item2 = item[1];
+
+    if (!item2.hasOwnProperty(key)) {
+      continue;
+    }
+
+    for (var j = 1, len2 = item.length; j < len2; j++) {
+      var offset = item[j].offset;
+
+      if (!offsetHash.hasOwnProperty(offset)) {
+        offsetList.push(offset);
+        offsetHash[offset] = true;
+      }
+    }
+  }
+}
+
+function insertKf(offsetList, offsetHash, list, style, key) {
+  var length = offsetList.length;
+
+  for (var i = 0, len = list.length; i < len; i++) {
+    var item = list[i].value;
+    var item2 = item[1];
+
+    if (!item2.hasOwnProperty(key)) {
+      continue;
+    }
+
+    for (var j = 1; j < length - 1; j++) {
+      if (item[j].offset !== offsetList[j]) {
+        var prev = item[j - 1],
+            next = item[j];
+        var percent = (offsetList[j] - prev.offset) / (next.offset - prev.offset);
+        var ea = prev.easing;
+
+        if (ea) {
+          percent = easing.getEasing(ea)(percent);
+        }
+
+        var obj = {
+          offset: offsetList[j]
+        };
+
+        var pv = j === 1 ? style[key] : prev[key];
+        var nv = next[key];
+
+        if (key === 'transformOrigin') {
+          pv = pv.split(' ');
+          pv[0] = parseFloat(pv[0]) || 0;
+          pv[1] = parseFloat(pv[1]) || 0;
+          pv[2] = parseFloat(pv[2]) || 0;
+          nv = nv.split(' ');
+          nv[0] = parseFloat(nv[0]) || 0;
+          nv[1] = parseFloat(nv[1]) || 0;
+          nv[2] = parseFloat(nv[2]) || 0;
+          var diff = [nv[0] - pv[0], nv[1] - pv[1], nv[2] - pv[2]];
+          obj[key] = pv[0] + diff[0] * percent + ' ' + (pv[1] + diff[1] * percent) + ' ' + (pv[2] + diff[2] * percent);
+        } // 这3个key可能同时出现在一帧里
+        else if (key === 'translateX' || key === 'translateY' || key === 'translateZ') {
+          var _diff = (nv || 0) - (pv || 0);
+
+          obj[key] = (pv || 0) + _diff * percent;
+          var arr = ['translateX', 'translateY', 'translateZ'];
+
+          for (var m = 0; m < 3; m++) {
+            var k = arr[m];
+
+            if (k !== 'key' && (prev.hasOwnProperty(k) || next.hasOwnProperty(k))) {
+              var _diff2 = (next[k] || 0) - (prev[k] || 0);
+
+              obj[k] = (prev[k] || 0) + _diff2 * percent;
+            }
+          }
+        } else if (key === 'rotateX' || key === 'rotateY' || key === 'rotateZ') {
+          var _diff3 = (nv || 0) - (pv || 0);
+
+          obj[key] = (pv || 0) + _diff3 * percent;
+        }
+
+        item.splice(j, 0, obj);
+      }
+    }
+  }
+}
+
+function camera (data, res) {
+  var children = res.children; // 为根节点和所有children之间新增一个perspective层，和画布同尺寸
+  // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
+
+  var offsetList = [0],
+      offsetHash = {
+    0: true
+  };
+  getOffset(offsetList, offsetHash, data.animate, 'transformOrigin');
+  getOffset(offsetList, offsetHash, data.animate, 'translateX');
+  getOffset(offsetList, offsetHash, data.animate, 'translateY');
+  getOffset(offsetList, offsetHash, data.animate, 'translateZ');
+
+  for (var i = 0, len = children.length; i < len; i++) {
+    var child = children[i];
+    getOffset(offsetList, offsetHash, child.animate, 'transformOrigin');
+    getOffset(offsetList, offsetHash, child.animate, 'translateX');
+    getOffset(offsetList, offsetHash, child.animate, 'translateY');
+    getOffset(offsetList, offsetHash, child.animate, 'translateZ');
+    getOffset(offsetList, offsetHash, child.animate, 'rotateX');
+    getOffset(offsetList, offsetHash, child.animate, 'rotateY');
+    getOffset(offsetList, offsetHash, child.animate, 'rotateZ');
+  }
+
+  offsetList.sort(function (a, b) {
+    return a - b;
+  }); // $.ae2karas.log(offsetList);
+  // 为不存在于offset合集的动画插入中间关键帧
+
+  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'transformOrigin');
+  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateX');
+  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateY');
+  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
+
+  for (var _i = 0, _len = children.length; _i < _len; _i++) {
+    var _child = children[_i];
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'transformOrigin');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'translateX');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'translateY');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'translateZ');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateX');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateY');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateZ');
+  }
+
+  $.ae2karas.log(data.animate);
+
+  for (var _i2 = 0, _len2 = offsetList.length; _i2 < _len2; _i2++) {// let item = i ===
+  }
 }
 
 /**
@@ -3839,7 +4180,7 @@ function convert (data) {
     library: newLib,
     abbr: false
   };
-  parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0); // 检查直接孩子中的camera，删除并存放属性在根节点上
+  parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0); // 检查直接孩子中的camera，删除并转换为3d
 
   var cd = res.children;
 
@@ -3847,17 +4188,19 @@ function convert (data) {
     var child = cd[i];
 
     if (child.isCamera) {
-      // res.camera = {
-      //   name: child.name,
-      //   cameraZoom: child.cameraZoom,
-      //   cameraDepthOfField: child.cameraDepthOfField,
-      //   cameraFocusDistance: child.cameraFocusDistance,
-      //   cameraAperture: child.cameraAperture,
-      //   cameraBlurLevel: child.cameraBlurLevel,
-      //   init: child.init,
-      //   animate: child.animate,
-      // };
+      delete res.props.style.perspective;
+      var cameraData = {
+        name: child.name,
+        cameraZoom: child.cameraZoom,
+        cameraDepthOfField: child.cameraDepthOfField,
+        cameraFocusDistance: child.cameraFocusDistance,
+        cameraAperture: child.cameraAperture,
+        cameraBlurLevel: child.cameraBlurLevel,
+        init: child.init,
+        animate: child.animate
+      };
       cd.splice(i, 1);
+      camera(cameraData, res);
       break;
     }
   }

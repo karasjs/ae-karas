@@ -41,7 +41,9 @@ function getPropertyValues(prop, matchName, noEasing) {
         let c1 = prop.keyOutSpatialTangent(i), c2 = prop.keyInSpatialTangent(i + 1);
         // y = kx + b，看是否有曲线，没有忽略
         let x1 = v1[0], y1 = v1[1], x2 = v2[0], y2 = v2[1];
-        if((x1 !== x2 || y1 !== y2) && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
+        // 有z失效，因为是3d空间变换
+        let isZ = v1.length > 2 && v1[2] || v2.length > 2 && v2[2];
+        if((x1 !== x2 || y1 !== y2) && !isZ && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
           let p1 = [v1[0] + c1[0], v1[1] + c1[1]], p2 = [v2[0] + c2[0], v2[1] + c2[1]];
           // 垂直特殊情况
           if(x1 === 0 && x2 === 0) {

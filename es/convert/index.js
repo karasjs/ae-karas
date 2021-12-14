@@ -17,6 +17,7 @@ import {
   translateXY,
 } from './animate';
 import path from './path';
+import camera from './camera';
 
 /**
  * 预解析父级链接，不递归深入children，返回一个普通的div
@@ -1130,22 +1131,24 @@ export default function(data) {
     abbr: false,
   };
   parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0);
-  // 检查直接孩子中的camera，删除并存放属性在根节点上
+  // 检查直接孩子中的camera，删除并转换为3d
   let cd = res.children;
   for(let i = 0, len = cd.length; i < len; i++) {
     let child = cd[i];
     if(child.isCamera) {
-      // res.camera = {
-      //   name: child.name,
-      //   cameraZoom: child.cameraZoom,
-      //   cameraDepthOfField: child.cameraDepthOfField,
-      //   cameraFocusDistance: child.cameraFocusDistance,
-      //   cameraAperture: child.cameraAperture,
-      //   cameraBlurLevel: child.cameraBlurLevel,
-      //   init: child.init,
-      //   animate: child.animate,
-      // };
+      delete res.props.style.perspective;
+      let cameraData = {
+        name: child.name,
+        cameraZoom: child.cameraZoom,
+        cameraDepthOfField: child.cameraDepthOfField,
+        cameraFocusDistance: child.cameraFocusDistance,
+        cameraAperture: child.cameraAperture,
+        cameraBlurLevel: child.cameraBlurLevel,
+        init: child.init,
+        animate: child.animate,
+      };
       cd.splice(i, 1);
+      let c3d = camera(cameraData, res);
       break;
     }
   }
