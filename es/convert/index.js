@@ -1136,7 +1136,6 @@ export default function(data) {
   for(let i = 0, len = cd.length; i < len; i++) {
     let child = cd[i];
     if(child.isCamera) {
-      delete res.props.style.perspective;
       let cameraData = {
         name: child.name,
         cameraZoom: child.cameraZoom,
