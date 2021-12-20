@@ -116,10 +116,9 @@ function getPerspectiveAndScale(data, index) {
   lookX = parseFloat(look[0]) || 0;
   lookY = parseFloat(look[1]) || 0;
   lookZ = parseFloat(look[2]) || 0;
-  eyeZ *= -1;
-  lookZ *= -1;
   let perspective = Math.floor(Math.sqrt(Math.pow(eyeX - lookX, 2) + Math.pow(eyeY - lookY, 2) + Math.pow(eyeZ - lookZ, 2)));
   let scale = Math.floor(data.cameraZoom) / perspective;
+  // $.ae2karas.log('perspective: ' + perspective + ', zoom: ' + data.cameraZoom);
   return {
     eyeX,
     eyeY,
@@ -132,16 +131,24 @@ function getPerspectiveAndScale(data, index) {
   };
 }
 
-function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ) {
+function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ) {
   let style = child.init.style;
   // 可能缺省和init一样，所以先赋值，首帧也是init
   let tfo = (style.transformOrigin || '').split(' ');
   let tx = style.translateX || 0, ty = style.translateY || 0, tz = style.translateZ || 0;
   let animate = child.animate;
-  // animate取
+  // $.ae2karas.log(animate);
+  // 非首帧从animate取
   if(index) {
     for(let i = 0, len = animate.length; i < len; i++) {
+      // $.ae2karas.log(i);
+      // $.ae2karas.log(animate[i].value);
       let item = animate[i].value[index];
+      // $.ae2karas.log(item);
+      // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
+      if(!item) {
+        continue;
+      }
       if(item.hasOwnProperty('transformOrigin')) {
         tfo = (item.transformOrigin || '').split(' ');
       }
@@ -160,6 +167,8 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
       }
     }
   }
+  // $.ae2karas.log(tfo);
+  // $.ae2karas.log(tx + ',' + ty + ',' + tz);
   let x = (style.left || 0) + parseFloat(tfo[0]) || 0;
   let y = (style.top || 0) + parseFloat(tfo[1]) || 0;
   let z = parseFloat(tfo[2]) || 0;
@@ -174,6 +183,10 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
   if(index) {
     for(let i = 0, len = animate.length; i < len; i++) {
       let item = animate[i].value[index];
+      // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
+      if(!item) {
+        continue;
+      }
       if(item.hasOwnProperty('translateX')
         || item.hasOwnProperty('translateY')
         || item.hasOwnProperty('translateZ')) {
@@ -197,6 +210,14 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
     }
   }
   else {
+    // 需要临时保存最初值，因为变换后的保存在style上会覆盖掉
+    let temp = {
+      translateX: style.translateX || 0,
+      translateY: style.translateY || 0,
+      translateZ: style.translateZ || 0,
+      rotateX: style.rotateX || 0,
+      rotateY: style.rotateY || 0,
+    };
     style.rotateX = style.rotateX || 0;
     style.rotateX += o.rotateX;
     style.rotateY = style.rotateY || 0;
@@ -206,6 +227,57 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
     style.translateY = style.translateY || 0;
     style.translateY += o.translateY;
     style.translateZ = o.translateZ;
+    // 需要特殊处理，可能这个child没有translate、rotate动画，需要加上，可能白加无所谓，交给压缩去除
+    let record = {};
+    outer:
+    for(let i = 0, len = animate.length; i < len; i++) {
+      let item = animate[i];
+      for(let j = 0, len2 = item.length; j < len2; j++) {
+        let item2 = item[j];
+        if(item2.hasOwnProperty('translateX')) {
+          record.translateX = true;
+        }
+        if(item2.hasOwnProperty('translateY')) {
+          record.translateY = true;
+        }
+        if(item2.hasOwnProperty('translateZ')) {
+          record.translateZ = true;
+        }
+        if(item2.hasOwnProperty('rotateX')) {
+          record.rotateX = true;
+        }
+        if(item2.hasOwnProperty('rotateY')) {
+          record.rotateY = true;
+        }
+        if(record.translateX && record.translateY && record.translateZ && record.rotateX && record.rotateY) {
+          break outer;
+        }
+      }
+    }
+    let list = ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY'];
+    for(let i = 0, len = list.length; i < len; i++) {
+      let k = list[i];
+      if(!record[k]) {
+        let item = {
+          value: [{
+            offset: 0,
+          }],
+          options: {
+            duration,
+            fill: 'forwards',
+            iterations: 1,
+          },
+        }
+        for(let j = 1, len2 = offsetList.length; j < len2; j++) {
+          let o = {
+            offset: offsetList[j],
+          };
+          o[k] = temp[k] || 0;
+          item.value.push(o);
+        }
+        animate.push(item);
+      }
+    }
   }
 }
 
@@ -215,6 +287,7 @@ function convert(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, data) {
   let x = convertX(cx, eyeX, eyeZ, lookX, lookZ, data);
   let y = convertY(cy, eyeY, eyeZ, lookY, lookZ, data);
   let a = eyeX - lookX, b = eyeY - lookY, c = eyeZ - lookZ, d = -a * lookX - b * lookY - c * lookZ;
+  // $.ae2karas.log('a: ' + a + ', b: ' + b + ', c: ' + c + ', d: ' + d);
   let translateZ = (data.x * a + data.y * b + data.z * c + d) / Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
   return {
     rotateX: y.rotateX,
@@ -297,12 +370,13 @@ export default function(data, res) {
   offsetList.sort(function(a, b) {
     return a - b;
   });
-  $.ae2karas.log(offsetList);
+  $.ae2karas.warn(offsetList);
   // 为不存在于offset合集的动画插入中间关键帧
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'transformOrigin');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateX');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateY');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
+  // $.ae2karas.log(data.animate);
   for(let i = 0, len = children.length; i < len; i++) {
     let child = children[i];
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'transformOrigin');
@@ -311,6 +385,7 @@ export default function(data, res) {
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateZ');
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateX');
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateY');
+    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateZ');
   }
   // 时长
   let duration = 0;
@@ -330,6 +405,7 @@ export default function(data, res) {
   // 计算每帧的perspective，存入动画，scale是AE固定焦距导致的缩放
   let rootAnimate = [];
   for(let i = 0, len = offsetList.length; i < len; i++) {
+    // $.ae2karas.warn('frame: ' + i);
     let { eyeX, eyeY, eyeZ, lookX, lookY, lookZ, perspective, scale } = getPerspectiveAndScale(data, i);
     // 非首帧
     if(i) {
@@ -345,13 +421,26 @@ export default function(data, res) {
         offset: 0,
       });
       res.props.style.perspective = perspective;
-      res.props.style.scale = scale;
+      if(scale !== 1) {
+        res.props.style.scale = scale;
+      }
     }
     for(let j = 0, len2 = children.length; j < len2; j++) {
       let child = children[j];
-      setTranslateAndRotate(w, h, child, i, offsetList[i], duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
+      // $.ae2karas.warn('child: ' + j + ', ' + child.name);
+      setTranslateAndRotate(w, h, child, i, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
     }
   }
+  // 因为上面一个步骤会遍历每个孩子的动画，强制添加几个首帧关键帧，如果没有动画的话则无效添加，需要再过滤一遍清除
+  // for(let i = 0, len = children.length; i < len; i++) {
+  //   let animate = children[i].animate;
+  //   for(let j = animate.length - 1; j >= 0; j--) {
+  //     let item = animate[j];
+  //     if(item.value.length <= 1) {
+  //       animate.splice(j, 1);
+  //     }
+  //   }
+  // }
   if(rootAnimate.length > 1) {
     res.animate = [
       {

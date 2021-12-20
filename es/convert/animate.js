@@ -161,7 +161,7 @@ export function transformOrigin(list, begin, duration) {
   if(list.length === 1) {
     let r = list[0][0] + ' ' + list[0][1];
     if(list[0].length > 2) {
-      r += ' ' + list[0][2];
+      r += ' ' + -list[0][2];
     }
     res.value.push({
       transformOrigin: r,
@@ -182,7 +182,7 @@ export function transformOrigin(list, begin, duration) {
       let item = list[i];
       let r = item.value[0] + ' ' + item.value[1];
       if(item.value.length > 2) {
-        r += ' ' + item.value[2];
+        r += ' ' + -item.value[2];
       }
       let o = {
         offset: (item.time - begin) / duration,

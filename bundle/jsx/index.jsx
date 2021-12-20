@@ -1784,7 +1784,7 @@ function transformOrigin(list, begin, duration) {
     var r = list[0][0] + ' ' + list[0][1];
 
     if (list[0].length > 2) {
-      r += ' ' + list[0][2];
+      r += ' ' + -list[0][2];
     }
 
     res.value.push({
@@ -1807,7 +1807,7 @@ function transformOrigin(list, begin, duration) {
       var _r = item.value[0] + ' ' + item.value[1];
 
       if (item.value.length > 2) {
-        _r += ' ' + item.value[2];
+        _r += ' ' + -item.value[2];
       }
 
       var o = {
@@ -2808,10 +2808,9 @@ function getPerspectiveAndScale(data, index) {
   lookX = parseFloat(look[0]) || 0;
   lookY = parseFloat(look[1]) || 0;
   lookZ = parseFloat(look[2]) || 0;
-  eyeZ *= -1;
-  lookZ *= -1;
   var perspective = Math.floor(Math.sqrt(Math.pow(eyeX - lookX, 2) + Math.pow(eyeY - lookY, 2) + Math.pow(eyeZ - lookZ, 2)));
-  var scale = Math.floor(data.cameraZoom) / perspective;
+  var scale = Math.floor(data.cameraZoom) / perspective; // $.ae2karas.log('perspective: ' + perspective + ', zoom: ' + data.cameraZoom);
+
   return {
     eyeX: eyeX,
     eyeY: eyeY,
@@ -2824,18 +2823,26 @@ function getPerspectiveAndScale(data, index) {
   };
 }
 
-function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ) {
+function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ) {
   var style = child.init.style; // 可能缺省和init一样，所以先赋值，首帧也是init
 
   var tfo = (style.transformOrigin || '').split(' ');
   var tx = style.translateX || 0,
       ty = style.translateY || 0,
       tz = style.translateZ || 0;
-  var animate = child.animate; // animate取
+  var animate = child.animate; // $.ae2karas.log(animate);
+  // 非首帧从animate取
 
   if (index) {
     for (var i = 0, len = animate.length; i < len; i++) {
-      var item = animate[i].value[index];
+      // $.ae2karas.log(i);
+      // $.ae2karas.log(animate[i].value);
+      var item = animate[i].value[index]; // $.ae2karas.log(item);
+      // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
+
+      if (!item) {
+        continue;
+      }
 
       if (item.hasOwnProperty('transformOrigin')) {
         tfo = (item.transformOrigin || '').split(' ');
@@ -2853,7 +2860,9 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
         }
       }
     }
-  }
+  } // $.ae2karas.log(tfo);
+  // $.ae2karas.log(tx + ',' + ty + ',' + tz);
+
 
   var x = (style.left || 0) + parseFloat(tfo[0]) || 0;
   var y = (style.top || 0) + parseFloat(tfo[1]) || 0;
@@ -2872,7 +2881,11 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
 
   if (index) {
     for (var _i = 0, _len = animate.length; _i < _len; _i++) {
-      var _item = animate[_i].value[index];
+      var _item = animate[_i].value[index]; // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
+
+      if (!_item) {
+        continue;
+      }
 
       if (_item.hasOwnProperty('translateX') || _item.hasOwnProperty('translateY') || _item.hasOwnProperty('translateZ')) {
         if (_item.hasOwnProperty('translateX')) {
@@ -2894,6 +2907,14 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
       }
     }
   } else {
+    // 需要临时保存最初值，因为变换后的保存在style上会覆盖掉
+    var temp = {
+      translateX: style.translateX || 0,
+      translateY: style.translateY || 0,
+      translateZ: style.translateZ || 0,
+      rotateX: style.rotateX || 0,
+      rotateY: style.rotateY || 0
+    };
     style.rotateX = style.rotateX || 0;
     style.rotateX += o.rotateX;
     style.rotateY = style.rotateY || 0;
@@ -2902,7 +2923,71 @@ function setTranslateAndRotate(w, h, child, index, offset, duration, eyeX, eyeY,
     style.translateX += o.translateX;
     style.translateY = style.translateY || 0;
     style.translateY += o.translateY;
-    style.translateZ = o.translateZ;
+    style.translateZ = o.translateZ; // 需要特殊处理，可能这个child没有translate、rotate动画，需要加上，可能白加无所谓，交给压缩去除
+
+    var record = {};
+
+    outer: for (var _i2 = 0, _len2 = animate.length; _i2 < _len2; _i2++) {
+      var _item2 = animate[_i2];
+
+      for (var j = 0, len2 = _item2.length; j < len2; j++) {
+        var item2 = _item2[j];
+
+        if (item2.hasOwnProperty('translateX')) {
+          record.translateX = true;
+        }
+
+        if (item2.hasOwnProperty('translateY')) {
+          record.translateY = true;
+        }
+
+        if (item2.hasOwnProperty('translateZ')) {
+          record.translateZ = true;
+        }
+
+        if (item2.hasOwnProperty('rotateX')) {
+          record.rotateX = true;
+        }
+
+        if (item2.hasOwnProperty('rotateY')) {
+          record.rotateY = true;
+        }
+
+        if (record.translateX && record.translateY && record.translateZ && record.rotateX && record.rotateY) {
+          break outer;
+        }
+      }
+    }
+
+    var list = ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY'];
+
+    for (var _i3 = 0, _len3 = list.length; _i3 < _len3; _i3++) {
+      var k = list[_i3];
+
+      if (!record[k]) {
+        var _item3 = {
+          value: [{
+            offset: 0
+          }],
+          options: {
+            duration: duration,
+            fill: 'forwards',
+            iterations: 1
+          }
+        };
+
+        for (var _j = 1, _len4 = offsetList.length; _j < _len4; _j++) {
+          var _o = {
+            offset: offsetList[_j]
+          };
+          _o[k] = temp[k] || 0;
+
+          _item3.value.push(_o);
+        }
+
+        animate.push(_item3);
+      }
+    }
   }
 }
 
@@ -2914,7 +2999,8 @@ function convert$1(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, data) {
   var a = eyeX - lookX,
       b = eyeY - lookY,
       c = eyeZ - lookZ,
-      d = -a * lookX - b * lookY - c * lookZ;
+      d = -a * lookX - b * lookY - c * lookZ; // $.ae2karas.log('a: ' + a + ', b: ' + b + ', c: ' + c + ', d: ' + d);
+
   var translateZ = (data.x * a + data.y * b + data.z * c + d) / Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2) + Math.pow(c, 2));
   return {
     rotateX: y.rotateX,
@@ -3004,21 +3090,22 @@ function camera (data, res) {
   offsetList.sort(function (a, b) {
     return a - b;
   });
-  $.ae2karas.log(offsetList); // 为不存在于offset合集的动画插入中间关键帧
+  $.ae2karas.warn(offsetList); // 为不存在于offset合集的动画插入中间关键帧
 
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'transformOrigin');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateX');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateY');
-  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
+  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ'); // $.ae2karas.log(data.animate);
 
-  for (var _i2 = 0, _len2 = children.length; _i2 < _len2; _i2++) {
-    var _child = children[_i2];
+  for (var _i4 = 0, _len5 = children.length; _i4 < _len5; _i4++) {
+    var _child = children[_i4];
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'transformOrigin');
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'translateX');
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'translateY');
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'translateZ');
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateX');
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateY');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateZ');
   } // 时长
 
 
@@ -3027,8 +3114,8 @@ function camera (data, res) {
   if (data.animate.length) {
     duration = data.animate[0].options.duration;
   } else {
-    for (var _i3 = 0, _len3 = children.length; _i3 < _len3; _i3++) {
-      var _child2 = children[_i3];
+    for (var _i5 = 0, _len6 = children.length; _i5 < _len6; _i5++) {
+      var _child2 = children[_i5];
 
       if (_child2.animate.length) {
         duration = _child2.animate[0].options.duration;
@@ -3042,8 +3129,9 @@ function camera (data, res) {
 
   var rootAnimate = [];
 
-  for (var _i4 = 0, _len4 = offsetList.length; _i4 < _len4; _i4++) {
-    var _getPerspectiveAndSca = getPerspectiveAndScale(data, _i4),
+  for (var _i6 = 0, _len7 = offsetList.length; _i6 < _len7; _i6++) {
+    // $.ae2karas.warn('frame: ' + i);
+    var _getPerspectiveAndSca = getPerspectiveAndScale(data, _i6),
         eyeX = _getPerspectiveAndSca.eyeX,
         eyeY = _getPerspectiveAndSca.eyeY,
         eyeZ = _getPerspectiveAndSca.eyeZ,
@@ -3054,9 +3142,9 @@ function camera (data, res) {
         scale = _getPerspectiveAndSca.scale; // 非首帧
 
 
-    if (_i4) {
+    if (_i6) {
       rootAnimate.push({
-        offset: offsetList[_i4],
+        offset: offsetList[_i6],
         perspective: perspective,
         scale: scale
       });
@@ -3066,14 +3154,28 @@ function camera (data, res) {
         offset: 0
       });
       res.props.style.perspective = perspective;
-      res.props.style.scale = scale;
+
+      if (scale !== 1) {
+        res.props.style.scale = scale;
+      }
     }
 
     for (var j = 0, len2 = children.length; j < len2; j++) {
-      var _child3 = children[j];
-      setTranslateAndRotate(w, h, _child3, _i4, offsetList[_i4], duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
+      var _child3 = children[j]; // $.ae2karas.warn('child: ' + j + ', ' + child.name);
+
+      setTranslateAndRotate(w, h, _child3, _i6, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
     }
-  }
+  } // 因为上面一个步骤会遍历每个孩子的动画，强制添加几个首帧关键帧，如果没有动画的话则无效添加，需要再过滤一遍清除
+  // for(let i = 0, len = children.length; i < len; i++) {
+  //   let animate = children[i].animate;
+  //   for(let j = animate.length - 1; j >= 0; j--) {
+  //     let item = animate[j];
+  //     if(item.value.length <= 1) {
+  //       animate.splice(j, 1);
+  //     }
+  //   }
+  // }
+
 
   if (rootAnimate.length > 1) {
     res.animate = [{
