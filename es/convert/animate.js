@@ -1,5 +1,6 @@
 import path from './path';
 import { sliceBezier } from '../math';
+import easing from '../easing';
 
 /**
  * 2个及以上的关键帧，获取区间，有可能有超过范围的无效关键帧，需滤除
@@ -80,7 +81,11 @@ function getAreaList(list, begin, duration, reducer) {
     let prev = list[list.length - 2];
     let percent = (begin + duration - prev.time) / (last.time - prev.time);
     last.time = begin + duration;
-    last.value = reducer(prev.value, last.value, percent);
+    let p = percent;
+    if(prev.easing) {
+      p = easing.getEasing(prev.easing)(percent);
+    }
+    last.value = reducer(prev.value, last.value, p);
     if(prev.easing) {
       let points = sliceBezier([
         [0, 0],
@@ -101,52 +106,6 @@ function getAreaList(list, begin, duration, reducer) {
   }
   return list;
 }
-
-// /**
-//  * 百分比截取贝塞尔中的一段，t为[0, 1]
-//  * @param points
-//  * @param t
-//  */
-// function sliceBezier(points, t) {
-//   let p1, p2, p3, p4;
-//   if(points.length === 8) {
-//     p1 = points.slice(0, 2);
-//     p2 = points.slice(2, 4);
-//     p3 = points.slice(4, 8);
-//     p4 = points.slice(6, 8);
-//   }
-//   else {
-//     p1 = points[0];
-//     p2 = points[1];
-//     p3 = points[2];
-//     p4 = points[3];
-//   }
-//   let x1 = p1[0], y1 = p1[1];
-//   let x2 = p2[0], y2 = p2[1];
-//   let x3 = p3[0], y3 = p3[1];
-//   let x12 = (x2 - x1) * t + x1;
-//   let y12 = (y2 - y1) * t + y1;
-//   let x23 = (x3 - x2) * t + x2;
-//   let y23 = (y3 - y2) * t + y2;
-//   let x123 = (x23 - x12) * t + x12;
-//   let y123 = (y23 - y12) * t + y12;
-//   if(points.length === 4 || points.length === 8) {
-//     let x4 = p4[0], y4 = p4[1];
-//     let x34 = (x4 - x3) * t + x3;
-//     let y34 = (y4 - y3) * t + y3;
-//     let x234 = (x34 - x23) * t + x23;
-//     let y234 = (y34 - y23) * t + y23;
-//     let x1234 = (x234 - x123) * t + x123;
-//     let y1234 = (y234 - y123) * t + y123;
-//     if(points.length === 8) {
-//       return [x1, y1, x12, y12, x123, y123, x1234, y1234];
-//     }
-//     return [[x1, y1], [x12, y12], [x123, y123], [x1234, y1234]];
-//   }
-//   else if(points.length === 3) {
-//     return [[x1, y1], [x12, y12], [x123, y123]];
-//   }
-// }
 
 export function transformOrigin(list, begin, duration) {
   let res = {
@@ -246,9 +205,9 @@ export function transformPosition(list, begin, duration) {
       translateX: list[0][0],
       translateY: list[0][1],
     };
-    if(list[0].length > 2) {
-      r.translateZ = -list[0][2];
-    }
+    // if(list[0].length > 2) {
+    //   r.translateZ = -list[0][2];
+    // }
     res.value.push(r);
   }
   else {
@@ -273,7 +232,10 @@ export function transformPosition(list, begin, duration) {
         prev[1] + (next[1] - prev[1]) * percent,
       ];
       if(prev.length > 2) {
-        r.push(prev[2] + (next[2] - prev[2]) * percent);
+        // $.ae2karas.log(percent);
+        // $.ae2karas.log(prev);
+        // $.ae2karas.log(next);
+        // r.push(prev[2] + (next[2] - prev[2]) * percent);
       }
       return r;
     });
@@ -291,9 +253,9 @@ export function transformPosition(list, begin, duration) {
       else {
         o.translateX = item.value[0];
         o.translateY = item.value[1];
-        if(item.value.length > 2) {
-          o.translateZ = -item.value[2];
-        }
+        // if(item.value.length > 2) {
+        //   o.translateZ = -item.value[2];
+        // }
       }
       res.value.push(o);
     }
@@ -301,7 +263,7 @@ export function transformPosition(list, begin, duration) {
   return res;
 }
 
-export function translateXY(list, begin, duration, key) {
+export function translateXYZ(list, begin, duration, key) {
   let res = {
     value: [],
     options: {
@@ -328,7 +290,7 @@ export function translateXY(list, begin, duration, key) {
       if(item.easing) {
         o.easing = item.easing;
       }
-      o[key] = item.value;
+      o[key] = key === 'translateZ' ? -item.value : item.value;
       res.value.push(o);
     }
   }

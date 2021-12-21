@@ -1,4 +1,4 @@
-import { r2d, sliceBezier, sliceBezier2Both } from '../math';
+import { r2d } from '../math';
 import easing from '../easing';
 
 function getOffset(offsetList, offsetHash, list, key) {
@@ -137,14 +137,10 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
   let tfo = (style.transformOrigin || '').split(' ');
   let tx = style.translateX || 0, ty = style.translateY || 0, tz = style.translateZ || 0;
   let animate = child.animate;
-  // $.ae2karas.log(animate);
   // 非首帧从animate取
   if(index) {
     for(let i = 0, len = animate.length; i < len; i++) {
-      // $.ae2karas.log(i);
-      // $.ae2karas.log(animate[i].value);
       let item = animate[i].value[index];
-      // $.ae2karas.log(item);
       // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
       if(!item) {
         continue;
@@ -167,15 +163,13 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
       }
     }
   }
-  // $.ae2karas.log(tfo);
-  // $.ae2karas.log(tx + ',' + ty + ',' + tz);
   let x = (style.left || 0) + parseFloat(tfo[0]) || 0;
   let y = (style.top || 0) + parseFloat(tfo[1]) || 0;
   let z = parseFloat(tfo[2]) || 0;
   x += tx;
   y += ty;
   z += tz;
-  // $.ae2karas.log(eyeX + ',' + eyeY + ',' + eyeZ + ',' + lookX + ',' + lookY + ',' + lookZ);
+  // $.ae2karas.log(eyeX + ',' + eyeY + ',' + eyeZ + ';' + lookX + ',' + lookY + ',' + lookZ);
   // $.ae2karas.log({ x, y, z });
   let o = convert(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, { x, y, z });
   // $.ae2karas.log(o);
@@ -351,6 +345,7 @@ function convertY(cy, eyeY, eyeZ, lookY, lookZ, data) {
 }
 
 export default function(data, res) {
+  $.ae2karas.error('camera');
   let children = res.children;
   // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
   let offsetList = [0], offsetHash = { 0: true };
@@ -405,7 +400,6 @@ export default function(data, res) {
   // 计算每帧的perspective，存入动画，scale是AE固定焦距导致的缩放
   let rootAnimate = [];
   for(let i = 0, len = offsetList.length; i < len; i++) {
-    // $.ae2karas.warn('frame: ' + i);
     let { eyeX, eyeY, eyeZ, lookX, lookY, lookZ, perspective, scale } = getPerspectiveAndScale(data, i);
     // 非首帧
     if(i) {
@@ -427,7 +421,6 @@ export default function(data, res) {
     }
     for(let j = 0, len2 = children.length; j < len2; j++) {
       let child = children[j];
-      // $.ae2karas.warn('child: ' + j + ', ' + child.name);
       setTranslateAndRotate(w, h, child, i, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
     }
   }

@@ -14,7 +14,7 @@ import {
   transformLineJoin,
   transformMiterLimit,
   transformSize,
-  translateXY,
+  translateXYZ,
 } from './animate';
 import path from './path';
 import camera from './camera';
@@ -120,6 +120,46 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     translateAbbr = false;
   }
   if(Array.isArray(position) && position.length && translateAbbr) {
+    // 需要特殊把translateZ拆开，因为独占一个easing2属性，不能和xy共用
+    if(position.length > 1) {
+      let hasZ;
+      for(let i = 0, len = position.length; i < len; i++) {
+        let item = position[i];
+        if(item.value[2] || item.easing2) {
+          hasZ = true;
+          break;
+        }
+      }
+      let za;
+      if(hasZ) {
+        za = [];
+        for(let i = 0, len = position.length; i < len; i++) {
+          let item = position[i];
+          let o = {
+            time: item.time,
+            value: item.value[2],
+          };
+          if(item.easing2) {
+            o.easing = item.easing2;
+          }
+          za.push(o);
+          delete item.easing2;
+        }
+        let t = translateXYZ(za, begin2, duration, 'translateZ');
+        let first = t.value[0];
+        if(first.translateZ) {
+          init.style.translateZ = first.translateZ;
+        }
+        res.animate.push(t);
+        is3d = true;
+      }
+    }
+    else {
+      if(position[0][2]) {
+        init.style.translateZ = -position[0][2];
+        is3d = true;
+      }
+    }
     let t = transformPosition(position, begin2, duration);
     let first = t.value[0];
     if(first.translatePath) {
@@ -133,10 +173,10 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       if(first.translateY) {
         init.style.translateY = first.translateY;
       }
-      if(first.translateZ) {
-        init.style.translateZ = first.translateZ;
-        is3d = true;
-      }
+      // if(first.translateZ) {
+      //   init.style.translateZ = first.translateZ;
+      //   is3d = true;
+      // }
     }
     if(t.value.length > 1) {
       if(!first.translatePath) {
@@ -144,16 +184,16 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
           offset: 0,
           easing: first.easing,
         };
-        if(t.value[1].length > 2) {
-          is3d = true;
-        }
+        // if(t.value[1].length > 2) {
+        //   is3d = true;
+        // }
       }
       res.animate.push(t);
     }
   }
   else {
     if(Array.isArray(position_0) && position_0.length) {
-      let t = translateXY(position_0, begin2, duration, 'translateX');
+      let t = translateXYZ(position_0, begin2, duration, 'translateX');
       let first = t.value[0];
       if(first.translateX) {
         init.style.translateX = first.translateX;
@@ -167,7 +207,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       }
     }
     if(Array.isArray(position_1) && position_1.length) {
-      let t = translateXY(position_1, begin2, duration, 'translateY');
+      let t = translateXYZ(position_1, begin2, duration, 'translateY');
       let first = t.value[0];
       if(first.translateY) {
         init.style.translateY = first.translateY;
@@ -181,7 +221,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       }
     }
     if(Array.isArray(position_2) && position_2.length) {
-      let t = translateXY(position_2, begin2, duration, 'translateZ');
+      let t = translateXYZ(position_2, begin2, duration, 'translateZ');
       let first = t.value[0];
       if(first.translateZ) {
         init.style.translateZ = first.translateZ;

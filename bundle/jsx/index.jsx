@@ -144,6 +144,14 @@ function getPropertyValues(prop, matchName, noEasing) {
         if (_e2) {
           o.easing = _e2;
         }
+
+        if (matchName === 'ADBE Position' && (prop.keyValue(i)[2] || prop.keyValue(i + 1)[2]) && prop.keyValue(i)[2] !== prop.keyValue(i + 1)[2]) {
+          var _e3 = getEasing(prop, i, i + 1, true);
+
+          if (_e3) {
+            o.easing2 = _e3;
+          }
+        }
       }
 
       arr.push(o);
@@ -165,16 +173,24 @@ function getPropertyValues(prop, matchName, noEasing) {
  * @param prop
  * @param start
  * @param end
+ * @param isZ
  */
 
 
-function getEasing(prop, start, end) {
+function getEasing(prop, start, end, isZ) {
   var t1 = prop.keyTime(start),
       t2 = prop.keyTime(end);
   var v1 = prop.keyValue(start),
       v2 = prop.keyValue(end);
   var e1 = prop.keyOutTemporalEase(start)[0],
       e2 = prop.keyInTemporalEase(end)[0]; // let c1 = prop.keyOutSpatialTangent(start), c2 = prop.keyInSpatialTangent(end);
+  // $.ae2karas.warn(t1);
+  // $.ae2karas.warn(t2);
+  // $.ae2karas.warn(isZ);
+  // $.ae2karas.log(v1);
+  // $.ae2karas.log(v2);
+  // $.ae2karas.log(e1);
+  // $.ae2karas.log(e2);
   // $.ae2karas.log(c1);
   // $.ae2karas.log(c2);
 
@@ -186,7 +202,17 @@ function getEasing(prop, start, end) {
   if (['ADBE Anchor Point', 'ADBE Position', 'ADBE Vector Anchor', 'ADBE Vector Position', 'ADBE Scale', 'ADBE Vector Scale', 'ADBE Vector Skew'].indexOf(matchName) > -1) {
     var avSpeedX = Math.abs(v2[0] - v1[0]) / (t2 - t1);
     var avSpeedY = Math.abs(v2[1] - v1[1]) / (t2 - t1);
+
+    if (isZ) {
+      avSpeedY = Math.abs(v2[2] - v1[2]) / (t2 - t1);
+    }
+
     var avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY);
+
+    if (v2.length > 2 && v1.length > 2) {
+      var avSpeedZ = Math.abs(v2[2] - v1[2]) / (t2 - t1);
+      avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY + avSpeedZ * avSpeedZ);
+    }
 
     if (avSpeed !== 0) {
       y1 = x1 * e1.speed / avSpeed;
@@ -1624,6 +1650,161 @@ function sliceBezier(points, t) {
 }
 
 /**
+ * https://github.com/gre/bezier-easing
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ */
+// These values are established by empiricism with tests (tradeoff: performance VS precision)
+var NEWTON_ITERATIONS = 4;
+var NEWTON_MIN_SLOPE = 0.001;
+var SUBDIVISION_PRECISION = 0.0000001;
+var SUBDIVISION_MAX_ITERATIONS = 10;
+var kSplineTableSize = 11;
+var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+var float32ArraySupported = typeof Float32Array === 'function';
+
+function A(aA1, aA2) {
+  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
+}
+
+function B(aA1, aA2) {
+  return 3.0 * aA2 - 6.0 * aA1;
+}
+
+function C(aA1) {
+  return 3.0 * aA1;
+} // Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+
+
+function calcBezier(aT, aA1, aA2) {
+  return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
+} // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+
+
+function getSlope(aT, aA1, aA2) {
+  return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+}
+
+function binarySubdivide(aX, aA, aB, mX1, mX2) {
+  var currentX,
+      currentT,
+      i = 0;
+
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier(currentT, mX1, mX2) - aX;
+
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
+    }
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+
+  return currentT;
+}
+
+function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
+  for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+    var currentSlope = getSlope(aGuessT, mX1, mX2);
+
+    if (currentSlope === 0.0) {
+      return aGuessT;
+    }
+
+    var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+    aGuessT -= currentX / currentSlope;
+  }
+
+  return aGuessT;
+}
+
+function LinearEasing(x) {
+  return x;
+}
+
+function bezier(mX1, mY1, mX2, mY2) {
+  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+    throw new Error('bezier x values must be in [0, 1] range');
+  }
+
+  if (mX1 === mY1 && mX2 === mY2) {
+    return LinearEasing;
+  } // Precompute samples table
+
+
+  var sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+
+  for (var i = 0; i < kSplineTableSize; ++i) {
+    sampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
+  }
+
+  function getTForX(aX) {
+    var intervalStart = 0.0;
+    var currentSample = 1;
+    var lastSample = kSplineTableSize - 1;
+
+    for (; currentSample !== lastSample && sampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+
+    --currentSample; // Interpolate to provide an initial guess for t
+
+    var dist = (aX - sampleValues[currentSample]) / (sampleValues[currentSample + 1] - sampleValues[currentSample]);
+    var guessForT = intervalStart + dist * kSampleStepSize;
+    var initialSlope = getSlope(guessForT, mX1, mX2);
+
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    } else {
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
+    }
+  }
+
+  return function BezierEasing(x) {
+    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+    if (x === 0 || x === 1) {
+      return x;
+    }
+
+    return calcBezier(getTForX(x), mY1, mY2);
+  };
+}
+
+var easing = {
+  linear: bezier(1, 1, 0, 0),
+  easeIn: bezier(0.42, 0, 1, 1),
+  easeOut: bezier(0, 0, 0.58, 1),
+  ease: bezier(0.25, 0.1, 0.25, 1),
+  easeInOut: bezier(0.42, 0, 0.58, 1),
+  cubicBezier: bezier,
+  getEasing: function getEasing(v, v1, v2, v3) {
+    if (arguments.length === 4) {
+      return bezier(v, v1, v2, v3);
+    } else if (Array.isArray(v) && v.length === 4) {
+      return bezier(v[0], v[1], v[2], v[3]);
+    } else if (v) {
+      v = v.toString();
+      var timingFunction;
+
+      if (/^\s*(?:cubic-bezier\s*)?\(\s*[\d.]+\s*,\s*[-\d.]+\s*,\s*[\d.]+\s*,\s*[-\d.]+\s*\)\s*$/i.test(v)) {
+        v = v.match(/[\d.]+/g);
+        timingFunction = bezier(v[0], v[1], v[2], v[3]);
+      } else if (v !== 'getEasing') {
+        timingFunction = this[v];
+      }
+
+      return timingFunction;
+    }
+  }
+};
+easing['ease-in'] = easing.easeIn;
+easing['ease-out'] = easing.easeOut;
+easing['ease-in-out'] = easing.easeInOut;
+
+/**
  * 2个及以上的关键帧，获取区间，有可能有超过范围的无效关键帧，需滤除
  * 也有可能不及工作区间，需补充首尾，和原有首尾一样复制一个出来对齐区间
  * 也有可能虽然在范围外，但范围上无关键帧，需截取至范围内，由每个特效传入截取回调
@@ -1706,7 +1887,13 @@ function getAreaList(list, begin, duration, reducer) {
     var _percent = (begin + duration - prev.time) / (last.time - prev.time);
 
     last.time = begin + duration;
-    last.value = reducer(prev.value, last.value, _percent);
+    var p = _percent;
+
+    if (prev.easing) {
+      p = easing.getEasing(prev.easing)(_percent);
+    }
+
+    last.value = reducer(prev.value, last.value, p);
 
     if (prev.easing) {
       var _points = sliceBezier([[0, 0], [prev.easing[0], prev.easing[1]], [prev.easing[2], prev.easing[3]], [1, 1]], _percent);
@@ -1723,52 +1910,7 @@ function getAreaList(list, begin, duration, reducer) {
   }
 
   return list;
-} // /**
-//  * 百分比截取贝塞尔中的一段，t为[0, 1]
-//  * @param points
-//  * @param t
-//  */
-// function sliceBezier(points, t) {
-//   let p1, p2, p3, p4;
-//   if(points.length === 8) {
-//     p1 = points.slice(0, 2);
-//     p2 = points.slice(2, 4);
-//     p3 = points.slice(4, 8);
-//     p4 = points.slice(6, 8);
-//   }
-//   else {
-//     p1 = points[0];
-//     p2 = points[1];
-//     p3 = points[2];
-//     p4 = points[3];
-//   }
-//   let x1 = p1[0], y1 = p1[1];
-//   let x2 = p2[0], y2 = p2[1];
-//   let x3 = p3[0], y3 = p3[1];
-//   let x12 = (x2 - x1) * t + x1;
-//   let y12 = (y2 - y1) * t + y1;
-//   let x23 = (x3 - x2) * t + x2;
-//   let y23 = (y3 - y2) * t + y2;
-//   let x123 = (x23 - x12) * t + x12;
-//   let y123 = (y23 - y12) * t + y12;
-//   if(points.length === 4 || points.length === 8) {
-//     let x4 = p4[0], y4 = p4[1];
-//     let x34 = (x4 - x3) * t + x3;
-//     let y34 = (y4 - y3) * t + y3;
-//     let x234 = (x34 - x23) * t + x23;
-//     let y234 = (y34 - y23) * t + y23;
-//     let x1234 = (x234 - x123) * t + x123;
-//     let y1234 = (y234 - y123) * t + y123;
-//     if(points.length === 8) {
-//       return [x1, y1, x12, y12, x123, y123, x1234, y1234];
-//     }
-//     return [[x1, y1], [x12, y12], [x123, y123], [x1234, y1234]];
-//   }
-//   else if(points.length === 3) {
-//     return [[x1, y1], [x12, y12], [x123, y123]];
-//   }
-// }
-
+}
 
 function transformOrigin(list, begin, duration) {
   var res = {
@@ -1875,11 +2017,9 @@ function transformPosition(list, begin, duration) {
     var r = {
       translateX: list[0][0],
       translateY: list[0][1]
-    };
-
-    if (list[0].length > 2) {
-      r.translateZ = -list[0][2];
-    }
+    }; // if(list[0].length > 2) {
+    //   r.translateZ = -list[0][2];
+    // }
 
     res.value.push(r);
   } else {
@@ -1903,9 +2043,7 @@ function transformPosition(list, begin, duration) {
 
       var r = [prev[0] + (next[0] - prev[0]) * percent, prev[1] + (next[1] - prev[1]) * percent];
 
-      if (prev.length > 2) {
-        r.push(prev[2] + (next[2] - prev[2]) * percent);
-      }
+      if (prev.length > 2) ;
 
       return r;
     });
@@ -1924,11 +2062,9 @@ function transformPosition(list, begin, duration) {
         o.translatePath = item.value;
       } else {
         o.translateX = item.value[0];
-        o.translateY = item.value[1];
-
-        if (item.value.length > 2) {
-          o.translateZ = -item.value[2];
-        }
+        o.translateY = item.value[1]; // if(item.value.length > 2) {
+        //   o.translateZ = -item.value[2];
+        // }
       }
 
       res.value.push(o);
@@ -1937,7 +2073,7 @@ function transformPosition(list, begin, duration) {
 
   return res;
 }
-function translateXY(list, begin, duration, key) {
+function translateXYZ(list, begin, duration, key) {
   var res = {
     value: [],
     options: {
@@ -1966,7 +2102,7 @@ function translateXY(list, begin, duration, key) {
         _o2.easing = item.easing;
       }
 
-      _o2[key] = item.value;
+      _o2[key] = key === 'translateZ' ? -item.value : item.value;
       res.value.push(_o2);
     }
   }
@@ -2530,161 +2666,6 @@ function transformSize(list, begin, duration) {
   return res;
 }
 
-/**
- * https://github.com/gre/bezier-easing
- * BezierEasing - use bezier curve for transition easing function
- * by Gaëtan Renaudeau 2014 - 2015 – MIT License
- */
-// These values are established by empiricism with tests (tradeoff: performance VS precision)
-var NEWTON_ITERATIONS = 4;
-var NEWTON_MIN_SLOPE = 0.001;
-var SUBDIVISION_PRECISION = 0.0000001;
-var SUBDIVISION_MAX_ITERATIONS = 10;
-var kSplineTableSize = 11;
-var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
-var float32ArraySupported = typeof Float32Array === 'function';
-
-function A(aA1, aA2) {
-  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
-}
-
-function B(aA1, aA2) {
-  return 3.0 * aA2 - 6.0 * aA1;
-}
-
-function C(aA1) {
-  return 3.0 * aA1;
-} // Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
-
-
-function calcBezier(aT, aA1, aA2) {
-  return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
-} // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
-
-
-function getSlope(aT, aA1, aA2) {
-  return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
-}
-
-function binarySubdivide(aX, aA, aB, mX1, mX2) {
-  var currentX,
-      currentT,
-      i = 0;
-
-  do {
-    currentT = aA + (aB - aA) / 2.0;
-    currentX = calcBezier(currentT, mX1, mX2) - aX;
-
-    if (currentX > 0.0) {
-      aB = currentT;
-    } else {
-      aA = currentT;
-    }
-  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
-
-  return currentT;
-}
-
-function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
-  for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
-    var currentSlope = getSlope(aGuessT, mX1, mX2);
-
-    if (currentSlope === 0.0) {
-      return aGuessT;
-    }
-
-    var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
-    aGuessT -= currentX / currentSlope;
-  }
-
-  return aGuessT;
-}
-
-function LinearEasing(x) {
-  return x;
-}
-
-function bezier(mX1, mY1, mX2, mY2) {
-  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
-    throw new Error('bezier x values must be in [0, 1] range');
-  }
-
-  if (mX1 === mY1 && mX2 === mY2) {
-    return LinearEasing;
-  } // Precompute samples table
-
-
-  var sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
-
-  for (var i = 0; i < kSplineTableSize; ++i) {
-    sampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
-  }
-
-  function getTForX(aX) {
-    var intervalStart = 0.0;
-    var currentSample = 1;
-    var lastSample = kSplineTableSize - 1;
-
-    for (; currentSample !== lastSample && sampleValues[currentSample] <= aX; ++currentSample) {
-      intervalStart += kSampleStepSize;
-    }
-
-    --currentSample; // Interpolate to provide an initial guess for t
-
-    var dist = (aX - sampleValues[currentSample]) / (sampleValues[currentSample + 1] - sampleValues[currentSample]);
-    var guessForT = intervalStart + dist * kSampleStepSize;
-    var initialSlope = getSlope(guessForT, mX1, mX2);
-
-    if (initialSlope >= NEWTON_MIN_SLOPE) {
-      return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
-    } else if (initialSlope === 0.0) {
-      return guessForT;
-    } else {
-      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
-    }
-  }
-
-  return function BezierEasing(x) {
-    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
-    if (x === 0 || x === 1) {
-      return x;
-    }
-
-    return calcBezier(getTForX(x), mY1, mY2);
-  };
-}
-
-var easing = {
-  linear: bezier(1, 1, 0, 0),
-  easeIn: bezier(0.42, 0, 1, 1),
-  easeOut: bezier(0, 0, 0.58, 1),
-  ease: bezier(0.25, 0.1, 0.25, 1),
-  easeInOut: bezier(0.42, 0, 0.58, 1),
-  cubicBezier: bezier,
-  getEasing: function getEasing(v, v1, v2, v3) {
-    if (arguments.length === 4) {
-      return bezier(v, v1, v2, v3);
-    } else if (Array.isArray(v) && v.length === 4) {
-      return bezier(v[0], v[1], v[2], v[3]);
-    } else if (v) {
-      v = v.toString();
-      var timingFunction;
-
-      if (/^\s*(?:cubic-bezier\s*)?\(\s*[\d.]+\s*,\s*[-\d.]+\s*,\s*[\d.]+\s*,\s*[-\d.]+\s*\)\s*$/i.test(v)) {
-        v = v.match(/[\d.]+/g);
-        timingFunction = bezier(v[0], v[1], v[2], v[3]);
-      } else if (v !== 'getEasing') {
-        timingFunction = this[v];
-      }
-
-      return timingFunction;
-    }
-  }
-};
-easing['ease-in'] = easing.easeIn;
-easing['ease-out'] = easing.easeOut;
-easing['ease-in-out'] = easing.easeInOut;
-
 function getOffset(offsetList, offsetHash, list, key) {
   for (var i = 0, len = list.length; i < len; i++) {
     var item = list[i].value;
@@ -2830,15 +2811,11 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
   var tx = style.translateX || 0,
       ty = style.translateY || 0,
       tz = style.translateZ || 0;
-  var animate = child.animate; // $.ae2karas.log(animate);
-  // 非首帧从animate取
+  var animate = child.animate; // 非首帧从animate取
 
   if (index) {
     for (var i = 0, len = animate.length; i < len; i++) {
-      // $.ae2karas.log(i);
-      // $.ae2karas.log(animate[i].value);
-      var item = animate[i].value[index]; // $.ae2karas.log(item);
-      // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
+      var item = animate[i].value[index]; // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
 
       if (!item) {
         continue;
@@ -2860,16 +2837,14 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
         }
       }
     }
-  } // $.ae2karas.log(tfo);
-  // $.ae2karas.log(tx + ',' + ty + ',' + tz);
-
+  }
 
   var x = (style.left || 0) + parseFloat(tfo[0]) || 0;
   var y = (style.top || 0) + parseFloat(tfo[1]) || 0;
   var z = parseFloat(tfo[2]) || 0;
   x += tx;
   y += ty;
-  z += tz; // $.ae2karas.log(eyeX + ',' + eyeY + ',' + eyeZ + ',' + lookX + ',' + lookY + ',' + lookZ);
+  z += tz; // $.ae2karas.log(eyeX + ',' + eyeY + ',' + eyeZ + ';' + lookX + ',' + lookY + ',' + lookZ);
   // $.ae2karas.log({ x, y, z });
 
   var o = convert$1(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, {
@@ -3066,6 +3041,7 @@ function convertY(cy, eyeY, eyeZ, lookY, lookZ, data) {
 }
 
 function camera (data, res) {
+  $.ae2karas.error('camera');
   var children = res.children; // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
 
   var offsetList = [0],
@@ -3130,7 +3106,6 @@ function camera (data, res) {
   var rootAnimate = [];
 
   for (var _i6 = 0, _len7 = offsetList.length; _i6 < _len7; _i6++) {
-    // $.ae2karas.warn('frame: ' + i);
     var _getPerspectiveAndSca = getPerspectiveAndScale(data, _i6),
         eyeX = _getPerspectiveAndSca.eyeX,
         eyeY = _getPerspectiveAndSca.eyeY,
@@ -3161,8 +3136,7 @@ function camera (data, res) {
     }
 
     for (var j = 0, len2 = children.length; j < len2; j++) {
-      var _child3 = children[j]; // $.ae2karas.warn('child: ' + j + ', ' + child.name);
-
+      var _child3 = children[j];
       setTranslateAndRotate(w, h, _child3, _i6, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
     }
   } // 因为上面一个步骤会遍历每个孩子的动画，强制添加几个首帧关键帧，如果没有动画的话则无效添加，需要再过滤一遍清除
@@ -3322,6 +3296,57 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   }
 
   if (Array.isArray(position) && position.length && translateAbbr) {
+    // 需要特殊把translateZ拆开，因为独占一个easing2属性，不能和xy共用
+    if (position.length > 1) {
+      var hasZ;
+
+      for (var _i = 0, _len = position.length; _i < _len; _i++) {
+        var _item = position[_i];
+
+        if (_item.value[2] || _item.easing2) {
+          hasZ = true;
+          break;
+        }
+      }
+
+      var za;
+
+      if (hasZ) {
+        za = [];
+
+        for (var _i2 = 0, _len2 = position.length; _i2 < _len2; _i2++) {
+          var _item2 = position[_i2];
+          var o = {
+            time: _item2.time,
+            value: _item2.value[2]
+          };
+
+          if (_item2.easing2) {
+            o.easing = _item2.easing2;
+          }
+
+          za.push(o);
+          delete _item2.easing2;
+        }
+
+        var _t3 = translateXYZ(za, begin2, duration, 'translateZ');
+
+        var _first3 = _t3.value[0];
+
+        if (_first3.translateZ) {
+          init.style.translateZ = _first3.translateZ;
+        }
+
+        res.animate.push(_t3);
+        is3d = true;
+      }
+    } else {
+      if (position[0][2]) {
+        init.style.translateZ = -position[0][2];
+        is3d = true;
+      }
+    }
+
     var _t2 = transformPosition(position, begin2, duration);
 
     var _first2 = _t2.value[0];
@@ -3336,12 +3361,11 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
 
       if (_first2.translateY) {
         init.style.translateY = _first2.translateY;
-      }
+      } // if(first.translateZ) {
+      //   init.style.translateZ = first.translateZ;
+      //   is3d = true;
+      // }
 
-      if (_first2.translateZ) {
-        init.style.translateZ = _first2.translateZ;
-        is3d = true;
-      }
     }
 
     if (_t2.value.length > 1) {
@@ -3349,41 +3373,21 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         _t2.value[0] = {
           offset: 0,
           easing: _first2.easing
-        };
-
-        if (_t2.value[1].length > 2) {
-          is3d = true;
-        }
+        }; // if(t.value[1].length > 2) {
+        //   is3d = true;
+        // }
       }
 
       res.animate.push(_t2);
     }
   } else {
     if (Array.isArray(position_0) && position_0.length) {
-      var _t3 = translateXY(position_0, begin2, duration, 'translateX');
-
-      var _first3 = _t3.value[0];
-
-      if (_first3.translateX) {
-        init.style.translateX = _first3.translateX;
-      }
-
-      if (_t3.value.length > 1) {
-        _t3.value[0] = {
-          offset: 0,
-          easing: _first3.easing
-        };
-        res.animate.push(_t3);
-      }
-    }
-
-    if (Array.isArray(position_1) && position_1.length) {
-      var _t4 = translateXY(position_1, begin2, duration, 'translateY');
+      var _t4 = translateXYZ(position_0, begin2, duration, 'translateX');
 
       var _first4 = _t4.value[0];
 
-      if (_first4.translateY) {
-        init.style.translateY = _first4.translateY;
+      if (_first4.translateX) {
+        init.style.translateX = _first4.translateX;
       }
 
       if (_t4.value.length > 1) {
@@ -3395,14 +3399,13 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       }
     }
 
-    if (Array.isArray(position_2) && position_2.length) {
-      var _t5 = translateXY(position_2, begin2, duration, 'translateZ');
+    if (Array.isArray(position_1) && position_1.length) {
+      var _t5 = translateXYZ(position_1, begin2, duration, 'translateY');
 
       var _first5 = _t5.value[0];
 
-      if (_first5.translateZ) {
-        init.style.translateZ = _first5.translateZ;
-        is3d = true;
+      if (_first5.translateY) {
+        init.style.translateY = _first5.translateY;
       }
 
       if (_t5.value.length > 1) {
@@ -3411,38 +3414,37 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
           easing: _first5.easing
         };
         res.animate.push(_t5);
+      }
+    }
+
+    if (Array.isArray(position_2) && position_2.length) {
+      var _t6 = translateXYZ(position_2, begin2, duration, 'translateZ');
+
+      var _first6 = _t6.value[0];
+
+      if (_first6.translateZ) {
+        init.style.translateZ = _first6.translateZ;
+        is3d = true;
+      }
+
+      if (_t6.value.length > 1) {
+        _t6.value[0] = {
+          offset: 0,
+          easing: _first6.easing
+        };
+        res.animate.push(_t6);
         is3d = true;
       }
     }
   }
 
   if (Array.isArray(rotateX) && rotateX.length) {
-    var _t6 = transformRotateX(rotateX, begin2, duration);
-
-    var _first6 = _t6.value[0];
-
-    if (_first6.rotateX) {
-      init.style.rotateX = _first6.rotateX;
-      is3d = true;
-    }
-
-    if (_t6.value.length > 1) {
-      _t6.value[0] = {
-        offset: 0,
-        easing: _first6.easing
-      };
-      res.animate.push(_t6);
-      is3d = true;
-    }
-  }
-
-  if (Array.isArray(rotateY) && rotateY.length) {
-    var _t7 = transformRotateY(rotateY, begin2, duration);
+    var _t7 = transformRotateX(rotateX, begin2, duration);
 
     var _first7 = _t7.value[0];
 
-    if (_first7.rotateY) {
-      init.style.rotateY = _first7.rotateY;
+    if (_first7.rotateX) {
+      init.style.rotateX = _first7.rotateX;
       is3d = true;
     }
 
@@ -3456,13 +3458,13 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     }
   }
 
-  if (Array.isArray(rotateZ) && rotateZ.length) {
-    var _t8 = transformRotateZ(rotateZ, begin2, duration);
+  if (Array.isArray(rotateY) && rotateY.length) {
+    var _t8 = transformRotateY(rotateY, begin2, duration);
 
     var _first8 = _t8.value[0];
 
-    if (_first8.rotateZ) {
-      init.style.rotateZ = _first8.rotateZ;
+    if (_first8.rotateY) {
+      init.style.rotateY = _first8.rotateY;
       is3d = true;
     }
 
@@ -3476,26 +3478,14 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     }
   }
 
-  if (is3d) {
-    // path没有width和height，在处理geom时会添加上
-    init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
-  }
-
-  if (Array.isArray(scale) && scale.length) {
-    var _t9 = transformScale(scale, begin2, duration);
+  if (Array.isArray(rotateZ) && rotateZ.length) {
+    var _t9 = transformRotateZ(rotateZ, begin2, duration);
 
     var _first9 = _t9.value[0];
 
-    if (_first9.scaleX !== 1 && _first9.scaleX !== undefined && _first9.scaleX !== null) {
-      init.style.scaleX = _first9.scaleX;
-    }
-
-    if (_first9.scaleY !== 1 && _first9.scaleY !== undefined && _first9.scaleY !== null) {
-      init.style.scaleY = _first9.scaleY;
-    }
-
-    if (_first9.scaleZ !== 1 && _first9.scaleZ !== undefined && _first9.scaleZ !== null) {
-      init.style.scaleZ = _first9.scaleZ;
+    if (_first9.rotateZ) {
+      init.style.rotateZ = _first9.rotateZ;
+      is3d = true;
     }
 
     if (_t9.value.length > 1) {
@@ -3504,6 +3494,38 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         easing: _first9.easing
       };
       res.animate.push(_t9);
+      is3d = true;
+    }
+  }
+
+  if (is3d) {
+    // path没有width和height，在处理geom时会添加上
+    init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+  }
+
+  if (Array.isArray(scale) && scale.length) {
+    var _t10 = transformScale(scale, begin2, duration);
+
+    var _first10 = _t10.value[0];
+
+    if (_first10.scaleX !== 1 && _first10.scaleX !== undefined && _first10.scaleX !== null) {
+      init.style.scaleX = _first10.scaleX;
+    }
+
+    if (_first10.scaleY !== 1 && _first10.scaleY !== undefined && _first10.scaleY !== null) {
+      init.style.scaleY = _first10.scaleY;
+    }
+
+    if (_first10.scaleZ !== 1 && _first10.scaleZ !== undefined && _first10.scaleZ !== null) {
+      init.style.scaleZ = _first10.scaleZ;
+    }
+
+    if (_t10.value.length > 1) {
+      _t10.value[0] = {
+        offset: 0,
+        easing: _first10.easing
+      };
+      res.animate.push(_t10);
     }
   }
 
@@ -3862,29 +3884,29 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
     } // 因为父级链接可能产生递归嵌套，需要再循环处理一遍parentLink
 
 
-    for (var _i in parentLink) {
-      if (parentLink.hasOwnProperty(_i)) {
-        var _item = parentLink[_i];
-        var asChild = _item.asChild;
+    for (var _i3 in parentLink) {
+      if (parentLink.hasOwnProperty(_i3)) {
+        var _item3 = parentLink[_i3];
+        var asChild = _item3.asChild;
 
         while (asChild !== undefined && parentLink[asChild]) {
           var parent = $.ae2karas.JSON.stringify(parentLink[asChild]);
           parent = $.ae2karas.JSON.parse(parent);
-          parent.children.push(_item);
-          _item = parent;
+          parent.children.push(_item3);
+          _item3 = parent;
           asChild = parent.asChild;
         }
 
-        if (_item !== parentLink[_i]) {
-          parentLink[_i] = _item;
+        if (_item3 !== parentLink[_i3]) {
+          parentLink[_i3] = _item3;
         }
       }
     } // 再普通解析，遇到父级链接特殊处理
 
 
-    for (var _i2 = 0, _len = children.length; _i2 < _len; _i2++) {
-      var _item2 = children[_i2];
-      var temp = recursion(_item2, library, newLib, start, duration, displayStartTime, offset, parentLink);
+    for (var _i4 = 0, _len3 = children.length; _i4 < _len3; _i4++) {
+      var _item4 = children[_i4];
+      var temp = recursion(_item4, library, newLib, start, duration, displayStartTime, offset, parentLink);
 
       if (temp) {
         res.children.push(temp); // ppt应该放在父层，如果有父级链接，则放在其上
@@ -3904,8 +3926,8 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
         } // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻
 
 
-        if (_item2.mask && _item2.mask.enabled) {
-          var m = parseMask(_item2, temp, start, duration, displayStartTime, offset);
+        if (_item4.mask && _item4.mask.enabled) {
+          var m = parseMask(_item4, temp, start, duration, displayStartTime, offset);
           var target = res;
 
           while (temp.children && temp.children.length === 1) {
@@ -3918,13 +3940,13 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
           var style = target.children[0].init.style;
 
           if (style) {
-            for (var _i3 in style) {
-              if (style.hasOwnProperty(_i3) && {
+            for (var _i5 in style) {
+              if (style.hasOwnProperty(_i5) && {
                 'scaleX': true,
                 'scaleY': true,
                 'scaleZ': true
-              }.hasOwnProperty(_i3)) {
-                m.props.style[_i3] = style[_i3];
+              }.hasOwnProperty(_i5)) {
+                m.props.style[_i5] = style[_i5];
               }
             }
           }
@@ -3979,7 +4001,7 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     animate: []
   };
 
-  for (var i = 0, _len2 = content.length; i < _len2; i++) {
+  for (var i = 0, _len4 = content.length; i < _len4; i++) {
     var item = content[i];
     var type = item.type;
         item.direction;
@@ -4011,12 +4033,12 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           offset: 0
         }; // 用缩放代替尺寸变化
 
-        for (var _i4 = 1, _len3 = t.value.length; _i4 < _len3; _i4++) {
-          var _item3 = t.value[_i4];
-          var _size = _item3.size;
-          _item3.size = undefined;
-          _item3.scaleX = _size[0] / first.size[0];
-          _item3.scaleY = _size[1] / first.size[1];
+        for (var _i6 = 1, _len5 = t.value.length; _i6 < _len5; _i6++) {
+          var _item5 = t.value[_i6];
+          var _size = _item5.size;
+          _item5.size = undefined;
+          _item5.scaleX = _size[0] / first.size[0];
+          _item5.scaleY = _size[1] / first.size[1];
         }
 
         $geom.animate.push(t);
@@ -4033,50 +4055,50 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         $geom.props.controls = _o.controls;
       }
     } else if (type === 'star') ; else if (type === 'path') {
-      var _t10 = transformPoints(points, begin2, duration);
+      var _t11 = transformPoints(points, begin2, duration);
 
-      var d = _t10.data; // path特殊没尺寸，3d等计算ppt需赋值
+      var d = _t11.data; // path特殊没尺寸，3d等计算ppt需赋值
 
       $geom.props.style.width = data.shape.width = d.width;
       $geom.props.style.height = data.shape.height = d.height; // path的特殊位置计算，因为ae中尺寸为0
 
       $geom.props.style.left = d.x2;
       $geom.props.style.top = d.y2;
-      _t10.data = undefined;
-      var _first10 = _t10.value[0];
-      $geom.props.points = _first10.points;
-      $geom.props.controls = _first10.controls;
-
-      if (_t10.value.length > 1) {
-        _t10.value[0] = {
-          offset: 0
-        };
-        $geom.animate.push(_t10);
-      }
-    } // path没有position
-
-
-    if (position && position.length) {
-      var _t11 = transformPosition(position, begin2, duration);
-
+      _t11.data = undefined;
       var _first11 = _t11.value[0];
-      $geom.props.style.translateX = _first11.translateX;
-      $geom.props.style.translateY = _first11.translateY;
-      $geom.props.style.translateZ = _first11.translateZ;
+      $geom.props.points = _first11.points;
+      $geom.props.controls = _first11.controls;
 
       if (_t11.value.length > 1) {
         _t11.value[0] = {
           offset: 0
         };
+        $geom.animate.push(_t11);
+      }
+    } // path没有position
 
-        for (var _i5 = 1; _i5 < _t11.value.length; _i5++) {
-          var _item4 = _t11.value[_i5];
-          _item4.translateX -= _first11.translateX;
-          _item4.translateY -= _first11.translateY;
-          _item4.translateZ -= _first11.translateZ;
+
+    if (position && position.length) {
+      var _t12 = transformPosition(position, begin2, duration);
+
+      var _first12 = _t12.value[0];
+      $geom.props.style.translateX = _first12.translateX;
+      $geom.props.style.translateY = _first12.translateY;
+      $geom.props.style.translateZ = _first12.translateZ;
+
+      if (_t12.value.length > 1) {
+        _t12.value[0] = {
+          offset: 0
+        };
+
+        for (var _i7 = 1; _i7 < _t12.value.length; _i7++) {
+          var _item6 = _t12.value[_i7];
+          _item6.translateX -= _first12.translateX;
+          _item6.translateY -= _first12.translateY;
+          _item6.translateZ -= _first12.translateZ;
         }
 
-        $geom.animate.push(_t11);
+        $geom.animate.push(_t12);
       }
     }
 
@@ -4088,11 +4110,11 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     var anchorPoint = transform.anchorPoint;
 
     if (Array.isArray(anchorPoint) && anchorPoint.length) {
-      var _t12 = transformOrigin(anchorPoint, begin2, duration);
+      var _t13 = transformOrigin(anchorPoint, begin2, duration);
 
-      var _first12 = _t12.value[0];
+      var _first13 = _t13.value[0];
 
-      var v = _first12.transformOrigin.split(' ');
+      var v = _first13.transformOrigin.split(' ');
 
       v[0] = parseFloat(v[0]);
       v[1] = parseFloat(v[1]);
@@ -4112,29 +4134,29 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         v[1] += h * 0.5;
 
         if (v[0] !== w * 0.5 || v[1] !== h * 0.5) {
-          $geom.props.style.transformOrigin = _first12.transformOrigin;
+          $geom.props.style.transformOrigin = _first13.transformOrigin;
         }
 
-        if (_t12.value.length > 1) {
-          if (_first12.offset === 0) {
-            _t12.value[0] = {
+        if (_t13.value.length > 1) {
+          if (_first13.offset === 0) {
+            _t13.value[0] = {
               offset: 0
             };
           } // tfo的每个动画需考虑对坐标的影响
 
 
-          for (var _i6 = 1, _len4 = _t12.value.length; _i6 < _len4; _i6++) {
-            var _item5 = _t12.value[_i6];
+          for (var _i8 = 1, _len6 = _t13.value.length; _i8 < _len6; _i8++) {
+            var _item7 = _t13.value[_i8];
 
-            var tfo = _item5.transformOrigin.split(' ');
+            var tfo = _item7.transformOrigin.split(' ');
 
             tfo[0] = parseFloat(tfo[0]);
             tfo[1] = parseFloat(tfo[1]);
-            _item5.left = left - tfo[0];
-            _item5.top = top - tfo[1];
+            _item7.left = left - tfo[0];
+            _item7.top = top - tfo[1];
           }
 
-          $geom.animate.push(_t12);
+          $geom.animate.push(_t13);
         }
       } else {
         // tfo中心判断，加上尺寸*0.5
@@ -4142,17 +4164,17 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         v[1] += $geom.props.style.height * 0.5;
 
         if (v[0] !== $geom.props.style.width * 0.5 || v[1] !== $geom.props.style.height * 0.5) {
-          $geom.props.style.transformOrigin = _first12.transformOrigin;
+          $geom.props.style.transformOrigin = _first13.transformOrigin;
         }
 
-        if (_t12.value.length > 1) {
-          if (_first12.offset === 0) {
-            _t12.value[0] = {
+        if (_t13.value.length > 1) {
+          if (_first13.offset === 0) {
+            _t13.value[0] = {
               offset: 0
             };
           }
 
-          $geom.animate.push(_t12);
+          $geom.animate.push(_t13);
         }
 
         if (v[0]) {
@@ -4191,23 +4213,23 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           p = _gFill$colors.p;
       var steps = '';
 
-      for (var _i7 = 0; _i7 < p; _i7++) {
-        if (_i7) {
+      for (var _i9 = 0; _i9 < p; _i9++) {
+        if (_i9) {
           steps += ', ';
         }
 
-        steps += 'rgba(' + Math.floor(m[_i7 * 4 + 1] * 255);
-        steps += ',' + Math.floor(m[_i7 * 4 + 2] * 255);
-        steps += ',' + Math.floor(m[_i7 * 4 + 3] * 255); // 可能有透明度
+        steps += 'rgba(' + Math.floor(m[_i9 * 4 + 1] * 255);
+        steps += ',' + Math.floor(m[_i9 * 4 + 2] * 255);
+        steps += ',' + Math.floor(m[_i9 * 4 + 3] * 255); // 可能有透明度
 
-        if (m.length >= p * 4 + (_i7 + 1) * 2) {
-          steps += ',' + m[p * 4 + (_i7 + 1) * 2 - 1];
+        if (m.length >= p * 4 + (_i9 + 1) * 2) {
+          steps += ',' + m[p * 4 + (_i9 + 1) * 2 - 1];
         } else {
           steps += ',1';
         }
 
         steps += ') ';
-        steps += m[_i7 * 4] * 100 + '%';
+        steps += m[_i9 * 4] * 100 + '%';
       }
 
       if (!steps) {
@@ -4244,34 +4266,12 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           _end = trim.end;
 
       if (_start2.length > 1) {
-        var _t13 = transformPath(_start2, begin2, duration, false);
-
-        var _first13 = _t13.value[0];
-
-        if (_first13.start !== 0) {
-          $geom.props.start = _first13.start;
-        }
-
-        if (_t13.value.length > 1) {
-          if (_first13.offset === 0) {
-            _t13.value[0] = {
-              offset: 0
-            };
-          }
-
-          $geom.animate.push(_t13);
-        }
-      } else {
-        $geom.props.start = _start2[0] * 0.01;
-      }
-
-      if (_end.length > 1) {
-        var _t14 = transformPath(_end, begin2, duration, true);
+        var _t14 = transformPath(_start2, begin2, duration, false);
 
         var _first14 = _t14.value[0];
 
-        if (_first14.end !== 0) {
-          $geom.props.end = _first14.end;
+        if (_first14.start !== 0) {
+          $geom.props.start = _first14.start;
         }
 
         if (_t14.value.length > 1) {
@@ -4284,38 +4284,40 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
           $geom.animate.push(_t14);
         }
       } else {
+        $geom.props.start = _start2[0] * 0.01;
+      }
+
+      if (_end.length > 1) {
+        var _t15 = transformPath(_end, begin2, duration, true);
+
+        var _first15 = _t15.value[0];
+
+        if (_first15.end !== 0) {
+          $geom.props.end = _first15.end;
+        }
+
+        if (_t15.value.length > 1) {
+          if (_first15.offset === 0) {
+            _t15.value[0] = {
+              offset: 0
+            };
+          }
+
+          $geom.animate.push(_t15);
+        }
+      } else {
         $geom.props.end = _end[0] * 0.01;
       }
     }
   }
 
   if (fill && Array.isArray(fill.color) && fill.color.length) {
-    var _t15 = transformFill(fill, begin2, duration);
-
-    var _first15 = _t15.value[0];
-
-    for (var _i8 = 0; _i8 < len; _i8++) {
-      children[_i8].props.style.fill = _first15.fill;
-    }
-
-    if (_t15.value.length > 1) {
-      _t15.value[0] = {
-        offset: 0
-      };
-
-      for (var _i9 = 0; _i9 < len; _i9++) {
-        children[_i9].animate.push(_t15);
-      }
-    }
-  }
-
-  if (stroke && Array.isArray(stroke.color) && stroke.color.length) {
-    var _t16 = transformStroke(stroke, begin2, duration);
+    var _t16 = transformFill(fill, begin2, duration);
 
     var _first16 = _t16.value[0];
 
     for (var _i10 = 0; _i10 < len; _i10++) {
-      children[_i10].props.style.stroke = _first16.stroke;
+      children[_i10].props.style.fill = _first16.fill;
     }
 
     if (_t16.value.length > 1) {
@@ -4329,13 +4331,13 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (stroke && Array.isArray(stroke.width) && stroke.width.length) {
-    var _t17 = transformStrokeWidth(stroke.width, begin2, duration);
+  if (stroke && Array.isArray(stroke.color) && stroke.color.length) {
+    var _t17 = transformStroke(stroke, begin2, duration);
 
     var _first17 = _t17.value[0];
 
     for (var _i12 = 0; _i12 < len; _i12++) {
-      children[_i12].props.style.strokeWidth = _first17.strokeWidth;
+      children[_i12].props.style.stroke = _first17.stroke;
     }
 
     if (_t17.value.length > 1) {
@@ -4349,13 +4351,13 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (stroke && Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
-    var _t18 = transformLineJoin(stroke.lineJoin, begin2, duration);
+  if (stroke && Array.isArray(stroke.width) && stroke.width.length) {
+    var _t18 = transformStrokeWidth(stroke.width, begin2, duration);
 
     var _first18 = _t18.value[0];
 
     for (var _i14 = 0; _i14 < len; _i14++) {
-      children[_i14].props.style.strokeLineJoin = _first18.strokeLineJoin;
+      children[_i14].props.style.strokeWidth = _first18.strokeWidth;
     }
 
     if (_t18.value.length > 1) {
@@ -4369,13 +4371,13 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (stroke && Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
-    var _t19 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+  if (stroke && Array.isArray(stroke.lineJoin) && stroke.lineJoin.length) {
+    var _t19 = transformLineJoin(stroke.lineJoin, begin2, duration);
 
     var _first19 = _t19.value[0];
 
     for (var _i16 = 0; _i16 < len; _i16++) {
-      children[_i16].props.style.strokeMiterlimit = _first19.strokeMiterlimit;
+      children[_i16].props.style.strokeLineJoin = _first19.strokeLineJoin;
     }
 
     if (_t19.value.length > 1) {
@@ -4389,15 +4391,35 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
     }
   }
 
-  if (stroke && stroke.dashes) {
+  if (stroke && Array.isArray(stroke.strokeMiterlimit) && stroke.strokeMiterlimit.length) {
+    var _t20 = transformMiterLimit(stroke.strokeMiterlimit, begin2, duration);
+
+    var _first20 = _t20.value[0];
+
     for (var _i18 = 0; _i18 < len; _i18++) {
-      children[_i18].props.style.strokeDasharray = [stroke.dashes];
+      children[_i18].props.style.strokeMiterlimit = _first20.strokeMiterlimit;
+    }
+
+    if (_t20.value.length > 1) {
+      _t20.value[0] = {
+        offset: 0
+      };
+
+      for (var _i19 = 0; _i19 < len; _i19++) {
+        children[_i19].animate.push(_t20);
+      }
+    }
+  }
+
+  if (stroke && stroke.dashes) {
+    for (var _i20 = 0; _i20 < len; _i20++) {
+      children[_i20].props.style.strokeDasharray = [stroke.dashes];
     }
   }
 
   if (!stroke) {
-    for (var _i19 = 0; _i19 < len; _i19++) {
-      children[_i19].props.style.strokeWidth = [0];
+    for (var _i21 = 0; _i21 < len; _i21++) {
+      children[_i21].props.style.strokeWidth = [0];
     }
   }
 
@@ -4485,19 +4507,19 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
   }
 
   if (Array.isArray(opacity) && opacity.length) {
-    var _t20 = transformOpacity(opacity, begin2, duration);
+    var _t21 = transformOpacity(opacity, begin2, duration);
 
-    var _first20 = _t20.value[0];
+    var _first21 = _t21.value[0];
 
-    if (_first20.opacity !== 1) {
-      res.props.style.opacity = _first20.opacity;
+    if (_first21.opacity !== 1) {
+      res.props.style.opacity = _first21.opacity;
     }
 
-    if (_t20.value.length > 1) {
-      _t20.value[0] = {
+    if (_t21.value.length > 1) {
+      _t21.value[0] = {
         offset: 0
       };
-      res.animate.push(_t20);
+      res.animate.push(_t21);
     }
   } // 获取对象锚点，mask的锚点需保持相同
 
