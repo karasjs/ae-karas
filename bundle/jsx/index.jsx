@@ -2714,21 +2714,16 @@ function insertKf(offsetList, offsetHash, list, style, key) {
         };
 
         if (ea) {
-          // $.ae2karas.log(j + ',' + percent);
-          // $.ae2karas.log(ea);
-          var points = sliceBezier([[0, 0], [ea[0], ea[1]], [ea[2], ea[3]], [1, 1]], percent); // $.ae2karas.log(points);
-
-          prev.easing = [points[1][0] / points[3][0], points[1][1] / points[3][1], points[2][0] / points[3][0], points[2][1] / points[3][1]]; // $.ae2karas.log(prev.easing);
-
-          points = sliceBezier([[0, 0], [ea[0], ea[1]], [ea[2], ea[3]], [1, 1]].reverse(), 1 - percent).reverse(); // $.ae2karas.log(points);
-
+          var points = sliceBezier([[0, 0], [ea[0], ea[1]], [ea[2], ea[3]], [1, 1]], percent);
+          prev.easing = [points[1][0] / points[3][0], points[1][1] / points[3][1], points[2][0] / points[3][0], points[2][1] / points[3][1]];
+          points = sliceBezier([[0, 0], [ea[0], ea[1]], [ea[2], ea[3]], [1, 1]].reverse(), 1 - percent).reverse();
           var x = 1 - points[0][0],
               y = 1 - points[0][1];
-          obj.easing = [(points[1][0] - points[0][0]) / x, (points[1][1] - points[0][1]) / y, (points[2][0] - points[0][0]) / x, (points[2][1] - points[0][1]) / y]; // $.ae2karas.log(obj.easing);
+          obj.easing = [(points[1][0] - points[0][0]) / x, (points[1][1] - points[0][1]) / y, (points[2][0] - points[0][0]) / x, (points[2][1] - points[0][1]) / y];
         }
 
         var pv = j === 1 ? style[key] || '' : prev[key] || '';
-        var nv = next[key] || ''; // $.ae2karas.log(key + ',' + j + ',' + pv + ',' + nv);
+        var nv = next[key] || '';
 
         if (key === 'transformOrigin') {
           pv = pv.split(' ');
@@ -2752,11 +2747,11 @@ function insertKf(offsetList, offsetHash, list, style, key) {
             var k = arr[m];
 
             if (k !== key && (prev.hasOwnProperty(k) || next.hasOwnProperty(k))) {
-              var _p = j === 1 ? style[k] || 0 : prev[k] || 0;
+              var _pv = j === 1 ? style[k] || 0 : prev[k] || 0;
 
-              var _diff2 = (next[k] || 0) - _p;
+              var _diff2 = (next[k] || 0) - _pv;
 
-              obj[k] = _p + _diff2 * _p;
+              obj[k] = _pv + _diff2 * p;
             }
           }
         } else if (key === 'rotateX' || key === 'rotateY' || key === 'rotateZ') {

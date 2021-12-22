@@ -39,29 +39,24 @@ function insertKf(offsetList, offsetHash, list, style, key) {
           offset: offsetList[j],
         };
         if(ea) {
-          // $.ae2karas.log(j + ',' + percent);
-          // $.ae2karas.log(ea);
           let points = sliceBezier([
             [0, 0],
             [ea[0], ea[1]],
             [ea[2], ea[3]],
             [1, 1],
           ], percent);
-          // $.ae2karas.log(points);
           prev.easing = [
             points[1][0] / points[3][0],
             points[1][1] / points[3][1],
             points[2][0] / points[3][0],
             points[2][1] / points[3][1],
           ];
-          // $.ae2karas.log(prev.easing);
           points = sliceBezier([
             [0, 0],
             [ea[0], ea[1]],
             [ea[2], ea[3]],
             [1, 1],
           ].reverse(), 1 - percent).reverse();
-          // $.ae2karas.log(points);
           let x = 1 - points[0][0], y = 1 - points[0][1];
           obj.easing = [
             (points[1][0] - points[0][0]) / x,
@@ -69,11 +64,9 @@ function insertKf(offsetList, offsetHash, list, style, key) {
             (points[2][0] - points[0][0]) / x,
             (points[2][1] - points[0][1]) / y,
           ];
-          // $.ae2karas.log(obj.easing);
         }
         let pv = j === 1 ? (style[key] || '') : (prev[key] || '');
         let nv = next[key] || '';
-        // $.ae2karas.log(key + ',' + j + ',' + pv + ',' + nv);
         if(key === 'transformOrigin') {
           pv = pv.split(' ');
           pv[0] = parseFloat(pv[0]) || 0;
@@ -100,9 +93,9 @@ function insertKf(offsetList, offsetHash, list, style, key) {
           for(let m = 0; m < 3; m++) {
             let k = arr[m];
             if(k !== key && (prev.hasOwnProperty(k) || next.hasOwnProperty(k))) {
-              let p = j === 1 ? (style[k] || 0) : (prev[k] || 0);
-              let diff = (next[k] || 0) - p;
-              obj[k] = p + diff * p;
+              let pv = j === 1 ? (style[k] || 0) : (prev[k] || 0);
+              let diff = (next[k] || 0) - pv;
+              obj[k] = pv + diff * p;
             }
           }
         }
