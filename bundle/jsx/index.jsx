@@ -2703,17 +2703,32 @@ function insertKf(offsetList, offsetHash, list, style, key) {
             next = item[j];
         var percent = (offsetList[j] - prev.offset) / (next.offset - prev.offset);
         var ea = prev.easing;
+        var p = percent;
 
         if (ea) {
-          percent = easing.getEasing(ea)(percent);
+          p = easing.getEasing(ea)(percent);
         }
 
         var obj = {
           offset: offsetList[j]
         };
 
+        if (ea) {
+          // $.ae2karas.log(j + ',' + percent);
+          // $.ae2karas.log(ea);
+          var points = sliceBezier([[0, 0], [ea[0], ea[1]], [ea[2], ea[3]], [1, 1]], percent); // $.ae2karas.log(points);
+
+          prev.easing = [points[1][0] / points[3][0], points[1][1] / points[3][1], points[2][0] / points[3][0], points[2][1] / points[3][1]]; // $.ae2karas.log(prev.easing);
+
+          points = sliceBezier([[0, 0], [ea[0], ea[1]], [ea[2], ea[3]], [1, 1]].reverse(), 1 - percent).reverse(); // $.ae2karas.log(points);
+
+          var x = 1 - points[0][0],
+              y = 1 - points[0][1];
+          obj.easing = [(points[1][0] - points[0][0]) / x, (points[1][1] - points[0][1]) / y, (points[2][0] - points[0][0]) / x, (points[2][1] - points[0][1]) / y]; // $.ae2karas.log(obj.easing);
+        }
+
         var pv = j === 1 ? style[key] || '' : prev[key] || '';
-        var nv = next[key] || '';
+        var nv = next[key] || ''; // $.ae2karas.log(key + ',' + j + ',' + pv + ',' + nv);
 
         if (key === 'transformOrigin') {
           pv = pv.split(' ');
@@ -2725,27 +2740,29 @@ function insertKf(offsetList, offsetHash, list, style, key) {
           nv[1] = parseFloat(nv[1]) || 0;
           nv[2] = parseFloat(nv[2]) || 0;
           var diff = [nv[0] - pv[0], nv[1] - pv[1], nv[2] - pv[2]];
-          obj[key] = pv[0] + diff[0] * percent + ' ' + (pv[1] + diff[1] * percent) + ' ' + (pv[2] + diff[2] * percent);
+          obj[key] = pv[0] + diff[0] * p + ' ' + (pv[1] + diff[1] * p) + ' ' + (pv[2] + diff[2] * p);
         } // 这3个key可能同时出现在一帧里
         else if (key === 'translateX' || key === 'translateY' || key === 'translateZ') {
           var _diff = (nv || 0) - (pv || 0);
 
-          obj[key] = (pv || 0) + _diff * percent;
+          obj[key] = (pv || 0) + _diff * p;
           var arr = ['translateX', 'translateY', 'translateZ'];
 
           for (var m = 0; m < 3; m++) {
             var k = arr[m];
 
-            if (k !== 'key' && (prev.hasOwnProperty(k) || next.hasOwnProperty(k))) {
-              var _diff2 = (next[k] || 0) - (prev[k] || 0);
+            if (k !== key && (prev.hasOwnProperty(k) || next.hasOwnProperty(k))) {
+              var _p = j === 1 ? style[k] || 0 : prev[k] || 0;
 
-              obj[k] = (prev[k] || 0) + _diff2 * percent;
+              var _diff2 = (next[k] || 0) - _p;
+
+              obj[k] = _p + _diff2 * _p;
             }
           }
         } else if (key === 'rotateX' || key === 'rotateY' || key === 'rotateZ') {
           var _diff3 = (nv || 0) - (pv || 0);
 
-          obj[key] = (pv || 0) + _diff3 * percent;
+          obj[key] = (pv || 0) + _diff3 * p;
         }
 
         item.splice(j, 0, obj);
@@ -2844,7 +2861,7 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
   var z = parseFloat(tfo[2]) || 0;
   x += tx;
   y += ty;
-  z += tz; // $.ae2karas.log(eyeX + ',' + eyeY + ',' + eyeZ + ';' + lookX + ',' + lookY + ',' + lookZ);
+  z += tz; // $.ae2karas.warn(eyeX + ',' + eyeY + ',' + eyeZ + '; ' + lookX + ',' + lookY + ',' + lookZ);
   // $.ae2karas.log({ x, y, z });
 
   var o = convert$1(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, {
@@ -2903,7 +2920,7 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
     var record = {};
 
     outer: for (var _i2 = 0, _len2 = animate.length; _i2 < _len2; _i2++) {
-      var _item2 = animate[_i2];
+      var _item2 = animate[_i2].value;
 
       for (var j = 0, len2 = _item2.length; j < len2; j++) {
         var item2 = _item2[j];
@@ -2932,7 +2949,10 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
           break outer;
         }
       }
-    }
+    } // $.ae2karas.log(JSON.stringify(animate));
+    // $.ae2karas.log(record);
+    // $.ae2karas.log(temp);
+
 
     var list = ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY'];
 
@@ -3041,7 +3061,8 @@ function convertY(cy, eyeY, eyeZ, lookY, lookZ, data) {
 }
 
 function camera (data, res) {
-  $.ae2karas.error('camera');
+  $.ae2karas.error('camera'); // $.ae2karas.log(JSON.stringify(res));
+
   var children = res.children; // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
 
   var offsetList = [0],
@@ -3071,7 +3092,7 @@ function camera (data, res) {
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'transformOrigin');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateX');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateY');
-  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ'); // $.ae2karas.log(data.animate);
+  insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
 
   for (var _i4 = 0, _len5 = children.length; _i4 < _len5; _i4++) {
     var _child = children[_i4];
@@ -3081,7 +3102,8 @@ function camera (data, res) {
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'translateZ');
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateX');
     insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateY');
-    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateZ');
+    insertKf(offsetList, offsetHash, _child.animate, _child.init.style, 'rotateZ'); // $.ae2karas.log(i);
+    // $.ae2karas.log(JSON.stringify(child));
   } // 时长
 
 
@@ -3337,7 +3359,14 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
           init.style.translateZ = _first3.translateZ;
         }
 
-        res.animate.push(_t3);
+        if (_t3.value.length > 1) {
+          _t3.value[0] = {
+            offset: 0,
+            easing: _first3.easing
+          };
+          res.animate.push(_t3);
+        }
+
         is3d = true;
       }
     } else {

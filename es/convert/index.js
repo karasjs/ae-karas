@@ -150,7 +150,13 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         if(first.translateZ) {
           init.style.translateZ = first.translateZ;
         }
-        res.animate.push(t);
+        if(t.value.length > 1) {
+          t.value[0] = {
+            offset: 0,
+            easing: first.easing,
+          };
+          res.animate.push(t);
+        }
         is3d = true;
       }
     }

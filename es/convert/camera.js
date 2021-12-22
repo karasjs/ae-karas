@@ -1,4 +1,4 @@
-import { r2d } from '../math';
+import { r2d, sliceBezier } from '../math';
 import easing from '../easing';
 
 function getOffset(offsetList, offsetHash, list, key) {
@@ -31,17 +31,49 @@ function insertKf(offsetList, offsetHash, list, style, key) {
         let prev = item[j - 1], next = item[j];
         let percent = (offsetList[j] - prev.offset) / (next.offset - prev.offset);
         let ea = prev.easing;
+        let p = percent;
         if(ea) {
-          percent = easing.getEasing(ea)(percent);
+          p = easing.getEasing(ea)(percent);
         }
         let obj = {
           offset: offsetList[j],
         };
         if(ea) {
-          // TODO
+          // $.ae2karas.log(j + ',' + percent);
+          // $.ae2karas.log(ea);
+          let points = sliceBezier([
+            [0, 0],
+            [ea[0], ea[1]],
+            [ea[2], ea[3]],
+            [1, 1],
+          ], percent);
+          // $.ae2karas.log(points);
+          prev.easing = [
+            points[1][0] / points[3][0],
+            points[1][1] / points[3][1],
+            points[2][0] / points[3][0],
+            points[2][1] / points[3][1],
+          ];
+          // $.ae2karas.log(prev.easing);
+          points = sliceBezier([
+            [0, 0],
+            [ea[0], ea[1]],
+            [ea[2], ea[3]],
+            [1, 1],
+          ].reverse(), 1 - percent).reverse();
+          // $.ae2karas.log(points);
+          let x = 1 - points[0][0], y = 1 - points[0][1];
+          obj.easing = [
+            (points[1][0] - points[0][0]) / x,
+            (points[1][1] - points[0][1]) / y,
+            (points[2][0] - points[0][0]) / x,
+            (points[2][1] - points[0][1]) / y,
+          ];
+          // $.ae2karas.log(obj.easing);
         }
         let pv = j === 1 ? (style[key] || '') : (prev[key] || '');
         let nv = next[key] || '';
+        // $.ae2karas.log(key + ',' + j + ',' + pv + ',' + nv);
         if(key === 'transformOrigin') {
           pv = pv.split(' ');
           pv[0] = parseFloat(pv[0]) || 0;
@@ -56,26 +88,27 @@ function insertKf(offsetList, offsetHash, list, style, key) {
             nv[1] - pv[1],
             nv[2] - pv[2],
           ];
-          obj[key] = (pv[0] + diff[0] * percent)
-            + ' ' + (pv[1] + diff[1] * percent)
-            + ' ' + (pv[2] + diff[2] * percent);
+          obj[key] = (pv[0] + diff[0] * p)
+            + ' ' + (pv[1] + diff[1] * p)
+            + ' ' + (pv[2] + diff[2] * p);
         }
         // 这3个key可能同时出现在一帧里
         else if(key === 'translateX' || key === 'translateY' || key === 'translateZ') {
-          let diff = (nv || 0) - ( pv || 0);
-          obj[key] = (pv || 0) + diff * percent;
+          let diff = (nv || 0) - (pv || 0);
+          obj[key] = (pv || 0) + diff * p;
           let arr = ['translateX', 'translateY', 'translateZ'];
           for(let m = 0; m < 3; m++) {
             let k = arr[m];
-            if(k !== 'key' && (prev.hasOwnProperty(k) || next.hasOwnProperty(k))) {
-              let diff = (next[k] || 0) - (prev[k] || 0);
-              obj[k] = (prev[k] || 0) + diff * percent;
+            if(k !== key && (prev.hasOwnProperty(k) || next.hasOwnProperty(k))) {
+              let p = j === 1 ? (style[k] || 0) : (prev[k] || 0);
+              let diff = (next[k] || 0) - p;
+              obj[k] = p + diff * p;
             }
           }
         }
         else if(key === 'rotateX' || key === 'rotateY' || key === 'rotateZ') {
           let diff = (nv || 0) - ( pv || 0);
-          obj[key] = (pv || 0) + diff * percent;
+          obj[key] = (pv || 0) + diff * p;
         }
         item.splice(j, 0, obj);
       }
@@ -169,7 +202,7 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
   x += tx;
   y += ty;
   z += tz;
-  // $.ae2karas.log(eyeX + ',' + eyeY + ',' + eyeZ + ';' + lookX + ',' + lookY + ',' + lookZ);
+  // $.ae2karas.warn(eyeX + ',' + eyeY + ',' + eyeZ + '; ' + lookX + ',' + lookY + ',' + lookZ);
   // $.ae2karas.log({ x, y, z });
   let o = convert(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, { x, y, z });
   // $.ae2karas.log(o);
@@ -225,7 +258,7 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
     let record = {};
     outer:
     for(let i = 0, len = animate.length; i < len; i++) {
-      let item = animate[i];
+      let item = animate[i].value;
       for(let j = 0, len2 = item.length; j < len2; j++) {
         let item2 = item[j];
         if(item2.hasOwnProperty('translateX')) {
@@ -248,6 +281,9 @@ function setTranslateAndRotate(w, h, child, index, offsetList, duration, eyeX, e
         }
       }
     }
+    // $.ae2karas.log(JSON.stringify(animate));
+    // $.ae2karas.log(record);
+    // $.ae2karas.log(temp);
     let list = ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY'];
     for(let i = 0, len = list.length; i < len; i++) {
       let k = list[i];
@@ -346,6 +382,7 @@ function convertY(cy, eyeY, eyeZ, lookY, lookZ, data) {
 
 export default function(data, res) {
   $.ae2karas.error('camera');
+  // $.ae2karas.log(JSON.stringify(res));
   let children = res.children;
   // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
   let offsetList = [0], offsetHash = { 0: true };
@@ -371,7 +408,6 @@ export default function(data, res) {
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateX');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateY');
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
-  // $.ae2karas.log(data.animate);
   for(let i = 0, len = children.length; i < len; i++) {
     let child = children[i];
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'transformOrigin');
@@ -381,6 +417,8 @@ export default function(data, res) {
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateX');
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateY');
     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateZ');
+    // $.ae2karas.log(i);
+    // $.ae2karas.log(JSON.stringify(child));
   }
   // 时长
   let duration = 0;
