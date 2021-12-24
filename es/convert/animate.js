@@ -71,8 +71,14 @@ function getAreaList(list, begin, duration, reducer) {
         [first.easing[0], first.easing[1]],
         [first.easing[2], first.easing[3]],
         [1, 1],
-      ].reverse(), percent).reverse();
-      first.easing = [points[1][0], points[1][1], points[2][0], points[2][1]];
+      ].reverse(), (1 - percent)).reverse();
+      let x = 1 - points[0][0], y = 1 - points[0][1];
+      first.easing = [
+        (points[1][0] - points[0][0]) / x,
+        (points[1][1] - points[0][1]) / y,
+        (points[2][0] - points[0][0]) / x,
+        (points[2][1] - points[0][1]) / y,
+      ];
     }
   }
   // 截取尾帧部分，同上
@@ -93,7 +99,12 @@ function getAreaList(list, begin, duration, reducer) {
         [prev.easing[2], prev.easing[3]],
         [1, 1],
       ], percent);
-      prev.easing = [points[1][0], points[1][1], points[2][0], points[2][1]];
+      prev.easing = [
+        points[1][0] / points[3][0],
+        points[1][1] / points[3][1],
+        points[2][0] / points[3][0],
+        points[2][1] / points[3][1],
+      ];
     }
   }
   // 补齐尾帧，同上
