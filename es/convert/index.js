@@ -108,7 +108,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     }
   }
   let is3d;
-  // position要考虑x/y拆开
+  // position要考虑x/y/z拆开
   let translateAbbr = true;
   if(Array.isArray(position_0) && position_0.length > 1) {
     translateAbbr = false;
@@ -116,12 +116,12 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   if(Array.isArray(position_1) && position_1.length > 1) {
     translateAbbr = false;
   }
-  if(Array.isArray(position_2) && position_2.length > 1) {
+  if(Array.isArray(position_2) && position_2.length > 1 && res.ddd) {
     translateAbbr = false;
   }
   if(Array.isArray(position) && position.length && translateAbbr) {
     // 需要特殊把translateZ拆开，因为独占一个easing2属性，不能和xy共用
-    if(position.length > 1) {
+    if(position.length > 1 && res.ddd) {
       let hasZ;
       for(let i = 0, len = position.length; i < len; i++) {
         let item = position[i];
@@ -161,7 +161,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       }
     }
     else {
-      if(position[0][2]) {
+      if(position[0][2] && res.ddd) {
         init.style.translateZ = -position[0][2];
         is3d = true;
       }
@@ -179,10 +179,6 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       if(first.translateY) {
         init.style.translateY = first.translateY;
       }
-      // if(first.translateZ) {
-      //   init.style.translateZ = first.translateZ;
-      //   is3d = true;
-      // }
     }
     if(t.value.length > 1) {
       if(!first.translatePath) {
@@ -190,9 +186,6 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
           offset: 0,
           easing: first.easing,
         };
-        // if(t.value[1].length > 2) {
-        //   is3d = true;
-        // }
       }
       res.animate.push(t);
     }
@@ -226,7 +219,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         res.animate.push(t);
       }
     }
-    if(Array.isArray(position_2) && position_2.length) {
+    if(Array.isArray(position_2) && position_2.length && res.ddd) {
       let t = translateXYZ(position_2, begin2, duration, 'translateZ');
       let first = t.value[0];
       if(first.translateZ) {
@@ -243,7 +236,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       }
     }
   }
-  if(Array.isArray(rotateX) && rotateX.length) {
+  if(Array.isArray(rotateX) && rotateX.length && res.ddd) {
     let t = transformRotateX(rotateX, begin2, duration);
     let first = t.value[0];
     if(first.rotateX) {
@@ -259,7 +252,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       is3d = true;
     }
   }
-  if(Array.isArray(rotateY) && rotateY.length) {
+  if(Array.isArray(rotateY) && rotateY.length && res.ddd) {
     let t = transformRotateY(rotateY, begin2, duration);
     let first = t.value[0];
     if(first.rotateY) {
@@ -280,7 +273,6 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     let first = t.value[0];
     if(first.rotateZ) {
       init.style.rotateZ = first.rotateZ;
-      is3d = true;
     }
     if(t.value.length > 1) {
       t.value[0] = {
@@ -288,7 +280,6 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         easing: first.easing,
       };
       res.animate.push(t);
-      is3d = true;
     }
   }
   if(is3d) {
@@ -296,7 +287,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
   if(Array.isArray(scale) && scale.length) {
-    let t = transformScale(scale, begin2, duration);
+    let t = transformScale(scale, begin2, duration, res.ddd);
     let first = t.value[0];
     if(first.scaleX !== 1 && first.scaleX !== undefined && first.scaleX !== null) {
       init.style.scaleX = first.scaleX;
@@ -334,7 +325,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   if(!data.enabled) {
     return null;
   }
-  let { name, assetId, startTime, inPoint, outPoint, blendingMode, isCamera, isMask, isClip } = data;
+  let { name, assetId, startTime, inPoint, outPoint, blendingMode, ddd, isCamera, isMask, isClip } = data;
   if(!isCamera && (assetId === undefined || assetId === null)) {
     return null;
   }
@@ -364,6 +355,9 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   }
   else {
     res.libraryId = parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
+  }
+  if(ddd) {
+    res.ddd = true;
   }
   res.init = {
     style: {},
@@ -1193,7 +1187,7 @@ export default function(data) {
         animate: child.animate,
       };
       cd.splice(i, 1);
-      let c3d = camera(cameraData, res);
+      camera(cameraData, res);
       break;
     }
   }

@@ -400,7 +400,7 @@ export function transformRotateZ(list, begin, duration) {
   return res;
 }
 
-export function transformScale(list, begin, duration) {
+export function transformScale(list, begin, duration, is3d) {
   let res = {
     value: [],
     options: {
@@ -415,7 +415,7 @@ export function transformScale(list, begin, duration) {
       scaleX: list[0][0] * 0.01,
       scaleY: list[0][1] * 0.01,
     };
-    if(list[0].length > 2) {
+    if(list[0].length > 2 && is3d) {
       v.scaleZ = list[0][2] * 0.01;
     }
     res.value.push(v);
@@ -438,7 +438,7 @@ export function transformScale(list, begin, duration) {
       if(item.easing) {
         v.easing = item.easing;
       }
-      if(item.value.length > 2) {
+      if(item.value.length > 2 && is3d) {
         v.scaleZ = item.value[2] * 0.01;
       }
       res.value.push(v);

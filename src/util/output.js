@@ -23,6 +23,8 @@ const STYLE = [
   'fontSize',
   'lineHeight',
   'translatePath',
+  'scale',
+  'zIndex',
 ];
 
 function recursion(data, params) {

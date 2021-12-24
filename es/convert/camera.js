@@ -377,6 +377,20 @@ export default function(data, res) {
   $.ae2karas.error('camera');
   // $.ae2karas.log(JSON.stringify(res));
   let children = res.children;
+  // 时长
+  let duration = 0;
+  if(data.animate.length) {
+    duration = data.animate[0].options.duration;
+  }
+  else {
+    for(let i = 0, len = children.length; i < len; i++) {
+      let child = children[i];
+      if(child.animate.length) {
+        duration = child.animate[0].options.duration;
+        break;
+      }
+    }
+  }
   // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
   let offsetList = [0], offsetHash = { 0: true };
   getOffset(offsetList, offsetHash, data.animate, 'transformOrigin');
@@ -403,28 +417,15 @@ export default function(data, res) {
   insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
   for(let i = 0, len = children.length; i < len; i++) {
     let child = children[i];
-    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'transformOrigin');
-    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateX');
-    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateY');
-    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateZ');
-    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateX');
-    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateY');
-    insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateZ');
-    // $.ae2karas.log(i);
-    // $.ae2karas.log(JSON.stringify(child));
-  }
-  // 时长
-  let duration = 0;
-  if(data.animate.length) {
-    duration = data.animate[0].options.duration;
-  }
-  else {
-    for(let i = 0, len = children.length; i < len; i++) {
-      let child = children[i];
-      if(child.animate.length) {
-        duration = child.animate[0].options.duration;
-        break;
-      }
+    // 只有3d图层需要
+    if(child.ddd) {
+      insertKf(offsetList, offsetHash, child.animate, child.init.style, 'transformOrigin');
+      insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateX');
+      insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateY');
+      insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateZ');
+      insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateX');
+      insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateY');
+      insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateZ');
     }
   }
   let w = res.props.style.width, h = res.props.style.height;
@@ -452,19 +453,62 @@ export default function(data, res) {
     }
     for(let j = 0, len2 = children.length; j < len2; j++) {
       let child = children[j];
-      setTranslateAndRotate(w, h, child, i, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
+      if(child.ddd) {
+        setTranslateAndRotate(w, h, child, i, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
+      }
+      else {
+        //
+      }
     }
   }
-  // 因为上面一个步骤会遍历每个孩子的动画，强制添加几个首帧关键帧，如果没有动画的话则无效添加，需要再过滤一遍清除
-  // for(let i = 0, len = children.length; i < len; i++) {
-  //   let animate = children[i].animate;
-  //   for(let j = animate.length - 1; j >= 0; j--) {
-  //     let item = animate[j];
-  //     if(item.value.length <= 1) {
-  //       animate.splice(j, 1);
-  //     }
-  //   }
-  // }
+  // 特殊插入zIndex，值等同于translateZ
+  for(let i = 0, len = children.length; i < len; i++) {
+    let child = children[i];
+    if(!child.ddd) {
+      continue;
+    }
+    let style = child.init.style;
+    let animate = child.animate;
+    if(style.translateZ) {
+      style.zIndex = style.translateZ;
+    }
+    let zIndex = [];
+    for(let j = 0, len2 = offsetList.length; j < len2; j++) {
+      if(j) {
+        let has;
+        for(let k = 0, len3 = animate.length; k < len3; k++) {
+          let item = animate[k];
+          let item2 = item.value[j];
+          if(item2.hasOwnProperty('translateZ')) {
+            zIndex.push({
+              offset: offsetList[j],
+              zIndex: item2.translateZ,
+            });
+            has = true;
+            break;
+          }
+        }
+        if(!has) {
+          zIndex.push({
+            offset: offsetList[j],
+          });
+        }
+      }
+      else {
+        zIndex.push({
+          offset: 0,
+        });
+      }
+    }
+    child.animate.push({
+      value: zIndex,
+      options: {
+        duration,
+        iterations: 1,
+        fill: 'forwards',
+      },
+    });
+  }
   if(rootAnimate.length > 1) {
     res.animate = [
       {
