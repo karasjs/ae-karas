@@ -50,6 +50,17 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
   // 附链接不跟随透明度，所以删掉opacity的静态属性
   if(res.props.style.hasOwnProperty('opacity')) {
     delete res.props.style.opacity;
+    let animate = res.animate;
+    outer:
+    for(let i = animate.length - 1; i >= 0; i--) {
+      let item = animate[i].value;
+      for(let j = 1, len = item.length; j < len; j++) {
+        if(item[j].hasOwnProperty('opacity')) {
+          animate.splice(i, 1);
+          break outer;
+        }
+      }
+    }
   }
   return res;
 }
@@ -329,11 +340,10 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   if(!isCamera && (assetId === undefined || assetId === null)) {
     return null;
   }
-  let begin = start + offset + displayStartTime;
   inPoint += offset + displayStartTime;
   outPoint += offset + displayStartTime;
   // 图层在工作区外可忽略
-  if(inPoint >= begin + duration || outPoint <= begin) {
+  if(inPoint >= start + duration || outPoint <= start) {
     return null;
   }
   let res = {
@@ -420,7 +430,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   }
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
-  if(inPoint > begin || outPoint < begin + duration) {
+  if(inPoint > start || outPoint < start + duration) {
     let v = {
       value: [],
       options: {
@@ -430,7 +440,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
       },
     };
     // 开头不可见，默认init的style
-    if(inPoint > begin) {
+    if(inPoint > start) {
       res.init.style.visibility = 'hidden';
       res.init.style.pointerEvents = 'none';
       v.value.push({
@@ -450,7 +460,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
       });
     }
     // 结尾计算
-    if(outPoint < begin + duration) {
+    if(outPoint < start + duration) {
       // 可能是第一帧但offset不为0，不用担心karas会补充空首帧
       v.value.push({
         offset: outPoint / duration,
@@ -458,7 +468,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
         pointerEvents: 'none',
       });
       // 默认不是隐藏需补结束帧为隐藏，否则karas会填补空关键帧
-      if(inPoint <= begin) {
+      if(inPoint <= start) {
         v.value.push({
           offset: 1,
           visibility: 'hidden',
@@ -1187,7 +1197,7 @@ export default function(data) {
         animate: child.animate,
       };
       cd.splice(i, 1);
-      camera(cameraData, res);
+      // camera(cameraData, res);
       break;
     }
   }

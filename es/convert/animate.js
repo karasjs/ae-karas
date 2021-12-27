@@ -46,6 +46,9 @@ function getAreaList(list, begin, duration, reducer) {
   if(startIndex > 0 || endIndex < len - 1) {
     list = list.slice(startIndex, endIndex + 1);
   }
+  if(list.length < 2) {
+    return list;
+  }
   // 补齐首帧，当关键帧在工作区间内的时候
   let first = list[0];
   if(first.time > begin) {
@@ -216,9 +219,6 @@ export function transformPosition(list, begin, duration) {
       translateX: list[0][0],
       translateY: list[0][1],
     };
-    // if(list[0].length > 2) {
-    //   r.translateZ = -list[0][2];
-    // }
     res.value.push(r);
   }
   else {
@@ -242,12 +242,6 @@ export function transformPosition(list, begin, duration) {
         prev[0] + (next[0] - prev[0]) * percent,
         prev[1] + (next[1] - prev[1]) * percent,
       ];
-      if(prev.length > 2) {
-        // $.ae2karas.log(percent);
-        // $.ae2karas.log(prev);
-        // $.ae2karas.log(next);
-        // r.push(prev[2] + (next[2] - prev[2]) * percent);
-      }
       return r;
     });
     for(let i = 0, len = list.length; i < len; i++) {
@@ -264,9 +258,6 @@ export function transformPosition(list, begin, duration) {
       else {
         o.translateX = item.value[0];
         o.translateY = item.value[1];
-        // if(item.value.length > 2) {
-        //   o.translateZ = -item.value[2];
-        // }
       }
       res.value.push(o);
     }
