@@ -101,6 +101,7 @@ function upload(name, data, imgHash, cb) {
       else {
         str = canvas.toDataURL('image/png');
       }
+      name = name.replace(/\.\w+$/, '');
       fetch(config.UPLOAD_BASE64, {
         method: 'post',
         headers: {

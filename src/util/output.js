@@ -237,6 +237,14 @@ function parseAnimate(data, params) {
     let v = options.duration.toFixed(params.precision);
     options.duration = parseFloat(v);
   }
+  if(options.hasOwnProperty('iterations')) {
+    if(params.iterations === 'Infinity') {
+      options.iterations = params.iterations;
+    }
+    else {
+      options.iterations = parseInt(params.iterations) || 1;
+    }
+  }
 }
 
 export default function(data, params) {

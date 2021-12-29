@@ -272,6 +272,10 @@ class Preview extends React.Component {
 
   render() {
     let { type, unit, rem, vw, vh, time, total, isPlaying, isBgBlack } = this.props.preview;
+    let iterations = this.props.preview.iterations;
+    if(iterations === 'Infinity') {
+      iterations = 0;
+    }
     return <div className={classnames('preview-panel', {
       show: store.global.isPreview,
     })}>
@@ -362,13 +366,13 @@ class Preview extends React.Component {
           <label className="block">
             <span>循环次数(0为无穷)</span>
             <input type="number" min="0"
-                   value={this.props.preview.iterations}
+                   value={iterations || 0}
                    onChange={e => this.changeIterations(e)}/>
           </label>
           <label className="block">
             <span>小数精度(0为整数)</span>
             <input type="number" min="0"
-                   value={this.props.preview.precision}
+                   value={this.props.preview.precision || 0}
                    onChange={e => this.changePrecision(e)}/>
           </label>
           <p>输出单位</p>
@@ -427,7 +431,7 @@ class Preview extends React.Component {
               let { data, iterations, precision } = this.props.preview;
               let { format, base64 } = this;
               data = JSON.parse(JSON.stringify(data));
-              data.uuid = undefined;
+              delete data.uuid;
               output(data, {
                 iterations,
                 precision,
@@ -455,7 +459,7 @@ class Preview extends React.Component {
               let { format, base64 } = this;
               let name = data.name;
               data = JSON.parse(JSON.stringify(data));
-              data.uuid = undefined;
+              delete data.uuid;
               output(data, {
                 iterations,
                 precision,
