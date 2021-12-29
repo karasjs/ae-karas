@@ -432,6 +432,7 @@ class Preview extends React.Component {
               let { format, base64 } = this;
               data = JSON.parse(JSON.stringify(data));
               delete data.uuid;
+              store.global.setLoading(true);
               output(data, {
                 iterations,
                 precision,
@@ -446,6 +447,7 @@ class Preview extends React.Component {
                 str = str.replace(/\n/g, '\\\n');
                 csInterface.evalScript(`$.ae2karas.export('${str}')`);
                 store.global.setAlert('导出成功！');
+                store.global.setLoading(false);
               }
               if(base64.checked) {
                 img.base64(data, cb);
@@ -460,6 +462,7 @@ class Preview extends React.Component {
               let name = data.name;
               data = JSON.parse(JSON.stringify(data));
               delete data.uuid;
+              store.global.setLoading(true);
               output(data, {
                 iterations,
                 precision,
@@ -469,7 +472,6 @@ class Preview extends React.Component {
                 vh,
               });
               function cb() {
-                store.global.setLoading(true);
                 let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
                 str = str.replace(/'/g, '\\\'');
                 let blob = new Blob([str], {

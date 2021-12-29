@@ -631,10 +631,15 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
       if(parentLink.hasOwnProperty(i)) {
         let item = parentLink[i];
         let asChild = item.asChild;
-        while(asChild !== undefined && parentLink[asChild]) {
+        while(asChild !== undefined && asChild !== null && parentLink[asChild]) {
           let parent = $.ae2karas.JSON.stringify(parentLink[asChild]);
           parent = $.ae2karas.JSON.parse(parent);
-          parent.children.push(item);
+          // 可能出现嵌套，需放在最里层
+          let target = parent;
+          while(target.children.length) {
+            target = target.children[0];
+          }
+          target.children.push(item);
           item = parent;
           asChild = parent.asChild;
         }
