@@ -271,10 +271,20 @@ class Preview extends React.Component {
   }
 
   render() {
-    let { type, unit, rem, vw, vh, time, total, isPlaying, isBgBlack } = this.props.preview;
+    let { data, type, unit, rem, vw, vh, time, total, isPlaying, isBgBlack } = this.props.preview;
     let iterations = this.props.preview.iterations;
     if(iterations === 'Infinity') {
       iterations = 0;
+    }
+    let list = [];
+    if(data) {
+      let library = data.library;
+      for(let i = 0, len = library.length; i < len; i++) {
+        let item = library[i];
+        if(item.tagName === 'img') {
+          list.push(item);
+        }
+      }
     }
     return <div className={classnames('preview-panel', {
       show: store.global.isPreview,
@@ -320,7 +330,16 @@ class Preview extends React.Component {
         </div>
       </div>
       <div className="container">
-        {/*<div className="menu"/>*/}
+        <ul className="menu">
+          {
+            list.map(item => {
+              return <li title={item.name}>
+                <img src={item.props.src}/>
+                <div>{item.props.style.width} * {item.props.style.height}</div>
+              </li>;
+            })
+          }
+        </ul>
         <div className="view">
           <div className="stage"
                ref={el => this.stage = el}>

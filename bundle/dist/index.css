@@ -140,6 +140,28 @@
   display: flex;
   padding: 0 10px 10px;
 }
+.preview-panel .container .menu {
+  margin: 0 10px 0 0;
+  width: 100px;
+  height: 100%;
+  overflow-y: auto;
+}
+.preview-panel .container .menu li {
+  margin-bottom: 10px;
+  width: 80px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+.preview-panel .container .menu li img {
+  display: block;
+  width: 100%;
+  max-height: 60px;
+  background: #313131;
+}
+.preview-panel .container .menu li div {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
 .preview-panel .container .view {
   flex: 1;
   display: flex;
