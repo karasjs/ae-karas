@@ -220,7 +220,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
       res.assetId = txt.id;
     }
     else if(source) {
-      let asset;
+      let asset, hasExist;
       // 图片图形等独立资源，将其解析为被link的放入library即可
       if(source instanceof FootageItem) {
         let src = source.file && source.file.fsName;
@@ -240,7 +240,6 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
             && !/\.gif/.test(src)) {
             return;
           }
-          let hasExist;
           for(let i = 0; i < library.length; i++) {
             let item = library[i];
             if(item.src === src && item.type === 'img') {
@@ -276,8 +275,10 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
         asset.type = 'div';
       }
       if(asset) {
-        asset.id = library.length;
-        library.push(asset);
+        if(!hasExist) {
+          asset.id = library.length;
+          library.push(asset);
+        }
         res.assetId = asset.id;
       }
     }

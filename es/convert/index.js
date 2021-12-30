@@ -364,7 +364,10 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     };
   }
   else {
-    res.libraryId = parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
+    if(!newLib[assetId]) {
+      parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
+    }
+    res.libraryId = assetId;
   }
   if(ddd) {
     res.ddd = true;
@@ -611,8 +614,8 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     res.children = [];
     parseChildren(res, children, library, newLib, start, duration, displayStartTime, offset);
   }
-  res.id = newLib.length;
-  newLib.push(res);
+  res.id = assetId;
+  newLib[assetId] = res;
   return res.id;
 }
 
