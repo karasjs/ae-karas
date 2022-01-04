@@ -332,8 +332,8 @@ class Preview extends React.Component {
       <div className="container">
         <ul className="menu">
           {
-            list.map(item => {
-              return <li title={item.name}>
+            list.map((item, i) => {
+              return <li title={item.name} key={i}>
                 <img src={item.props.src}/>
                 <div>{item.props.style.width} * {item.props.style.height}</div>
               </li>;

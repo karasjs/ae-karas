@@ -677,9 +677,10 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
             target = temp;
             temp = temp.children[0];
           }
+          let prev = target.children[target.children.length - 1];
           target.children.push(m);
           // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
-          let style = target.children[0].init.style;
+          let style = prev.init.style;
           if(style) {
             for(let i in style) {
               if(style.hasOwnProperty(i) && {
@@ -691,7 +692,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
               }
             }
           }
-          let a = target.children[0].animate;
+          let a = prev.animate;
           if(a && a.length) {
             m.animate = a;
           }
@@ -1071,7 +1072,7 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
   // $.ae2karas.log(data);
   // $.ae2karas.log(target);
   // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
-  if(target.children && target.children.length === 1) {
+  while(target.children && target.children.length === 1) {
     target = target.children[0];
   }
   let targetProps = target.init;
