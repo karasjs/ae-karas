@@ -23,6 +23,8 @@ const STYLE = [
   'fontSize',
   'lineHeight',
   'translatePath',
+  'scale',
+  'zIndex',
 ];
 
 function recursion(data, params) {
@@ -152,20 +154,23 @@ function parseStyle(data, params) {
         'top', 'right', 'bottom', 'left', 'width', 'height',
         'translateX', 'translateY', 'translateZ', 'perspective', 'fontSize',
       ].indexOf(k) > -1) {
-        let v2;
-        if(unit === 'rem') {
-          v2 = parseFloat((v / rem).toFixed(params.precision)) + 'rem';
+        // 3d有个wrap层是100%
+        if(v !== '100%') {
+          let v2;
+          if(unit === 'rem') {
+            v2 = parseFloat((v / rem).toFixed(params.precision)) + 'rem';
+          }
+          else if(unit === 'vw') {
+            v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vw';
+          }
+          else if(unit === 'vh') {
+            v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vh';
+          }
+          else if(v) {
+            v2 = parseFloat(v.toFixed(params.precision));
+          }
+          data[k] = v2;
         }
-        else if(unit === 'vw') {
-          v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vw';
-        }
-        else if(unit === 'vh') {
-          v2 = parseFloat((v * 100 / vw).toFixed(params.precision)) + 'vh';
-        }
-        else if(v) {
-          v2 = parseFloat(v.toFixed(params.precision));
-        }
-        data[k] = v2;
       }
       // 无单位的小数
       else if(v) {
@@ -234,6 +239,14 @@ function parseAnimate(data, params) {
   if(options.hasOwnProperty('duration')) {
     let v = options.duration.toFixed(params.precision);
     options.duration = parseFloat(v);
+  }
+  if(options.hasOwnProperty('iterations')) {
+    if(params.iterations === 'Infinity') {
+      options.iterations = params.iterations;
+    }
+    else {
+      options.iterations = parseInt(params.iterations) || 1;
+    }
   }
 }
 

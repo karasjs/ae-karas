@@ -14,9 +14,10 @@ import {
   transformLineJoin,
   transformMiterLimit,
   transformSize,
-  translateXY,
+  translateXYZ,
 } from './animate';
 import path from './path';
+import camera from './camera';
 
 /**
  * 预解析父级链接，不递归深入children，返回一个普通的div
@@ -49,6 +50,17 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
   // 附链接不跟随透明度，所以删掉opacity的静态属性
   if(res.props.style.hasOwnProperty('opacity')) {
     delete res.props.style.opacity;
+    let animate = res.animate;
+    outer:
+    for(let i = animate.length - 1; i >= 0; i--) {
+      let item = animate[i].value;
+      for(let j = 1, len = item.length; j < len; j++) {
+        if(item[j].hasOwnProperty('opacity')) {
+          animate.splice(i, 1);
+          break outer;
+        }
+      }
+    }
   }
   return res;
 }
@@ -107,7 +119,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     }
   }
   let is3d;
-  // position要考虑x/y拆开
+  // position要考虑x/y/z拆开
   let translateAbbr = true;
   if(Array.isArray(position_0) && position_0.length > 1) {
     translateAbbr = false;
@@ -115,10 +127,56 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   if(Array.isArray(position_1) && position_1.length > 1) {
     translateAbbr = false;
   }
-  if(Array.isArray(position_2) && position_2.length > 1) {
+  if(Array.isArray(position_2) && position_2.length > 1 && res.ddd) {
     translateAbbr = false;
   }
   if(Array.isArray(position) && position.length && translateAbbr) {
+    // 需要特殊把translateZ拆开，因为独占一个easing2属性，不能和xy共用
+    if(position.length > 1 && res.ddd) {
+      let hasZ;
+      for(let i = 0, len = position.length; i < len; i++) {
+        let item = position[i];
+        if(item.value[2] || item.easing2) {
+          hasZ = true;
+          break;
+        }
+      }
+      let za;
+      if(hasZ) {
+        za = [];
+        for(let i = 0, len = position.length; i < len; i++) {
+          let item = position[i];
+          let o = {
+            time: item.time,
+            value: item.value[2],
+          };
+          if(item.easing2) {
+            o.easing = item.easing2;
+          }
+          za.push(o);
+          delete item.easing2;
+        }
+        let t = translateXYZ(za, begin2, duration, 'translateZ');
+        let first = t.value[0];
+        if(first.translateZ) {
+          init.style.translateZ = first.translateZ;
+        }
+        if(t.value.length > 1) {
+          t.value[0] = {
+            offset: 0,
+            easing: first.easing,
+          };
+          res.animate.push(t);
+        }
+        is3d = true;
+      }
+    }
+    else {
+      if(position[0][2] && res.ddd) {
+        init.style.translateZ = -position[0][2];
+        is3d = true;
+      }
+    }
     let t = transformPosition(position, begin2, duration);
     let first = t.value[0];
     if(first.translatePath) {
@@ -132,10 +190,6 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       if(first.translateY) {
         init.style.translateY = first.translateY;
       }
-      if(first.translateZ) {
-        init.style.translateZ = first.translateZ;
-        is3d = true;
-      }
     }
     if(t.value.length > 1) {
       if(!first.translatePath) {
@@ -143,16 +197,13 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
           offset: 0,
           easing: first.easing,
         };
-        if(t.value[1].length > 2) {
-          is3d = true;
-        }
       }
       res.animate.push(t);
     }
   }
   else {
     if(Array.isArray(position_0) && position_0.length) {
-      let t = translateXY(position_0, begin2, duration, 'translateX');
+      let t = translateXYZ(position_0, begin2, duration, 'translateX');
       let first = t.value[0];
       if(first.translateX) {
         init.style.translateX = first.translateX;
@@ -166,7 +217,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       }
     }
     if(Array.isArray(position_1) && position_1.length) {
-      let t = translateXY(position_1, begin2, duration, 'translateY');
+      let t = translateXYZ(position_1, begin2, duration, 'translateY');
       let first = t.value[0];
       if(first.translateY) {
         init.style.translateY = first.translateY;
@@ -179,8 +230,8 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         res.animate.push(t);
       }
     }
-    if(Array.isArray(position_2) && position_2.length) {
-      let t = translateXY(position_2, begin2, duration, 'translateZ');
+    if(Array.isArray(position_2) && position_2.length && res.ddd) {
+      let t = translateXYZ(position_2, begin2, duration, 'translateZ');
       let first = t.value[0];
       if(first.translateZ) {
         init.style.translateZ = first.translateZ;
@@ -196,7 +247,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       }
     }
   }
-  if(Array.isArray(rotateX) && rotateX.length) {
+  if(Array.isArray(rotateX) && rotateX.length && res.ddd) {
     let t = transformRotateX(rotateX, begin2, duration);
     let first = t.value[0];
     if(first.rotateX) {
@@ -212,7 +263,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       is3d = true;
     }
   }
-  if(Array.isArray(rotateY) && rotateY.length) {
+  if(Array.isArray(rotateY) && rotateY.length && res.ddd) {
     let t = transformRotateY(rotateY, begin2, duration);
     let first = t.value[0];
     if(first.rotateY) {
@@ -233,7 +284,6 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     let first = t.value[0];
     if(first.rotateZ) {
       init.style.rotateZ = first.rotateZ;
-      is3d = true;
     }
     if(t.value.length > 1) {
       t.value[0] = {
@@ -241,7 +291,6 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
         easing: first.easing,
       };
       res.animate.push(t);
-      is3d = true;
     }
   }
   if(is3d) {
@@ -249,7 +298,7 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
   if(Array.isArray(scale) && scale.length) {
-    let t = transformScale(scale, begin2, duration);
+    let t = transformScale(scale, begin2, duration, res.ddd);
     let first = t.value[0];
     if(first.scaleX !== 1 && first.scaleX !== undefined && first.scaleX !== null) {
       init.style.scaleX = first.scaleX;
@@ -287,15 +336,14 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   if(!data.enabled) {
     return null;
   }
-  let { name, assetId, startTime, inPoint, outPoint, blendingMode, isCamera, isMask, isClip } = data;
+  let { name, assetId, startTime, inPoint, outPoint, blendingMode, ddd, isCamera, isMask, isClip } = data;
   if(!isCamera && (assetId === undefined || assetId === null)) {
     return null;
   }
-  let begin = start + offset + displayStartTime;
   inPoint += offset + displayStartTime;
   outPoint += offset + displayStartTime;
   // 图层在工作区外可忽略
-  if(inPoint >= begin + duration || outPoint <= begin) {
+  if(inPoint >= start + duration || outPoint <= start) {
     return null;
   }
   let res = {
@@ -316,7 +364,13 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     };
   }
   else {
-    res.libraryId = parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
+    if(!newLib[assetId]) {
+      parse(library, assetId, newLib, start, duration, displayStartTime, offset + startTime);
+    }
+    res.libraryId = assetId;
+  }
+  if(ddd) {
+    res.ddd = true;
   }
   res.init = {
     style: {},
@@ -379,7 +433,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
   }
   res.animate = [];
   // 特殊的visibility动画，如果图层可见在工作区间内，需要有动画，否则可以无视
-  if(inPoint > begin || outPoint < begin + duration) {
+  if(inPoint > start || outPoint < start + duration) {
     let v = {
       value: [],
       options: {
@@ -389,7 +443,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
       },
     };
     // 开头不可见，默认init的style
-    if(inPoint > begin) {
+    if(inPoint > start) {
       res.init.style.visibility = 'hidden';
       res.init.style.pointerEvents = 'none';
       v.value.push({
@@ -409,7 +463,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
       });
     }
     // 结尾计算
-    if(outPoint < begin + duration) {
+    if(outPoint < start + duration) {
       // 可能是第一帧但offset不为0，不用担心karas会补充空首帧
       v.value.push({
         offset: outPoint / duration,
@@ -417,7 +471,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
         pointerEvents: 'none',
       });
       // 默认不是隐藏需补结束帧为隐藏，否则karas会填补空关键帧
-      if(inPoint <= begin) {
+      if(inPoint <= start) {
         v.value.push({
           offset: 1,
           visibility: 'hidden',
@@ -560,8 +614,8 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
     res.children = [];
     parseChildren(res, children, library, newLib, start, duration, displayStartTime, offset);
   }
-  res.id = newLib.length;
-  newLib.push(res);
+  res.id = assetId;
+  newLib[assetId] = res;
   return res.id;
 }
 
@@ -580,10 +634,15 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
       if(parentLink.hasOwnProperty(i)) {
         let item = parentLink[i];
         let asChild = item.asChild;
-        while(asChild !== undefined && parentLink[asChild]) {
+        while(asChild !== undefined && asChild !== null && parentLink[asChild]) {
           let parent = $.ae2karas.JSON.stringify(parentLink[asChild]);
           parent = $.ae2karas.JSON.parse(parent);
-          parent.children.push(item);
+          // 可能出现嵌套，需放在最里层
+          let target = parent;
+          while(target.children.length) {
+            target = target.children[0];
+          }
+          target.children.push(item);
           item = parent;
           asChild = parent.asChild;
         }
@@ -618,9 +677,10 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
             target = temp;
             temp = temp.children[0];
           }
+          let prev = target.children[target.children.length - 1];
           target.children.push(m);
           // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
-          let style = target.children[0].init.style;
+          let style = prev.init.style;
           if(style) {
             for(let i in style) {
               if(style.hasOwnProperty(i) && {
@@ -632,7 +692,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
               }
             }
           }
-          let a = target.children[0].animate;
+          let a = prev.animate;
           if(a && a.length) {
             m.animate = a;
           }
@@ -1012,7 +1072,7 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
   // $.ae2karas.log(data);
   // $.ae2karas.log(target);
   // 会出现父级链接特殊情况，此时遮罩应该是其唯一children
-  if(target.children && target.children.length === 1) {
+  while(target.children && target.children.length === 1) {
     target = target.children[0];
   }
   let targetProps = target.init;
@@ -1130,22 +1190,23 @@ export default function(data) {
     abbr: false,
   };
   parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0);
-  // 检查直接孩子中的camera，删除并存放属性在根节点上
+  // 检查直接孩子中的camera，删除并转换为3d
   let cd = res.children;
   for(let i = 0, len = cd.length; i < len; i++) {
     let child = cd[i];
     if(child.isCamera) {
-      // res.camera = {
-      //   name: child.name,
-      //   cameraZoom: child.cameraZoom,
-      //   cameraDepthOfField: child.cameraDepthOfField,
-      //   cameraFocusDistance: child.cameraFocusDistance,
-      //   cameraAperture: child.cameraAperture,
-      //   cameraBlurLevel: child.cameraBlurLevel,
-      //   init: child.init,
-      //   animate: child.animate,
-      // };
+      let cameraData = {
+        name: child.name,
+        cameraZoom: child.cameraZoom,
+        cameraDepthOfField: child.cameraDepthOfField,
+        cameraFocusDistance: child.cameraFocusDistance,
+        cameraAperture: child.cameraAperture,
+        cameraBlurLevel: child.cameraBlurLevel,
+        init: child.init,
+        animate: child.animate,
+      };
       cd.splice(i, 1);
+      camera(cameraData, res);
       break;
     }
   }

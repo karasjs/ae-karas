@@ -271,7 +271,21 @@ class Preview extends React.Component {
   }
 
   render() {
-    let { type, unit, rem, vw, vh, time, total, isPlaying, isBgBlack } = this.props.preview;
+    let { data, type, unit, rem, vw, vh, time, total, isPlaying, isBgBlack } = this.props.preview;
+    let iterations = this.props.preview.iterations;
+    if(iterations === 'Infinity') {
+      iterations = 0;
+    }
+    let list = [];
+    if(data) {
+      let library = data.library;
+      for(let i = 0, len = library.length; i < len; i++) {
+        let item = library[i];
+        if(item.tagName === 'img') {
+          list.push(item);
+        }
+      }
+    }
     return <div className={classnames('preview-panel', {
       show: store.global.isPreview,
     })}>
@@ -316,7 +330,16 @@ class Preview extends React.Component {
         </div>
       </div>
       <div className="container">
-        {/*<div className="menu"/>*/}
+        <ul className="menu">
+          {
+            list.map((item, i) => {
+              return <li title={item.name} key={i}>
+                <img src={item.props.src}/>
+                <div>{item.props.style.width} * {item.props.style.height}</div>
+              </li>;
+            })
+          }
+        </ul>
         <div className="view">
           <div className="stage"
                ref={el => this.stage = el}>
@@ -362,13 +385,13 @@ class Preview extends React.Component {
           <label className="block">
             <span>循环次数(0为无穷)</span>
             <input type="number" min="0"
-                   value={this.props.preview.iterations}
+                   value={iterations || 0}
                    onChange={e => this.changeIterations(e)}/>
           </label>
           <label className="block">
             <span>小数精度(0为整数)</span>
             <input type="number" min="0"
-                   value={this.props.preview.precision}
+                   value={this.props.preview.precision || 0}
                    onChange={e => this.changePrecision(e)}/>
           </label>
           <p>输出单位</p>
@@ -427,7 +450,8 @@ class Preview extends React.Component {
               let { data, iterations, precision } = this.props.preview;
               let { format, base64 } = this;
               data = JSON.parse(JSON.stringify(data));
-              data.uuid = undefined;
+              delete data.uuid;
+              store.global.setLoading(true);
               output(data, {
                 iterations,
                 precision,
@@ -442,6 +466,7 @@ class Preview extends React.Component {
                 str = str.replace(/\n/g, '\\\n');
                 csInterface.evalScript(`$.ae2karas.export('${str}')`);
                 store.global.setAlert('导出成功！');
+                store.global.setLoading(false);
               }
               if(base64.checked) {
                 img.base64(data, cb);
@@ -455,7 +480,8 @@ class Preview extends React.Component {
               let { format, base64 } = this;
               let name = data.name;
               data = JSON.parse(JSON.stringify(data));
-              data.uuid = undefined;
+              delete data.uuid;
+              store.global.setLoading(true);
               output(data, {
                 iterations,
                 precision,
@@ -465,7 +491,6 @@ class Preview extends React.Component {
                 vh,
               });
               function cb() {
-                store.global.setLoading(true);
                 let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
                 str = str.replace(/'/g, '\\\'');
                 let blob = new Blob([str], {

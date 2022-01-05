@@ -41,7 +41,9 @@ function getPropertyValues(prop, matchName, noEasing) {
         let c1 = prop.keyOutSpatialTangent(i), c2 = prop.keyInSpatialTangent(i + 1);
         // y = kx + b，看是否有曲线，没有忽略
         let x1 = v1[0], y1 = v1[1], x2 = v2[0], y2 = v2[1];
-        if((x1 !== x2 || y1 !== y2) && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
+        // 有z失效，因为是3d空间变换
+        let isZ = v1.length > 2 && v1[2] || v2.length > 2 && v2[2];
+        if((x1 !== x2 || y1 !== y2) && !isZ && (c1[0] !== 0 || c1[1] !== 0 || c2[0] !== 0 || c2[1] !== 0)) {
           let p1 = [v1[0] + c1[0], v1[1] + c1[1]], p2 = [v2[0] + c2[0], v2[1] + c2[1]];
           // 垂直特殊情况
           if(x1 === 0 && x2 === 0) {
@@ -105,6 +107,14 @@ function getPropertyValues(prop, matchName, noEasing) {
         if(e) {
           o.easing = e;
         }
+        if(matchName === 'ADBE Position'
+          && (prop.keyValue(i)[2] || prop.keyValue(i + 1)[2])
+          && prop.keyValue(i)[2] !== prop.keyValue(i + 1)[2]) {
+          let e = getEasing(prop, i, i + 1, true);
+          if(e) {
+            o.easing2 = e;
+          }
+        }
       }
       arr.push(o);
     }
@@ -127,12 +137,20 @@ function getPropertyValues(prop, matchName, noEasing) {
  * @param prop
  * @param start
  * @param end
+ * @param isZ
  */
-function getEasing(prop, start, end) {
+function getEasing(prop, start, end, isZ) {
   let t1 = prop.keyTime(start), t2 = prop.keyTime(end);
   let v1 = prop.keyValue(start), v2 = prop.keyValue(end);
   let e1 = prop.keyOutTemporalEase(start)[0], e2 = prop.keyInTemporalEase(end)[0];
   // let c1 = prop.keyOutSpatialTangent(start), c2 = prop.keyInSpatialTangent(end);
+  // $.ae2karas.warn(t1);
+  // $.ae2karas.warn(t2);
+  // $.ae2karas.warn(isZ);
+  // $.ae2karas.log(v1);
+  // $.ae2karas.log(v2);
+  // $.ae2karas.log(e1);
+  // $.ae2karas.log(e2);
   // $.ae2karas.log(c1);
   // $.ae2karas.log(c2);
   let x1 = e1.influence * 0.01, x2 = 1 - e2.influence * 0.01;
@@ -145,7 +163,14 @@ function getEasing(prop, start, end) {
     'ADBE Vector Skew'].indexOf(matchName) > -1) {
     let avSpeedX = Math.abs(v2[0] - v1[0]) / (t2 - t1);
     let avSpeedY = Math.abs(v2[1] - v1[1]) / (t2 - t1);
+    if(isZ) {
+      avSpeedY = Math.abs(v2[2] - v1[2]) / (t2 - t1);
+    }
     let avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY);
+    if(v2.length > 2 && v1.length > 2) {
+      let avSpeedZ = Math.abs(v2[2] - v1[2]) / (t2 - t1);
+      avSpeed = Math.sqrt(avSpeedX * avSpeedX + avSpeedY * avSpeedY + avSpeedZ * avSpeedZ);
+    }
     if(avSpeed !== 0) {
       y1 = x1 * e1.speed / avSpeed;
       y2 = 1 - (1 - x2) * e2.speed / avSpeed;

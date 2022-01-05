@@ -3,6 +3,7 @@ import vector from './vector';
 import render from '../render';
 
 let uuid = 0;
+let reNameId = 0;
 
 function recursion(composition, library, navigationShapeTree) {
   let { name, layers, width, height, displayStartTime, duration } = composition;
@@ -124,11 +125,12 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
     inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
-    // isMask: layer.isTrackMatte,
-    // isClip: layer.trackMatteType === TrackMatteType.ALPHA_INVERTED || layer.trackMatteType === TrackMatteType.LUMA_INVERTED,
+    ddd: layer.threeDLayer,
   };
+  // 摄像机图层特殊处理，其它看遮罩
   let matchName = layer.matchName;
   if(matchName === 'ADBE Camera Layer') {
+    res.ddd = true;
     res.isCamera = true;
   }
   else if(layer.isTrackMatte) {
@@ -218,16 +220,16 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
       res.assetId = txt.id;
     }
     else if(source) {
-      let asset;
+      let asset, hasExist;
       // 图片图形等独立资源，将其解析为被link的放入library即可
       if(source instanceof FootageItem) {
         let src = source.file && source.file.fsName;
         // 空图层偶现有source但无source.file，视作空图层
         if(src) {
           let name = source.name;
-          if(/\.psd$/.test(name)) {
-            let path = src.replace(/[^\/]*\.psd$/, '');
-            let newName = name.replace(/[\/.]/g, '_') + '_layer_' + layer.index + '.png';
+          if(/\.psd$/.test(name) || /\.ai$/.test(name)) {
+            let path = src.replace(/[^\/]*\.\w+$/, '');
+            let newName = name.replace(/[\/.:]/g, '_') + '_' + (reNameId++) + '_' + '.png';
             render.psd2png(source, src, path, newName);
             src = path + newName;
           }
@@ -238,7 +240,6 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
             && !/\.gif/.test(src)) {
             return;
           }
-          let hasExist;
           for(let i = 0; i < library.length; i++) {
             let item = library[i];
             if(item.src === src && item.type === 'img') {
@@ -274,8 +275,10 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
         asset.type = 'div';
       }
       if(asset) {
-        asset.id = library.length;
-        library.push(asset);
+        if(!hasExist) {
+          asset.id = library.length;
+          library.push(asset);
+        }
         res.assetId = asset.id;
       }
     }
