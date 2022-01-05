@@ -1206,7 +1206,7 @@ export default function(data) {
         animate: child.animate,
       };
       cd.splice(i, 1);
-      // camera(cameraData, res);
+      camera(cameraData, res);
       break;
     }
   }

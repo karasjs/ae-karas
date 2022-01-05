@@ -54,15 +54,63 @@ ae2karas.dispatch = (function() {
 })();
 
 ae2karas.log = function(s) {
-  $.ae2karas.dispatch(enums.EVENT.LOG, s);
+  let len = arguments.length;
+  if(arguments.length > 1) {
+    for(let i = 1; i < len; i++) {
+      let item = arguments[i];
+      if(item === undefined) {
+        item = 'undefined';
+      }
+      else if(item === null) {
+        item = 'null';
+      }
+      s += ', ' + item.toString();
+    }
+    $.ae2karas.dispatch(enums.EVENT.LOG, s);
+  }
+  else {
+    $.ae2karas.dispatch(enums.EVENT.LOG, s);
+  }
 };
 
 ae2karas.warn = function(s) {
-  $.ae2karas.dispatch(enums.EVENT.WARN, s);
+  let len = arguments.length;
+  if(arguments.length > 1) {
+    for(let i = 1; i < len; i++) {
+      let item = arguments[i];
+      if(item === undefined) {
+        item = 'undefined';
+      }
+      else if(item === null) {
+        item = 'null';
+      }
+      s += ', ' + item.toString();
+    }
+    $.ae2karas.dispatch(enums.EVENT.WARN, s);
+  }
+  else {
+    $.ae2karas.dispatch(enums.EVENT.WARN, s);
+  }
 };
 
 ae2karas.error = function(s) {
-  $.ae2karas.dispatch(enums.EVENT.ERROR, s);
+  let len = arguments.length;
+  if(arguments.length > 1) {
+    for(let i = 1; i < len; i++) {
+      let item = arguments[i];
+      if(item === undefined) {
+        item = 'undefined';
+      }
+      else if(item === null) {
+        item = 'null';
+      }
+      s += ', ' + item.toString();
+    }
+    $.ae2karas.dispatch(enums.EVENT.ERROR, s);
+  }
+  else {
+    $.ae2karas.dispatch(enums.EVENT.ERROR, s);
+  }
 };
 
 function getItemType(item) {
