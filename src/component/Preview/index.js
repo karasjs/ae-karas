@@ -166,7 +166,11 @@ class Preview extends React.Component {
   }
 
   change(v) {
-    store.preview.setType(v);
+    transaction(() => {
+      store.preview.setType(v);
+      store.preview.setTime(0);
+      store.preview.setPlay(false);
+    });
   }
 
   unit(v) {

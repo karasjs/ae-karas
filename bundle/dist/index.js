@@ -600,7 +600,11 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_15__.inject)('globa
   }, {
     key: "change",
     value: function change(v) {
-      _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setType(v);
+      (0,mobx__WEBPACK_IMPORTED_MODULE_16__.transaction)(function () {
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setType(v);
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(0);
+        _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(false);
+      });
     }
   }, {
     key: "unit",
@@ -2446,6 +2450,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'fontSize', 'lineHeight', 'translatePath', 'scale', 'zIndex'];
+var EXIST_FONT = {
+  arial: true,
+  helvetica: true,
+  verdana: true,
+  tahoma: true,
+  georgia: true,
+  'courier new': true,
+  simsun: true,
+  '宋体': true,
+  'pingfang sc': true
+};
 
 function recursion(data, params) {
   // 分为普通节点和library节点分别递归进行
@@ -2481,6 +2496,20 @@ function recursion(data, params) {
         params.imgHash[data.props.src] = {
           url: data.props.src
         };
+      }
+
+      var style = data.props.style;
+
+      if (style && style.fontFamily) {
+        var f = style.fontFamily.toLocaleLowerCase();
+
+        if (!EXIST_FONT.hasOwnProperty(f) && !params.fontsHash.hasOwnProperty(f)) {
+          params.fontsHash[f] = {
+            fontFamily: f,
+            url: '',
+            data: {}
+          };
+        }
       }
     }
 
@@ -2690,6 +2719,7 @@ function parseAnimate(data, params) {
 
 /* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(data, params) {
   var imgHash = params.imgHash = {};
+  var fontsHash = params.fontsHash = {};
   recursion(data, params);
   var library = data.library;
 
@@ -2709,6 +2739,18 @@ function parseAnimate(data, params) {
 
   if (imgs.length) {
     data.imgs = imgs;
+  }
+
+  var fonts = [];
+
+  for (var _i5 in fontsHash) {
+    if (fontsHash.hasOwnProperty(_i5)) {
+      fonts.push(fontsHash[_i5]);
+    }
+  }
+
+  if (fonts.length) {
+    data.fonts = fonts;
   }
 }
 ;
@@ -80598,7 +80640,7 @@ function _typeof(obj) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"ae-karas","version":"0.4.0","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.66.10","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
+module.exports = JSON.parse('{"name":"ae-karas","version":"0.4.1","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.66.10","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
 
 /***/ })
 
