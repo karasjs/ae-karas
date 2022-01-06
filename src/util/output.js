@@ -27,6 +27,18 @@ const STYLE = [
   'zIndex',
 ];
 
+const EXIST_FONT = {
+  arial: true,
+  helvetica: true,
+  verdana: true,
+  tahoma: true,
+  georgia: true,
+  'courier new': true,
+  simsun: true,
+  '宋体': true,
+  'pingfang sc': true,
+};
+
 function recursion(data, params) {
   // 分为普通节点和library节点分别递归进行
   if(data.hasOwnProperty('libraryId')) {
@@ -57,6 +69,17 @@ function recursion(data, params) {
         params.imgHash[data.props.src] = {
           url: data.props.src,
         };
+      }
+      let style = data.props.style;
+      if(style && style.fontFamily) {
+        let f = style.fontFamily.toLocaleLowerCase();
+        if(!EXIST_FONT.hasOwnProperty(f) && !params.fontsHash.hasOwnProperty(f)) {
+          params.fontsHash[f] = {
+            fontFamily: f,
+            url: '',
+            data: {},
+          };
+        }
       }
     }
     let children = data.children;
@@ -252,6 +275,7 @@ function parseAnimate(data, params) {
 
 export default function(data, params) {
   let imgHash = params.imgHash = {};
+  let fontsHash = params.fontsHash = {};
   recursion(data, params);
   let library = data.library;
   if(Array.isArray(library)) {
@@ -267,5 +291,14 @@ export default function(data, params) {
   }
   if(imgs.length) {
     data.imgs = imgs;
+  }
+  let fonts = [];
+  for(let i in fontsHash) {
+    if(fontsHash.hasOwnProperty(i)) {
+      fonts.push(fontsHash[i]);
+    }
+  }
+  if(fonts.length) {
+    data.fonts = fonts;
   }
 };
