@@ -4780,6 +4780,22 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
   return res;
 }
 
+function recursionId(data, map) {
+  if (data.hasOwnProperty('libraryId')) {
+    if (map.hasOwnProperty(data.libraryId)) {
+      data.libraryId = map[data.libraryId];
+    }
+  }
+
+  var children = data.children;
+
+  if (Array.isArray(children)) {
+    for (var i = 0, len = children.length; i < len; i++) {
+      recursionId(children[i], map);
+    }
+  }
+}
+
 var uuid = 0;
 function convert (data) {
   $.ae2karas.error('convert');
@@ -4809,12 +4825,39 @@ function convert (data) {
     library: newLib,
     abbr: false
   };
-  parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0); // 检查直接孩子中的camera，删除并转换为3d
+  parseChildren(res, children, library, newLib, workAreaStart, workAreaDuration, displayStartTime, 0); // library可能出现null，需排除，然后要把id重新映射一下
+
+  var map = {},
+      count = 0,
+      ol = newLib.length;
+
+  for (var i = 0, len = newLib.length; i < len; i++) {
+    var item = newLib[i];
+
+    if (item) {
+      var nid = count;
+      map[item.id] = count++;
+      item.id = nid;
+    } else {
+      newLib.splice(i, 1);
+      i--;
+      len--;
+    }
+  }
+
+  if (ol > newLib.length) {
+    recursionId(res, map);
+
+    for (var _i22 = 0, _len7 = newLib.length; _i22 < _len7; _i22++) {
+      recursionId(newLib[_i22], map);
+    }
+  } // 检查直接孩子中的camera，删除并转换为3d
+
 
   var cd = res.children;
 
-  for (var i = 0, len = cd.length; i < len; i++) {
-    var child = cd[i];
+  for (var _i23 = 0, _len8 = cd.length; _i23 < _len8; _i23++) {
+    var child = cd[_i23];
 
     if (child.isCamera) {
       var cameraData = {
@@ -4827,7 +4870,7 @@ function convert (data) {
         init: child.init,
         animate: child.animate
       };
-      cd.splice(i, 1);
+      cd.splice(_i23, 1);
       camera(cameraData, res);
       break;
     }
