@@ -330,12 +330,13 @@
 .preview-panel .container .side .btn {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
   margin: 10px 0;
   padding-top: 10px;
   border-top: 1px solid rgba(0, 0, 0, 0.5);
 }
-.preview-panel .container .side .btn .export,
-.preview-panel .container .side .btn .upload {
+.preview-panel .container .side .btn .item {
+  margin-bottom: 8px;
   width: 75px;
   height: 30px;
   background: #005df7;
@@ -344,13 +345,15 @@
   text-align: center;
   color: #FFF;
 }
-.preview-panel .container .side .btn .export:hover,
-.preview-panel .container .side .btn .upload:hover {
+.preview-panel .container .side .btn .item:hover {
   background: #336dff;
 }
-.preview-panel .container .side .btn .export:active,
-.preview-panel .container .side .btn .upload:active {
+.preview-panel .container .side .btn .item:active {
   color: #E30;
+}
+.preview-panel .container .side .btn .check {
+  width: 160px;
+  background: #5af;
 }
 
 /*!*************************************************************************************************************************************************************************************************************************************************************!*\

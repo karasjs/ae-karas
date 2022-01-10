@@ -1,5 +1,6 @@
 import { r2d, sliceBezier } from '../math';
 import easing from '../easing';
+import animation from '../../src/util/animation';
 
 function getOffset(offsetList, offsetHash, list, key) {
   for(let i = 0, len = list.length; i < len; i++) {
@@ -381,19 +382,7 @@ export default function(data, res) {
   let w = res.props.style.width, h = res.props.style.height;
   let children = res.children;
   // 时长
-  let duration = 0;
-  if(data.animate.length) {
-    duration = data.animate[0].options.duration;
-  }
-  else {
-    for(let i = 0, len = children.length; i < len; i++) {
-      let child = children[i];
-      if(child.animate.length) {
-        duration = child.animate[0].options.duration;
-        break;
-      }
-    }
-  }
+  let duration = animation.getDuration(data);
   // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
   let offsetList = [0], offsetHash = { 0: true };
   getOffset(offsetList, offsetHash, data.animate, 'transformOrigin');

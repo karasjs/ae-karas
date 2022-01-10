@@ -9,6 +9,7 @@ class Preview {
   vh = 1334;
   format = false;
   base64 = false;
+  autoSize = true;
   iterations = 1;
   precision = 0;
   time = 0;
@@ -38,6 +39,10 @@ class Preview {
 
   setBase64(base64) {
     this.base64 = base64;
+  }
+
+  setAutoSize(autoSize) {
+    this.autoSize = autoSize;
   }
 
   setFontSize(fontSize) {
