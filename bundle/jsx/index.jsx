@@ -2667,6 +2667,118 @@ function transformSize(list, begin, duration) {
   return res;
 }
 
+function _getDuration(data) {
+  var animate = data.animate;
+
+  if (Array.isArray(animate) && animate.length) {
+    return data.animate[0].options.duration;
+  }
+
+  var children = data.children;
+
+  if (Array.isArray(children)) {
+    for (var i = 0, len = children.length; i < len; i++) {
+      var child = children[i];
+
+      var res = _getDuration(child);
+
+      if (res !== undefined) {
+        return res;
+      }
+    }
+  }
+}
+
+function _getKeyFrames(data, list, hash, ks) {
+  var animate = data.animate;
+
+  if (Array.isArray(animate)) {
+    for (var i = 0, len = animate.length; i < len; i++) {
+      var item = animate[i].value;
+
+      if (item.length && item.length > 1) {
+        var one = item[1]; // 传入必需的关键帧样式key则要包含，否则为全部
+
+        var has = !Array.isArray(ks);
+
+        if (!has) {
+          for (var j = 0, len2 = ks.length; j < len2; j++) {
+            if (one.hasOwnProperty(ks[j])) {
+              has = true;
+              break;
+            }
+          }
+        }
+
+        if (has) {
+          for (var _j = 0, _len = item.length; _j < _len; _j++) {
+            var offset = item[_j].offset || 0;
+
+            if (!hash.hasOwnProperty(offset)) {
+              hash[offset] = true;
+              list.push(offset);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  var children = data.children;
+
+  if (Array.isArray(children)) {
+    for (var _i = 0, _len2 = children.length; _i < _len2; _i++) {
+      var child = children[_i];
+
+      _getKeyFrames(child, list, hash, ks);
+    }
+  }
+}
+
+var animation = {
+  getDuration: function getDuration(data) {
+    var res = _getDuration(data);
+
+    if (res !== undefined) {
+      return res;
+    }
+
+    var library = data.library;
+
+    for (var i = 0, len = library.length; i < len; i++) {
+      var item = library[i];
+
+      var _res = _getDuration(item);
+
+      if (_res !== undefined) {
+        return _res;
+      }
+    }
+
+    return 0;
+  },
+  getKeyFrames: function getKeyFrames(data, ks) {
+    var list = [0],
+        hash = {
+      0: true
+    };
+
+    _getKeyFrames(data, list, hash, ks);
+
+    var library = data.library;
+
+    for (var i = 0, len = library.length; i < len; i++) {
+      var item = library[i];
+
+      _getKeyFrames(item, list, hash, ks);
+    }
+
+    return list.sort(function (a, b) {
+      return a - b;
+    });
+  }
+};
+
 function getOffset(offsetList, offsetHash, list, key) {
   for (var i = 0, len = list.length; i < len; i++) {
     var item = list[i].value;
@@ -3065,21 +3177,7 @@ function camera (data, res) {
       h = res.props.style.height;
   var children = res.children; // 时长
 
-  var duration = 0;
-
-  if (data.animate.length) {
-    duration = data.animate[0].options.duration;
-  } else {
-    for (var i = 0, len = children.length; i < len; i++) {
-      var child = children[i];
-
-      if (child.animate.length) {
-        duration = child.animate[0].options.duration;
-        break;
-      }
-    }
-  } // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
-
+  var duration = animation.getDuration(data); // 求出camera的tfo/translate动画的关键帧时间和所有children的tfo/translate/rotate的合集
 
   var offsetList = [0],
       offsetHash = {
@@ -3091,10 +3189,10 @@ function camera (data, res) {
   getOffset(offsetList, offsetHash, data.animate, 'translateZ');
   var str = JSON.stringify(data); // 由于zIndex影响，2d图层不涉及透视变换，需遍历每个3d图层单独计算摄像机perspective变化动画
 
-  for (var _i4 = 0, _len5 = children.length; _i4 < _len5; _i4++) {
-    var _child = children[_i4];
+  for (var i = 0, len = children.length; i < len; i++) {
+    var child = children[i];
 
-    if (_child.ddd) {
+    if (child.ddd) {
       var clone = JSON.parse(str); // 求出child的tfo/translate/rotate的合集，和摄像机的并集，每个child用的都是clone备份
 
       var osList = [],
@@ -3107,16 +3205,16 @@ function camera (data, res) {
         osHash[k] = true;
       }
 
-      getOffset(osList, osHash, _child.animate, 'transformOrigin');
-      getOffset(osList, osHash, _child.animate, 'translateX');
-      getOffset(osList, osHash, _child.animate, 'translateY');
-      getOffset(osList, osHash, _child.animate, 'translateZ');
-      getOffset(osList, osHash, _child.animate, 'rotateX');
-      getOffset(osList, osHash, _child.animate, 'rotateY');
+      getOffset(osList, osHash, child.animate, 'transformOrigin');
+      getOffset(osList, osHash, child.animate, 'translateX');
+      getOffset(osList, osHash, child.animate, 'translateY');
+      getOffset(osList, osHash, child.animate, 'translateZ');
+      getOffset(osList, osHash, child.animate, 'rotateX');
+      getOffset(osList, osHash, child.animate, 'rotateY');
       osList.sort(function (a, b) {
         return a - b;
       });
-      $.ae2karas.warn(_i4);
+      $.ae2karas.warn(i);
       $.ae2karas.log(osList); // 为不存在于offset合集的动画插入中间关键帧，先是摄像头最外围的图层
 
       insertKf(osList, osHash, clone.animate, clone.init.style, 'transformOrigin');
@@ -3124,13 +3222,13 @@ function camera (data, res) {
       insertKf(osList, osHash, clone.animate, clone.init.style, 'translateY');
       insertKf(osList, osHash, clone.animate, clone.init.style, 'translateZ'); // child节点本身
 
-      insertKf(osList, osHash, _child.animate, _child.init.style, 'transformOrigin');
-      insertKf(osList, osHash, _child.animate, _child.init.style, 'translateX');
-      insertKf(osList, osHash, _child.animate, _child.init.style, 'translateY');
-      insertKf(osList, osHash, _child.animate, _child.init.style, 'translateZ');
-      insertKf(osList, osHash, _child.animate, _child.init.style, 'rotateX');
-      insertKf(osList, osHash, _child.animate, _child.init.style, 'rotateY');
-      insertKf(osList, osHash, _child.animate, _child.init.style, 'rotateZ'); // 计算每帧的perspective，存入动画，scale是AE固定焦距导致的缩放
+      insertKf(osList, osHash, child.animate, child.init.style, 'transformOrigin');
+      insertKf(osList, osHash, child.animate, child.init.style, 'translateX');
+      insertKf(osList, osHash, child.animate, child.init.style, 'translateY');
+      insertKf(osList, osHash, child.animate, child.init.style, 'translateZ');
+      insertKf(osList, osHash, child.animate, child.init.style, 'rotateX');
+      insertKf(osList, osHash, child.animate, child.init.style, 'rotateY');
+      insertKf(osList, osHash, child.animate, child.init.style, 'rotateZ'); // 计算每帧的perspective，存入动画，scale是AE固定焦距导致的缩放
 
       var wrap = {
         tagName: 'div',
@@ -3146,7 +3244,7 @@ function camera (data, res) {
       };
       var wrapAnimate = [];
 
-      for (var _j2 = 0, _len6 = osList.length; _j2 < _len6; _j2++) {
+      for (var _j2 = 0, _len5 = osList.length; _j2 < _len5; _j2++) {
         var _getPerspectiveAndSca = getPerspectiveAndScale(clone, _j2),
             eyeX = _getPerspectiveAndSca.eyeX,
             eyeY = _getPerspectiveAndSca.eyeY,
@@ -3176,7 +3274,7 @@ function camera (data, res) {
           }
         }
 
-        setTranslateAndRotate(w, h, _child, _j2, osList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
+        setTranslateAndRotate(w, h, child, _j2, osList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
       }
 
       if (wrapAnimate.length > 1) {
@@ -3191,8 +3289,8 @@ function camera (data, res) {
       } // 特殊插入zIndex，值等同于translateZ
 
 
-      var style = _child.init.style;
-      var animate = _child.animate;
+      var style = child.init.style;
+      var animate = child.animate;
 
       if (style.translateZ) {
         wrap.props.style.zIndex = style.translateZ;
@@ -3200,7 +3298,7 @@ function camera (data, res) {
 
       var zIndex = [];
 
-      for (var _j3 = 0, _len7 = osList.length; _j3 < _len7; _j3++) {
+      for (var _j3 = 0, _len6 = osList.length; _j3 < _len6; _j3++) {
         if (_j3) {
           var has = void 0;
 
@@ -3238,8 +3336,8 @@ function camera (data, res) {
           fill: 'forwards'
         }
       });
-      wrap.children = [_child];
-      children.splice(_i4, 1, wrap);
+      wrap.children = [child];
+      children.splice(i, 1, wrap);
     }
   } // return;
   // for(let i = 0, len = children.length; i < len; i++) {

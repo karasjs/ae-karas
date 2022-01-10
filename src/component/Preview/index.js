@@ -140,7 +140,7 @@ class Preview extends React.Component {
       children: [
         karas.parse(data, {
           autoPlay: false,
-        })
+        }),
       ],
       abbr: false,
     }, canvas);
@@ -339,7 +339,7 @@ class Preview extends React.Component {
             list.map((item, i) => {
               return <li title={item.name} key={i}>
                 <img src={item.props.src}/>
-                <div>{item.props.style.width} * {item.props.style.height}</div>
+                <div>{item.props.style.width.toFixed(1)} * {item.props.style.height.toFixed(1)}</div>
               </li>;
             })
           }
@@ -385,6 +385,12 @@ class Preview extends React.Component {
                    ref={el => this.base64 = el}
                    defaultChecked={this.props.preview.base64}/>
             <span>图片base64</span>
+          </label>
+          <label className="block">
+            <input type="checkbox"
+                   ref={el => this.autoSize = el}
+                   defaultChecked={this.props.preview.autoSize}/>
+            <span>图片尺寸自适应</span>
           </label>
           <label className="block">
             <span>循环次数(0为无穷)</span>
@@ -450,12 +456,12 @@ class Preview extends React.Component {
                    onChange={e => this.changeVh(e)}/>
           </label>
           <div className="btn">
-            <div className="export" onClick={() => {
+            <div className="item" onClick={() => {
               let { data, iterations, precision } = this.props.preview;
               let { format, base64 } = this;
+              store.global.setLoading(true);
               data = JSON.parse(JSON.stringify(data));
               delete data.uuid;
-              store.global.setLoading(true);
               output(data, {
                 iterations,
                 precision,
@@ -479,21 +485,13 @@ class Preview extends React.Component {
                 cb();
               }
             }}>导出</div>
-            <div className="upload" onClick={() => {
+            <div className="item" onClick={() => {
               let { data, iterations, precision } = this.props.preview;
-              let { format, base64 } = this;
+              let { format, base64, autoSize } = this;
+              store.global.setLoading(true);
               let name = data.name;
               data = JSON.parse(JSON.stringify(data));
               delete data.uuid;
-              store.global.setLoading(true);
-              output(data, {
-                iterations,
-                precision,
-                unit,
-                rem,
-                vw,
-                vh,
-              });
               function cb() {
                 let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
                 str = str.replace(/'/g, '\\\'');
@@ -517,16 +515,32 @@ class Preview extends React.Component {
                   else {
                     store.global.setAlert('上传失败！');
                   }
-                }).catch(function(e) {
+                }).catch(function() {
                   store.global.setLoading(false);
                   store.global.setAlert('上传失败！');
                 });
               }
-              if(base64.checked) {
-                img.base64(data, cb);
+              function cb2() {
+                output(data, {
+                  iterations,
+                  precision,
+                  unit,
+                  rem,
+                  vw,
+                  vh,
+                });
+                if(base64.checked) {
+                  img.base64(data, cb);
+                }
+                else {
+                  img.upload(data, cb);
+                }
+              }
+              if(autoSize.checked) {
+                img.autoSize(type, data, list, cb2);
               }
               else {
-                img.upload(data, cb);
+                cb2();
               }
             }}>上传</div>
           </div>

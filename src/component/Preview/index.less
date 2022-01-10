@@ -269,11 +269,13 @@
       .btn{
         display:flex;
         justify-content:space-between;
+        flex-wrap:wrap;
         margin:10px 0;
         padding-top:10px;
         border-top:1px solid rgba(0, 0, 0, 0.5);
 
-        .export, .upload{
+        .item{
+          margin-bottom:8px;
           width:75px;
           height:30px;
           background:#005df7;
@@ -289,6 +291,11 @@
           &:active{
             color:#E30;
           }
+        }
+
+        .check{
+          width:160px;
+          background:#5af;
         }
       }
     }
