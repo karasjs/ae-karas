@@ -2689,19 +2689,36 @@ function _getDuration(data) {
   }
 }
 
-function _getKeyFrames(data, list, hash) {
+function _getKeyFrames(data, list, hash, ks) {
   var animate = data.animate;
 
   if (Array.isArray(animate)) {
     for (var i = 0, len = animate.length; i < len; i++) {
       var item = animate[i].value;
 
-      for (var j = 0, len2 = item.length; j < len2; j++) {
-        var offset = item[j].offset || 0;
+      if (item.length && item.length > 1) {
+        var one = item[1]; // 传入必需的关键帧样式key则要包含，否则为全部
 
-        if (!hash.hasOwnProperty(offset)) {
-          hash[offset] = true;
-          list.push(offset);
+        var has = !Array.isArray(ks);
+
+        if (!has) {
+          for (var j = 0, len2 = ks.length; j < len2; j++) {
+            if (one.hasOwnProperty(ks[j])) {
+              has = true;
+              break;
+            }
+          }
+        }
+
+        if (has) {
+          for (var _j = 0, _len = item.length; _j < _len; _j++) {
+            var offset = item[_j].offset || 0;
+
+            if (!hash.hasOwnProperty(offset)) {
+              hash[offset] = true;
+              list.push(offset);
+            }
+          }
         }
       }
     }
@@ -2710,10 +2727,10 @@ function _getKeyFrames(data, list, hash) {
   var children = data.children;
 
   if (Array.isArray(children)) {
-    for (var _i = 0, _len = children.length; _i < _len; _i++) {
+    for (var _i = 0, _len2 = children.length; _i < _len2; _i++) {
       var child = children[_i];
 
-      _getKeyFrames(child, list, hash);
+      _getKeyFrames(child, list, hash, ks);
     }
   }
 }
@@ -2740,18 +2757,20 @@ var animation = {
 
     return 0;
   },
-  getKeyFrames: function getKeyFrames(data) {
-    var list = [],
-        hash = {};
+  getKeyFrames: function getKeyFrames(data, ks) {
+    var list = [0],
+        hash = {
+      0: true
+    };
 
-    _getKeyFrames(data, list, hash);
+    _getKeyFrames(data, list, hash, ks);
 
     var library = data.library;
 
     for (var i = 0, len = library.length; i < len; i++) {
       var item = library[i];
 
-      _getKeyFrames(item, list, hash);
+      _getKeyFrames(item, list, hash, ks);
     }
 
     return list.sort(function (a, b) {

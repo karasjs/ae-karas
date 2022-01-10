@@ -2263,19 +2263,36 @@ function _getDuration(data) {
   }
 }
 
-function _getKeyFrames(data, list, hash) {
+function _getKeyFrames(data, list, hash, ks) {
   var animate = data.animate;
 
   if (Array.isArray(animate)) {
     for (var i = 0, len = animate.length; i < len; i++) {
       var item = animate[i].value;
 
-      for (var j = 0, len2 = item.length; j < len2; j++) {
-        var offset = item[j].offset || 0;
+      if (item.length && item.length > 1) {
+        var one = item[1]; // 传入必需的关键帧样式key则要包含，否则为全部
 
-        if (!hash.hasOwnProperty(offset)) {
-          hash[offset] = true;
-          list.push(offset);
+        var has = !Array.isArray(ks);
+
+        if (!has) {
+          for (var j = 0, len2 = ks.length; j < len2; j++) {
+            if (one.hasOwnProperty(ks[j])) {
+              has = true;
+              break;
+            }
+          }
+        }
+
+        if (has) {
+          for (var _j = 0, _len = item.length; _j < _len; _j++) {
+            var offset = item[_j].offset || 0;
+
+            if (!hash.hasOwnProperty(offset)) {
+              hash[offset] = true;
+              list.push(offset);
+            }
+          }
         }
       }
     }
@@ -2284,10 +2301,10 @@ function _getKeyFrames(data, list, hash) {
   var children = data.children;
 
   if (Array.isArray(children)) {
-    for (var _i = 0, _len = children.length; _i < _len; _i++) {
+    for (var _i = 0, _len2 = children.length; _i < _len2; _i++) {
       var child = children[_i];
 
-      _getKeyFrames(child, list, hash);
+      _getKeyFrames(child, list, hash, ks);
     }
   }
 }
@@ -2314,18 +2331,20 @@ function _getKeyFrames(data, list, hash) {
 
     return 0;
   },
-  getKeyFrames: function getKeyFrames(data) {
-    var list = [],
-        hash = {};
+  getKeyFrames: function getKeyFrames(data, ks) {
+    var list = [0],
+        hash = {
+      0: true
+    };
 
-    _getKeyFrames(data, list, hash);
+    _getKeyFrames(data, list, hash, ks);
 
     var library = data.library;
 
     for (var i = 0, len = library.length; i < len; i++) {
       var item = library[i];
 
-      _getKeyFrames(item, list, hash);
+      _getKeyFrames(item, list, hash, ks);
     }
 
     return list.sort(function (a, b) {
@@ -2572,84 +2591,14 @@ function recursionGetAutoSize(node, hash) {
   }
 }
 
-function recursionSetAutoSize(node, id, sx, sy) {
-  if (node.hasOwnProperty('libraryId')) {
-    if (node.libraryId === id) {
-      var style = node.init.style;
-
-      if (style.hasOwnProperty('scaleX')) {
-        style.scaleX *= sx;
-      }
-
-      if (style.hasOwnProperty('scaleY')) {
-        style.scaleY *= sy;
-      }
-
-      if (style.hasOwnProperty('left')) {
-        style.left /= sy;
-      }
-
-      if (style.hasOwnProperty('top')) {
-        style.top /= sy;
-      }
-
-      if (style.hasOwnProperty('transformOrigin')) {
-        var tfo = style.transformOrigin.split(' ').map(function (item) {
-          return parseFloat(item);
-        });
-        tfo[0] /= sx;
-        tfo[1] /= sy;
-        style.transformOrigin = tfo.join(' ');
-      }
-
-      var animate = node.animate;
-
-      if (Array.isArray(animate)) {
-        for (var i = 0, len = animate.length; i < len; i++) {
-          var item = animate[i].value;
-
-          if (item.length > 1) {
-            if (item[1].hasOwnProperty('scaleX') || item[1].hasOwnProperty('scaleY')) {
-              for (var j = 1, len2 = item.length; j < len2; j++) {
-                var item2 = item[j];
-
-                if (item2.hasOwnProperty('scaleX')) {
-                  item2.scaleX *= sx;
-                }
-
-                if (item2.hasOwnProperty('scaleY')) {
-                  item2.scaleY *= sy;
-                }
-              }
-            }
-
-            if (item[1].hasOwnProperty('transformOrigin')) {
-              for (var _j = 1, _len = item.length; _j < _len; _j++) {
-                var _item = item[_j];
-
-                var _tfo = _item.transformOrigin.split(' ').map(function (item) {
-                  return parseFloat(item);
-                });
-
-                _tfo[0] /= sx;
-                _tfo[1] /= sy;
-                _item.transformOrigin = _tfo.join(' ');
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  var children = node.children;
-
-  if (Array.isArray(children)) {
-    for (var _i = 0, _len2 = children.length; _i < _len2; _i++) {
-      var child = children[_i];
-      recursionSetAutoSize(child, id, sx, sy);
-    }
-  }
+function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
+  delete node.id;
+  var style = node.props.style;
+  style.width = nw;
+  style.height = nh;
+  style.transformOrigin = '0 0';
+  style.scaleX = sx;
+  style.scaleY = sy;
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -2666,6 +2615,7 @@ function recursionSetAutoSize(node, id, sx, sy) {
       if (item.tagName === 'img') {
         total++;
         hash[item.props.src] = {
+          index: i,
           width: 0,
           height: 0,
           node: item
@@ -2674,7 +2624,7 @@ function recursionSetAutoSize(node, id, sx, sy) {
     }
 
     var duration = _animation__WEBPACK_IMPORTED_MODULE_3__["default"].getDuration(data);
-    var kfs = _animation__WEBPACK_IMPORTED_MODULE_3__["default"].getKeyFrames(data);
+    var kfs = _animation__WEBPACK_IMPORTED_MODULE_3__["default"].getKeyFrames(data, ['scaleX', 'scaleY']);
     var _data$props$style = data.props.style,
         width = _data$props$style.width,
         height = _data$props$style.height;
@@ -2693,40 +2643,52 @@ function recursionSetAutoSize(node, id, sx, sy) {
     }, canvas);
     var animateController = root.animateController;
 
-    for (var _i2 = 0, _len3 = kfs.length; _i2 < _len3; _i2++) {
-      var time = kfs[_i2] * duration;
+    for (var _i = 0, _len = kfs.length; _i < _len; _i++) {
+      var time = kfs[_i] * duration;
       animateController.gotoAndStop(time);
       recursionGetAutoSize(root, hash);
     }
 
-    var _loop = function _loop(_i3) {
-      if (hash.hasOwnProperty(_i3)) {
-        var _item2 = hash[_i3];
-        var scaleX = _item2.node.props.style.width / _item2.width;
-        var scaleY = _item2.node.props.style.height / _item2.height; // 有可能缩放0
+    var _loop = function _loop(url) {
+      if (hash.hasOwnProperty(url)) {
+        var _item = hash[url];
+        var ow = _item.node.props.style.width,
+            oh = _item.node.props.style.height;
+        var scaleX = ow / _item.width;
+        var scaleY = oh / _item.height; // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
 
-        if (_item2.width && _item2.height && (scaleX > 1 || scaleY > 1)) {
-          _item2.node.props.style.width = _item2.width;
-          _item2.node.props.style.height = _item2.height;
-          recursionSetAutoSize(data, _item2.node.id, scaleX, scaleY);
+        if (_item.width && _item.height && (scaleX > 1.01 || scaleY > 1.01)) {
+          library[_item.index] = {
+            id: _item.node.id,
+            tagName: 'div',
+            props: {
+              style: {
+                position: 'absolute',
+                width: ow,
+                height: oh
+              }
+            },
+            children: [_item.node]
+          };
+          recursionSetAutoSize(_item.node, ow, oh, _item.width, _item.height, scaleX, scaleY);
           var img = document.createElement('img');
 
           img.onload = function () {
-            canvas2.width = _item2.width;
-            canvas2.height = _item2.height;
-            ctx2.clearRect(0, 0, _item2.width, _item2.height);
-            ctx2.drawImage(img, 0, 0, _item2.width, _item2.height);
+            canvas2.width = _item.width;
+            canvas2.height = _item.height;
+            ctx2.clearRect(0, 0, _item.width, _item.height);
+            ctx2.drawImage(img, 0, 0, _item.width, _item.height);
             var str;
 
-            if (/\.jpe?g$/.test(_i3)) {
+            if (/\.jpe?g$/.test(url)) {
               str = canvas2.toDataURL('image/jpeg');
-            } else if (/\.webp$/.test(_i3)) {
+            } else if (/\.webp$/.test(url)) {
               str = canvas2.toDataURL('image/webp');
             } else {
               str = canvas2.toDataURL('image/png');
             }
 
-            _item2.node.props.src = str;
+            _item.node.props.src = str;
 
             if (++count === total) {
               cb();
@@ -2739,15 +2701,15 @@ function recursionSetAutoSize(node, id, sx, sy) {
             }
           };
 
-          img.src = _i3;
+          img.src = url;
         } else if (++count === total) {
           cb();
         }
       }
     };
 
-    for (var _i3 in hash) {
-      _loop(_i3);
+    for (var url in hash) {
+      _loop(url);
     }
   },
   base64: function base64(data, cb) {
@@ -81149,7 +81111,7 @@ function _unsupportedIterableToArray(o, minLen) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"ae-karas","version":"0.4.1","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.66.10","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
+module.exports = JSON.parse('{"name":"ae-karas","version":"0.5.0","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.66.10","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
 
 /***/ })
 

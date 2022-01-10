@@ -170,65 +170,14 @@ function recursionGetAutoSize(node, hash) {
   }
 }
 
-function recursionSetAutoSize(node, id, sx, sy) {
-  if(node.hasOwnProperty('libraryId')) {
-    if(node.libraryId === id) {
-      let style = node.init.style;
-      if(style.hasOwnProperty('scaleX')) {
-        style.scaleX *= sx;
-      }
-      if(style.hasOwnProperty('scaleY')) {
-        style.scaleY *= sy;
-      }
-      if(style.hasOwnProperty('left')) {
-        style.left /= sy;
-      }
-      if(style.hasOwnProperty('top')) {
-        style.top /= sy;
-      }
-      if(style.hasOwnProperty('transformOrigin')) {
-        let tfo = style.transformOrigin.split(' ').map(item => parseFloat(item));
-        tfo[0] /= sx;
-        tfo[1] /= sy;
-        style.transformOrigin = tfo.join(' ');
-      }
-      let animate = node.animate;
-      if(Array.isArray(animate)) {
-        for(let i = 0, len = animate.length; i < len; i++) {
-          let item = animate[i].value;
-          if(item.length > 1) {
-            if(item[1].hasOwnProperty('scaleX') || item[1].hasOwnProperty('scaleY')) {
-              for(let j = 1, len2 = item.length; j < len2; j++) {
-                let item2 = item[j];
-                if(item2.hasOwnProperty('scaleX')) {
-                  item2.scaleX *= sx;
-                }
-                if(item2.hasOwnProperty('scaleY')) {
-                  item2.scaleY *= sy;
-                }
-              }
-            }
-            if(item[1].hasOwnProperty('transformOrigin')) {
-              for(let j = 1, len2 = item.length; j < len2; j++) {
-                let item2 = item[j];
-                let tfo = item2.transformOrigin.split(' ').map(item => parseFloat(item));
-                tfo[0] /= sx;
-                tfo[1] /= sy;
-                item2.transformOrigin = tfo.join(' ');
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  let children = node.children;
-  if(Array.isArray(children)) {
-    for(let i = 0, len = children.length; i < len; i++) {
-      let child = children[i];
-      recursionSetAutoSize(child, id, sx, sy);
-    }
-  }
+function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
+  delete node.id;
+  let style = node.props.style;
+  style.width = nw;
+  style.height = nh;
+  style.transformOrigin = '0 0';
+  style.scaleX = sx;
+  style.scaleY = sy;
 }
 
 export default {
@@ -241,6 +190,7 @@ export default {
       if(item.tagName === 'img') {
         total++;
         hash[item.props.src] = {
+          index: i,
           width: 0,
           height: 0,
           node: item,
@@ -248,7 +198,7 @@ export default {
       }
     }
     let duration = animation.getDuration(data);
-    let kfs = animation.getKeyFrames(data);
+    let kfs = animation.getKeyFrames(data, ['scaleX', 'scaleY']);
     let { width, height } = data.props.style;
     canvas.width = width;
     canvas.height = height;
@@ -271,16 +221,27 @@ export default {
       animateController.gotoAndStop(time);
       recursionGetAutoSize(root, hash);
     }
-    for(let i in hash) {
-      if(hash.hasOwnProperty(i)) {
-        let item = hash[i];
-        let scaleX = item.node.props.style.width / item.width;
-        let scaleY = item.node.props.style.height / item.height;
-        // 有可能缩放0
-        if(item.width && item.height && (scaleX > 1 || scaleY > 1)) {
-          item.node.props.style.width = item.width;
-          item.node.props.style.height = item.height;
-          recursionSetAutoSize(data, item.node.id, scaleX, scaleY);
+    for(let url in hash) {
+      if(hash.hasOwnProperty(url)) {
+        let item = hash[url];
+        let ow = item.node.props.style.width, oh = item.node.props.style.height;
+        let scaleX = ow / item.width;
+        let scaleY = oh / item.height;
+        // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
+        if(item.width && item.height && (scaleX > 1.01 || scaleY > 1.01)) {
+          library[item.index] = {
+            id: item.node.id,
+            tagName: 'div',
+            props: {
+              style: {
+                position: 'absolute',
+                width: ow,
+                height: oh,
+              },
+            },
+            children: [item.node],
+          };
+          recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
           let img = document.createElement('img');
           img.onload = function() {
             canvas2.width = item.width;
@@ -288,10 +249,10 @@ export default {
             ctx2.clearRect(0, 0, item.width, item.height);
             ctx2.drawImage(img, 0, 0, item.width, item.height);
             let str;
-            if(/\.jpe?g$/.test(i)) {
+            if(/\.jpe?g$/.test(url)) {
               str = canvas2.toDataURL('image/jpeg');
             }
-            else if(/\.webp$/.test(i)) {
+            else if(/\.webp$/.test(url)) {
               str = canvas2.toDataURL('image/webp');
             }
             else {
@@ -307,7 +268,7 @@ export default {
               cb();
             }
           };
-          img.src = i;
+          img.src = url;
         }
         else if(++count === total) {
           cb();
