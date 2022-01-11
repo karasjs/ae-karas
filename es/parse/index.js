@@ -125,6 +125,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
     inPoint: layer.inPoint * 1000, // 真正开始显示时间，>= startTime，可能有前置空白不显示的一段
     outPoint: layer.outPoint * 1000, // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
+    guide: layer.guideLayer,
     ddd: layer.threeDLayer,
   };
   // 摄像机图层特殊处理，其它看遮罩
