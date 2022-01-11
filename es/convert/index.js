@@ -47,7 +47,7 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     asChild,
   };
   parseAnimate(res, data, start, duration, displayStartTime, offset, true, false);
-  // 附链接不跟随透明度，所以删掉opacity的静态属性
+  // 父链接不跟随透明度，所以删掉opacity的静态属性
   if(res.props.style.hasOwnProperty('opacity')) {
     delete res.props.style.opacity;
     let animate = res.animate;
@@ -654,6 +654,10 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
     // 再普通解析，遇到父级链接特殊处理
     for(let i = 0, len = children.length; i < len; i++) {
       let item = children[i];
+      // 参考线图层跳过
+      if(item.guide) {
+        continue;
+      }
       let temp = recursion(item, library, newLib, start, duration, displayStartTime, offset, parentLink);
       if(temp) {
         res.children.push(temp);

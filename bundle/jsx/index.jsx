@@ -1153,6 +1153,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
     outPoint: layer.outPoint * 1000,
     // 真正结束显示时间，<= duration绝对值，可能有后置空白不显示的一段
     blendingMode: layer.blendingMode,
+    guide: layer.guideLayer,
     ddd: layer.threeDLayer
   }; // 摄像机图层特殊处理，其它看遮罩
 
@@ -3503,7 +3504,7 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     asParent: asParent,
     asChild: asChild
   };
-  parseAnimate(res, data, start, duration, displayStartTime, offset, true, false); // 附链接不跟随透明度，所以删掉opacity的静态属性
+  parseAnimate(res, data, start, duration, displayStartTime, offset, true, false); // 父链接不跟随透明度，所以删掉opacity的静态属性
 
   if (res.props.style.hasOwnProperty('opacity')) {
     delete res.props.style.opacity;
@@ -4239,7 +4240,12 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
 
 
     for (var _i4 = 0, _len3 = children.length; _i4 < _len3; _i4++) {
-      var _item4 = children[_i4];
+      var _item4 = children[_i4]; // 参考线图层跳过
+
+      if (_item4.guide) {
+        continue;
+      }
+
       var temp = recursion(_item4, library, newLib, start, duration, displayStartTime, offset, parentLink);
 
       if (temp) {
