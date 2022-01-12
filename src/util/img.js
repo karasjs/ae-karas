@@ -241,6 +241,15 @@ export default {
             },
             children: [item.node],
           };
+          // 不能放大
+          if(scaleX < 1) {
+            item.width = ow;
+            scaleX = 1;
+          }
+          if(scaleY < 1) {
+            item.height = ow;
+            scaleY = 1;
+          }
           recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
           let img = document.createElement('img');
           img.onload = function() {

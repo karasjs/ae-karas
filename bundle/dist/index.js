@@ -2669,7 +2669,18 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
               }
             },
             children: [_item.node]
-          };
+          }; // 不能放大
+
+          if (scaleX < 1) {
+            _item.width = ow;
+            scaleX = 1;
+          }
+
+          if (scaleY < 1) {
+            _item.height = ow;
+            scaleY = 1;
+          }
+
           recursionSetAutoSize(_item.node, ow, oh, _item.width, _item.height, scaleX, scaleY);
           var img = document.createElement('img');
 
