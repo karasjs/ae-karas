@@ -975,7 +975,7 @@ function vector (prop, navigationShapeTree) {
 }
 
 var render = {
-  psd2png: function psd2png(source, psd, path, name) {
+  psd2png: function psd2png(source, path, name) {
     var helperSequenceComp = app.project.items.addComp('tempConverterComp', source.width, source.height, 1, 1, 1);
     helperSequenceComp.layers.add(source);
     $.ae2karas.addTemp(helperSequenceComp);
@@ -1008,7 +1008,6 @@ var render = {
 };
 
 var uuid$1 = 0;
-var reNameId = 0;
 
 function recursion$1(composition, library, navigationShapeTree) {
   var name = composition.name,
@@ -1268,11 +1267,13 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
 
         if (src) {
           var name = source.name;
+          var newName;
+          var path;
+          var isPsd = /\.psd$/.test(name) || /\.ai$/.test(name);
 
-          if (/\.psd$/.test(name) || /\.ai$/.test(name)) {
-            var path = src.replace(/[^\/]*\.\w+$/, '');
-            var newName = name.replace(/[\/.:]/g, '_') + '_' + reNameId++ + '_' + '.png';
-            render.psd2png(source, src, path, newName);
+          if (isPsd) {
+            path = src.replace(/[^\/]*\.\w+$/, '');
+            newName = name.replace(/[\/.:]/g, '_') + '_' + '.png';
             src = path + newName;
           }
 
@@ -1291,23 +1292,25 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
           }
 
           if (!hasExist) {
-            if (src) {
-              asset = {
-                type: 'img',
-                name: name,
-                width: source.width,
-                height: source.height,
-                src: src
-              };
-            } // 颜色类型没有src
-            else {
-              asset = {
-                type: 'div',
-                width: source.width,
-                height: source.height
-              };
+            if (isPsd) {
+              render.psd2png(source, path, newName);
             }
+
+            asset = {
+              type: 'img',
+              name: name,
+              width: source.width,
+              height: source.height,
+              src: src
+            };
           }
+        } // 颜色类型没有src
+        else {
+          asset = {
+            type: 'div',
+            width: source.width,
+            height: source.height
+          };
         }
       } // 合成，递归分析
       else if (source instanceof CompItem) {

@@ -3,7 +3,6 @@ import vector from './vector';
 import render from '../render';
 
 let uuid = 0;
-let reNameId = 0;
 
 function recursion(composition, library, navigationShapeTree) {
   let { name, layers, width, height, displayStartTime, duration } = composition;
@@ -228,10 +227,12 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
         // 空图层偶现有source但无source.file，视作空图层
         if(src) {
           let name = source.name;
-          if(/\.psd$/.test(name) || /\.ai$/.test(name)) {
-            let path = src.replace(/[^\/]*\.\w+$/, '');
-            let newName = name.replace(/[\/.:]/g, '_') + '_' + (reNameId++) + '_' + '.png';
-            render.psd2png(source, src, path, newName);
+          let newName;
+          let path;
+          let isPsd = /\.psd$/.test(name) || /\.ai$/.test(name);
+          if(isPsd) {
+            path = src.replace(/[^\/]*\.\w+$/, '');
+            newName = name.replace(/[\/.:]/g, '_') + '_' + '.png';
             src = path + newName;
           }
           if(!/\.jpg$/.test(src)
@@ -250,23 +251,24 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
             }
           }
           if(!hasExist) {
-            if(src) {
-              asset = {
-                type: 'img',
-                name,
-                width: source.width,
-                height: source.height,
-                src,
-              };
+            if(isPsd) {
+              render.psd2png(source, path, newName);
             }
-            // 颜色类型没有src
-            else {
-              asset = {
-                type: 'div',
-                width: source.width,
-                height: source.height,
-              }
-            }
+            asset = {
+              type: 'img',
+              name,
+              width: source.width,
+              height: source.height,
+              src,
+            };
+          }
+        }
+        // 颜色类型没有src
+        else {
+          asset = {
+            type: 'div',
+            width: source.width,
+            height: source.height,
           }
         }
       }
