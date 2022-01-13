@@ -162,8 +162,6 @@ function recursionGetAutoSize(node, hash) {
           let w = Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2));
           let h = Math.sqrt(Math.pow(p2[0] - p3[0], 2) + Math.pow(p2[1] - p3[1], 2));
           let o = hash[url];
-          console.log(url);
-          console.log(w, h, points);
           o.width = Math.max(o.width, w);
           o.height = Math.max(o.height, h);
         }
@@ -218,75 +216,81 @@ export default {
       abbr: false,
     }, canvas);
     let animateController = root.animateController;
+    function setCb() {
+      for(let url in hash) {
+        if(hash.hasOwnProperty(url)) {
+          let item = hash[url];
+          let ow = item.node.props.style.width, oh = item.node.props.style.height;
+          let scaleX = ow / item.width;
+          let scaleY = oh / item.height;
+          // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
+          if(item.width && item.height && (scaleX > 1.01 || scaleY > 1.01)) {
+            library[item.index] = {
+              id: item.node.id,
+              tagName: 'div',
+              props: {
+                style: {
+                  position: 'absolute',
+                  width: ow,
+                  height: oh,
+                },
+              },
+              children: [item.node],
+            };
+            // 不能放大
+            if(scaleX < 1) {
+              item.width = ow;
+              scaleX = 1;
+            }
+            if(scaleY < 1) {
+              item.height = ow;
+              scaleY = 1;
+            }
+            recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
+            let img = document.createElement('img');
+            img.onload = function() {
+              canvas2.width = item.width;
+              canvas2.height = item.height;
+              ctx2.clearRect(0, 0, item.width, item.height);
+              ctx2.drawImage(img, 0, 0, item.width, item.height);
+              let str;
+              if(/\.jpe?g$/.test(url)) {
+                str = canvas2.toDataURL('image/jpeg');
+              }
+              else if(/\.webp$/.test(url)) {
+                str = canvas2.toDataURL('image/webp');
+              }
+              else {
+                str = canvas2.toDataURL('image/png');
+              }
+              item.node.props.src = str;
+              if(++count === total) {
+                cb();
+              }
+            };
+            img.onerror = function() {
+              if(++count === total) {
+                cb();
+              }
+            };
+            img.src = url;
+          }
+          else if(++count === total) {
+            cb();
+          }
+        }
+      }
+    }
     function task() {
       if(kfs.length) {
         let time = kfs.pop() * duration;
         animateController.gotoAndStop(time, function() {
-          for(let url in hash) {
-            if(hash.hasOwnProperty(url)) {
-              let item = hash[url];
-              let ow = item.node.props.style.width, oh = item.node.props.style.height;
-              let scaleX = ow / item.width;
-              let scaleY = oh / item.height;
-              // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
-              if(item.width && item.height && (scaleX > 1.01 || scaleY > 1.01)) {
-                library[item.index] = {
-                  id: item.node.id,
-                  tagName: 'div',
-                  props: {
-                    style: {
-                      position: 'absolute',
-                      width: ow,
-                      height: oh,
-                    },
-                  },
-                  children: [item.node],
-                };
-                // 不能放大
-                if(scaleX < 1) {
-                  item.width = ow;
-                  scaleX = 1;
-                }
-                if(scaleY < 1) {
-                  item.height = ow;
-                  scaleY = 1;
-                }
-                recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
-                let img = document.createElement('img');
-                img.onload = function() {
-                  canvas2.width = item.width;
-                  canvas2.height = item.height;
-                  ctx2.clearRect(0, 0, item.width, item.height);
-                  ctx2.drawImage(img, 0, 0, item.width, item.height);
-                  let str;
-                  if(/\.jpe?g$/.test(url)) {
-                    str = canvas2.toDataURL('image/jpeg');
-                  }
-                  else if(/\.webp$/.test(url)) {
-                    str = canvas2.toDataURL('image/webp');
-                  }
-                  else {
-                    str = canvas2.toDataURL('image/png');
-                  }
-                  item.node.props.src = str;
-                  if(++count === total) {
-                    cb();
-                  }
-                };
-                img.onerror = function() {
-                  if(++count === total) {
-                    cb();
-                  }
-                };
-                img.src = url;
-              }
-              else if(++count === total) {
-                cb();
-              }
-            }
-          }
-          task();
+          recursionGetAutoSize(root, hash);
+          setTimeout(task, 20);
         });
+      }
+      else {
+        setCb();
       }
     }
     task();
