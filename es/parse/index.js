@@ -232,7 +232,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
           let isPsd = /\.psd$/.test(name) || /\.ai$/.test(name);
           if(isPsd) {
             path = src.replace(/[^\/]*\.\w+$/, '');
-            newName = name.replace(/[\/.:]/g, '_') + '_' + '.png';
+            newName = name.replace(/[\/.:?*<>|\\'"]/g, '_') + '.png';
             src = path + newName;
           }
           if(!/\.jpg$/.test(src)
