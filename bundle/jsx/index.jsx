@@ -1273,7 +1273,7 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
 
           if (isPsd) {
             path = src.replace(/[^\/]*\.\w+$/, '');
-            newName = name.replace(/[\/.:]/g, '_') + '_' + '.png';
+            newName = name.replace(/[\/.:?*<>|\\'"]/g, '_') + '.png';
             src = path + newName;
           }
 
