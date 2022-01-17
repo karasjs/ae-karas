@@ -98,6 +98,10 @@ class Preview extends React.Component {
         canvas.style.width = width / max + 'px';
         canvas.style.height = height / max + 'px';
         root.resize(width, height);
+        let svg = canvas.querySelector('svg');
+        if(svg) {
+          svg.style.transform = `scale(${1 / max})`;
+        }
       }
     });
   }
@@ -144,6 +148,13 @@ class Preview extends React.Component {
       ],
       abbr: false,
     }, canvas);
+    // svg需做缩放处理
+    if(type === 'svg') {
+      let svg = canvas.querySelector('svg');
+      svg.style.width = width + 'px';
+      svg.style.height = height + 'px';
+      svg.style.transform = `scale(${1 / max})`;
+    }
     // 时间显示
     store.preview.setTime(0);
     let animateController = root.animateController;

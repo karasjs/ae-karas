@@ -383,7 +383,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.3.3@mobx/dist/mobx.esm.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.67.1@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.67.2@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
 /* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../util/CSInterface */ "./src/util/CSInterface.js");
@@ -524,6 +524,11 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_15__.inject)('globa
           canvas.style.width = width / max + 'px';
           canvas.style.height = height / max + 'px';
           root.resize(width, height);
+          var svg = canvas.querySelector('svg');
+
+          if (svg) {
+            svg.style.transform = "scale(".concat(1 / max, ")");
+          }
         }
       });
     }
@@ -576,7 +581,15 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_15__.inject)('globa
           autoPlay: false
         })],
         abbr: false
-      }, canvas); // 时间显示
+      }, canvas); // svg需做缩放处理
+
+      if (type === 'svg') {
+        var svg = canvas.querySelector('svg');
+        svg.style.width = width + 'px';
+        svg.style.height = height + 'px';
+        svg.style.transform = "scale(".concat(1 / max, ")");
+      } // 时间显示
+
 
       _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(0);
       var animateController = root.animateController;
@@ -2385,7 +2398,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/_@babel_runtime@7.15.4@@babel/runtime/helpers/esm/slicedToArray.js");
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.67.1@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.67.2@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./config */ "./src/util/config.js");
 /* harmony import */ var _animation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./animation */ "./src/util/animation.js");
@@ -3182,9 +3195,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./node_modules/_karas@0.67.1@karas/index.js":
+/***/ "./node_modules/_karas@0.67.2@karas/index.js":
 /*!***************************************************!*\
-  !*** ./node_modules/_karas@0.67.1@karas/index.js ***!
+  !*** ./node_modules/_karas@0.67.2@karas/index.js ***!
   \***************************************************/
 /***/ (function(module) {
 
@@ -3636,44 +3649,43 @@ __webpack_require__.r(__webpack_exports__);
     I_FINISHED: 5,
     I_NEXT_END: 6,
     I_FIRST_PLAY: 7,
-    I_FRAME_CB: 8,
-    I_PLAY_CB: 9,
-    I_TARGET: 10,
-    I_ROOT: 11,
-    I_FRAMES: 12,
-    I_FRAMES_R: 13,
-    I_CURRENT_TIME: 14,
-    I_NEXT_TIME: 15,
-    I_STYLE: 16,
-    I_DURATION: 17,
-    I_ITERATIONS: 18,
-    I_FILL: 19,
-    I_PLAYBACK_RATE: 20,
-    I_PLAY_COUNT: 21,
-    I_PLAY_STATE: 22,
-    I_DESTROYED: 23,
-    I_START_TIME: 24,
-    I_FPS_TIME: 25,
-    I_EASING: 26,
-    I_ENTER_FRAME: 27,
-    I_DELAY: 28,
-    I_END_DELAY: 29,
-    I_KEYS: 30,
-    I_ORIGIN_STYLE: 31,
-    I_CURRENT_FRAMES: 32,
-    I_CURRENT_FRAME: 33,
-    I_SPF_LIMIT: 34,
-    I_FPS: 35,
-    I_DIRECTION: 36,
-    I_FIRST_ENTER: 37,
-    I_STAY_BEGIN: 38,
-    I_STAY_END: 39,
-    I_IS2: 40,
-    I_END_TIME: 41,
-    I_NODE_CONFIG: 42,
-    I_ROOT_CONFIG: 43,
-    I_OUT_BEGIN_DELAY: 44,
-    I_TIME_STAMP: 45
+    I_PLAY_CB: 8,
+    I_TARGET: 9,
+    I_ROOT: 10,
+    I_FRAMES: 11,
+    I_FRAMES_R: 12,
+    I_CURRENT_TIME: 13,
+    I_NEXT_TIME: 14,
+    I_STYLE: 15,
+    I_DURATION: 16,
+    I_ITERATIONS: 17,
+    I_FILL: 18,
+    I_PLAYBACK_RATE: 19,
+    I_PLAY_COUNT: 20,
+    I_PLAY_STATE: 21,
+    I_DESTROYED: 22,
+    I_START_TIME: 23,
+    I_FPS_TIME: 24,
+    I_EASING: 25,
+    I_ENTER_FRAME: 26,
+    I_DELAY: 27,
+    I_END_DELAY: 28,
+    I_KEYS: 29,
+    I_ORIGIN_STYLE: 30,
+    I_CURRENT_FRAMES: 31,
+    I_CURRENT_FRAME: 32,
+    I_SPF_LIMIT: 33,
+    I_FPS: 34,
+    I_DIRECTION: 35,
+    I_FIRST_ENTER: 36,
+    I_STAY_BEGIN: 37,
+    I_STAY_END: 38,
+    I_IS2: 39,
+    I_END_TIME: 40,
+    I_NODE_CONFIG: 41,
+    I_ROOT_CONFIG: 42,
+    I_OUT_BEGIN_DELAY: 43,
+    I_TIME_STAMP: 44
   };
   var enums = {
     STYLE_KEY: STYLE_KEY,
@@ -19640,7 +19652,6 @@ __webpack_require__.r(__webpack_exports__);
       I_FINISHED = _enums$ANIMATE_KEY.I_FINISHED,
       I_NEXT_END = _enums$ANIMATE_KEY.I_NEXT_END,
       I_FIRST_PLAY = _enums$ANIMATE_KEY.I_FIRST_PLAY,
-      I_FRAME_CB = _enums$ANIMATE_KEY.I_FRAME_CB,
       I_PLAY_CB = _enums$ANIMATE_KEY.I_PLAY_CB,
       I_TARGET = _enums$ANIMATE_KEY.I_TARGET,
       I_ROOT = _enums$ANIMATE_KEY.I_ROOT,
@@ -21036,6 +21047,25 @@ __webpack_require__.r(__webpack_exports__);
     return [v, diff];
   }
 
+  function frameCb(self, __config, diff, isDelay) {
+    self.emit(Event.FRAME, diff, isDelay);
+
+    if (__config[I_FIRST_PLAY]) {
+      __config[I_FIRST_PLAY] = false;
+      self.emit(Event.PLAY);
+    }
+
+    var cb = __config[I_PLAY_CB];
+
+    if (isFunction$4(cb)) {
+      cb.call(self, diff, isDelay); // 清理要检查，gotoAndStop()这种cb回调中直接再次调用goto的话cb会不一致不能删除
+
+      if (__config[I_PLAY_CB] === cb) {
+        __config[I_PLAY_CB] = null;
+      }
+    }
+  }
+
   var uuid$1 = 0;
 
   var Animation = /*#__PURE__*/function (_Event) {
@@ -21095,7 +21125,7 @@ __webpack_require__.r(__webpack_exports__);
       false, // finished
       false, // nextBegin
       true, // firstPlay
-      _this.__frameCb, null, // playCb
+      null, // playCb
       target, root, null, // frames
       null, // framesR
       0, // currentTime
@@ -21403,22 +21433,6 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     }, {
-      key: "__frameCb",
-      value: function __frameCb(__config, diff, isDelay) {
-        this.emit(Event.FRAME, diff, isDelay);
-
-        if (__config[I_FIRST_PLAY]) {
-          __config[I_FIRST_PLAY] = false;
-          this.emit(Event.PLAY);
-        }
-
-        if (isFunction$4(__config[I_PLAY_CB])) {
-          __config[I_PLAY_CB].call(this, diff, isDelay);
-
-          __config[I_PLAY_CB] = null;
-        }
-      }
-    }, {
       key: "play",
       value: function play(cb) {
         var __config = this.__config;
@@ -21456,9 +21470,9 @@ __webpack_require__.r(__webpack_exports__);
           }.hasOwnProperty(direction) ? framesR : frames;
           __config[I_CURRENT_TIME] = __config[I_NEXT_TIME] = __config[I_FPS_TIME] = 0;
         } // 添加每帧回调且立刻执行，本次执行调用refreshTask也是下一帧再渲染，frame的每帧都是下一帧
+        // frame.offFrame(this);
 
 
-        frame.offFrame(this);
         frame.onFrame(this);
         __config[I_START_TIME] = frame.__now;
         __config[I_END] = false;
@@ -21651,8 +21665,7 @@ __webpack_require__.r(__webpack_exports__);
           return;
         }
 
-        __config[I_FRAME_CB].call(this, __config, diff, __config[I_IS_DELAY]);
-
+        frameCb(this, __config, diff, __config[I_IS_DELAY]);
         __config[I_IS_DELAY] = false;
 
         if (__config[I_BEGIN]) {
@@ -21749,9 +21762,7 @@ __webpack_require__.r(__webpack_exports__);
               if (!self.__hasFin) {
                 self.__hasFin = true;
                 __config[I_ASSIGNING] = false;
-
-                __config[I_FRAME_CB].call(self, __config, diff);
-
+                frameCb(self, __config, diff);
                 __config[I_BEGIN] = __config[I_END] = __config[I_IS_DELAY] = __config[I_FINISHED] = __config[I_IN_FPS] = __config[I_ENTER_FRAME] = false;
                 self.emit(Event.FINISH);
               }
@@ -21796,9 +21807,7 @@ __webpack_require__.r(__webpack_exports__);
               if (!self.__hasCancel) {
                 self.__hasCancel = true;
                 __config[I_ASSIGNING] = false;
-
-                __config[I_FRAME_CB].call(self, __config, diff);
-
+                frameCb(self, __config, diff);
                 __config[I_BEGIN] = __config[I_END] = __config[I_IS_DELAY] = __config[I_FINISHED] = __config[I_IN_FPS] = __config[I_ENTER_FRAME] = false;
                 self.emit(Event.CANCEL);
               }
@@ -21910,9 +21919,7 @@ __webpack_require__.r(__webpack_exports__);
         var __config = this.__config;
         var iterations = __config[I_ITERATIONS];
         var duration = __config[I_DURATION];
-        __config[I_PLAY_STATE] = 'paused';
-
-        this.__cancelTask();
+        __config[I_PLAY_STATE] = 'paused'; // this.__cancelTask(); // 应该不需要，gotoAndXxx都会调用play()，里面有
 
         if (isNaN(v) || v < 0) {
           throw new Error('Param of gotoAnd(Play/Stop) is illegal: ' + v);
@@ -43227,7 +43234,7 @@ __webpack_require__.r(__webpack_exports__);
     Cache: Cache
   };
 
-  var version = "0.67.1";
+  var version = "0.67.2";
 
   Geom$1.register('$line', Line);
   Geom$1.register('$polyline', Polyline);
@@ -81145,7 +81152,7 @@ function _unsupportedIterableToArray(o, minLen) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"ae-karas","version":"0.5.3","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.67.1","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
+module.exports = JSON.parse('{"name":"ae-karas","version":"0.5.4","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.67.2","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
 
 /***/ })
 

@@ -195,6 +195,9 @@
   width: 100%;
   height: 100%;
 }
+.preview-panel .container .view .canvas svg {
+  transform-origin: 0 0;
+}
 .preview-panel .container .view .control {
   display: flex;
   align-items: center;

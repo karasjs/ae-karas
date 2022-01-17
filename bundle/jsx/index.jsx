@@ -229,6 +229,10 @@ function getEasing(prop, start, end, isZ) {
     return;
   }
 
+  x1 = Math.max(x1, 0);
+  x1 = Math.min(x1, 1);
+  x2 = Math.max(x2, 0);
+  x2 = Math.min(x2, 1);
   return [x1, y1, x2, y2];
 }
 
@@ -1885,9 +1889,11 @@ function getAreaList(list, begin, duration, reducer) {
 
     if (first.easing) {
       var points = sliceBezier([[0, 0], [first.easing[0], first.easing[1]], [first.easing[2], first.easing[3]], [1, 1]].reverse(), 1 - percent).reverse();
-      var x = 1 - points[0][0],
-          y = 1 - points[0][1];
-      first.easing = [(points[1][0] - points[0][0]) / x, (points[1][1] - points[0][1]) / y, (points[2][0] - points[0][0]) / x, (points[2][1] - points[0][1]) / y];
+      first.easing = [points[1][0] / (1 - percent), points[1][1], points[2][0] / (1 - percent), points[2][1]];
+      first.easing[0] = Math.max(first.easing[0], 0);
+      first.easing[0] = Math.min(first.easing[0], 1);
+      first.easing[2] = Math.max(first.easing[2], 0);
+      first.easing[2] = Math.min(first.easing[2], 1);
     }
   } // 截取尾帧部分，同上
 
@@ -1911,7 +1917,11 @@ function getAreaList(list, begin, duration, reducer) {
     if (prev.easing) {
       var _points = sliceBezier([[0, 0], [prev.easing[0], prev.easing[1]], [prev.easing[2], prev.easing[3]], [1, 1]], _percent);
 
-      prev.easing = [_points[1][0] / _points[3][0], _points[1][1] / _points[3][1], _points[2][0] / _points[3][0], _points[2][1] / _points[3][1]];
+      prev.easing = [_points[1][0] / _percent, _points[1][1], _points[2][0] / _percent, _points[2][1]];
+      prev.easing[0] = Math.max(prev.easing[0], 0);
+      prev.easing[0] = Math.min(prev.easing[0], 1);
+      prev.easing[2] = Math.max(prev.easing[2], 0);
+      prev.easing[2] = Math.min(prev.easing[2], 1);
     }
   } // 补齐尾帧，同上
   else if (last.time < begin + duration) {

@@ -184,6 +184,10 @@ function getEasing(prop, start, end, isZ) {
   if(x1 === y1 && x2 === y2 || y1 === undefined || y2 === undefined) {
     return;
   }
+  x1 = Math.max(x1, 0);
+  x1 = Math.min(x1, 1);
+  x2 = Math.max(x2, 0);
+  x2 = Math.min(x2, 1);
   return [x1, y1, x2, y2];
 }
 
