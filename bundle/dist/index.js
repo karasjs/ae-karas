@@ -2596,8 +2596,8 @@ function recursionGetAutoSize(node, hash) {
           var w = Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2));
           var h = Math.sqrt(Math.pow(p2[0] - p3[0], 2) + Math.pow(p2[1] - p3[1], 2));
           var o = hash[url];
-          o.width = Math.max(o.width, w);
-          o.height = Math.max(o.height, h);
+          o.width = Math.max(o.width, Math.ceil(w));
+          o.height = Math.max(o.height, Math.ceil(h));
         }
       }
     }
