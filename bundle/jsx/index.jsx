@@ -4196,7 +4196,7 @@ function parse(library, assetId, newLib, start, duration, displayStartTime, offs
         res.props.style.textAlign = 'center';
       }
 
-      res.props.style.top = -content.fontSize - baselineLocs[1];
+      res.props.style.top = -content.fontSize + baselineLocs[1];
     }
   } // 图片无children
   else if (type === 'img') {
