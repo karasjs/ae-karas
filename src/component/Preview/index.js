@@ -555,6 +555,7 @@ class Preview extends React.Component {
               }
             }}>上传</div>
           </div>
+          <p className="info">导出功能为到本地JSON，图片需base64才能正常查看。</p>
         </div>
       </div>
     </div>

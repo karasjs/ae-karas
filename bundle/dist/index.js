@@ -1134,7 +1134,9 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_15__.inject)('globa
             cb2();
           }
         }
-      }, "\u4E0A\u4F20")))));
+      }, "\u4E0A\u4F20")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", {
+        className: "info"
+      }, "\u5BFC\u51FA\u529F\u80FD\u4E3A\u5230\u672C\u5730JSON\uFF0C\u56FE\u7247\u9700base64\u624D\u80FD\u6B63\u5E38\u67E5\u770B\u3002"))));
     }
   }]);
 
