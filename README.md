@@ -24,5 +24,25 @@ npm install ae-karas
 
 上传功能需自定义配置src/util/config.js中的URL并实现对应服务端接口后，重新打包。
 
+```
+config.UPLOAD_IMG为上传图片的配置，会post如下数据：
+{
+  data: String,
+  quality: Number = 0.8,
+  returnBase64: Boolean,
+}
+data为图片的base64数据，returnBase64会根据用户勾选传true。
+返回数据为：
+{
+  url: String,
+  base64: String,
+}
+会根据returnBase64的值来返回压缩后的图片url或者base64数据。
+```
+
+```
+config.UPLOAD为上传JSON的配置，会post一个file数据，并在结果中返回json地址。
+```
+
 # License
 [MIT License]
