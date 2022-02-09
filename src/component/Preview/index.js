@@ -541,7 +541,9 @@ class Preview extends React.Component {
                   vh,
                 });
                 if(base64.checked) {
-                  img.base64(data, cb);
+                  img.base64(data, function() {
+                    img.upload(data, cb, true);
+                  });
                 }
                 else {
                   img.upload(data, cb);

@@ -26,13 +26,19 @@ function recursionBase64(data, cb) {
   }
 }
 
-function base64(data, cb) {
-  if(data.hasOwnProperty('src')) {
-    let { src, style: { width, height } } = data;
+function base64(props, cb) {
+  if(props.hasOwnProperty('src')) {
+    let { src, style: { width, height } } = props;
+    total++;
     if(src.indexOf('data:') === 0) {
+      // 模拟一个异步，防止只有1张base64或首张就是的情况直接cb返回
+      setTimeout(function() {
+        if(++count === total) {
+          cb();
+        }
+      }, 20);
       return;
     }
-    total++;
     let img = document.createElement('img');
     img.onload = function() {
       width = width || img.width;
@@ -44,13 +50,13 @@ function base64(data, cb) {
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
       if(/\.jpe?g$/.test(src)) {
-        data.src = canvas.toDataURL('image/jpeg');
+        props.src = canvas.toDataURL('image/jpeg');
       }
       else if(/\.webp$/.test(src)) {
-        data.src = canvas.toDataURL('image/webp');
+        props.src = canvas.toDataURL('image/webp');
       }
       else {
-        data.src = canvas.toDataURL('image/png');
+        props.src = canvas.toDataURL('image/png');
       }
       if(++count === total) {
         cb();
@@ -65,31 +71,31 @@ function base64(data, cb) {
   }
 }
 
-function recursionUpload(data, imgHash, cb) {
+function recursionUpload(data, imgHash, cb, isBase64) {
   // 分为普通节点和library节点
   if(data.hasOwnProperty('libraryId')) {
   }
   else {
     if(data.props) {
-      upload(data.name, data.props, imgHash, cb);
+      upload(data.name, data.props, imgHash, cb, isBase64);
     }
     let children = data.children;
     if(Array.isArray(children)) {
       for(let i = 0, len = children.length; i < len; i++) {
-        recursionUpload(children[i], imgHash, cb);
+        recursionUpload(children[i], imgHash, cb, isBase64);
       }
     }
   }
 }
 
-function upload(name, data, imgHash, cb) {
-  if(data.hasOwnProperty('src')) {
-    let { src, style: { width, height } } = data;
+function upload(name, props, imgHash, cb, isBase64) {
+  if(props.hasOwnProperty('src')) {
+    let { src, style: { width, height } } = props;
     total++;
     if(src.indexOf('data:') === 0) {
       maxW = Math.max(maxW, width);
       maxH = Math.max(maxH, height);
-      remote(src, data, cb, imgHash);
+      remote(src, props, cb, imgHash, isBase64);
       return;
     }
     let img = document.createElement('img');
@@ -109,7 +115,7 @@ function upload(name, data, imgHash, cb) {
       else {
         str = canvas.toDataURL('image/png');
       }
-      remote(str, data, cb, imgHash);
+      remote(str, props, cb, imgHash, isBase64);
     };
     img.onerror = function() {
       if(++count === total) {
@@ -120,22 +126,26 @@ function upload(name, data, imgHash, cb) {
   }
 }
 
-function remote(str, data, cb, imgHash) {
-  name = name.replace(/\.\w+$/, '');
-  fetch(config.UPLOAD_BASE64, {
+function remote(str, props, cb, imgHash, isBase64) {
+  fetch(config.UPLOAD_IMG, {
     method: 'post',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      imgData: str,
-      fileName: name,
-      needCompress: true,
+      data: str,
+      quality: 0.8,
+      returnBase64: isBase64,
     }),
   }).then(res => res.json()).then(function(res) {
     if(res.success) {
-      data.src = res.url;
+      if(isBase64) {
+        props.src = res.base64;
+      }
+      else {
+        props.src = res.url;
+      }
       imgHash[res.url] = true;
     }
     if(++count === total) {
@@ -284,10 +294,16 @@ export default {
     function task() {
       if(kfs.length) {
         let time = kfs.pop() * duration;
-        animateController.gotoAndStop(time, function() {
+        if(animateController.list.length) {
+          animateController.gotoAndStop(time, function() {
+            recursionGetAutoSize(root, hash);
+            setTimeout(task, 20);
+          });
+        }
+        else {
           recursionGetAutoSize(root, hash);
           setTimeout(task, 20);
-        });
+        }
       }
       else {
         setCb();
@@ -306,7 +322,7 @@ export default {
     }
     delete data.imgs;
   },
-  upload(data, cb) {
+  upload(data, cb, isBase64) {
     console.error('upload');
     let imgHash = {};
     count = total = maxW = maxH = 0;
@@ -325,7 +341,7 @@ export default {
     }
     if(Array.isArray(library)) {
       for(let i = 0, len = library.length; i < len; i++) {
-        recursionUpload(library[i], imgHash, wrap);
+        recursionUpload(library[i], imgHash, wrap, isBase64);
       }
     }
   },

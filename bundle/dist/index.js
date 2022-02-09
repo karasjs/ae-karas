@@ -383,7 +383,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.3.3@mobx/dist/mobx.esm.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.67.2@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.68.1@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
 /* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../util/CSInterface */ "./src/util/CSInterface.js");
@@ -1122,7 +1122,9 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_15__.inject)('globa
             });
 
             if (base64.checked) {
-              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].base64(data, cb);
+              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].base64(data, function () {
+                _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].upload(data, cb, true);
+              });
             } else {
               _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].upload(data, cb);
             }
@@ -2383,7 +2385,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   UPLOAD_JSON: 'https://karas.alipay.com/api/upload',
-  UPLOAD_BASE64: 'https://animconfig-office.alipay.net/api/ae2karas/upload'
+  UPLOAD_IMG: 'https://karas-pre.alipay.com/api/uploadbase64'
 });
 
 /***/ }),
@@ -2400,7 +2402,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/_@babel_runtime@7.15.4@@babel/runtime/helpers/esm/slicedToArray.js");
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.67.2@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.68.1@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./config */ "./src/util/config.js");
 /* harmony import */ var _animation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./animation */ "./src/util/animation.js");
@@ -2434,18 +2436,24 @@ function recursionBase64(data, cb) {
   }
 }
 
-function base64(data, cb) {
-  if (data.hasOwnProperty('src')) {
-    var src = data.src,
-        _data$style = data.style,
-        width = _data$style.width,
-        height = _data$style.height;
+function base64(props, cb) {
+  if (props.hasOwnProperty('src')) {
+    var src = props.src,
+        _props$style = props.style,
+        width = _props$style.width,
+        height = _props$style.height;
+    total++;
 
     if (src.indexOf('data:') === 0) {
+      // 模拟一个异步，防止只有1张base64或首张就是的情况直接cb返回
+      setTimeout(function () {
+        if (++count === total) {
+          cb();
+        }
+      }, 20);
       return;
     }
 
-    total++;
     var img = document.createElement('img');
 
     img.onload = function () {
@@ -2459,11 +2467,11 @@ function base64(data, cb) {
       ctx.drawImage(img, 0, 0, width, height);
 
       if (/\.jpe?g$/.test(src)) {
-        data.src = canvas.toDataURL('image/jpeg');
+        props.src = canvas.toDataURL('image/jpeg');
       } else if (/\.webp$/.test(src)) {
-        data.src = canvas.toDataURL('image/webp');
+        props.src = canvas.toDataURL('image/webp');
       } else {
-        data.src = canvas.toDataURL('image/png');
+        props.src = canvas.toDataURL('image/png');
       }
 
       if (++count === total) {
@@ -2481,35 +2489,35 @@ function base64(data, cb) {
   }
 }
 
-function recursionUpload(data, imgHash, cb) {
+function recursionUpload(data, imgHash, cb, isBase64) {
   // 分为普通节点和library节点
   if (data.hasOwnProperty('libraryId')) {} else {
     if (data.props) {
-      upload(data.name, data.props, imgHash, cb);
+      upload(data.name, data.props, imgHash, cb, isBase64);
     }
 
     var children = data.children;
 
     if (Array.isArray(children)) {
       for (var i = 0, len = children.length; i < len; i++) {
-        recursionUpload(children[i], imgHash, cb);
+        recursionUpload(children[i], imgHash, cb, isBase64);
       }
     }
   }
 }
 
-function upload(name, data, imgHash, cb) {
-  if (data.hasOwnProperty('src')) {
-    var src = data.src,
-        _data$style2 = data.style,
-        width = _data$style2.width,
-        height = _data$style2.height;
+function upload(name, props, imgHash, cb, isBase64) {
+  if (props.hasOwnProperty('src')) {
+    var src = props.src,
+        _props$style2 = props.style,
+        width = _props$style2.width,
+        height = _props$style2.height;
     total++;
 
     if (src.indexOf('data:') === 0) {
       maxW = Math.max(maxW, width);
       maxH = Math.max(maxH, height);
-      remote(src, data, cb, imgHash);
+      remote(src, props, cb, imgHash, isBase64);
       return;
     }
 
@@ -2531,7 +2539,7 @@ function upload(name, data, imgHash, cb) {
         str = canvas.toDataURL('image/png');
       }
 
-      remote(str, data, cb, imgHash);
+      remote(str, props, cb, imgHash, isBase64);
     };
 
     img.onerror = function () {
@@ -2544,24 +2552,28 @@ function upload(name, data, imgHash, cb) {
   }
 }
 
-function remote(str, data, cb, imgHash) {
-  name = name.replace(/\.\w+$/, '');
-  fetch(_config__WEBPACK_IMPORTED_MODULE_2__["default"].UPLOAD_BASE64, {
+function remote(str, props, cb, imgHash, isBase64) {
+  fetch(_config__WEBPACK_IMPORTED_MODULE_2__["default"].UPLOAD_IMG, {
     method: 'post',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      imgData: str,
-      fileName: name,
-      needCompress: true
+      data: str,
+      quality: 0.8,
+      returnBase64: isBase64
     })
   }).then(function (res) {
     return res.json();
   }).then(function (res) {
     if (res.success) {
-      data.src = res.url;
+      if (isBase64) {
+        props.src = res.base64;
+      } else {
+        props.src = res.url;
+      }
+
       imgHash[res.url] = true;
     }
 
@@ -2737,10 +2749,16 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
     function task() {
       if (kfs.length) {
         var time = kfs.pop() * duration;
-        animateController.gotoAndStop(time, function () {
+
+        if (animateController.list.length) {
+          animateController.gotoAndStop(time, function () {
+            recursionGetAutoSize(root, hash);
+            setTimeout(task, 20);
+          });
+        } else {
           recursionGetAutoSize(root, hash);
           setTimeout(task, 20);
-        });
+        }
       } else {
         setCb();
       }
@@ -2761,7 +2779,7 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
 
     delete data.imgs;
   },
-  upload: function upload(data, cb) {
+  upload: function upload(data, cb, isBase64) {
     console.error('upload');
     var imgHash = {};
     count = total = maxW = maxH = 0;
@@ -2785,7 +2803,7 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
 
     if (Array.isArray(library)) {
       for (var i = 0, len = library.length; i < len; i++) {
-        recursionUpload(library[i], imgHash, wrap);
+        recursionUpload(library[i], imgHash, wrap, isBase64);
       }
     }
   },
@@ -3197,9 +3215,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./node_modules/_karas@0.67.2@karas/index.js":
+/***/ "./node_modules/_karas@0.68.1@karas/index.js":
 /*!***************************************************!*\
-  !*** ./node_modules/_karas@0.67.2@karas/index.js ***!
+  !*** ./node_modules/_karas@0.68.1@karas/index.js ***!
   \***************************************************/
 /***/ (function(module) {
 
@@ -3728,13 +3746,13 @@ __webpack_require__.r(__webpack_exports__);
       this.__width = 0;
       this.__height = 0;
       this.__baseLine = 0;
-      this.__config = {}; // 默认undefined
-      // this.__prev = undefined;
-      // this.__next = undefined;
-      // this.__parent = undefined;
-      // this.__domParent = undefined;
-      // this.__root = undefined;
-      // this.__host = undefined;
+      this.__config = {};
+      this.__prev = null;
+      this.__next = null;
+      this.__parent = null;
+      this.__domParent = null;
+      this.__root = null;
+      this.__host = null;
     }
 
     _createClass(Node, [{
@@ -10255,10 +10273,10 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
 
-      var v = gradient[2].match(/([-+]?[\d.]+[pxremvwhina%]+)?\s*((#[0-9a-f]{3,8})|(rgba?\s*\(.+?\)))\s*([-+]?[\d.]+[pxremvwhina%]+)?/ig) || [];
+      var v = gradient[2].match(/(([-+]?[\d.]+[pxremvwhina%]+)?\s*((#[0-9a-f]{3,8})|(rgba?\s*\(.+?\)))\s*([-+]?[\d.]+[pxremvwhina%]+)?)|(transparent)/ig) || [];
       o.v = v.map(function (item) {
-        var color = /((?:#[0-9a-f]{3,8})|(?:rgba?\s*\(.+?\)))/i.exec(item);
-        var arr = [rgba2int$1(color[1])];
+        var color = /(?:#[0-9a-f]{3,8})|(?:rgba?\s*\(.+?\))|(?:transparent)/i.exec(item);
+        var arr = [rgba2int$1(color[0])];
         var percent = /[-+]?[\d.]+[pxremvwhina%]+/.exec(item);
 
         if (percent) {
@@ -25376,9 +25394,10 @@ __webpack_require__.r(__webpack_exports__);
 
         var root = this.root;
         this.clearAnimate();
-        this.clearFrameAnimate();
-        root.delRefreshTask(this.__loadBgi.cb);
-        root.delRefreshTask(this.__task);
+        this.clearFrameAnimate(); // root在没有初始化到真实dom渲染的情况下没有
+
+        root && root.delRefreshTask(this.__loadBgi.cb);
+        root && root.delRefreshTask(this.__task);
         this.__task = null;
         this.__root = null;
         this.clearCache();
@@ -42707,6 +42726,14 @@ __webpack_require__.r(__webpack_exports__);
     }
   }
 
+  function replaceAnimateOptions(options, opt) {
+    ['iterations', 'fill', 'duration', 'direction', 'easing', 'fps', 'delay', 'endDelay', 'playbackRate', 'spfLimit'].forEach(function (k) {
+      if (opt.hasOwnProperty(k)) {
+        options[k] = opt[k];
+      }
+    });
+  }
+
   function replaceLibraryVars(json, hash, vars) {
     if (vars) {
       // 新版同级vars语法
@@ -42952,62 +42979,38 @@ __webpack_require__.r(__webpack_exports__);
       }));
     }
 
-    var animationRecord;
-
     if (animate) {
-      if (Array.isArray(animate)) {
-        var has;
-        animate.forEach(function (item) {
-          opt.abbr !== false && abbr2full(item, abbrAnimate$1);
-          var value = item.value,
-              options = item.options; // 忽略空动画
+      if (!Array.isArray(animate)) {
+        animate = [animate];
+      }
 
-          if (Array.isArray(value) && value.length) {
-            has = true;
-            value.forEach(function (item) {
-              opt.abbr !== false && abbr2full(item, abbrCssProperty$1);
-              replaceVars(item, opt.vars);
-            });
-          }
-
-          if (options) {
-            opt.abbr !== false && abbr2full(options, abbrAnimateOption$1);
-            replaceVars(options, opt.vars);
-          }
-        });
-
-        if (has) {
-          animationRecord = {
-            animate: animate,
-            target: vd
-          };
-        }
-      } else {
-        opt.abbr !== false && abbr2full(animate, abbrAnimate$1);
-        var value = animate.value,
-            options = animate.options;
+      var has;
+      animate.forEach(function (item) {
+        opt.abbr !== false && abbr2full(item, abbrAnimate$1);
+        var value = item.value,
+            options = item.options; // 忽略空动画
 
         if (Array.isArray(value) && value.length) {
+          has = true;
           value.forEach(function (item) {
             opt.abbr !== false && abbr2full(item, abbrCssProperty$1);
             replaceVars(item, opt.vars);
           });
-          animationRecord = {
-            animate: animate,
-            target: vd
-          };
         }
 
         if (options) {
           opt.abbr !== false && abbr2full(options, abbrAnimateOption$1);
           replaceVars(options, opt.vars);
+          replaceAnimateOptions(options, opt);
         }
+      }); // 产生实际动画运行才存入列表供root调用执行
+
+      if (has) {
+        animateRecords.push({
+          animate: animate,
+          target: vd
+        });
       }
-    } // 产生实际动画运行才存入列表供root调用执行
-
-
-    if (animationRecord) {
-      animateRecords.push(animationRecord);
     }
 
     return vd;
@@ -43236,7 +43239,7 @@ __webpack_require__.r(__webpack_exports__);
     Cache: Cache
   };
 
-  var version = "0.67.2";
+  var version = "0.68.1";
 
   Geom$1.register('$line', Line);
   Geom$1.register('$polyline', Polyline);
@@ -81154,7 +81157,7 @@ function _unsupportedIterableToArray(o, minLen) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"ae-karas","version":"0.5.4","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.67.2","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
+module.exports = JSON.parse('{"name":"ae-karas","version":"0.5.4","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"~0.68.1","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
 
 /***/ })
 
