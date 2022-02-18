@@ -44,5 +44,7 @@ data为图片的base64数据，returnBase64会根据用户勾选传true。
 config.UPLOAD为上传JSON的配置，会post一个file数据，并在结果中返回json地址。
 ```
 
+蚂蚁内部请使用内部版本，已做好上传。
+
 # License
 [MIT License]
