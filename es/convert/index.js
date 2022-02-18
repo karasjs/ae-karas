@@ -673,32 +673,68 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
             delete t.init.style.perspective;
           }
         }
-        // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻
-        if(item.mask && item.mask.enabled) {
-          let m = parseMask(item, temp, start, duration, displayStartTime, offset);
-          let target = res;
-          while(temp.children && temp.children.length === 1) {
-            target = temp;
-            temp = temp.children[0];
-          }
-          let prev = target.children[target.children.length - 1];
-          target.children.push(m);
-          // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
-          let style = prev.init.style;
-          if(style) {
-            for(let i in style) {
-              if(style.hasOwnProperty(i) && {
-                'scaleX': true,
-                'scaleY': true,
-                'scaleZ': true,
-              }.hasOwnProperty(i)) {
-                m.props.style[i] = style[i];
+        /**
+         * 有mask分析mask，特殊的这里有2种mask：
+         * 1种是图层自带的mask属性，这时mask是个矢量，它需要跟随本图层的父链接，
+         * 因此不能直接存入当前children，要下钻；
+         * 2种是TrkMat图层，这时mask可能会是个图片，它不跟随被遮罩图层但可能有自己的父链接
+         * 需要将mask标识上移到父链接层
+         */
+        if(item.mask) {
+          // 这种是自带的属性矢量mask
+          if(item.mask.enabled) {
+            let m = parseMask(item, temp, start, duration, displayStartTime, offset);
+            let target = res;
+            while(temp.children && temp.children.length === 1) {
+              target = temp;
+              temp = temp.children[0];
+            }
+            let prev = target.children[target.children.length - 1];
+            target.children.push(m);
+            // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
+            let style = prev.init.style;
+            if(style) {
+              for(let i in style) {
+                if(style.hasOwnProperty(i) && {
+                  'scaleX': true,
+                  'scaleY': true,
+                  'scaleZ': true,
+                }.hasOwnProperty(i)) {
+                  m.props.style[i] = style[i];
+                }
               }
             }
+            let a = prev.animate;
+            if(a && a.length) {
+              m.animate = a;
+            }
           }
-          let a = prev.animate;
-          if(a && a.length) {
-            m.animate = a;
+          // 另外这种是独立mask图层，看有无嵌套，有则提升mask属性
+          else {
+            let needFix;
+            // 嵌套都是父级只有props不会出现init
+            if(temp.props) {
+              if(temp.props.mask || temp.props.clip) {}
+              else {
+                needFix = true;
+              }
+            }
+            if(needFix) {
+              let child = temp;
+              while(child.children && child.children[0]) {
+                child = child.children[0];
+              }
+              if(child.init && (child.init.mask || child.init.clip)) {
+                if(child.init.mask) {
+                  delete child.init.mask;
+                  temp.props.mask = true;
+                }
+                else {
+                  delete child.props.mask;
+                  temp.props.clip = true;
+                }
+              }
+            }
           }
         }
       }

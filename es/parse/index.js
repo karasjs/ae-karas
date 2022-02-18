@@ -20,16 +20,17 @@ function recursion(composition, library, navigationShapeTree) {
   let asParent = {}, asChild = {};
   for(let i = 1; i <= layers.length; i++) {
     let item = layers[i];
-    if(hasSolo) {
-      if(!item.solo) {
-        continue;
-      }
-    }
-    else {
-      if(!item.enabled) {
-        continue;
-      }
-    }
+    // mask经常为不可见状态，不能忽略掉，所以关系全部记下来，不可见layer在转化那里剔除
+    // if(hasSolo) {
+    //   if(!item.solo) {
+    //     continue;
+    //   }
+    // }
+    // else {
+    //   if(!item.enabled) {
+    //     continue;
+    //   }
+    // }
     if(item.parent && item.parent.index) {
       asParent[item.parent.index] = true;
       asChild[item.index] = item.parent.index;

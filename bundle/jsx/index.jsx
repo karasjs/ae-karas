@@ -1038,17 +1038,17 @@ function recursion$1(composition, library, navigationShapeTree) {
       asChild = {};
 
   for (var _i = 1; _i <= layers.length; _i++) {
-    var _item = layers[_i];
-
-    if (hasSolo) {
-      if (!_item.solo) {
-        continue;
-      }
-    } else {
-      if (!_item.enabled) {
-        continue;
-      }
-    }
+    var _item = layers[_i]; // mask经常为不可见状态，不能忽略掉，所以关系全部记下来，不可见layer在转化那里剔除
+    // if(hasSolo) {
+    //   if(!item.solo) {
+    //     continue;
+    //   }
+    // }
+    // else {
+    //   if(!item.enabled) {
+    //     continue;
+    //   }
+    // }
 
     if (_item.parent && _item.parent.index) {
       asParent[_item.parent.index] = true;
@@ -4276,41 +4276,78 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
             temp.props.style.perspective = t.init.style.perspective || undefined;
             delete t.init.style.perspective;
           }
-        } // 有mask分析mask，且要注意如果有父级链接不能直接存入当前children，要下钻
+        }
+        /**
+         * 有mask分析mask，特殊的这里有2种mask：
+         * 1种是图层自带的mask属性，这时mask是个矢量，它需要跟随本图层的父链接，
+         * 因此不能直接存入当前children，要下钻；
+         * 2种是TrkMat图层，这时mask可能会是个图片，它不跟随被遮罩图层但可能有自己的父链接
+         * 需要将mask标识上移到父链接层
+         */
 
 
-        if (_item4.mask && _item4.mask.enabled) {
-          var m = parseMask(_item4, temp, start, duration, displayStartTime, offset);
-          var _target = res;
+        if (_item4.mask) {
+          // 这种是自带的属性矢量mask
+          if (_item4.mask.enabled) {
+            var m = parseMask(_item4, temp, start, duration, displayStartTime, offset);
+            var _target = res;
 
-          while (temp.children && temp.children.length === 1) {
-            _target = temp;
-            temp = temp.children[0];
-          }
+            while (temp.children && temp.children.length === 1) {
+              _target = temp;
+              temp = temp.children[0];
+            }
 
-          var prev = _target.children[_target.children.length - 1];
+            var prev = _target.children[_target.children.length - 1];
 
-          _target.children.push(m); // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
+            _target.children.push(m); // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
 
 
-          var style = prev.init.style;
+            var style = prev.init.style;
 
-          if (style) {
-            for (var _i5 in style) {
-              if (style.hasOwnProperty(_i5) && {
-                'scaleX': true,
-                'scaleY': true,
-                'scaleZ': true
-              }.hasOwnProperty(_i5)) {
-                m.props.style[_i5] = style[_i5];
+            if (style) {
+              for (var _i5 in style) {
+                if (style.hasOwnProperty(_i5) && {
+                  'scaleX': true,
+                  'scaleY': true,
+                  'scaleZ': true
+                }.hasOwnProperty(_i5)) {
+                  m.props.style[_i5] = style[_i5];
+                }
               }
             }
-          }
 
-          var a = prev.animate;
+            var a = prev.animate;
 
-          if (a && a.length) {
-            m.animate = a;
+            if (a && a.length) {
+              m.animate = a;
+            }
+          } // 另外这种是独立mask图层，看有无嵌套，有则提升mask属性
+          else {
+            var needFix = void 0; // 嵌套都是父级只有props不会出现init
+
+            if (temp.props) {
+              if (temp.props.mask || temp.props.clip) ; else {
+                needFix = true;
+              }
+            }
+
+            if (needFix) {
+              var child = temp;
+
+              while (child.children && child.children[0]) {
+                child = child.children[0];
+              }
+
+              if (child.init && (child.init.mask || child.init.clip)) {
+                if (child.init.mask) {
+                  delete child.init.mask;
+                  temp.props.mask = true;
+                } else {
+                  delete child.props.mask;
+                  temp.props.clip = true;
+                }
+              }
+            }
           }
         }
       }
