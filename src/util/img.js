@@ -36,7 +36,7 @@ function base64(props, cb) {
         if(++count === total) {
           cb();
         }
-      }, 20);
+      }, 1);
       return;
     }
     let img = document.createElement('img');
@@ -320,6 +320,12 @@ export default {
         recursionBase64(library[i], cb);
       }
     }
+    // 模拟一个异步，防止没有base64时需要cb返回
+    setTimeout(function() {
+      if(0 === total) {
+        cb();
+      }
+    }, 1);
     delete data.imgs;
   },
   upload(data, cb, isBase64) {
@@ -344,8 +350,5 @@ export default {
         recursionUpload(library[i], imgHash, wrap, isBase64);
       }
     }
-  },
-  reset() {
-    maxW = maxH = 0;
   },
 };

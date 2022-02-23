@@ -314,7 +314,6 @@ class Preview extends React.Component {
             store.preview.setPlay(false);
             store.preview.setTime(0);
             store.global.setPreview(false);
-            img.reset();
           });
         }}>返回</div>
         <div className="type">
