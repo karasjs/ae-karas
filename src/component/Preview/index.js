@@ -9,6 +9,7 @@ import { csInterface } from '../../util/CSInterface';
 import output from '../../util/output';
 import img from '../../util/img';
 import config from '../../util/config';
+import overflow from '../../util/overflow';
 
 import './index.less';
 import preview from '../../store/preview';
@@ -481,12 +482,14 @@ class Preview extends React.Component {
                 vh,
               });
               function cb() {
-                let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-                str = str.replace(/'/g, '\\\'');
-                str = str.replace(/\n/g, '\\\n');
-                csInterface.evalScript(`$.ae2karas.export('${str}')`);
-                store.global.setAlert('导出成功！');
-                store.global.setLoading(false);
+                overflow(type, data, function() {
+                  let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+                  str = str.replace(/'/g, '\\\'');
+                  str = str.replace(/\n/g, '\\\n');
+                  csInterface.evalScript(`$.ae2karas.export('${str}')`);
+                  store.global.setAlert('导出成功！');
+                  store.global.setLoading(false);
+                });
               }
               if(base64.checked) {
                 img.base64(data, cb);
@@ -539,14 +542,16 @@ class Preview extends React.Component {
                   vw,
                   vh,
                 });
-                if(base64.checked) {
-                  img.base64(data, function() {
-                    img.upload(data, cb, true);
-                  });
-                }
-                else {
-                  img.upload(data, cb);
-                }
+                overflow(type, data, function() {
+                  if(base64.checked) {
+                    img.base64(data, function() {
+                      img.upload(data, cb, true);
+                    });
+                  }
+                  else {
+                    img.upload(data, cb);
+                  }
+                });
               }
               if(autoSize.checked) {
                 img.autoSize(type, data, list, cb2);

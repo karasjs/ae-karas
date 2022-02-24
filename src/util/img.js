@@ -294,16 +294,16 @@ export default {
     function task() {
       if(kfs.length) {
         let time = kfs.pop() * duration;
-        if(animateController.list.length) {
-          animateController.gotoAndStop(time, function() {
-            recursionGetAutoSize(root, hash);
-            setTimeout(task, 20);
-          });
-        }
-        else {
+        // if(animateController.list.length) {
+        animateController.gotoAndStop(time, function() {
           recursionGetAutoSize(root, hash);
-          setTimeout(task, 20);
-        }
+          setTimeout(task, 1);
+        });
+        // }
+        // else {
+        //   recursionGetAutoSize(root, hash);
+        //   setTimeout(task, 1);
+        // }
       }
       else {
         setCb();
