@@ -10,6 +10,7 @@ class Preview {
   format = false;
   base64 = false;
   autoSize = true;
+  autoOverflow = true;
   iterations = 1;
   precision = 0;
   time = 0;
@@ -43,6 +44,10 @@ class Preview {
 
   setAutoSize(autoSize) {
     this.autoSize = autoSize;
+  }
+
+  setAutoOverflow(autoOverflow) {
+    this.autoOverflow = autoOverflow;
   }
 
   setFontSize(fontSize) {
