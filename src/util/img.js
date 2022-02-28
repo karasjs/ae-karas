@@ -227,6 +227,10 @@ export default {
     }, canvas);
     let animateController = root.animateController;
     function setCb() {
+      if(total === 0) {
+        cb();
+        return;
+      }
       for(let url in hash) {
         if(hash.hasOwnProperty(url)) {
           let item = hash[url];
@@ -350,5 +354,11 @@ export default {
         recursionUpload(library[i], imgHash, wrap, isBase64);
       }
     }
+    // 模拟一个异步，防止没有图片时需要cb返回
+    setTimeout(function() {
+      if(0 === total) {
+        cb();
+      }
+    }, 1);
   },
 };

@@ -404,6 +404,12 @@ class Preview extends React.Component {
             <span>图片尺寸自适应</span>
           </label>
           <label className="block">
+            <input type="checkbox"
+                   ref={el => this.autoOverflow = el}
+                   defaultChecked={this.props.preview.autoOverflow}/>
+            <span>自动去除无效overflow</span>
+          </label>
+          <label className="block">
             <span>循环次数(0为无穷)</span>
             <input type="number" min="0"
                    value={iterations || 0}
@@ -469,7 +475,7 @@ class Preview extends React.Component {
           <div className="btn">
             <div className="item" onClick={() => {
               let { data, iterations, precision } = this.props.preview;
-              let { format, base64 } = this;
+              let { format, base64, autoOverflow } = this;
               store.global.setLoading(true);
               data = JSON.parse(JSON.stringify(data));
               delete data.uuid;
@@ -481,31 +487,63 @@ class Preview extends React.Component {
                 vw,
                 vh,
               });
-              function cb() {
-                overflow(type, data, function() {
-                  let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-                  str = str.replace(/'/g, '\\\'');
-                  str = str.replace(/\n/g, '\\\n');
-                  csInterface.evalScript(`$.ae2karas.export('${str}')`);
-                  store.global.setAlert('导出成功！');
-                  store.global.setLoading(false);
-                });
+              function cb1() {
+                if(autoOverflow.checked) {
+                  overflow(type, data, cb2);
+                }
+                else {
+                  cb2();
+                }
+              }
+              function cb2() {
+                let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+                str = str.replace(/'/g, '\\\'');
+                str = str.replace(/\n/g, '\\\n');
+                csInterface.evalScript(`$.ae2karas.export('${str}')`);
+                store.global.setAlert('导出成功！');
+                store.global.setLoading(false);
               }
               if(base64.checked) {
-                img.base64(data, cb);
+                img.base64(data, cb1);
               }
               else {
-                cb();
+                cb1();
               }
             }}>导出</div>
             <div className="item" onClick={() => {
               let { data, iterations, precision } = this.props.preview;
-              let { format, base64, autoSize } = this;
+              let { format, base64, autoSize, autoOverflow } = this;
               store.global.setLoading(true);
               let name = data.name;
               data = JSON.parse(JSON.stringify(data));
               delete data.uuid;
-              function cb() {
+              function cb1() {
+                output(data, {
+                  iterations,
+                  precision,
+                  unit,
+                  rem,
+                  vw,
+                  vh,
+                });
+                if(autoOverflow.checked) {
+                  overflow(type, data, cb2);
+                }
+                else {
+                  cb2();
+                }
+              }
+              function cb2() {
+                if(base64.checked) {
+                  img.base64(data, function() {
+                    img.upload(data, cb3, true);
+                  });
+                }
+                else {
+                  img.upload(data, cb3);
+                }
+              }
+              function cb3() {
                 let str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
                 str = str.replace(/'/g, '\\\'');
                 let blob = new Blob([str], {
@@ -533,31 +571,11 @@ class Preview extends React.Component {
                   store.global.setAlert('上传失败！');
                 });
               }
-              function cb2() {
-                output(data, {
-                  iterations,
-                  precision,
-                  unit,
-                  rem,
-                  vw,
-                  vh,
-                });
-                overflow(type, data, function() {
-                  if(base64.checked) {
-                    img.base64(data, function() {
-                      img.upload(data, cb, true);
-                    });
-                  }
-                  else {
-                    img.upload(data, cb);
-                  }
-                });
-              }
               if(autoSize.checked) {
-                img.autoSize(type, data, list, cb2);
+                img.autoSize(type, data, list, cb1);
               }
               else {
-                cb2();
+                cb1();
               }
             }}>上传</div>
           </div>

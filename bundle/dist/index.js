@@ -383,7 +383,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.3.13@mobx/dist/mobx.esm.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.69.4@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.69.5@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store */ "./src/store/index.js");
 /* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../util/CSInterface */ "./src/util/CSInterface.js");
@@ -932,6 +932,14 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
         defaultChecked: this.props.preview.autoSize
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "\u56FE\u7247\u5C3A\u5BF8\u81EA\u9002\u5E94")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
         className: "block"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "checkbox",
+        ref: function ref(el) {
+          return _this2.autoOverflow = el;
+        },
+        defaultChecked: this.props.preview.autoOverflow
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "\u81EA\u52A8\u53BB\u9664\u65E0\u6548overflow")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
+        className: "block"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "\u5FAA\u73AF\u6B21\u6570(0\u4E3A\u65E0\u7A77)"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
         type: "number",
         min: "0",
@@ -1038,7 +1046,8 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
               iterations = _this2$props$preview.iterations,
               precision = _this2$props$preview.precision;
           var format = _this2.format,
-              base64 = _this2.base64;
+              base64 = _this2.base64,
+              autoOverflow = _this2.autoOverflow;
           _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setLoading(true);
           data = JSON.parse(JSON.stringify(data));
           delete data.uuid;
@@ -1051,21 +1060,27 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
             vh: vh
           });
 
-          function cb() {
-            (0,_util_overflow__WEBPACK_IMPORTED_MODULE_13__["default"])(type, data, function () {
-              var str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-              str = str.replace(/'/g, '\\\'');
-              str = str.replace(/\n/g, '\\\n');
-              _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__.csInterface.evalScript("$.ae2karas.export('".concat(str, "')"));
-              _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setAlert('导出成功！');
-              _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setLoading(false);
-            });
+          function cb1() {
+            if (autoOverflow.checked) {
+              (0,_util_overflow__WEBPACK_IMPORTED_MODULE_13__["default"])(type, data, cb2);
+            } else {
+              cb2();
+            }
+          }
+
+          function cb2() {
+            var str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+            str = str.replace(/'/g, '\\\'');
+            str = str.replace(/\n/g, '\\\n');
+            _util_CSInterface__WEBPACK_IMPORTED_MODULE_9__.csInterface.evalScript("$.ae2karas.export('".concat(str, "')"));
+            _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setAlert('导出成功！');
+            _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setLoading(false);
           }
 
           if (base64.checked) {
-            _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].base64(data, cb);
+            _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].base64(data, cb1);
           } else {
-            cb();
+            cb1();
           }
         }
       }, "\u5BFC\u51FA"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
@@ -1077,13 +1092,41 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
               precision = _this2$props$preview2.precision;
           var format = _this2.format,
               base64 = _this2.base64,
-              autoSize = _this2.autoSize;
+              autoSize = _this2.autoSize,
+              autoOverflow = _this2.autoOverflow;
           _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setLoading(true);
           var name = data.name;
           data = JSON.parse(JSON.stringify(data));
           delete data.uuid;
 
-          function cb() {
+          function cb1() {
+            (0,_util_output__WEBPACK_IMPORTED_MODULE_10__["default"])(data, {
+              iterations: iterations,
+              precision: precision,
+              unit: unit,
+              rem: rem,
+              vw: vw,
+              vh: vh
+            });
+
+            if (autoOverflow.checked) {
+              (0,_util_overflow__WEBPACK_IMPORTED_MODULE_13__["default"])(type, data, cb2);
+            } else {
+              cb2();
+            }
+          }
+
+          function cb2() {
+            if (base64.checked) {
+              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].base64(data, function () {
+                _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].upload(data, cb3, true);
+              });
+            } else {
+              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].upload(data, cb3);
+            }
+          }
+
+          function cb3() {
             var str = format.checked ? JSON.stringify(data, null, 2) : JSON.stringify(data);
             str = str.replace(/'/g, '\\\'');
             var blob = new Blob([str], {
@@ -1114,30 +1157,10 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
             });
           }
 
-          function cb2() {
-            (0,_util_output__WEBPACK_IMPORTED_MODULE_10__["default"])(data, {
-              iterations: iterations,
-              precision: precision,
-              unit: unit,
-              rem: rem,
-              vw: vw,
-              vh: vh
-            });
-            (0,_util_overflow__WEBPACK_IMPORTED_MODULE_13__["default"])(type, data, function () {
-              if (base64.checked) {
-                _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].base64(data, function () {
-                  _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].upload(data, cb, true);
-                });
-              } else {
-                _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].upload(data, cb);
-              }
-            });
-          }
-
           if (autoSize.checked) {
-            _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].autoSize(type, data, list, cb2);
+            _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].autoSize(type, data, list, cb1);
           } else {
-            cb2();
+            cb1();
           }
         }
       }, "\u4E0A\u4F20")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", {
@@ -1326,6 +1349,8 @@ var Preview = /*#__PURE__*/function () {
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "autoSize", true);
 
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "autoOverflow", true);
+
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "iterations", 1);
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "precision", 0);
@@ -1370,6 +1395,11 @@ var Preview = /*#__PURE__*/function () {
     key: "setAutoSize",
     value: function setAutoSize(autoSize) {
       this.autoSize = autoSize;
+    }
+  }, {
+    key: "setAutoOverflow",
+    value: function setAutoOverflow(autoOverflow) {
+      this.autoOverflow = autoOverflow;
     }
   }, {
     key: "setFontSize",
@@ -2406,7 +2436,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/_@babel_runtime@7.17.2@@babel/runtime/helpers/esm/slicedToArray.js");
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.69.4@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.69.5@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./config */ "./src/util/config.js");
 /* harmony import */ var _animation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./animation */ "./src/util/animation.js");
@@ -2675,6 +2705,11 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
     var animateController = root.animateController;
 
     function setCb() {
+      if (total === 0) {
+        cb();
+        return;
+      }
+
       var _loop = function _loop(url) {
         if (hash.hasOwnProperty(url)) {
           var _item = hash[url];
@@ -2814,7 +2849,14 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
       for (var i = 0, len = library.length; i < len; i++) {
         recursionUpload(library[i], imgHash, wrap, isBase64);
       }
-    }
+    } // 模拟一个异步，防止没有图片时需要cb返回
+
+
+    setTimeout(function () {
+      if (0 === total) {
+        cb();
+      }
+    }, 1);
   }
 });
 
@@ -3150,7 +3192,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.69.4@karas/index.js");
+/* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.69.5@karas/index.js");
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(karas__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _animation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./animation */ "./src/util/animation.js");
 
@@ -3389,9 +3431,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./node_modules/_karas@0.69.4@karas/index.js":
+/***/ "./node_modules/_karas@0.69.5@karas/index.js":
 /*!***************************************************!*\
-  !*** ./node_modules/_karas@0.69.4@karas/index.js ***!
+  !*** ./node_modules/_karas@0.69.5@karas/index.js ***!
   \***************************************************/
 /***/ (function(module) {
 
@@ -17168,6 +17210,7 @@ __webpack_require__.r(__webpack_exports__);
       WIDTH$2 = _enums$STYLE_KEY$7.WIDTH,
       TEXT_STROKE_COLOR$2 = _enums$STYLE_KEY$7.TEXT_STROKE_COLOR,
       TEXT_STROKE_WIDTH$2 = _enums$STYLE_KEY$7.TEXT_STROKE_WIDTH,
+      POSITION$1 = _enums$STYLE_KEY$7.POSITION,
       _enums$NODE_KEY$1 = enums.NODE_KEY,
       NODE_CACHE = _enums$NODE_KEY$1.NODE_CACHE,
       NODE_LIMIT_CACHE = _enums$NODE_KEY$1.NODE_LIMIT_CACHE,
@@ -17249,8 +17292,14 @@ __webpack_require__.r(__webpack_exports__);
 
         var bp = this.domParent;
 
-        while (bp.currentStyle[DISPLAY$1] === 'inline') {
-          bp = bp.domParent;
+        while (bp.currentStyle[DISPLAY$1] === 'inline' && bp.currentStyle[POSITION$1] !== 'absolute') {
+          var p = bp.domParent;
+
+          if (p.currentStyle[DISPLAY$1] === 'flex') {
+            break;
+          }
+
+          bp = p;
         }
 
         this.__bp = bp;
@@ -17521,8 +17570,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
             if (count === w) {
-              // 多行文本截断，这里肯定需要回退
-              if (lineClamp && lineCount + lineClampCount >= lineClamp - 1) {
+              // 多行文本截断，这里肯定需要回退，注意防止恰好是最后一个字符，此时无需截取
+              if (lineClamp && lineCount + lineClampCount >= lineClamp - 1 && i < length - 1) {
                 var _this$__lineBack3 = this.__lineBack(count, w, beginSpace, endSpace, ew, letterSpacing, begin, i, length, lineCount, lineHeight, lx, x, y, maxW, textBoxes, content, charWidthList, lineBoxManager);
 
                 var _this$__lineBack4 = _slicedToArray(_this$__lineBack3, 2);
@@ -23210,7 +23259,7 @@ __webpack_require__.r(__webpack_exports__);
       RIGHT = _enums$STYLE_KEY$c.RIGHT,
       BOTTOM$1 = _enums$STYLE_KEY$c.BOTTOM,
       LEFT = _enums$STYLE_KEY$c.LEFT,
-      POSITION$1 = _enums$STYLE_KEY$c.POSITION,
+      POSITION$2 = _enums$STYLE_KEY$c.POSITION,
       DISPLAY$2 = _enums$STYLE_KEY$c.DISPLAY,
       WIDTH$4 = _enums$STYLE_KEY$c.WIDTH,
       HEIGHT$3 = _enums$STYLE_KEY$c.HEIGHT,
@@ -23630,7 +23679,7 @@ __webpack_require__.r(__webpack_exports__);
             __config = this.__config;
         var display = computedStyle[DISPLAY$2];
         var width = currentStyle[WIDTH$4],
-            position = currentStyle[POSITION$1];
+            position = currentStyle[POSITION$2];
         this.clearCache();
         this.__layoutData = {
           x: data.x,
@@ -24004,7 +24053,7 @@ __webpack_require__.r(__webpack_exports__);
     }, {
       key: "__marginAuto",
       value: function __marginAuto(style, data) {
-        var position = style[POSITION$1],
+        var position = style[POSITION$2],
             display = style[DISPLAY$2],
             marginLeft = style[MARGIN_LEFT$1],
             marginRight = style[MARGIN_RIGHT$1],
@@ -27153,7 +27202,7 @@ __webpack_require__.r(__webpack_exports__);
       DISPLAY$4 = _enums$STYLE_KEY$e.DISPLAY,
       TOP$2 = _enums$STYLE_KEY$e.TOP,
       BOTTOM$2 = _enums$STYLE_KEY$e.BOTTOM,
-      POSITION$2 = _enums$STYLE_KEY$e.POSITION,
+      POSITION$3 = _enums$STYLE_KEY$e.POSITION,
       HEIGHT$4 = _enums$STYLE_KEY$e.HEIGHT;
   var AUTO$5 = o.AUTO,
       PX$7 = o.PX,
@@ -27176,7 +27225,7 @@ __webpack_require__.r(__webpack_exports__);
 
         if (parent) {
           var cs = parent.computedStyle;
-          var ps = cs[POSITION$2];
+          var ps = cs[POSITION$3];
           isContainer = parent === root || parent.isShadowRoot || ps === 'relative' || ps === 'absolute';
         } // 先偏移next，忽略有定位的absolute，本身非container也忽略
 
@@ -27186,7 +27235,7 @@ __webpack_require__.r(__webpack_exports__);
 
         while (next) {
           if (next.currentStyle[DISPLAY$4] !== 'none') {
-            if (next.currentStyle[POSITION$2] === 'absolute') {
+            if (next.currentStyle[POSITION$3] === 'absolute') {
               var _next$currentStyle = next.currentStyle,
                   top = _next$currentStyle[TOP$2],
                   bottom = _next$currentStyle[BOTTOM$2],
@@ -27227,7 +27276,7 @@ __webpack_require__.r(__webpack_exports__);
 
                       var _cs = container.currentStyle;
 
-                      if (_cs[POSITION$2] === 'absolute' || _cs[POSITION$2] === 'relative') {
+                      if (_cs[POSITION$3] === 'absolute' || _cs[POSITION$3] === 'relative') {
                         break;
                       }
 
@@ -27257,7 +27306,7 @@ __webpack_require__.r(__webpack_exports__);
 
         var _node = node,
             currentStyle = _node.currentStyle;
-        var isAbs = currentStyle[POSITION$2] === 'absolute';
+        var isAbs = currentStyle[POSITION$3] === 'absolute';
         var need = void 0;
 
         if (isAbs) {
@@ -27335,7 +27384,7 @@ __webpack_require__.r(__webpack_exports__);
   };
 
   var _enums$STYLE_KEY$f = enums.STYLE_KEY,
-      POSITION$3 = _enums$STYLE_KEY$f.POSITION,
+      POSITION$4 = _enums$STYLE_KEY$f.POSITION,
       DISPLAY$5 = _enums$STYLE_KEY$f.DISPLAY,
       FONT_WEIGHT$4 = _enums$STYLE_KEY$f.FONT_WEIGHT,
       MARGIN_LEFT$3 = _enums$STYLE_KEY$f.MARGIN_LEFT,
@@ -30315,7 +30364,7 @@ __webpack_require__.r(__webpack_exports__);
 
             while (prev) {
               // 目前不考虑margin合并，直接以前面的flow的最近的prev末尾为准
-              if (prev instanceof Text || prev.computedStyle[POSITION$3] !== 'absolute') {
+              if (prev instanceof Text || prev.computedStyle[POSITION$4] !== 'absolute') {
                 y2 = prev.y + prev.outerHeight;
                 break;
               }
@@ -30858,7 +30907,7 @@ __webpack_require__.r(__webpack_exports__);
             item = item.shadowRoot;
           }
 
-          return item instanceof Text || item.currentStyle[POSITION$3] !== 'absolute';
+          return item instanceof Text || item.currentStyle[POSITION$4] !== 'absolute';
         });
       }
     }, {
@@ -30869,7 +30918,7 @@ __webpack_require__.r(__webpack_exports__);
             item = item.shadowRoot;
           }
 
-          return item instanceof Xom$1 && item.currentStyle[POSITION$3] === 'absolute';
+          return item instanceof Xom$1 && item.currentStyle[POSITION$4] === 'absolute';
         });
       }
     }, {
@@ -38002,7 +38051,7 @@ __webpack_require__.r(__webpack_exports__);
       RIGHT$2 = _enums$STYLE_KEY$j.RIGHT,
       BOTTOM$4 = _enums$STYLE_KEY$j.BOTTOM,
       LEFT$2 = _enums$STYLE_KEY$j.LEFT,
-      POSITION$4 = _enums$STYLE_KEY$j.POSITION,
+      POSITION$5 = _enums$STYLE_KEY$j.POSITION,
       DISPLAY$9 = _enums$STYLE_KEY$j.DISPLAY,
       VISIBILITY$6 = _enums$STYLE_KEY$j.VISIBILITY,
       COLOR$5 = _enums$STYLE_KEY$j.COLOR,
@@ -38209,7 +38258,7 @@ __webpack_require__.r(__webpack_exports__);
 
   function checkInfluence(root, reflowHash, node, component, addDom) {
     // add情况abs节点特殊对待不影响其它节点，不能判断display，因为inline会强制block
-    if (addDom && node.currentStyle[POSITION$4] === 'absolute') {
+    if (addDom && node.currentStyle[POSITION$5] === 'absolute') {
       return;
     }
 
@@ -38229,7 +38278,7 @@ __webpack_require__.r(__webpack_exports__);
         } // 遇到absolute跳出，设置其布局；如果absolute不变化普通处理，如果absolute发生变化，一定会存在于列表中，不用考虑
 
 
-        if (target.currentStyle[POSITION$4] === 'absolute' || target.computedStyle[POSITION$4] === 'absolute') {
+        if (target.currentStyle[POSITION$5] === 'absolute' || target.computedStyle[POSITION$5] === 'absolute') {
           setLAYOUT(target, reflowHash, component, addDom);
           return;
         }
@@ -38264,7 +38313,7 @@ __webpack_require__.r(__webpack_exports__);
       } // 遇到absolute跳出，如果absolute不变化普通处理，如果absolute发生变化，一定会存在于列表中，不用考虑
 
 
-      if (parent.currentStyle[POSITION$4] === 'absolute' || parent.computedStyle[POSITION$4] === 'absolute') {
+      if (parent.currentStyle[POSITION$5] === 'absolute' || parent.computedStyle[POSITION$5] === 'absolute') {
         break;
       } // 父固定宽高跳出
 
@@ -38289,7 +38338,7 @@ __webpack_require__.r(__webpack_exports__);
 
     while (parent) {
       // 无论新老absolute，不变化则设置，变化一定会出现在列表中
-      if (parent.currentStyle[POSITION$4] === 'absolute' || parent.computedStyle[POSITION$4] === 'absolute') {
+      if (parent.currentStyle[POSITION$5] === 'absolute' || parent.computedStyle[POSITION$5] === 'absolute') {
         if (parent === root) {
           break;
         } // 固定尺寸的不用设置，需要跳出循环
@@ -38424,7 +38473,7 @@ __webpack_require__.r(__webpack_exports__);
             } else {
               // TRBL变化只对relative/absolute起作用，其它忽视
               if (DIRECTION_HASH.hasOwnProperty(k)) {
-                var position = currentStyle[POSITION$4];
+                var position = currentStyle[POSITION$5];
 
                 if (position !== 'relative' && position !== 'absolute') {
                   delete style[k];
@@ -39289,8 +39338,8 @@ __webpack_require__.r(__webpack_exports__);
         } // 同理position不能为absolute
 
 
-        if (currentStyle[POSITION$4] === 'absolute') {
-          computedStyle[POSITION$4] = currentStyle[POSITION$4] = 'static';
+        if (currentStyle[POSITION$5] === 'absolute') {
+          computedStyle[POSITION$5] = currentStyle[POSITION$5] = 'static';
         } // 根节点满宽高
 
 
@@ -39631,10 +39680,10 @@ __webpack_require__.r(__webpack_exports__);
             var cps = node.computedStyle,
                 cts = node.currentStyle;
             var zIndex = cps[Z_INDEX$4],
-                position = cps[POSITION$4],
+                position = cps[POSITION$5],
                 display = cps[DISPLAY$9];
             var isLastAbs = position === 'absolute';
-            var isNowAbs = cts[POSITION$4] === 'absolute';
+            var isNowAbs = cts[POSITION$5] === 'absolute';
             var isLastNone = display === 'none';
             var isNowNone = cts[DISPLAY$9] === 'none'; // none不可见布局无效可以无视
 
@@ -39660,7 +39709,7 @@ __webpack_require__.r(__webpack_exports__);
             var hasFlowPrev;
 
             while (ref) {
-              if (ref instanceof Text || ref.computedStyle[POSITION$4] !== 'absolute' && ref.computedStyle[DISPLAY$9] !== 'none') {
+              if (ref instanceof Text || ref.computedStyle[POSITION$5] !== 'absolute' && ref.computedStyle[DISPLAY$9] !== 'none') {
                 y = ref.y + ref.outerHeight;
                 hasFlowPrev = true;
                 break;
@@ -39728,7 +39777,7 @@ __webpack_require__.r(__webpack_exports__);
                     diffI += _arr[1];
                     diffList.push(_arr);
 
-                    if (position !== cts[POSITION$4] && (position === 'static' || cts[POSITION$4] === 'static') || zIndex !== cts[Z_INDEX$4]) {
+                    if (position !== cts[POSITION$5] && (position === 'static' || cts[POSITION$5] === 'static') || zIndex !== cts[Z_INDEX$4]) {
                       parent.__updateStruct(root.__structs);
 
                       if (_this5.renderMode === mode.SVG) {
@@ -39807,7 +39856,7 @@ __webpack_require__.r(__webpack_exports__);
               p = p.domParent;
               computedStyle = p.computedStyle;
 
-              if (computedStyle[POSITION$4] === 'relative') {
+              if (computedStyle[POSITION$5] === 'relative') {
                 var _p = p,
                     ox = _p.ox,
                     oy = _p.oy;
@@ -39825,7 +39874,7 @@ __webpack_require__.r(__webpack_exports__);
             var next = node.next;
 
             while (next && !next.hasOwnProperty('__uniqueReflowId')) {
-              if (next.computedStyle[POSITION$4] === 'absolute') {
+              if (next.computedStyle[POSITION$5] === 'absolute') {
                 next = next.next;
                 continue;
               }
@@ -39845,7 +39894,7 @@ __webpack_require__.r(__webpack_exports__);
 
                   var cs = target.computedStyle;
 
-                  if (cs[POSITION$4] !== 'absolute' && cs[DISPLAY$9] !== 'none') {
+                  if (cs[POSITION$5] !== 'absolute' && cs[DISPLAY$9] !== 'none') {
                     target.__offsetY(_diff, true, REPAINT$3);
                   }
 
@@ -39879,7 +39928,7 @@ __webpack_require__.r(__webpack_exports__);
               diffI += _arr4[1];
               diffList.push(_arr4);
 
-              if (position !== cts[POSITION$4] && (position === 'static' || cts[POSITION$4] === 'static') || zIndex !== cts[Z_INDEX$4]) {
+              if (position !== cts[POSITION$5] && (position === 'static' || cts[POSITION$5] === 'static') || zIndex !== cts[Z_INDEX$4]) {
                 node.domParent.__updateStruct(root.__structs);
 
                 if (_this5.renderMode === mode.SVG) {
@@ -40016,7 +40065,7 @@ __webpack_require__.r(__webpack_exports__);
 
             var cs = parent.currentStyle;
             var height = cs[HEIGHT$8];
-            var isContainer = parent === root || parent.isShadowRoot || cs[POSITION$4] === 'absolute' || cs[POSITION$4] === 'relative';
+            var isContainer = parent === root || parent.isShadowRoot || cs[POSITION$5] === 'absolute' || cs[POSITION$5] === 'relative';
 
             if (height[1] === AUTO$8 && lastChild) {
               var oldH = parent.height + parent.computedStyle[PADDING_TOP$6];
@@ -40052,7 +40101,7 @@ __webpack_require__.r(__webpack_exports__);
 
                         var _cs2 = _isXom && target.currentStyle;
 
-                        var isAbs = _isXom && _cs2[POSITION$4] === 'absolute';
+                        var isAbs = _isXom && _cs2[POSITION$5] === 'absolute';
 
                         if (!isAbs) {
                           var y = target.y + target.outerHeight;
@@ -40091,7 +40140,7 @@ __webpack_require__.r(__webpack_exports__);
 
                           var _cs3 = container.currentStyle;
 
-                          if (_cs3[POSITION$4] === 'absolute' || _cs3[POSITION$4] === 'relative') {
+                          if (_cs3[POSITION$5] === 'absolute' || _cs3[POSITION$5] === 'relative') {
                             break;
                           }
 
@@ -40123,7 +40172,7 @@ __webpack_require__.r(__webpack_exports__);
 
                           var _cs4 = container.currentStyle;
 
-                          if (_cs4[POSITION$4] === 'absolute' || _cs4[POSITION$4] === 'relative') {
+                          if (_cs4[POSITION$5] === 'absolute' || _cs4[POSITION$5] === 'relative') {
                             break;
                           }
 
@@ -40162,7 +40211,7 @@ __webpack_require__.r(__webpack_exports__);
 
                   var _cs5 = _isXom2 && _target.currentStyle;
 
-                  var _isAbs = _isXom2 && _cs5[POSITION$4] === 'absolute';
+                  var _isAbs = _isXom2 && _cs5[POSITION$5] === 'absolute';
 
                   if (!_isAbs) {
                     var _y = _target.y + _target.outerHeight;
@@ -43595,7 +43644,7 @@ __webpack_require__.r(__webpack_exports__);
     Cache: Cache
   };
 
-  var version = "0.69.4";
+  var version = "0.69.5";
 
   Geom$1.register('$line', Line);
   Geom$1.register('$polyline', Polyline);
@@ -81565,7 +81614,7 @@ function _unsupportedIterableToArray(o, minLen) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"ae-karas","version":"0.6.0","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"^0.69.4","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
+module.exports = JSON.parse('{"name":"ae-karas","version":"0.6.1","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"^0.69.5","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
 
 /***/ })
 

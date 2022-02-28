@@ -3,6 +3,7 @@ import vector from './vector';
 import render from '../render';
 
 let uuid = 0;
+let compList = [];
 
 function recursion(composition, library, navigationShapeTree) {
   let { name, layers, width, height, displayStartTime, duration } = composition;
@@ -273,10 +274,23 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
           }
         }
       }
-      // 合成，递归分析
+      // 合成，递归分析，需要缓存起来，防止重复使用合成生成多余的library对象
       else if(source instanceof CompItem) {
-        asset = recursion(source, library, navigationShapeTree);
-        asset.type = 'div';
+        for(let i = 0, len = compList.length; i < len; i++) {
+          if(source === compList[i].source) {
+            hasExist = true;
+            asset = compList[i].asset;
+            break;
+          }
+        }
+        if(!hasExist) {
+          asset = recursion(source, library, navigationShapeTree);
+          asset.type = 'div';
+          compList.push({
+            source,
+            asset,
+          });
+        }
       }
       if(asset) {
         if(!hasExist) {
@@ -352,6 +366,7 @@ function text(prop) {
 
 export default function(composition) {
   $.ae2karas.error('parse');
+  compList.splice(0);
   // 递归遍历合成，转换ae的图层为普通js对象
   let { workAreaStart, workAreaDuration } = composition;
   workAreaStart *= 1000;
