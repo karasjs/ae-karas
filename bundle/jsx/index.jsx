@@ -1012,7 +1012,6 @@ var render = {
 };
 
 var uuid$1 = 0;
-var compList = [];
 
 function recursion$1(composition, library, navigationShapeTree) {
   var name = composition.name,
@@ -1319,21 +1318,17 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
         }
       } // 合成，递归分析，需要缓存起来，防止重复使用合成生成多余的library对象
       else if (source instanceof CompItem) {
-        for (var _i6 = 0, len = compList.length; _i6 < len; _i6++) {
-          if (source === compList[_i6].source) {
-            hasExist = true;
-            asset = compList[_i6].asset;
-            break;
-          }
-        }
-
+        // TODO，仅静态无动画可复用，否则时间轴对不齐
+        // for(let i = 0, len = compList.length; i < len; i++) {
+        //   if(source === compList[i].source) {
+        //     hasExist = true;
+        //     asset = compList[i].asset;
+        //     break;
+        //   }
+        // }
         if (!hasExist) {
           asset = recursion$1(source, library, navigationShapeTree);
           asset.type = 'div';
-          compList.push({
-            source: source,
-            asset: asset
-          });
         }
       }
 
@@ -1426,7 +1421,6 @@ function text(prop) {
 
 function parse$1 (composition) {
   $.ae2karas.error('parse');
-  compList.splice(0); // 递归遍历合成，转换ae的图层为普通js对象
 
   var workAreaStart = composition.workAreaStart,
       workAreaDuration = composition.workAreaDuration;

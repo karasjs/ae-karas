@@ -276,13 +276,14 @@ function parseLayer(layer, library, navigationShapeTree, hasSolo) {
       }
       // 合成，递归分析，需要缓存起来，防止重复使用合成生成多余的library对象
       else if(source instanceof CompItem) {
-        for(let i = 0, len = compList.length; i < len; i++) {
-          if(source === compList[i].source) {
-            hasExist = true;
-            asset = compList[i].asset;
-            break;
-          }
-        }
+        // TODO，仅静态无动画可复用，否则时间轴对不齐
+        // for(let i = 0, len = compList.length; i < len; i++) {
+        //   if(source === compList[i].source) {
+        //     hasExist = true;
+        //     asset = compList[i].asset;
+        //     break;
+        //   }
+        // }
         if(!hasExist) {
           asset = recursion(source, library, navigationShapeTree);
           asset.type = 'div';
