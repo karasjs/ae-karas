@@ -690,7 +690,6 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
               temp = temp.children[0];
             }
             let prev = target.children[target.children.length - 1];
-            target.children.push(m);
             // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
             let style = prev.init.style;
             if(style) {
@@ -705,8 +704,32 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
               }
             }
             let a = prev.animate;
+            // mask本身会有动画，还会继承同层的动画，避免干扰塞进一个div里
             if(a && a.length) {
-              m.animate = a;
+              let isClip = m.props.clip;
+              delete m.props.mask;
+              delete m.props.clip;
+              let o = {
+                name: 'wrap',
+                tagName: 'div',
+                props: {
+                  style: {
+                    position: 'absolute',
+                  },
+                },
+                children: [m],
+                animate: a,
+              };
+              if(isClip) {
+                o.props.clip = true;
+              }
+              else {
+                o.props.mask = true;
+              }
+              target.children.push(o);
+            }
+            else {
+              target.children.push(m);
             }
           }
           // 另外这种是独立mask图层，看有无嵌套，有则提升mask属性
