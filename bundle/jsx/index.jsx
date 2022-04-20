@@ -4371,7 +4371,9 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
                   }
 
                   m.animate.push(tfo);
-                } else if (value1.hasOwnProperty('translatePath')) ; else if (value1.hasOwnProperty('translateX') || value1.hasOwnProperty('translateY') || value1.hasOwnProperty('translateZ')) ;
+                } else if (value1.hasOwnProperty('translatePath') || value1.hasOwnProperty('translateX') || value1.hasOwnProperty('translateY') || value1.hasOwnProperty('translateZ')) {
+                  m.animate.push(JSON.parse(JSON.stringify(_item5)));
+                }
               }
             }
 
