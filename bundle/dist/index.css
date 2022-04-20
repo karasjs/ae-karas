@@ -361,6 +361,7 @@
   background: #5af;
 }
 .preview-panel .container .side .info {
+  margin: 5px 0;
   color: #666;
 }
 

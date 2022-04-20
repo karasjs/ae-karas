@@ -1165,9 +1165,9 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
         }
       }, "\u4E0A\u4F20")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", {
         className: "info"
-      }, "\u5BFC\u51FA\u529F\u80FD\u4E3A\u5230\u672C\u5730JSON\uFF0C\u56FE\u7247\u9700base64\u624D\u80FD\u6B63\u5E38\u67E5\u770B\u3002"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", {
+      }, "* \u5BFC\u51FA\u529F\u80FD\u4E3A\u5230\u672C\u5730JSON\uFF0C\u56FE\u7247\u9700base64\u624D\u80FD\u663E\u793A\u3002"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", {
         className: "info"
-      }, "\u4E0A\u4F20\u529F\u80FD\u9700\u914D\u5408\u670D\u52A1\u7AEF\u63A5\u53E3\uFF0C\u56FE\u7247\u5DF2\u505A\u538B\u7F29\u3002"))));
+      }, "* \u4E0A\u4F20\u529F\u80FD\u9700\u914D\u5408\u670D\u52A1\u7AEF\u63A5\u53E3\uFF0C\u56FE\u7247\u5DF2\u505A\u538B\u7F29\u3002"))));
     }
   }]);
 
