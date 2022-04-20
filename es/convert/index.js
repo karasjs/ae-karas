@@ -690,47 +690,68 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
               temp = temp.children[0];
             }
             let prev = target.children[target.children.length - 1];
-            // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值
+            // 特殊的地方，被遮罩的可能有init样式，mask需同等赋值，位置锚点会有冲突其它不会
             let style = prev.init.style;
+            let mStyle = m.props.style;
             if(style) {
               for(let i in style) {
                 if(style.hasOwnProperty(i) && {
                   'scaleX': true,
                   'scaleY': true,
                   'scaleZ': true,
+                  'rotateZ': true,
                 }.hasOwnProperty(i)) {
-                  m.props.style[i] = style[i];
+                  mStyle[i] = style[i];
                 }
               }
             }
             let a = prev.animate;
-            // mask本身会有动画，还会继承同层的动画，避免干扰塞进一个div里
+            // mask本身会有动画，还会继承同层被遮罩的位置锚点的动画，不能直接赋予，需计算每帧差值应用过来
             if(a && a.length) {
-              let isClip = m.props.clip;
-              delete m.props.mask;
-              delete m.props.clip;
-              let o = {
-                name: 'wrap',
-                tagName: 'div',
-                props: {
-                  style: {
-                    position: 'absolute',
-                  },
-                },
-                children: [m],
-                animate: a,
-              };
-              if(isClip) {
-                o.props.clip = true;
+              m.animate = m.animate || [];
+              for(let i = 0, len = a.length; i < len; i++) {
+                let item = a[i], value = item.value, value1 = value[1];
+                // tfo和left/top是一起的，可直接计算
+                if(value1.hasOwnProperty('transformOrigin')) {
+                  let tfo = {
+                    value: [{
+                      offset: 0,
+                    }],
+                    options: item.options,
+                  };
+                  if(value[0].hasOwnProperty('easing')) {
+                    tfo.value[0].easing = value[0].easing;
+                  }
+                  let arr = mStyle.transformOrigin.split(' ');
+                  arr[0] = parseFloat(arr[0]);
+                  arr[1] = parseFloat(arr[1]);
+                  for(let j = 1, len2 = value.length; j < len2; j++) {
+                    let item2 = value[j];
+                    let diffX = item2.left - (style.left || 0);
+                    let diffY = item2.top - (style.top || 0);
+                    let arr2 = [arr[0] - diffX, arr[1] - diffY];
+                    let o = {
+                      offset: item2.offset,
+                      left: mStyle.left + diffX,
+                      top: mStyle.top + diffY,
+                      transformOrigin: arr2.join(' '),
+                    };
+                    if(item2.hasOwnProperty('easing')) {
+                      o.easing = item2.easing;
+                    }
+                    tfo.value.push(o);
+                  }
+                  m.animate.push(tfo);
+                }
+                else if(value1.hasOwnProperty('translatePath')
+                  || value1.hasOwnProperty('translateX')
+                  || value1.hasOwnProperty('translateY')
+                  || value1.hasOwnProperty('translateZ')) {
+                  m.animate.push(JSON.parse(JSON.stringify(item)));
+                }
               }
-              else {
-                o.props.mask = true;
-              }
-              target.children.push(o);
             }
-            else {
-              target.children.push(m);
-            }
+            target.children.push(m);
           }
           // 另外这种是独立mask图层，看有无嵌套，有则提升mask属性
           else {
@@ -1169,7 +1190,7 @@ function parseMask(data, target, start, duration, displayStartTime, offset) {
       res.props.clip = true;
     }
   }
-  // 样式和target一致，只有位置信息需要
+  // 样式和target一致，只有位置信息需要，锚点单独处理
   let style = targetProps.style;
   for(let i in style) {
     if(style.hasOwnProperty(i) && ['left', 'top', 'translateX', 'translateY', 'translateZ'].indexOf(i) > -1) {
