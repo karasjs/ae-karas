@@ -98,7 +98,7 @@ export default function(type, data, cb) {
   canvas.width = width;
   canvas.height = height;
   let root = karas.parse({
-    tagName: type === 'webgl' ? type : 'canvas',
+    tagName: 'canvas',
     props: {
       width,
       height,

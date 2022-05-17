@@ -2915,7 +2915,11 @@ function getPerspectiveAndScale(data, index) {
     var animate = data.animate;
 
     for (var i = 0, len = animate.length; i < len; i++) {
-      var item = animate[i].value[index];
+      var item = animate[i].value[index]; // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
+
+      if (!item) {
+        continue;
+      }
 
       if (item.hasOwnProperty('transformOrigin')) {
         look = (item.transformOrigin || '').split(' ');
@@ -3141,7 +3145,7 @@ function convert$1(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, data) {
 
 function convertX(cx, eyeX, eyeZ, lookX, lookZ, data) {
   // 特殊情况
-  if (eyeX === lookX && cx === eyeX) {
+  if (eyeX === lookX || cx === eyeX) {
     return {
       rotateY: 0,
       translateX: 0
@@ -3168,7 +3172,7 @@ function convertX(cx, eyeX, eyeZ, lookX, lookZ, data) {
 
 function convertY(cy, eyeY, eyeZ, lookY, lookZ, data) {
   // 特殊情况
-  if (eyeY === lookY && cy === eyeY) {
+  if (eyeY === lookY || cy === eyeY) {
     return {
       rotateX: 0,
       translateY: 0
@@ -3330,6 +3334,10 @@ function camera (data, res) {
             var item = animate[_k];
             var item2 = item.value[_j3];
 
+            if (!item2) {
+              continue;
+            }
+
             if (item2.hasOwnProperty('translateZ')) {
               zIndex.push({
                 offset: osList[_j3],
@@ -3352,147 +3360,21 @@ function camera (data, res) {
         }
       }
 
-      wrap.animate.push({
-        value: zIndex,
-        options: {
-          duration: duration,
-          iterations: 1,
-          fill: 'forwards'
-        }
-      });
+      if (wrap.animate) {
+        wrap.animate.push({
+          value: zIndex,
+          options: {
+            duration: duration,
+            iterations: 1,
+            fill: 'forwards'
+          }
+        });
+      }
+
       wrap.children = [child];
       children.splice(i, 1, wrap);
     }
-  } // return;
-  // for(let i = 0, len = children.length; i < len; i++) {
-  //   let child = children[i];
-  //   getOffset(offsetList, offsetHash, child.animate, 'transformOrigin');
-  //   getOffset(offsetList, offsetHash, child.animate, 'translateX');
-  //   getOffset(offsetList, offsetHash, child.animate, 'translateY');
-  //   getOffset(offsetList, offsetHash, child.animate, 'translateZ');
-  //   getOffset(offsetList, offsetHash, child.animate, 'rotateX');
-  //   getOffset(offsetList, offsetHash, child.animate, 'rotateY');
-  // }
-  // offsetList.sort(function(a, b) {
-  //   return a - b;
-  // });
-  // $.ae2karas.warn(offsetList);
-  // $.ae2karas.log(data.animate);
-  // // 为不存在于offset合集的动画插入中间关键帧
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'transformOrigin');
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateX');
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateY');
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
-  // for(let i = 0, len = children.length; i < len; i++) {
-  //   let child = children[i];
-  //   // 只有3d图层需要
-  //   if(child.ddd) {
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'transformOrigin');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateX');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateY');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateZ');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateX');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateY');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateZ');
-  //   }
-  // }
-  // $.ae2karas.log(data.animate);
-  // // 计算每帧的perspective，存入动画，scale是AE固定焦距导致的缩放
-  // let rootAnimate = [];
-  // for(let i = 0, len = offsetList.length; i < len; i++) {
-  //   let { eyeX, eyeY, eyeZ, lookX, lookY, lookZ, perspective, scale } = getPerspectiveAndScale(data, i);
-  //   // $.ae2karas.log(i);
-  //   // $.ae2karas.log(data);
-  //   // $.ae2karas.log(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, perspective, scale);
-  //   // 非首帧
-  //   if(i) {
-  //     rootAnimate.push({
-  //       offset: offsetList[i],
-  //       perspective,
-  //       scale,
-  //     });
-  //   }
-  //   // 首帧填空
-  //   else {
-  //     rootAnimate.push({
-  //       offset: 0,
-  //     });
-  //     res.props.style.perspective = perspective;
-  //     if(scale !== 1) {
-  //       res.props.style.scale = scale;
-  //     }
-  //   }
-  //   for(let j = 0, len2 = children.length; j < len2; j++) {
-  //     let child = children[j];
-  //     if(child.ddd) {
-  //       setTranslateAndRotate(w, h, child, i, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
-  //     }
-  //     else {
-  //       // TODO
-  //     }
-  //   }
-  // }
-  // // 特殊插入zIndex，值等同于translateZ
-  // for(let i = 0, len = children.length; i < len; i++) {
-  //   let child = children[i];
-  //   if(!child.ddd) {
-  //     continue;
-  //   }
-  //   let style = child.init.style;
-  //   let animate = child.animate;
-  //   if(style.translateZ) {
-  //     style.zIndex = style.translateZ;
-  //   }
-  //   let zIndex = [];
-  //   for(let j = 0, len2 = offsetList.length; j < len2; j++) {
-  //     if(j) {
-  //       let has;
-  //       for(let k = 0, len3 = animate.length; k < len3; k++) {
-  //         let item = animate[k];
-  //         let item2 = item.value[j];
-  //         if(item2.hasOwnProperty('translateZ')) {
-  //           zIndex.push({
-  //             offset: offsetList[j],
-  //             zIndex: item2.translateZ,
-  //           });
-  //           has = true;
-  //           break;
-  //         }
-  //       }
-  //       if(!has) {
-  //         zIndex.push({
-  //           offset: offsetList[j],
-  //         });
-  //       }
-  //     }
-  //     else {
-  //       zIndex.push({
-  //         offset: 0,
-  //       });
-  //     }
-  //   }
-  //   child.animate.push({
-  //     value: zIndex,
-  //     options: {
-  //       duration,
-  //       iterations: 1,
-  //       fill: 'forwards',
-  //     },
-  //   });
-  // }
-  // if(rootAnimate.length > 1) {
-  //   res.animate = [
-  //     {
-  //       value: rootAnimate,
-  //       options: {
-  //         duration,
-  //         fill: 'forwards',
-  //         iterations: 1,
-  //       },
-  //     },
-  //   ];
-  // }
-
+  }
 }
 
 /**
@@ -3841,9 +3723,9 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
     }
   }
 
-  if (is3d) {
-    // path没有width和height，在处理geom时会添加上
-    init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+  if (is3d && !res.isCamera) {
+    init.style.perspective = true; // path没有width和height，在处理geom时会添加上
+    // init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
 
   if (Array.isArray(scale) && scale.length) {
@@ -4272,10 +4154,11 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
       var temp = recursion(_item4, library, newLib, start, duration, displayStartTime, offset, parentLink);
 
       if (temp) {
-        res.children.push(temp); // ppt应该放在父层，如果有父级链接，则放在其上
+        res.children.push(temp); // ppt应该放在父层，如果有父级链接，则放在其上，另外ppt计算应该用合成的尺寸，而非节点自身的尺寸
 
         if (temp.init && temp.init.style && temp.init.style.perspective) {
-          res.props.style.perspective = temp.init.style.perspective || undefined;
+          // res.props.style.perspective = temp.init.style.perspective || undefined;
+          res.props.style.perspective = Math.sqrt(Math.pow(res.props.style.width, 2) + Math.pow(res.props.style.height, 2));
           delete temp.init.style.perspective;
         }
 
@@ -4283,7 +4166,8 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
           var t = temp.children[0];
 
           if (t.init && t.init.style && t.init.style.perspective) {
-            temp.props.style.perspective = t.init.style.perspective || undefined;
+            // temp.props.style.perspective = t.init.style.perspective || undefined;
+            temp.props.style.perspective = Math.sqrt(Math.pow(res.props.style.width, 2) + Math.pow(res.props.style.height, 2));
             delete t.init.style.perspective;
           }
         }
