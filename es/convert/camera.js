@@ -122,6 +122,10 @@ function getPerspectiveAndScale(data, index) {
     let animate = data.animate;
     for(let i = 0, len = animate.length; i < len; i++) {
       let item = animate[i].value[index];
+      // 没有的话说明没有执行统一插帧操作，不是需要考虑的变换属性
+      if(!item) {
+        continue;
+      }
       if(item.hasOwnProperty('transformOrigin')) {
         look = (item.transformOrigin || '').split(' ');
       }
@@ -325,7 +329,7 @@ function convert(w, h, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, data) {
 // 顶视图往下看，左到右为x，上到下为z，朝向为y
 function convertX(cx, eyeX, eyeZ, lookX, lookZ, data) {
   // 特殊情况
-  if(eyeX === lookX && cx === eyeX) {
+  if(eyeX === lookX || cx === eyeX) {
     return {
       rotateY: 0,
       translateX: 0,
@@ -351,7 +355,7 @@ function convertX(cx, eyeX, eyeZ, lookX, lookZ, data) {
 // 左视图往右看，左到右为z，下到上为y，朝向为x
 function convertY(cy, eyeY, eyeZ, lookY, lookZ, data) {
   // 特殊情况
-  if(eyeY === lookY && cy === eyeY) {
+  if(eyeY === lookY || cy === eyeY) {
     return {
       rotateX: 0,
       translateY: 0,
@@ -487,6 +491,9 @@ export default function(data, res) {
           for(let k = 0, len3 = animate.length; k < len3; k++) {
             let item = animate[k];
             let item2 = item.value[j];
+            if(!item2) {
+              continue;
+            }
             if(item2.hasOwnProperty('translateZ')) {
               zIndex.push({
                 offset: osList[j],
@@ -508,145 +515,18 @@ export default function(data, res) {
           });
         }
       }
-      wrap.animate.push({
-        value: zIndex,
-        options: {
-          duration,
-          iterations: 1,
-          fill: 'forwards',
-        },
-      });
+      if(wrap.animate) {
+        wrap.animate.push({
+          value: zIndex,
+          options: {
+            duration,
+            iterations: 1,
+            fill: 'forwards',
+          },
+        });
+      }
       wrap.children = [child];
       children.splice(i, 1, wrap);
     }
   }
-  // return;
-  // for(let i = 0, len = children.length; i < len; i++) {
-  //   let child = children[i];
-  //   getOffset(offsetList, offsetHash, child.animate, 'transformOrigin');
-  //   getOffset(offsetList, offsetHash, child.animate, 'translateX');
-  //   getOffset(offsetList, offsetHash, child.animate, 'translateY');
-  //   getOffset(offsetList, offsetHash, child.animate, 'translateZ');
-  //   getOffset(offsetList, offsetHash, child.animate, 'rotateX');
-  //   getOffset(offsetList, offsetHash, child.animate, 'rotateY');
-  // }
-  // offsetList.sort(function(a, b) {
-  //   return a - b;
-  // });
-  // $.ae2karas.warn(offsetList);
-  // $.ae2karas.log(data.animate);
-  // // 为不存在于offset合集的动画插入中间关键帧
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'transformOrigin');
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateX');
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateY');
-  // insertKf(offsetList, offsetHash, data.animate, data.init.style, 'translateZ');
-  // for(let i = 0, len = children.length; i < len; i++) {
-  //   let child = children[i];
-  //   // 只有3d图层需要
-  //   if(child.ddd) {
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'transformOrigin');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateX');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateY');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'translateZ');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateX');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateY');
-  //     insertKf(offsetList, offsetHash, child.animate, child.init.style, 'rotateZ');
-  //   }
-  // }
-  // $.ae2karas.log(data.animate);
-  // // 计算每帧的perspective，存入动画，scale是AE固定焦距导致的缩放
-  // let rootAnimate = [];
-  // for(let i = 0, len = offsetList.length; i < len; i++) {
-  //   let { eyeX, eyeY, eyeZ, lookX, lookY, lookZ, perspective, scale } = getPerspectiveAndScale(data, i);
-  //   // $.ae2karas.log(i);
-  //   // $.ae2karas.log(data);
-  //   // $.ae2karas.log(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, perspective, scale);
-  //   // 非首帧
-  //   if(i) {
-  //     rootAnimate.push({
-  //       offset: offsetList[i],
-  //       perspective,
-  //       scale,
-  //     });
-  //   }
-  //   // 首帧填空
-  //   else {
-  //     rootAnimate.push({
-  //       offset: 0,
-  //     });
-  //     res.props.style.perspective = perspective;
-  //     if(scale !== 1) {
-  //       res.props.style.scale = scale;
-  //     }
-  //   }
-  //   for(let j = 0, len2 = children.length; j < len2; j++) {
-  //     let child = children[j];
-  //     if(child.ddd) {
-  //       setTranslateAndRotate(w, h, child, i, offsetList, duration, eyeX, eyeY, eyeZ, lookX, lookY, lookZ);
-  //     }
-  //     else {
-  //       // TODO
-  //     }
-  //   }
-  // }
-  // // 特殊插入zIndex，值等同于translateZ
-  // for(let i = 0, len = children.length; i < len; i++) {
-  //   let child = children[i];
-  //   if(!child.ddd) {
-  //     continue;
-  //   }
-  //   let style = child.init.style;
-  //   let animate = child.animate;
-  //   if(style.translateZ) {
-  //     style.zIndex = style.translateZ;
-  //   }
-  //   let zIndex = [];
-  //   for(let j = 0, len2 = offsetList.length; j < len2; j++) {
-  //     if(j) {
-  //       let has;
-  //       for(let k = 0, len3 = animate.length; k < len3; k++) {
-  //         let item = animate[k];
-  //         let item2 = item.value[j];
-  //         if(item2.hasOwnProperty('translateZ')) {
-  //           zIndex.push({
-  //             offset: offsetList[j],
-  //             zIndex: item2.translateZ,
-  //           });
-  //           has = true;
-  //           break;
-  //         }
-  //       }
-  //       if(!has) {
-  //         zIndex.push({
-  //           offset: offsetList[j],
-  //         });
-  //       }
-  //     }
-  //     else {
-  //       zIndex.push({
-  //         offset: 0,
-  //       });
-  //     }
-  //   }
-  //   child.animate.push({
-  //     value: zIndex,
-  //     options: {
-  //       duration,
-  //       iterations: 1,
-  //       fill: 'forwards',
-  //     },
-  //   });
-  // }
-  // if(rootAnimate.length > 1) {
-  //   res.animate = [
-  //     {
-  //       value: rootAnimate,
-  //       options: {
-  //         duration,
-  //         fill: 'forwards',
-  //         iterations: 1,
-  //       },
-  //     },
-  //   ];
-  // }
 };

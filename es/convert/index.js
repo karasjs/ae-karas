@@ -293,9 +293,10 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
       res.animate.push(t);
     }
   }
-  if(is3d) {
+  if(is3d && !res.isCamera) {
+    init.style.perspective = true;
     // path没有width和height，在处理geom时会添加上
-    init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+    // init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
   if(Array.isArray(scale) && scale.length) {
     let t = transformScale(scale, begin2, duration, res.ddd);
@@ -661,15 +662,17 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
       let temp = recursion(item, library, newLib, start, duration, displayStartTime, offset, parentLink);
       if(temp) {
         res.children.push(temp);
-        // ppt应该放在父层，如果有父级链接，则放在其上
+        // ppt应该放在父层，如果有父级链接，则放在其上，另外ppt计算应该用合成的尺寸，而非节点自身的尺寸
         if(temp.init && temp.init.style && temp.init.style.perspective) {
-          res.props.style.perspective = temp.init.style.perspective || undefined;
+          // res.props.style.perspective = temp.init.style.perspective || undefined;
+          res.props.style.perspective = Math.sqrt(Math.pow(res.props.style.width, 2) + Math.pow(res.props.style.height, 2));
           delete temp.init.style.perspective;
         }
         if(temp.children && temp.children.length === 1) {
           let t = temp.children[0];
           if(t.init && t.init.style && t.init.style.perspective) {
-            temp.props.style.perspective = t.init.style.perspective || undefined;
+            // temp.props.style.perspective = t.init.style.perspective || undefined;
+            temp.props.style.perspective = Math.sqrt(Math.pow(res.props.style.width, 2) + Math.pow(res.props.style.height, 2));
             delete t.init.style.perspective;
           }
         }

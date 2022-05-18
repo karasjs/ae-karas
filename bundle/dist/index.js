@@ -8990,7 +8990,7 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
     canvas.width = width;
     canvas.height = height;
     var root = _karas_0_72_5_karas_default().parse({
-      tagName: type === 'webgl' ? type : 'canvas',
+      tagName: 'canvas',
       props: {
         width: width,
         height: height
@@ -9265,7 +9265,7 @@ function checkOverflow(root, node, vertexes, obj) {
   overflow_canvas.width = width;
   overflow_canvas.height = height;
   var root = _karas_0_72_5_karas_default().parse({
-    tagName: type === 'webgl' ? type : 'canvas',
+    tagName: 'canvas',
     props: {
       width: width,
       height: height
@@ -10207,7 +10207,7 @@ var Alert = (Alert_dec = inject('global'), Alert_dec(Alert_class = mobxreact_esm
   }
 });
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"0.6.4"};
+const package_namespaceObject = {"i8":"0.6.5"};
 ;// CONCATENATED MODULE: ./src/index.html
 /* harmony default export */ const src = (__webpack_require__.p + "index.html");
 ;// CONCATENATED MODULE: ./src/index.js
