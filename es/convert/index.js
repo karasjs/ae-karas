@@ -662,7 +662,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
       let temp = recursion(item, library, newLib, start, duration, displayStartTime, offset, parentLink);
       if(temp) {
         res.children.push(temp);
-        // ppt应该放在父层，如果有父级链接，则放在其上，另外ppt计算应该用合成的尺寸，而非节点自身的尺寸
+        // ppt应该放在父层合成层，有父级链接要跳过，另外ppt计算应该用合成的尺寸，而非节点自身的尺寸
         if(temp.init && temp.init.style && temp.init.style.perspective) {
           // res.props.style.perspective = temp.init.style.perspective || undefined;
           res.props.style.perspective = Math.sqrt(Math.pow(res.props.style.width, 2) + Math.pow(res.props.style.height, 2));
@@ -672,7 +672,7 @@ function parseChildren(res, children, library, newLib, start, duration, displayS
           let t = temp.children[0];
           if(t.init && t.init.style && t.init.style.perspective) {
             // temp.props.style.perspective = t.init.style.perspective || undefined;
-            temp.props.style.perspective = Math.sqrt(Math.pow(res.props.style.width, 2) + Math.pow(res.props.style.height, 2));
+            res.props.style.perspective = Math.sqrt(Math.pow(res.props.style.width, 2) + Math.pow(res.props.style.height, 2));
             delete t.init.style.perspective;
           }
         }
