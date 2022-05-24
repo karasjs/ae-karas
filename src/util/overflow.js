@@ -58,16 +58,16 @@ function checkOverflow(root, node, vertexes, obj) {
   if(node !== root) {
     let p = node.getBoundingClientRect(true).points;
     // 4个顶点都在root的vertexes内就不出界
-    if(!karas.math.geom.pointInPolygon(p[0][0], p[0][1], vertexes)) {
+    if(!karas.math.geom.pointInConvexPolygon(p[0][0], p[0][1], vertexes)) {
       return true;
     }
-    if(!karas.math.geom.pointInPolygon(p[1][0], p[1][1], vertexes)) {
+    if(!karas.math.geom.pointInConvexPolygon(p[1][0], p[1][1], vertexes)) {
       return true;
     }
-    if(!karas.math.geom.pointInPolygon(p[2][0], p[2][1], vertexes)) {
+    if(!karas.math.geom.pointInConvexPolygon(p[2][0], p[2][1], vertexes)) {
       return true;
     }
-    if(!karas.math.geom.pointInPolygon(p[3][0], p[3][1], vertexes)) {
+    if(!karas.math.geom.pointInConvexPolygon(p[3][0], p[3][1], vertexes)) {
       return true;
     }
   }
