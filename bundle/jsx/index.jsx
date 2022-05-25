@@ -3918,7 +3918,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
         offset: 0
       });
       v.value.push({
-        offset: inPoint / duration,
+        offset: (inPoint - start) / duration,
         visibility: 'inherit',
         pointerEvents: 'auto'
       });
@@ -3934,7 +3934,7 @@ function recursion(data, library, newLib, start, duration, displayStartTime, off
     if (outPoint < start + duration) {
       // 可能是第一帧但offset不为0，不用担心karas会补充空首帧
       v.value.push({
-        offset: outPoint / duration,
+        offset: (outPoint - start) / duration,
         visibility: 'hidden',
         pointerEvents: 'none'
       }); // 默认不是隐藏需补结束帧为隐藏，否则karas会填补空关键帧
