@@ -74,7 +74,11 @@ function checkOverflow(root, node, vertexes, obj) {
   let children = node.children;
   if(Array.isArray(children)) {
     for(let i = 0, len = children.length; i < len; i++) {
-      let overflow = checkOverflow(root, children[i], vertexes, obj);
+      let child = children[i];
+      if(child instanceof karas.Text) {
+        continue;
+      }
+      let overflow = checkOverflow(root, child, vertexes, obj);
       // 超出可以打标并提前跳出
       if(overflow) {
         obj.isOverflow = true;
