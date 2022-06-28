@@ -1920,9 +1920,18 @@ function getAreaList(list, begin, duration, reducer) {
 
     if (prev.easing) {
       p = easing.getEasing(prev.easing)(_percent);
-    }
+    } // 很特殊的地方，如果是普通的关键帧，直接截取并赋值尾帧即可，
+    // translatePath需要将截取值赋给倒数第2帧，并尾帧使用结束位置
 
-    last.value = reducer(prev.value, last.value, p);
+
+    var v = reducer(prev.value, last.value, p);
+
+    if (v.length === 8) {
+      prev.value = v;
+      last.value = v.slice(6, 8);
+    } else {
+      last.value = v;
+    }
 
     if (prev.easing) {
       var _points = sliceBezier([[0, 0], [prev.easing[0], prev.easing[1]], [prev.easing[2], prev.easing[3]], [1, 1]], _percent);
@@ -2062,9 +2071,10 @@ function transformPosition(list, begin, duration) {
           for (var i = 0, len = prev.length; i < len; i++) {
             var item = prev[i];
             points.push(item);
-          }
+          } // start的话translatePath是个bezier，percent很特殊反过来
 
-          points = sliceBezier(points.reverse(), percent);
+
+          points = sliceBezier(points.reverse(), 1 - percent);
           return points.reverse();
         } else {
           return sliceBezier(prev, percent);
