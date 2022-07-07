@@ -194,6 +194,12 @@ function getEasing(prop, start, end, isZ) {
   // $.ae2karas.log(c1);
   // $.ae2karas.log(c2);
 
+  var interpolationType = '';
+
+  if (prop.keyOutInterpolationType(start) === KeyframeInterpolationType.LINEAR && prop.keyOutInterpolationType(end) === KeyframeInterpolationType.LINEAR) {
+    interpolationType = 'linear';
+  }
+
   var x1 = e1.influence * 0.01,
       x2 = 1 - e2.influence * 0.01;
   var y1, y2;
@@ -215,14 +221,16 @@ function getEasing(prop, start, end, isZ) {
     }
 
     if (avSpeed !== 0) {
-      y1 = x1 * e1.speed / avSpeed;
-      y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+      y1 = x1 * e1.speed / avSpeed; // y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+
+      y2 = 1 - x2 * e2.speed / avSpeed;
     }
   } else if (v2 !== v1) {
     var _avSpeed = Math.abs(v2 - v1) / (t2 - t1);
 
-    y1 = x1 * e1.speed / _avSpeed;
-    y2 = 1 - (1 - x2) * e2.speed / _avSpeed;
+    y1 = x1 * e1.speed / _avSpeed; // y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+
+    y2 = 1 - x2 * e2.speed / _avSpeed;
   }
 
   if (x1 === y1 && x2 === y2 || y1 === undefined || y2 === undefined) {
@@ -233,6 +241,12 @@ function getEasing(prop, start, end, isZ) {
   x1 = Math.min(x1, 1);
   x2 = Math.max(x2, 0);
   x2 = Math.min(x2, 1);
+
+  if (interpolationType === 'linear') {
+    y1 = x1;
+    y2 = x2;
+  }
+
   return [x1, y1, x2, y2];
 }
 
@@ -5214,6 +5228,40 @@ Array.prototype.indexOf = Array.prototype.indexOf || function (o) {
 
   return -1;
 };
+
+if (!Array.prototype.forEach) {
+  Array.prototype.forEach = function (callback, thisArg) {
+    var T, k;
+
+    if (this == null) {
+      throw new TypeError(' this is null or not defined');
+    }
+
+    var O = Object(this);
+    var len = O.length >>> 0;
+
+    if (typeof callback !== "function") {
+      throw new TypeError(callback + ' is not a function');
+    }
+
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    k = 0;
+
+    while (k < len) {
+      var kValue;
+
+      if (k in O) {
+        kValue = O[k];
+        callback.call(T, kValue, k, O);
+      }
+
+      k++;
+    }
+  };
+}
 
 var ae2karas = $.ae2karas = $.ae2karas || {};
 json(ae2karas);

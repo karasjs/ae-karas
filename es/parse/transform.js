@@ -153,6 +153,11 @@ function getEasing(prop, start, end, isZ) {
   // $.ae2karas.log(e2);
   // $.ae2karas.log(c1);
   // $.ae2karas.log(c2);
+  let interpolationType = '';
+  if(prop.keyOutInterpolationType(start) === KeyframeInterpolationType.LINEAR
+    && prop.keyOutInterpolationType(end) === KeyframeInterpolationType.LINEAR) {
+    interpolationType = 'linear';
+  }
   let x1 = e1.influence * 0.01, x2 = 1 - e2.influence * 0.01;
   let y1, y2;
   let matchName = prop.matchName;
@@ -173,13 +178,15 @@ function getEasing(prop, start, end, isZ) {
     }
     if(avSpeed !== 0) {
       y1 = x1 * e1.speed / avSpeed;
-      y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+      // y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+      y2 = 1 - x2 * e2.speed / avSpeed;
     }
   }
-  else if(v2 !== v1){
+  else if(v2 !== v1) {
     let avSpeed = Math.abs(v2 - v1) / (t2 - t1);
     y1 = x1 * e1.speed / avSpeed;
-    y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+    // y2 = 1 - (1 - x2) * e2.speed / avSpeed;
+    y2 = 1 - x2 * e2.speed / avSpeed;
   }
   if(x1 === y1 && x2 === y2 || y1 === undefined || y2 === undefined) {
     return;
@@ -188,6 +195,10 @@ function getEasing(prop, start, end, isZ) {
   x1 = Math.min(x1, 1);
   x2 = Math.max(x2, 0);
   x2 = Math.min(x2, 1);
+  if(interpolationType === 'linear') {
+    y1 = x1;
+    y2 = x2;
+  }
   return [x1, y1, x2, y2];
 }
 
