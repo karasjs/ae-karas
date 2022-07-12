@@ -257,7 +257,7 @@ export default {
               scaleX = 1;
             }
             if(scaleY < 1) {
-              item.height = ow;
+              item.height = oh;
               scaleY = 1;
             }
             recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
