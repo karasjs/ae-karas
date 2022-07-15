@@ -29,7 +29,7 @@ import camera from './camera';
  * @param offset
  */
 function preParse(data, library, start, duration, displayStartTime, offset) {
-  let { name, width, height, asParent, asChild } = data;
+  let { name, width, height, asParent, asChild, ddd } = data;
   let res = {
     name,
     tagName: 'div',
@@ -46,6 +46,9 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     asParent,
     asChild,
   };
+  if(ddd) {
+    res.ddd = true;
+  }
   parseAnimate(res, data, start, duration, displayStartTime, offset, true, false);
   // 父链接不跟随透明度，所以删掉opacity的静态属性
   if(res.props.style.hasOwnProperty('opacity')) {

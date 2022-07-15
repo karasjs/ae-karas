@@ -3416,7 +3416,8 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
       width = data.width,
       height = data.height,
       asParent = data.asParent,
-      asChild = data.asChild;
+      asChild = data.asChild,
+      ddd = data.ddd;
   var res = {
     name: name,
     tagName: 'div',
@@ -3433,6 +3434,11 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     asParent: asParent,
     asChild: asChild
   };
+
+  if (ddd) {
+    res.ddd = true;
+  }
+
   parseAnimate(res, data, start, duration, displayStartTime, offset, true, false); // 父链接不跟随透明度，所以删掉opacity的静态属性
 
   if (res.props.style.hasOwnProperty('opacity')) {
