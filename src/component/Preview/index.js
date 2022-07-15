@@ -221,6 +221,10 @@ class Preview extends React.Component {
     store.preview.setBgBlack(v);
   }
 
+  clickImg(data) {
+    console.log(data);
+  }
+
   clickPlay() {
     if(root) {
       store.preview.setPlay(true);
@@ -348,7 +352,7 @@ class Preview extends React.Component {
         <ul className="menu">
           {
             list.map((item, i) => {
-              return <li title={item.name} key={i}>
+              return <li title={item.name} key={i} onClick={() => this.clickImg(item)}>
                 <img src={item.props.src}/>
                 <div>{item.props.style.width.toFixed(1)} * {item.props.style.height.toFixed(1)}</div>
               </li>;
