@@ -7,6 +7,7 @@ import store from './store';
 import List from './component/List';
 import Preview from './component/Preview';
 import Loading from './component/Loading';
+import Resize from './component/Resize';
 import Alert from './component/Alert';
 import { csInterface } from './util/CSInterface';
 import enums from '../es/enums';
@@ -20,6 +21,7 @@ ReactDom.render(
     <List/>
     <Preview/>
     <Loading/>
+    <Resize/>
     <Alert/>
     <div className="version">{pkg.version}</div>
   </Provider>,

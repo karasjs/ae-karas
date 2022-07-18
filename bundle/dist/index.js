@@ -379,8 +379,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/_@babel_runtime@7.18.3@@babel/runtime/helpers/esm/possibleConstructorReturn.js");
 /* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/_@babel_runtime@7.18.3@@babel/runtime/helpers/esm/getPrototypeOf.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react */ "./node_modules/_react@17.0.2@react/index.js");
-/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.5.0@mobx-react/dist/mobxreact.esm.js");
-/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.6.0@mobx/dist/mobx.esm.js");
+/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.5.0@mobx-react/dist/mobxreact.esm.js");
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.6.0@mobx/dist/mobx.esm.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
 /* harmony import */ var karas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! karas */ "./node_modules/_karas@0.77.4@karas/index.js");
@@ -392,7 +392,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util_config__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../util/config */ "./src/util/config.js");
 /* harmony import */ var _util_overflow__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../../util/overflow */ "./src/util/overflow.js");
 /* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./index.less */ "./src/component/Preview/index.less");
-/* harmony import */ var _store_preview__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../store/preview */ "./src/store/preview.js");
+/* harmony import */ var _store_global__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../store/global */ "./src/store/global.js");
+/* harmony import */ var _store_preview__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../../store/preview */ "./src/store/preview.js");
 
 
 
@@ -404,6 +405,7 @@ var _dec, _dec2, _class;
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0,_babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 
 
 
@@ -459,7 +461,7 @@ function formatTime(duration) {
 
 var root, uuid, type;
 var isDrag, originX, W;
-var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.observer)(_class = /*#__PURE__*/function (_React$Component) {
+var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_17__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_17__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_17__.observer)(_class = /*#__PURE__*/function (_React$Component) {
   (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__["default"])(Preview, _React$Component);
 
   var _super = _createSuper(Preview);
@@ -615,7 +617,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
   }, {
     key: "change",
     value: function change(v) {
-      (0,mobx__WEBPACK_IMPORTED_MODULE_17__.transaction)(function () {
+      (0,mobx__WEBPACK_IMPORTED_MODULE_18__.transaction)(function () {
         _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setType(v);
         _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(0);
         _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(false);
@@ -672,6 +674,10 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
     key: "clickImg",
     value: function clickImg(data) {
       console.log(data);
+      (0,mobx__WEBPACK_IMPORTED_MODULE_18__.transaction)(function () {
+        _store_global__WEBPACK_IMPORTED_MODULE_15__["default"].setResize(true);
+        _store_preview__WEBPACK_IMPORTED_MODULE_16__["default"].setImg(data);
+      });
     }
   }, {
     key: "clickPlay",
@@ -801,7 +807,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
             root = null;
           }
 
-          (0,mobx__WEBPACK_IMPORTED_MODULE_17__.transaction)(function () {
+          (0,mobx__WEBPACK_IMPORTED_MODULE_18__.transaction)(function () {
             _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setPlay(false);
             _store__WEBPACK_IMPORTED_MODULE_8__["default"].preview.setTime(0);
             _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setPreview(false);
@@ -852,7 +858,11 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
           }
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("img", {
           src: item.props.src
-        }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", null, item.props.style.width.toFixed(1), " * ", item.props.style.height.toFixed(1)));
+        }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+          className: classnames__WEBPACK_IMPORTED_MODULE_6___default()({
+            re: item.props.nw || item.props.nh
+          })
+        }, item.props.nw || item.props.style.width, " * ", item.props.nh || item.props.style.height));
       })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
         className: "view"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
@@ -1165,11 +1175,13 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
             });
           }
 
-          if (autoSize.checked) {
-            _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].autoSize(type, data, list, cb1);
-          } else {
-            cb1();
-          }
+          _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].manualSize(type, data, function () {
+            if (autoSize.checked) {
+              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].autoSize(type, data, cb1);
+            } else {
+              cb1();
+            }
+          });
         }
       }, "\u4E0A\u4F20")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", {
         className: "info"
@@ -1182,6 +1194,168 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_16__.inject)('globa
   return Preview;
 }(react__WEBPACK_IMPORTED_MODULE_5__.Component)) || _class) || _class) || _class);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Preview);
+
+/***/ }),
+
+/***/ "./src/component/Resize/index.js":
+/*!***************************************!*\
+  !*** ./src/component/Resize/index.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/_@babel_runtime@7.18.3@@babel/runtime/helpers/esm/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/_@babel_runtime@7.18.3@@babel/runtime/helpers/esm/createClass.js");
+/* harmony import */ var _babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/inherits */ "./node_modules/_@babel_runtime@7.18.3@@babel/runtime/helpers/esm/inherits.js");
+/* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/_@babel_runtime@7.18.3@@babel/runtime/helpers/esm/possibleConstructorReturn.js");
+/* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/_@babel_runtime@7.18.3@@babel/runtime/helpers/esm/getPrototypeOf.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react */ "./node_modules/_react@17.0.2@react/index.js");
+/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.5.0@mobx-react/dist/mobxreact.esm.js");
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.6.0@mobx/dist/mobx.esm.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! classnames */ "./node_modules/_classnames@2.3.1@classnames/index.js");
+/* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./index.less */ "./src/component/Resize/index.less");
+/* harmony import */ var _store_global__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../store/global */ "./src/store/global.js");
+/* harmony import */ var _store_preview__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../store/preview */ "./src/store/preview.js");
+
+
+
+
+
+
+var _dec, _dec2, _class;
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0,_babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+
+
+
+
+
+
+
+var Resize = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('global'), _dec2 = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.inject)('preview'), _dec(_class = _dec2(_class = (0,mobx_react__WEBPACK_IMPORTED_MODULE_10__.observer)(_class = /*#__PURE__*/function (_React$Component) {
+  (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_2__["default"])(Resize, _React$Component);
+
+  var _super = _createSuper(Resize);
+
+  function Resize() {
+    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, Resize);
+
+    return _super.apply(this, arguments);
+  }
+
+  (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(Resize, [{
+    key: "change",
+    value: function change(e, isWidth) {
+      var _this$props$preview$i = this.props.preview.img.props.style,
+          width = _this$props$preview$i.width,
+          height = _this$props$preview$i.height;
+      var n = parseInt(e.target.value) || 1;
+      var keep = this.keep.checked;
+      var ratio = width / height;
+      var w = parseInt(this.w.value) || 1;
+      var h = parseInt(this.h.value) || 1;
+
+      if (isWidth) {
+        if (keep) {
+          this.h.value = Math.round(w / ratio) || 1;
+        }
+      } else {
+        if (keep) {
+          this.w.value = Math.round(h * ratio) || 1;
+        }
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this = this;
+
+      var img = this.props.preview.img;
+
+      if (!img) {
+        return null;
+      }
+
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: classnames__WEBPACK_IMPORTED_MODULE_6___default()('resize', {
+          show: !!this.props.global.isResize
+        })
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "bg"
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "panel"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "name"
+      }, img.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "size"
+      }, img.props.style.width, "px * ", img.props.style.height, "px"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "input"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "number",
+        min: "1",
+        step: "1",
+        defaultValue: img.props.nw || img.props.style.width,
+        ref: function ref(el) {
+          return _this.w = el;
+        },
+        onChange: function onChange(e) {
+          return _this.change(e, true);
+        }
+      }), "\u65B0\u5BBD"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "number",
+        min: "1",
+        step: "1",
+        defaultValue: img.props.nh || img.props.style.height,
+        ref: function ref(el) {
+          return _this.h = el;
+        },
+        onChange: function onChange(e) {
+          return _this.change(e, false);
+        }
+      }), "\u65B0\u9AD8"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "checkbox",
+        defaultChecked: true,
+        ref: function ref(el) {
+          return _this.keep = el;
+        }
+      }), "\u4FDD\u6301\u5BBD\u9AD8\u6BD4")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", {
+        className: "btn",
+        onClick: function onClick() {
+          (0,mobx__WEBPACK_IMPORTED_MODULE_11__.transaction)(function () {
+            var w = parseInt(_this.w.value) || 1;
+            var h = parseInt(_this.h.value) || 1;
+
+            if (w !== img.props.style.width) {
+              img.props.nw = w;
+            } else {
+              delete img.props.nw;
+            }
+
+            if (h !== img.props.style.height) {
+              img.props.nh = h;
+            } else {
+              delete img.props.nh;
+            }
+
+            _store_global__WEBPACK_IMPORTED_MODULE_8__["default"].setResize(false);
+            _store_preview__WEBPACK_IMPORTED_MODULE_9__["default"].setImg(null);
+          });
+        }
+      }, "\u786E\u5B9A")));
+    }
+  }]);
+
+  return Resize;
+}(react__WEBPACK_IMPORTED_MODULE_5__.Component)) || _class) || _class) || _class);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Resize);
 
 /***/ }),
 
@@ -1265,6 +1439,8 @@ var Global = /*#__PURE__*/function () {
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "alert", '');
 
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "isResize", false);
+
     (0,mobx__WEBPACK_IMPORTED_MODULE_3__.makeAutoObservable)(this);
   }
 
@@ -1282,6 +1458,11 @@ var Global = /*#__PURE__*/function () {
     key: "setAlert",
     value: function setAlert(b) {
       this.alert = b;
+    }
+  }, {
+    key: "setResize",
+    value: function setResize(b) {
+      this.isResize = b;
     }
   }]);
 
@@ -1373,6 +1554,8 @@ var Preview = /*#__PURE__*/function () {
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "isBgBlack", false);
 
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "img", null);
+
     (0,mobx__WEBPACK_IMPORTED_MODULE_3__.makeAutoObservable)(this);
   }
 
@@ -1460,6 +1643,11 @@ var Preview = /*#__PURE__*/function () {
     key: "setBgBlack",
     value: function setBgBlack(isBgBlack) {
       this.isBgBlack = isBgBlack;
+    }
+  }, {
+    key: "setImg",
+    value: function setImg(img) {
+      this.img = img;
     }
   }]);
 
@@ -2660,20 +2848,73 @@ function recursionGetAutoSize(node, hash) {
       }
     }
   }
-}
+} // function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
+//   delete node.id;
+//   let style = node.props.style;
+//   style.width = nw;
+//   style.height = nh;
+//   style.transformOrigin = '0 0';
+//   style.scaleX = sx;
+//   style.scaleY = sy;
+// }
 
-function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
-  delete node.id;
-  var style = node.props.style;
-  style.width = nw;
-  style.height = nh;
-  style.transformOrigin = '0 0';
-  style.scaleX = sx;
-  style.scaleY = sy;
-}
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  autoSize: function autoSize(type, data, list, cb) {
+  manualSize: function manualSize(type, data, cb) {
+    console.error('manualSize');
+    var total = 0,
+        count = 0;
+    var library = data.library;
+
+    var _loop = function _loop(i, len) {
+      var item = library[i]; // 排除手动尺寸
+
+      if (item.tagName === 'img' && item.props.nw && item.props.nh) {
+        var url = item.props.src;
+        total++;
+        var img = document.createElement('img');
+
+        img.onload = function () {
+          canvas2.width = item.props.nw;
+          canvas2.height = item.props.nh;
+          ctx2.clearRect(0, 0, item.props.nw, item.props.nh);
+          ctx2.drawImage(img, 0, 0, item.props.nw, item.props.nh);
+          var str;
+
+          if (/\.jpe?g$/.test(url)) {
+            str = canvas2.toDataURL('image/jpeg');
+          } else if (/\.webp$/.test(url)) {
+            str = canvas2.toDataURL('image/webp');
+          } else {
+            str = canvas2.toDataURL('image/png');
+          }
+
+          item.props.src = str;
+
+          if (++count === total) {
+            cb();
+          }
+        };
+
+        img.onerror = function () {
+          if (++count === total) {
+            cb();
+          }
+        };
+
+        img.src = url;
+      }
+    };
+
+    for (var i = 0, len = library.length; i < len; i++) {
+      _loop(i, len);
+    }
+
+    if (total === 0) {
+      cb();
+    }
+  },
+  autoSize: function autoSize(type, data, cb) {
     console.error('autoSize');
     var hash = {},
         total = 0,
@@ -2681,9 +2922,9 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
     var library = data.library;
 
     for (var i = 0, len = library.length; i < len; i++) {
-      var item = library[i];
+      var item = library[i]; // 排除手动尺寸
 
-      if (item.tagName === 'img') {
+      if (item.tagName === 'img' && !item.props.nw && !item.props.nh) {
         total++;
         hash[item.props.src] = {
           index: i,
@@ -2720,7 +2961,7 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
         return;
       }
 
-      var _loop = function _loop(url) {
+      var _loop2 = function _loop2(url) {
         if (hash.hasOwnProperty(url)) {
           var item = hash[url];
           var ow = item.node.props.style.width,
@@ -2729,19 +2970,19 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
           var scaleY = oh / item.height; // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
 
           if (item.width && item.height && (scaleX > 1.01 || scaleY > 1.01)) {
-            library[item.index] = {
-              id: item.node.id,
-              tagName: 'div',
-              props: {
-                style: {
-                  position: 'absolute',
-                  width: ow,
-                  height: oh
-                }
-              },
-              children: [item.node]
-            }; // 不能放大
-
+            // library[item.index] = {
+            //   id: item.node.id,
+            //   tagName: 'div',
+            //   props: {
+            //     style: {
+            //       position: 'absolute',
+            //       width: ow,
+            //       height: oh,
+            //     },
+            //   },
+            //   children: [item.node],
+            // };
+            // 不能放大
             if (scaleX < 1) {
               item.width = ow;
               scaleX = 1;
@@ -2750,9 +2991,9 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
             if (scaleY < 1) {
               item.height = oh;
               scaleY = 1;
-            }
+            } // recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
 
-            recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
+
             var img = document.createElement('img');
 
             img.onload = function () {
@@ -2791,22 +3032,22 @@ function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
       };
 
       for (var url in hash) {
-        _loop(url);
+        _loop2(url);
       }
     }
 
     function task() {
       if (kfs.length) {
-        var time = kfs.pop() * duration; // if(animateController.list.length) {
-
-        animateController.gotoAndStop(time, function () {
+        if (duration) {
+          var time = kfs.pop() * duration;
+          animateController.gotoAndStop(time, function () {
+            recursionGetAutoSize(root, hash);
+            setTimeout(task, 1);
+          });
+        } else {
           recursionGetAutoSize(root, hash);
-          setTimeout(task, 1);
-        }); // }
-        // else {
-        //   recursionGetAutoSize(root, hash);
-        //   setTimeout(task, 1);
-        // }
+          setTimeout(setCb, 1);
+        }
       } else {
         setCb();
       }
@@ -3350,11 +3591,16 @@ function checkOverflow(root, node, vertexes, obj) {
 
   function task() {
     if (kfs.length) {
-      var time = kfs.pop() * duration;
-      animateController.gotoAndStop(time, function () {
-        recursion(root, time, hash);
-        setTimeout(task, 1);
-      });
+      if (duration) {
+        var time = kfs.pop() * duration;
+        animateController.gotoAndStop(time, function () {
+          recursion(root, time, hash);
+          setTimeout(task, 1);
+        });
+      } else {
+        recursion(root, 0, hash);
+        setTimeout(finish, 1);
+      }
     } else {
       finish();
     }
@@ -45928,6 +46174,19 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/component/Resize/index.less":
+/*!*****************************************!*\
+  !*** ./src/component/Resize/index.less ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
 /***/ "./src/index.less":
 /*!************************!*\
   !*** ./src/index.less ***!
@@ -84490,18 +84749,19 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/_react@17.0.2@react/index.js");
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "./node_modules/_react-dom@17.0.2@react-dom/index.js");
-/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.6.0@mobx/dist/mobx.esm.js");
-/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.5.0@mobx-react/dist/mobxreact.esm.js");
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! mobx */ "./node_modules/_mobx@6.6.0@mobx/dist/mobx.esm.js");
+/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! mobx-react */ "./node_modules/_mobx-react@7.5.0@mobx-react/dist/mobxreact.esm.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./store */ "./src/store/index.js");
 /* harmony import */ var _component_List__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./component/List */ "./src/component/List/index.js");
 /* harmony import */ var _component_Preview__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./component/Preview */ "./src/component/Preview/index.js");
 /* harmony import */ var _component_Loading__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./component/Loading */ "./src/component/Loading/index.js");
-/* harmony import */ var _component_Alert__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./component/Alert */ "./src/component/Alert/index.js");
-/* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util/CSInterface */ "./src/util/CSInterface.js");
-/* harmony import */ var _es_enums__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../es/enums */ "./es/enums.js");
-/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../package.json */ "./package.json");
-/* harmony import */ var _index_html__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./index.html */ "./src/index.html");
-/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./index.less */ "./src/index.less");
+/* harmony import */ var _component_Resize__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./component/Resize */ "./src/component/Resize/index.js");
+/* harmony import */ var _component_Alert__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./component/Alert */ "./src/component/Alert/index.js");
+/* harmony import */ var _util_CSInterface__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./util/CSInterface */ "./src/util/CSInterface.js");
+/* harmony import */ var _es_enums__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../es/enums */ "./es/enums.js");
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../package.json */ "./package.json");
+/* harmony import */ var _index_html__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./index.html */ "./src/index.html");
+/* harmony import */ var _index_less__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./index.less */ "./src/index.less");
 
 
 
@@ -84516,38 +84776,39 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-react_dom__WEBPACK_IMPORTED_MODULE_1__.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(mobx_react__WEBPACK_IMPORTED_MODULE_12__.Provider, _store__WEBPACK_IMPORTED_MODULE_2__["default"], /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_List__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Preview__WEBPACK_IMPORTED_MODULE_4__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Loading__WEBPACK_IMPORTED_MODULE_5__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Alert__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+
+react_dom__WEBPACK_IMPORTED_MODULE_1__.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(mobx_react__WEBPACK_IMPORTED_MODULE_13__.Provider, _store__WEBPACK_IMPORTED_MODULE_2__["default"], /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_List__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Preview__WEBPACK_IMPORTED_MODULE_4__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Loading__WEBPACK_IMPORTED_MODULE_5__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Resize__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_component_Alert__WEBPACK_IMPORTED_MODULE_7__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
   className: "version"
-}, _package_json__WEBPACK_IMPORTED_MODULE_9__.version)), document.querySelector('#root'));
-_util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.INIT, function (event) {
+}, _package_json__WEBPACK_IMPORTED_MODULE_10__.version)), document.querySelector('#root'));
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_8__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_9__["default"].EVENT.INIT, function (event) {
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].composition.update(event.data);
 });
-_util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.LOG, function (event) {
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_8__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_9__["default"].EVENT.LOG, function (event) {
   console.log(event.data);
 });
-_util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.WARN, function (event) {
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_8__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_9__["default"].EVENT.WARN, function (event) {
   console.warn(event.data);
 });
-_util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.ERROR, function (event) {
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_8__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_9__["default"].EVENT.ERROR, function (event) {
   console.error(event.data);
 });
-_util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.FINISH, function (event) {
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_8__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_9__["default"].EVENT.FINISH, function (event) {
   console.warn(event.data);
   console.warn(JSON.stringify(event.data));
-  (0,mobx__WEBPACK_IMPORTED_MODULE_13__.transaction)(function () {
+  (0,mobx__WEBPACK_IMPORTED_MODULE_14__.transaction)(function () {
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setLoading(false);
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].preview.setData(event.data);
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setPreview(true);
   });
 });
-_util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_8__["default"].EVENT.CANCEL, function () {
-  (0,mobx__WEBPACK_IMPORTED_MODULE_13__.transaction)(function () {
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_8__.csInterface.addEventListener(_es_enums__WEBPACK_IMPORTED_MODULE_9__["default"].EVENT.CANCEL, function () {
+  (0,mobx__WEBPACK_IMPORTED_MODULE_14__.transaction)(function () {
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setLoading(false);
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].global.setPreview(false);
   });
 }); // 通知es初始化获取展示合成列表，不发送的话es那边不执行任何代码很神奇
 
-_util_CSInterface__WEBPACK_IMPORTED_MODULE_7__.csInterface.evalScript('$.ae2karas.getCompositions();');
+_util_CSInterface__WEBPACK_IMPORTED_MODULE_8__.csInterface.evalScript('$.ae2karas.getCompositions();');
 })();
 
 /******/ })()

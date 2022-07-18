@@ -17,6 +17,7 @@ class Preview {
   total = 0;
   isPlaying = false;
   isBgBlack = false;
+  img = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -88,6 +89,10 @@ class Preview {
 
   setBgBlack(isBgBlack) {
     this.isBgBlack = isBgBlack;
+  }
+
+  setImg(img) {
+    this.img = img;
   }
 }
 

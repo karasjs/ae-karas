@@ -4,6 +4,7 @@ class Global {
   isLoading = false;
   isPreview = false;
   alert = '';
+  isResize = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -19,6 +20,10 @@ class Global {
 
   setAlert(b) {
     this.alert = b;
+  }
+
+  setResize(b) {
+    this.isResize = b;
   }
 }
 

@@ -180,24 +180,68 @@ function recursionGetAutoSize(node, hash) {
   }
 }
 
-function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
-  delete node.id;
-  let style = node.props.style;
-  style.width = nw;
-  style.height = nh;
-  style.transformOrigin = '0 0';
-  style.scaleX = sx;
-  style.scaleY = sy;
-}
+// function recursionSetAutoSize(node, ow, oh, nw, nh, sx, sy) {
+//   delete node.id;
+//   let style = node.props.style;
+//   style.width = nw;
+//   style.height = nh;
+//   style.transformOrigin = '0 0';
+//   style.scaleX = sx;
+//   style.scaleY = sy;
+// }
 
 export default {
-  autoSize(type, data, list, cb) {
+  manualSize(type, data, cb) {
+    console.error('manualSize');
+    let total = 0, count = 0;
+    let library = data.library;
+    for(let i = 0, len = library.length; i < len; i++) {
+      let item = library[i];
+      // 排除手动尺寸
+      if(item.tagName === 'img' && item.props.nw && item.props.nh) {
+        let url = item.props.src;
+        total++;
+        let img = document.createElement('img');
+        img.onload = function() {
+          canvas2.width = item.props.nw;
+          canvas2.height = item.props.nh;
+          ctx2.clearRect(0, 0, item.props.nw, item.props.nh);
+          ctx2.drawImage(img, 0, 0, item.props.nw, item.props.nh);
+          let str;
+          if(/\.jpe?g$/.test(url)) {
+            str = canvas2.toDataURL('image/jpeg');
+          }
+          else if(/\.webp$/.test(url)) {
+            str = canvas2.toDataURL('image/webp');
+          }
+          else {
+            str = canvas2.toDataURL('image/png');
+          }
+          item.props.src = str;
+          if(++count === total) {
+            cb();
+          }
+        };
+        img.onerror = function() {
+          if(++count === total) {
+            cb();
+          }
+        };
+        img.src = url;
+      }
+    }
+    if(total === 0) {
+      cb();
+    }
+  },
+  autoSize(type, data, cb) {
     console.error('autoSize');
     let hash = {}, total = 0, count = 0;
     let library = data.library;
     for(let i = 0, len = library.length; i < len; i++) {
       let item = library[i];
-      if(item.tagName === 'img') {
+      // 排除手动尺寸
+      if(item.tagName === 'img' && !item.props.nw && !item.props.nh) {
         total++;
         hash[item.props.src] = {
           index: i,
@@ -239,18 +283,18 @@ export default {
           let scaleY = oh / item.height;
           // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
           if(item.width && item.height && (scaleX > 1.01 || scaleY > 1.01)) {
-            library[item.index] = {
-              id: item.node.id,
-              tagName: 'div',
-              props: {
-                style: {
-                  position: 'absolute',
-                  width: ow,
-                  height: oh,
-                },
-              },
-              children: [item.node],
-            };
+            // library[item.index] = {
+            //   id: item.node.id,
+            //   tagName: 'div',
+            //   props: {
+            //     style: {
+            //       position: 'absolute',
+            //       width: ow,
+            //       height: oh,
+            //     },
+            //   },
+            //   children: [item.node],
+            // };
             // 不能放大
             if(scaleX < 1) {
               item.width = ow;
@@ -260,7 +304,7 @@ export default {
               item.height = oh;
               scaleY = 1;
             }
-            recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
+            // recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
             let img = document.createElement('img');
             img.onload = function() {
               canvas2.width = item.width;
@@ -297,17 +341,17 @@ export default {
     }
     function task() {
       if(kfs.length) {
-        let time = kfs.pop() * duration;
-        // if(animateController.list.length) {
-        animateController.gotoAndStop(time, function() {
+        if(duration) {
+          let time = kfs.pop() * duration;
+          animateController.gotoAndStop(time, function() {
+            recursionGetAutoSize(root, hash);
+            setTimeout(task, 1);
+          });
+        }
+        else {
           recursionGetAutoSize(root, hash);
-          setTimeout(task, 1);
-        });
-        // }
-        // else {
-        //   recursionGetAutoSize(root, hash);
-        //   setTimeout(task, 1);
-        // }
+          setTimeout(setCb, 1);
+        }
       }
       else {
         setCb();

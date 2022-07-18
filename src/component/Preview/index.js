@@ -12,6 +12,7 @@ import config from '../../util/config';
 import overflow from '../../util/overflow';
 
 import './index.less';
+import global from '../../store/global';
 import preview from '../../store/preview';
 
 function formatTime(duration) {
@@ -223,6 +224,10 @@ class Preview extends React.Component {
 
   clickImg(data) {
     console.log(data);
+    transaction(() => {
+      global.setResize(true);
+      preview.setImg(data);
+    });
   }
 
   clickPlay() {
@@ -352,9 +357,13 @@ class Preview extends React.Component {
         <ul className="menu">
           {
             list.map((item, i) => {
-              return <li title={item.name} key={i} onClick={() => this.clickImg(item)}>
+              return <li title={item.name}
+                         key={i}
+                         onClick={() => this.clickImg(item)}>
                 <img src={item.props.src}/>
-                <div>{item.props.style.width.toFixed(1)} * {item.props.style.height.toFixed(1)}</div>
+                <div className={classnames({
+                  re: item.props.nw || item.props.nh,
+                })}>{item.props.nw || item.props.style.width} * {item.props.nh || item.props.style.height}</div>
               </li>;
             })
           }
@@ -575,12 +584,14 @@ class Preview extends React.Component {
                   store.global.setAlert('上传失败！');
                 });
               }
-              if(autoSize.checked) {
-                img.autoSize(type, data, list, cb1);
-              }
-              else {
-                cb1();
-              }
+              img.manualSize(type, data, function() {
+                if(autoSize.checked) {
+                  img.autoSize(type, data, cb1);
+                }
+                else {
+                  cb1();
+                }
+              });
             }}>上传</div>
           </div>
           <p className="info">* 导出功能为到本地JSON，图片需base64才能显示。</p>

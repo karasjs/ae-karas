@@ -130,11 +130,17 @@ export default function(type, data, cb) {
   }
   function task() {
     if(kfs.length) {
-      let time = kfs.pop() * duration;
-      animateController.gotoAndStop(time, function() {
-        recursion(root, time, hash);
-        setTimeout(task, 1);
-      });
+      if(duration) {
+        let time = kfs.pop() * duration;
+        animateController.gotoAndStop(time, function() {
+          recursion(root, time, hash);
+          setTimeout(task, 1);
+        });
+      }
+      else {
+        recursion(root, 0, hash);
+        setTimeout(finish, 1);
+      }
     }
     else {
       finish();
