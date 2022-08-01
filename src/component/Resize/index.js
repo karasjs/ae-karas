@@ -13,7 +13,6 @@ import preview from '../../store/preview';
 class Resize extends React.Component {
   change(e, isWidth) {
     let { img: { props: { style: { width, height } } } } = this.props.preview;
-    let n = parseInt(e.target.value) || 1;
     let keep = this.keep.checked;
     let ratio = width / height;
     let w = parseInt(this.w.value) || 1;
@@ -27,6 +26,17 @@ class Resize extends React.Component {
       if(keep) {
         this.w.value = Math.round(h * ratio) || 1;
       }
+    }
+  }
+
+  changeVars(e) {
+    let { img: { props } } = this.props.preview;
+    let id = e.target.value.replace(/^\s+/, '').replace(/\s+$/, '');
+    if(id) {
+      props.vars = { id };
+    }
+    else {
+      delete props.vars;
     }
   }
 
@@ -58,6 +68,11 @@ class Resize extends React.Component {
           <label><input type="checkbox"
                         defaultChecked={true}
                         ref={el => this.keep = el}/>保持宽高比</label>
+          <label><input type="text"
+                        min="1"
+                        step="1"
+                        defaultValue={img.props.vars && img.props.vars.id || ''}
+                        onChange={e => this.changeVars(e)}/>url vars</label>
         </div>
         <div className="btn" onClick={() => {
           transaction(() => {

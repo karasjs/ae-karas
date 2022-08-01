@@ -363,6 +363,7 @@ class Preview extends React.Component {
                 <img src={item.props.src}/>
                 <div className={classnames({
                   re: item.props.nw || item.props.nh,
+                  vars: item.props.vars,
                 })}>{item.props.nw || item.props.style.width} * {item.props.nh || item.props.style.height}</div>
               </li>;
             })
