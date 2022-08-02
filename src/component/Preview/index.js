@@ -419,6 +419,12 @@ class Preview extends React.Component {
           </label>
           <label className="block">
             <input type="checkbox"
+                   ref={el => this.cropBlank = el}
+                   defaultChecked={this.props.preview.cropBlank}/>
+            <span>图片裁剪空白边</span>
+          </label>
+          <label className="block">
+            <input type="checkbox"
                    ref={el => this.autoOverflow = el}
                    defaultChecked={this.props.preview.autoOverflow}/>
             <span>自动去除无效overflow</span>
@@ -526,7 +532,7 @@ class Preview extends React.Component {
             }}>导出</div>
             <div className="item" onClick={() => {
               let { data, iterations, precision } = this.props.preview;
-              let { format, base64, autoSize, autoOverflow } = this;
+              let { format, base64, autoSize, cropBlank, autoOverflow } = this;
               store.global.setLoading(true);
               let name = data.name;
               data = JSON.parse(JSON.stringify(data));
@@ -585,12 +591,20 @@ class Preview extends React.Component {
                   store.global.setAlert('上传失败！');
                 });
               }
-              img.manualSize(type, data, function() {
-                if(autoSize.checked) {
-                  img.autoSize(type, data, cb1);
+              function cb0() {
+                if(cropBlank.checked) {
+                  img.cropBlank(type, data, cb1);
                 }
                 else {
                   cb1();
+                }
+              }
+              img.manualSize(type, data, function() {
+                if(autoSize.checked) {
+                  img.autoSize(type, data, cb0);
+                }
+                else {
+                  cb0();
                 }
               });
             }}>上传</div>

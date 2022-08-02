@@ -954,6 +954,14 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_17__.inject)('globa
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
         type: "checkbox",
         ref: function ref(el) {
+          return _this2.cropBlank = el;
+        },
+        defaultChecked: this.props.preview.cropBlank
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("span", null, "\u56FE\u7247\u88C1\u526A\u7A7A\u767D\u8FB9")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("label", {
+        className: "block"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("input", {
+        type: "checkbox",
+        ref: function ref(el) {
           return _this2.autoOverflow = el;
         },
         defaultChecked: this.props.preview.autoOverflow
@@ -1112,6 +1120,7 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_17__.inject)('globa
           var format = _this2.format,
               base64 = _this2.base64,
               autoSize = _this2.autoSize,
+              cropBlank = _this2.cropBlank,
               autoOverflow = _this2.autoOverflow;
           _store__WEBPACK_IMPORTED_MODULE_8__["default"].global.setLoading(true);
           var name = data.name;
@@ -1176,11 +1185,19 @@ var Preview = (_dec = (0,mobx_react__WEBPACK_IMPORTED_MODULE_17__.inject)('globa
             });
           }
 
-          _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].manualSize(type, data, function () {
-            if (autoSize.checked) {
-              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].autoSize(type, data, cb1);
+          function cb0() {
+            if (cropBlank.checked) {
+              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].cropBlank(type, data, cb1);
             } else {
               cb1();
+            }
+          }
+
+          _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].manualSize(type, data, function () {
+            if (autoSize.checked) {
+              _util_img__WEBPACK_IMPORTED_MODULE_11__["default"].autoSize(type, data, cb0);
+            } else {
+              cb0();
             }
           });
         }
@@ -1564,6 +1581,8 @@ var Preview = /*#__PURE__*/function () {
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "autoOverflow", true);
 
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "cropBlank", true);
+
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "iterations", 1);
 
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "precision", 0);
@@ -1615,6 +1634,11 @@ var Preview = /*#__PURE__*/function () {
     key: "setAutoOverflow",
     value: function setAutoOverflow(autoOverflow) {
       this.autoOverflow = autoOverflow;
+    }
+  }, {
+    key: "setCropBlank",
+    value: function setCropBlank(cropBlank) {
+      this.cropBlank = cropBlank;
     }
   }, {
     key: "setFontSize",
@@ -2665,9 +2689,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var canvas = document.createElement('canvas');
-var ctx = canvas.getContext('2d');
-var canvas2 = document.createElement('canvas');
-var ctx2 = canvas2.getContext('2d');
+var ctx = canvas.getContext('2d'); // let canvas2 = document.createElement('canvas');
+// let ctx2 = canvas2.getContext('2d');
+
 var count = 0,
     total = 0;
 var maxW = 0,
@@ -2767,10 +2791,10 @@ function upload(name, props, imgHash, cb, isBase64) {
         width = _props$style2.width,
         height = _props$style2.height;
     total++;
+    maxW = Math.max(maxW, width);
+    maxH = Math.max(maxH, height);
 
     if (src.indexOf('data:') === 0) {
-      maxW = Math.max(maxW, width);
-      maxH = Math.max(maxH, height);
       remote(src, props, cb, imgHash, isBase64);
       return;
     }
@@ -2889,7 +2913,7 @@ function recursionGetAutoSize(node, hash) {
     var library = data.library;
 
     var _loop = function _loop(i, len) {
-      var item = library[i]; // 排除手动尺寸
+      var item = library[i];
 
       if (item.tagName === 'img' && item.props.nw && item.props.nh) {
         var url = item.props.src;
@@ -2897,18 +2921,20 @@ function recursionGetAutoSize(node, hash) {
         var img = document.createElement('img');
 
         img.onload = function () {
-          canvas2.width = item.props.nw;
-          canvas2.height = item.props.nh;
-          ctx2.clearRect(0, 0, item.props.nw, item.props.nh);
-          ctx2.drawImage(img, 0, 0, item.props.nw, item.props.nh);
+          canvas.width = item.props.nw;
+          canvas.height = item.props.nh;
+          maxW = Math.max(maxW, item.props.nw);
+          maxH = Math.max(maxH, item.props.nh);
+          ctx.clearRect(0, 0, maxW, maxH);
+          ctx.drawImage(img, 0, 0, item.props.nw, item.props.nh);
           var str;
 
           if (/\.jpe?g$/.test(url)) {
-            str = canvas2.toDataURL('image/jpeg');
+            str = canvas.toDataURL('image/jpeg');
           } else if (/\.webp$/.test(url)) {
-            str = canvas2.toDataURL('image/webp');
+            str = canvas.toDataURL('image/webp');
           } else {
-            str = canvas2.toDataURL('image/png');
+            str = canvas.toDataURL('image/png');
           }
 
           item.props.src = str;
@@ -2947,6 +2973,7 @@ function recursionGetAutoSize(node, hash) {
       var item = library[i]; // 排除手动尺寸
 
       if (item.tagName === 'img' && !item.props.nw && !item.props.nh) {
+        // if(item.tagName === 'img') {
         total++;
         hash[item.props.src] = {
           index: i,
@@ -2989,9 +3016,11 @@ function recursionGetAutoSize(node, hash) {
           var ow = item.node.props.style.width,
               oh = item.node.props.style.height;
           var scaleX = ow / item.width;
-          var scaleY = oh / item.height; // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
+          var scaleY = oh / item.height;
+          var dx = ow - item.width;
+          var dy = oh - item.height; // 有可能缩放0，另外限制相差一定尺寸才进行修改
 
-          if (item.width && item.height && (scaleX > 1.01 || scaleY > 1.01)) {
+          if (item.width && item.height && (scaleX > 1.1 || scaleY > 1.1) && (dx > 20 || dy > 20)) {
             // library[item.index] = {
             //   id: item.node.id,
             //   tagName: 'div',
@@ -3005,32 +3034,32 @@ function recursionGetAutoSize(node, hash) {
             //   children: [item.node],
             // };
             // 不能放大
-            if (scaleX < 1) {
-              item.width = ow;
-              scaleX = 1;
-            }
-
-            if (scaleY < 1) {
-              item.height = oh;
-              scaleY = 1;
-            } // recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
-
-
+            // if(scaleX < 1) {
+            //   item.width = ow;
+            //   scaleX = 1;
+            // }
+            // if(scaleY < 1) {
+            //   item.height = oh;
+            //   scaleY = 1;
+            // }
+            // recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
             var img = document.createElement('img');
 
             img.onload = function () {
-              canvas2.width = item.width;
-              canvas2.height = item.height;
-              ctx2.clearRect(0, 0, item.width, item.height);
-              ctx2.drawImage(img, 0, 0, item.width, item.height);
+              canvas.width = item.width;
+              canvas.height = item.height;
+              maxW = Math.max(maxW, item.width);
+              maxH = Math.max(maxH, item.height);
+              ctx.clearRect(0, 0, maxW, maxH);
+              ctx.drawImage(img, 0, 0, item.width, item.height);
               var str;
 
               if (/\.jpe?g$/.test(url)) {
-                str = canvas2.toDataURL('image/jpeg');
+                str = canvas.toDataURL('image/jpeg');
               } else if (/\.webp$/.test(url)) {
-                str = canvas2.toDataURL('image/webp');
+                str = canvas.toDataURL('image/webp');
               } else {
-                str = canvas2.toDataURL('image/png');
+                str = canvas.toDataURL('image/png');
               }
 
               item.node.props.src = str;
@@ -3076,6 +3105,160 @@ function recursionGetAutoSize(node, hash) {
     }
 
     task();
+  },
+  cropBlank: function cropBlank(type, data, cb) {
+    console.error('cropBlank');
+    var total = 0,
+        count = 0;
+    var library = data.library;
+
+    var _loop3 = function _loop3(i, len) {
+      var item = library[i];
+
+      if (item.tagName === 'img') {
+        var url = item.props.src;
+        total++;
+        var img = document.createElement('img');
+
+        img.onload = function () {
+          var width = img.width,
+              height = img.height;
+          canvas.width = width;
+          canvas.height = height;
+          maxW = Math.max(maxW, width);
+          maxH = Math.max(maxH, height);
+          ctx.clearRect(0, 0, maxW, maxH);
+          ctx.drawImage(img, 0, 0, width, height);
+          var x1 = 0,
+              x2 = width - 1,
+              y1 = 0,
+              y2 = height - 1;
+          var imageData = ctx.getImageData(0, 0, width, height).data;
+
+          outer: for (var _i = 0; _i < height; _i++) {
+            for (var j = 0; j < width; j++) {
+              var a = imageData[_i * width * 4 + j * 4 + 3];
+
+              if (a > 0) {
+                y1 = _i;
+                break outer;
+              }
+            }
+          }
+
+          outer: for (var _i2 = height - 1; _i2 >= 0; _i2--) {
+            for (var _j = 0; _j < width; _j++) {
+              var _a = imageData[_i2 * width * 4 + _j * 4 + 3];
+
+              if (_a > 0) {
+                y2 = _i2;
+                break outer;
+              }
+            }
+          }
+
+          outer: for (var _i3 = 0; _i3 < width; _i3++) {
+            for (var _j2 = 0; _j2 < height; _j2++) {
+              var _a2 = imageData[_i3 * 4 + _j2 * width * 4 + 3];
+
+              if (_a2 > 0) {
+                x1 = _i3;
+                break outer;
+              }
+            }
+          }
+
+          outer: for (var _i4 = width - 1; _i4 >= 0; _i4--) {
+            for (var _j3 = 0; _j3 < height; _j3++) {
+              var _a3 = imageData[_i4 * 4 + _j3 * width * 4 + 3];
+
+              if (_a3 > 0) {
+                x2 = _i4;
+                break outer;
+              }
+            }
+          } // 超过一定阈值才裁剪空白边
+
+
+          if (x1 > 20 || x2 < width - 21 || y1 > 20 || y2 < height - 21) {
+            console.log(x1, y1, x2, y2, width, height);
+            var nw = x2 - x1,
+                nh = y2 - y1;
+            var nd = ctx.getImageData(x1, y1, nw, nh);
+            canvas.width = nw;
+            canvas.height = nh;
+            ctx.clearRect(0, 0, maxW, maxH);
+            ctx.putImageData(nd, 0, 0);
+            var str;
+
+            if (/\.jpe?g$/.test(url)) {
+              str = canvas.toDataURL('image/jpeg');
+            } else if (/\.webp$/.test(url)) {
+              str = canvas.toDataURL('image/webp');
+            } else {
+              str = canvas.toDataURL('image/png');
+            }
+
+            var ow = item.props.style.width;
+            var oh = item.props.style.height;
+            var scaleX = ow / width,
+                scaleY = oh / height;
+            item.props.src = str;
+            item.props.style.width = nw * scaleX;
+            item.props.style.height = nh * scaleY;
+            item.props.style.left = x1 * scaleX;
+            item.props.style.top = y1 * scaleY;
+            library[i] = {
+              id: item.id,
+              tagName: 'div',
+              props: {
+                style: {
+                  position: 'absolute',
+                  width: ow,
+                  height: oh
+                }
+              },
+              children: [item]
+            };
+          } // let len = img.width * img.height;
+          // for(let i = 0; i < len; i++) {
+          //   let a = imageData[i * 4] + 3;
+          //   if(a > 0) {
+          //     y1 = Math.floor(i / img.width);
+          //     break;
+          //   }
+          // }
+          // for(let i = len - 1; i >= 0; i--) {
+          //   let a = imageData[i * 4] + 3;
+          //   if(a > 0) {
+          //     y2 = Math.floor((len - i) / img.width);
+          //     break;
+          //   }
+          // }
+
+
+          if (++count === total) {
+            cb();
+          }
+        };
+
+        img.onerror = function () {
+          if (++count === total) {
+            cb();
+          }
+        };
+
+        img.src = url;
+      }
+    };
+
+    for (var i = 0, len = library.length; i < len; i++) {
+      _loop3(i, len);
+    }
+
+    if (total === 0) {
+      cb();
+    }
   },
   base64: function base64(data, cb) {
     console.error('base64');
@@ -84276,7 +84459,7 @@ function _unsupportedIterableToArray(o, minLen) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"ae-karas","version":"0.7.1","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"^0.78.1","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
+module.exports = JSON.parse('{"name":"ae-karas","version":"0.7.2","description":"An AfterEffects plugin for karas.","maintainers":[{"name":"army8735","email":"army8735@qq.com"}],"scripts":{"build":"npm run build:es && npm run build:web","build:es":"rollup -c rollup.config.js","build:web":"webpack --mode=production","dev":"npm run dev:es & npm run dev:web","dev:es":"rollup -c rollup.dev.config.js --watch","dev:web":"webpack --mode=development --watch"},"repository":{"type":"git","url":"git://github.com/karasjs/ae-karas.git"},"dependencies":{"classnames":"^2.3.1","karas":"^0.78.1","mobx":"^6.3.2","mobx-react":"^7.2.0","react":"^17.0.2","react-dom":"^17.0.2"},"devDependencies":{"@babel/core":"^7.8.7","@babel/plugin-proposal-class-properties":"^7.8.3","@babel/plugin-proposal-decorators":"^7.14.5","@babel/plugin-transform-runtime":"^7.15.0","@babel/preset-env":"^7.8.7","@babel/preset-react":"^7.14.5","@babel/runtime":"^7.15.3","@rollup/plugin-babel":"^5.3.0","@rollup/plugin-json":"^4.1.0","babel-loader":"^8.2.2","css-loader":"^5.2.6","css-minimizer-webpack-plugin":"^3.0.2","file-loader":"^6.2.0","less":"^4.1.1","less-loader":"^10.0.1","mini-css-extract-plugin":"^2.1.0","postcss-loader":"^6.1.1","postcss-preset-env":"^6.7.0","rollup":"^2.52.3","rollup-plugin-babel":"^4.4.0","rollup-plugin-sourcemaps":"^0.5.0","style-loader":"^3.1.0","url-loader":"^4.1.1","webpack":"^5.53.0","webpack-cli":"^4.8.0","webstorm-disable-index":"^1.2.0"},"main":"./index.js","engines":{"node":">=10.0.0"},"license":"MIT","readmeFilename":"README.md","author":"army8735 <army8735@qq.com>"}');
 
 /***/ })
 

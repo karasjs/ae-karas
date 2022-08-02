@@ -4,8 +4,8 @@ import animation from './animation';
 
 let canvas = document.createElement('canvas');
 let ctx = canvas.getContext('2d');
-let canvas2 = document.createElement('canvas');
-let ctx2 = canvas2.getContext('2d');
+// let canvas2 = document.createElement('canvas');
+// let ctx2 = canvas2.getContext('2d');
 let count = 0, total = 0;
 let maxW = 0, maxH = 0;
 
@@ -92,9 +92,9 @@ function upload(name, props, imgHash, cb, isBase64) {
   if(props.hasOwnProperty('src')) {
     let { src, style: { width, height } } = props;
     total++;
+    maxW = Math.max(maxW, width);
+    maxH = Math.max(maxH, height);
     if(src.indexOf('data:') === 0) {
-      maxW = Math.max(maxW, width);
-      maxH = Math.max(maxH, height);
       remote(src, props, cb, imgHash, isBase64);
       return;
     }
@@ -197,25 +197,26 @@ export default {
     let library = data.library;
     for(let i = 0, len = library.length; i < len; i++) {
       let item = library[i];
-      // 排除手动尺寸
       if(item.tagName === 'img' && item.props.nw && item.props.nh) {
         let url = item.props.src;
         total++;
         let img = document.createElement('img');
         img.onload = function() {
-          canvas2.width = item.props.nw;
-          canvas2.height = item.props.nh;
-          ctx2.clearRect(0, 0, item.props.nw, item.props.nh);
-          ctx2.drawImage(img, 0, 0, item.props.nw, item.props.nh);
+          canvas.width = item.props.nw;
+          canvas.height = item.props.nh;
+          maxW = Math.max(maxW, item.props.nw);
+          maxH = Math.max(maxH, item.props.nh);
+          ctx.clearRect(0, 0, maxW, maxH);
+          ctx.drawImage(img, 0, 0, item.props.nw, item.props.nh);
           let str;
           if(/\.jpe?g$/.test(url)) {
-            str = canvas2.toDataURL('image/jpeg');
+            str = canvas.toDataURL('image/jpeg');
           }
           else if(/\.webp$/.test(url)) {
-            str = canvas2.toDataURL('image/webp');
+            str = canvas.toDataURL('image/webp');
           }
           else {
-            str = canvas2.toDataURL('image/png');
+            str = canvas.toDataURL('image/png');
           }
           item.props.src = str;
           if(++count === total) {
@@ -242,6 +243,7 @@ export default {
       let item = library[i];
       // 排除手动尺寸
       if(item.tagName === 'img' && !item.props.nw && !item.props.nh) {
+      // if(item.tagName === 'img') {
         total++;
         hash[item.props.src] = {
           index: i,
@@ -281,8 +283,11 @@ export default {
           let ow = item.node.props.style.width, oh = item.node.props.style.height;
           let scaleX = ow / item.width;
           let scaleY = oh / item.height;
-          // 有可能缩放0，另外限制相差1%尺寸才进行修改，新建一个包裹div用原来的尺寸和位置，img则相应缩放
-          if(item.width && item.height && (scaleX > 1.01 || scaleY > 1.01)) {
+          let dx = ow - item.width;
+          let dy = oh - item.height;
+          // 有可能缩放0，另外限制相差一定尺寸才进行修改
+          if(item.width && item.height
+            && (scaleX > 1.1 || scaleY > 1.1) && (dx > 20 || dy > 20)) {
             // library[item.index] = {
             //   id: item.node.id,
             //   tagName: 'div',
@@ -296,30 +301,32 @@ export default {
             //   children: [item.node],
             // };
             // 不能放大
-            if(scaleX < 1) {
-              item.width = ow;
-              scaleX = 1;
-            }
-            if(scaleY < 1) {
-              item.height = oh;
-              scaleY = 1;
-            }
+            // if(scaleX < 1) {
+            //   item.width = ow;
+            //   scaleX = 1;
+            // }
+            // if(scaleY < 1) {
+            //   item.height = oh;
+            //   scaleY = 1;
+            // }
             // recursionSetAutoSize(item.node, ow, oh, item.width, item.height, scaleX, scaleY);
             let img = document.createElement('img');
             img.onload = function() {
-              canvas2.width = item.width;
-              canvas2.height = item.height;
-              ctx2.clearRect(0, 0, item.width, item.height);
-              ctx2.drawImage(img, 0, 0, item.width, item.height);
+              canvas.width = item.width;
+              canvas.height = item.height;
+              maxW = Math.max(maxW, item.width);
+              maxH = Math.max(maxH, item.height);
+              ctx.clearRect(0, 0, maxW, maxH);
+              ctx.drawImage(img, 0, 0, item.width, item.height);
               let str;
               if(/\.jpe?g$/.test(url)) {
-                str = canvas2.toDataURL('image/jpeg');
+                str = canvas.toDataURL('image/jpeg');
               }
               else if(/\.webp$/.test(url)) {
-                str = canvas2.toDataURL('image/webp');
+                str = canvas.toDataURL('image/webp');
               }
               else {
-                str = canvas2.toDataURL('image/png');
+                str = canvas.toDataURL('image/png');
               }
               item.node.props.src = str;
               if(++count === total) {
@@ -358,6 +365,137 @@ export default {
       }
     }
     task();
+  },
+  cropBlank(type, data, cb) {
+    console.error('cropBlank');
+    let total = 0, count = 0;
+    let library = data.library;
+    for(let i = 0, len = library.length; i < len; i++) {
+      let item = library[i];
+      if(item.tagName === 'img') {
+        let url = item.props.src;
+        total++;
+        let img = document.createElement('img');
+        img.onload = function() {
+          let width = img.width, height = img.height;
+          canvas.width = width;
+          canvas.height = height;
+          maxW = Math.max(maxW, width);
+          maxH = Math.max(maxH, height);
+          ctx.clearRect(0, 0, maxW, maxH);
+          ctx.drawImage(img, 0, 0, width, height);
+          let x1 = 0, x2 = width - 1, y1 = 0, y2 = height - 1;
+          let imageData = ctx.getImageData(0, 0, width, height).data;
+          outer:
+            for(let i = 0; i < height; i++) {
+              for(let j = 0; j < width; j++) {
+                let a = imageData[i * width * 4 + j * 4 + 3];
+                if(a > 0) {
+                  y1 = i;
+                  break outer;
+                }
+              }
+            }
+          outer:
+            for(let i = height - 1; i >= 0; i--) {
+              for(let j = 0; j < width; j++) {
+                let a = imageData[i * width * 4 + j * 4 + 3];
+                if(a > 0) {
+                  y2 = i;
+                  break outer;
+                }
+              }
+            }
+          outer:
+            for(let i = 0; i < width; i++) {
+              for(let j = 0; j < height; j++) {
+                let a = imageData[i * 4 + j * width * 4 + 3];
+                if(a > 0) {
+                  x1 = i;
+                  break outer;
+                }
+              }
+            }
+          outer:
+            for(let i = width - 1; i >= 0; i--) {
+              for(let j = 0; j < height; j++) {
+                let a = imageData[i * 4 + j * width * 4 + 3];
+                if(a > 0) {
+                  x2 = i;
+                  break outer;
+                }
+              }
+            }
+          // 超过一定阈值才裁剪空白边
+          if(x1 > 20 || x2 < width - 21 || y1 > 20 || y2 < height - 21) {
+            console.log(x1, y1, x2, y2, width, height);
+            let nw = x2 - x1, nh = y2 - y1;
+            let nd = ctx.getImageData(x1, y1, nw, nh);
+            canvas.width = nw;
+            canvas.height = nh;
+            ctx.clearRect(0, 0, maxW, maxH);
+            ctx.putImageData(nd, 0, 0);
+            let str;
+            if(/\.jpe?g$/.test(url)) {
+              str = canvas.toDataURL('image/jpeg');
+            }
+            else if(/\.webp$/.test(url)) {
+              str = canvas.toDataURL('image/webp');
+            }
+            else {
+              str = canvas.toDataURL('image/png');
+            }
+            let ow = item.props.style.width;
+            let oh = item.props.style.height;
+            let scaleX = ow / width, scaleY = oh / height;
+            item.props.src = str;
+            item.props.style.width = nw * scaleX;
+            item.props.style.height = nh * scaleY;
+            item.props.style.left = x1 * scaleX;
+            item.props.style.top = y1 * scaleY;
+            library[i] = {
+              id: item.id,
+              tagName: 'div',
+              props: {
+                style: {
+                  position: 'absolute',
+                  width: ow,
+                  height: oh,
+                },
+              },
+              children: [item],
+            };
+          }
+          // let len = img.width * img.height;
+          // for(let i = 0; i < len; i++) {
+          //   let a = imageData[i * 4] + 3;
+          //   if(a > 0) {
+          //     y1 = Math.floor(i / img.width);
+          //     break;
+          //   }
+          // }
+          // for(let i = len - 1; i >= 0; i--) {
+          //   let a = imageData[i * 4] + 3;
+          //   if(a > 0) {
+          //     y2 = Math.floor((len - i) / img.width);
+          //     break;
+          //   }
+          // }
+          if(++count === total) {
+            cb();
+          }
+        }
+        img.onerror = function() {
+          if(++count === total) {
+            cb();
+          }
+        }
+        img.src = url;
+      }
+    }
+    if(total === 0) {
+      cb();
+    }
   },
   base64(data, cb) {
     console.error('base64');

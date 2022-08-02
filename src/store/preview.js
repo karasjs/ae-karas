@@ -11,6 +11,7 @@ class Preview {
   base64 = false;
   autoSize = true;
   autoOverflow = true;
+  cropBlank = true;
   iterations = 1;
   precision = 0;
   time = 0;
@@ -49,6 +50,10 @@ class Preview {
 
   setAutoOverflow(autoOverflow) {
     this.autoOverflow = autoOverflow;
+  }
+
+  setCropBlank(cropBlank) {
+    this.cropBlank = cropBlank;
   }
 
   setFontSize(fontSize) {
