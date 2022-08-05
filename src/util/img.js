@@ -448,13 +448,15 @@ export default {
             let ow = item.props.style.width;
             let oh = item.props.style.height;
             let scaleX = ow / width, scaleY = oh / height;
+            let id = item.id;
+            delete item.id;
             item.props.src = str;
             item.props.style.width = nw * scaleX;
             item.props.style.height = nh * scaleY;
             item.props.style.left = x1 * scaleX;
             item.props.style.top = y1 * scaleY;
             library[i] = {
-              id: item.id,
+              id,
               tagName: 'div',
               props: {
                 style: {
