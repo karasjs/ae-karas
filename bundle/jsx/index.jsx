@@ -3754,8 +3754,9 @@ function parseAnimate(res, data, start, duration, displayStartTime, offset, isDi
   }
 
   if (is3d && !res.isCamera) {
-    init.style.perspective = true; // path没有width和height，在处理geom时会添加上
-    // init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+    // init.style.perspective = true;
+    // path没有width和height，在处理geom时会添加上
+    init.style.perspective = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
   }
 
   if (Array.isArray(scale) && scale.length) {
