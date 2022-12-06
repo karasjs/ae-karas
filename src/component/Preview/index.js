@@ -137,7 +137,7 @@ class Preview extends React.Component {
       canvas.innerHTML = '';
     }
     // 不同类型type根节点
-    root = karas.parse({
+    root = window.root = karas.parse({
       tagName: type,
       props: {
         width,
