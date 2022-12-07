@@ -221,16 +221,14 @@ function getEasing(prop, start, end, isZ) {
     }
 
     if (avSpeed !== 0) {
-      y1 = x1 * e1.speed / avSpeed; // y2 = 1 - (1 - x2) * e2.speed / avSpeed;
-
-      y2 = 1 - x2 * e2.speed / avSpeed;
+      y1 = x1 * e1.speed / avSpeed;
+      y2 = 1 - (1 - x2) * e2.speed / avSpeed; // y2 = 1 - x2 * e2.speed / avSpeed;
     }
   } else if (v2 !== v1) {
     var _avSpeed = Math.abs(v2 - v1) / (t2 - t1);
 
-    y1 = x1 * e1.speed / _avSpeed; // y2 = 1 - (1 - x2) * e2.speed / avSpeed;
-
-    y2 = 1 - x2 * e2.speed / _avSpeed;
+    y1 = x1 * e1.speed / _avSpeed;
+    y2 = 1 - (1 - x2) * e2.speed / _avSpeed; // y2 = 1 - x2 * e2.speed / avSpeed;
   }
 
   if (x1 === y1 && x2 === y2 || y1 === undefined || y2 === undefined) {

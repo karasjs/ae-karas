@@ -56789,7 +56789,7 @@ var Alert = (Alert_dec = inject('global'), Alert_dec(Alert_class = mobxreact_esm
   }
 });
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"0.7.3"};
+const package_namespaceObject = {"i8":"0.7.4"};
 ;// CONCATENATED MODULE: ./src/index.html
 /* harmony default export */ const src = (__webpack_require__.p + "index.html");
 ;// CONCATENATED MODULE: ./src/index.js
