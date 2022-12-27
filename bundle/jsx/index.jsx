@@ -4575,32 +4575,35 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
       var _type = gFill.type,
           _start = gFill.start,
           end = gFill.end,
-          _gFill$colors = gFill.colors,
-          m = _gFill$colors.m,
-          p = _gFill$colors.p;
+          colors = gFill.colors;
       var steps = '';
 
-      for (var _i10 = 0; _i10 < p; _i10++) {
-        if (_i10) {
-          steps += ', ';
+      if (colors) {
+        var m = colors.m,
+            p = colors.p;
+
+        for (var _i10 = 0; _i10 < p; _i10++) {
+          if (_i10) {
+            steps += ', ';
+          }
+
+          steps += 'rgba(' + Math.floor(m[_i10 * 4 + 1] * 255);
+          steps += ',' + Math.floor(m[_i10 * 4 + 2] * 255);
+          steps += ',' + Math.floor(m[_i10 * 4 + 3] * 255); // 可能有透明度
+
+          if (m.length >= p * 4 + (_i10 + 1) * 2) {
+            steps += ',' + m[p * 4 + (_i10 + 1) * 2 - 1];
+          } else {
+            steps += ',1';
+          }
+
+          steps += ') ';
+          steps += m[_i10 * 4] * 100 + '%';
         }
-
-        steps += 'rgba(' + Math.floor(m[_i10 * 4 + 1] * 255);
-        steps += ',' + Math.floor(m[_i10 * 4 + 2] * 255);
-        steps += ',' + Math.floor(m[_i10 * 4 + 3] * 255); // 可能有透明度
-
-        if (m.length >= p * 4 + (_i10 + 1) * 2) {
-          steps += ',' + m[p * 4 + (_i10 + 1) * 2 - 1];
-        } else {
-          steps += ',1';
-        }
-
-        steps += ') ';
-        steps += m[_i10 * 4] * 100 + '%';
       }
 
       if (!steps) {
-        steps = '#F00, #00F';
+        steps = 'rgba(255,255,255,1), rgba(255,255,255,0)';
       }
 
       if (_type === 1) {

@@ -998,27 +998,30 @@ function parseGeom(res, data, start, duration, displayStartTime, offset) {
         cx = w * 0.5;
         cy = h * 0.5;
       }
-      let { type, start, end, colors: { m, p } } = gFill;
+      let { type, start, end, colors } = gFill;
       let steps = '';
-      for(let i = 0; i < p; i++) {
-        if(i) {
-          steps += ', ';
+      if(colors) {
+        let { m, p } = colors;
+        for(let i = 0; i < p; i++) {
+          if(i) {
+            steps += ', ';
+          }
+          steps += 'rgba(' + Math.floor(m[i * 4 + 1] * 255);
+          steps += ',' + Math.floor(m[i * 4 + 2] * 255);
+          steps += ',' + Math.floor(m[i * 4 + 3] * 255);
+          // 可能有透明度
+          if(m.length >= p * 4 + (i + 1) * 2) {
+            steps += ',' + m[p * 4 + (i + 1) * 2 - 1];
+          }
+          else {
+            steps += ',1';
+          }
+          steps += ') ';
+          steps += m[i * 4] * 100 + '%';
         }
-        steps += 'rgba(' + Math.floor(m[i * 4 + 1] * 255);
-        steps += ',' + Math.floor(m[i * 4 + 2] * 255);
-        steps += ',' + Math.floor(m[i * 4 + 3] * 255);
-        // 可能有透明度
-        if(m.length >= p * 4 + (i + 1) * 2) {
-          steps += ',' + m[p * 4 + (i + 1) * 2 - 1];
-        }
-        else {
-          steps += ',1';
-        }
-        steps += ') ';
-        steps += m[i * 4] * 100 + '%';
       }
       if(!steps) {
-        steps = '#F00, #00F';
+        steps = 'rgba(255,255,255,1), rgba(255,255,255,0)';
       }
       if(type === 1) {
         let x0 = $geom.props.style.translateX || 0, y0 = $geom.props.style.translateY || 0;
