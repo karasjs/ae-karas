@@ -1435,10 +1435,17 @@ function parse$1 (composition) {
   $.ae2karas.error('parse');
 
   var workAreaStart = composition.workAreaStart,
-      workAreaDuration = composition.workAreaDuration;
+      workAreaDuration = composition.workAreaDuration,
+      displayStartTime = composition.displayStartTime;
   workAreaStart *= 1000;
   workAreaDuration *= 1000;
-  $.ae2karas.log('workArea: ' + workAreaStart + ',' + workAreaDuration);
+  $.ae2karas.log('workArea: ' + workAreaStart + ',' + workAreaDuration + ',' + displayStartTime);
+
+  if (displayStartTime) {
+    displayStartTime *= 1000;
+    workAreaStart += displayStartTime;
+  }
+
   var library = [],
       navigationShapeTree = [];
   var result = recursion$1(composition, library, navigationShapeTree);

@@ -369,10 +369,14 @@ export default function(composition) {
   $.ae2karas.error('parse');
   compList.splice(0);
   // 递归遍历合成，转换ae的图层为普通js对象
-  let { workAreaStart, workAreaDuration } = composition;
+  let { workAreaStart, workAreaDuration, displayStartTime } = composition;
   workAreaStart *= 1000;
   workAreaDuration *= 1000;
-  $.ae2karas.log('workArea: ' + workAreaStart + ',' + workAreaDuration);
+  $.ae2karas.log('workArea: ' + workAreaStart + ',' + workAreaDuration + ',' + displayStartTime);
+  if(displayStartTime) {
+    displayStartTime *= 1000;
+    workAreaStart += displayStartTime;
+  }
   let library = [], navigationShapeTree = [];
   let result = recursion(composition, library, navigationShapeTree);
   $.ae2karas.log(result);
