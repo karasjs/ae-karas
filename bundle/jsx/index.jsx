@@ -3448,16 +3448,19 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
 
   if (res.props.style.hasOwnProperty('opacity')) {
     delete res.props.style.opacity;
-    var animate = res.animate;
+  } // 动画也要删掉，不依赖
 
-    outer: for (var i = animate.length - 1; i >= 0; i--) {
-      var item = animate[i].value;
 
-      for (var j = 1, len = item.length; j < len; j++) {
-        if (item[j].hasOwnProperty('opacity')) {
-          animate.splice(i, 1);
-          break outer;
-        }
+  var animate = res.animate;
+
+  outer: for (var i = animate.length - 1; i >= 0; i--) {
+    var item = animate[i].value;
+
+    for (var j = 1, len = item.length; j < len; j++) {
+      if (item[j].hasOwnProperty('opacity')) {
+        animate.splice(i, 1);
+        $.ae2karas.log(123);
+        break outer;
       }
     }
   }

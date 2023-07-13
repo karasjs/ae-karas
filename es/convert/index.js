@@ -53,18 +53,19 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
   // 父链接不跟随透明度，所以删掉opacity的静态属性
   if(res.props.style.hasOwnProperty('opacity')) {
     delete res.props.style.opacity;
-    let animate = res.animate;
-    outer:
+  }
+  // 动画也要删掉，不依赖
+  let animate = res.animate;
+  outer:
     for(let i = animate.length - 1; i >= 0; i--) {
       let item = animate[i].value;
       for(let j = 1, len = item.length; j < len; j++) {
         if(item[j].hasOwnProperty('opacity')) {
-          animate.splice(i, 1);
+          animate.splice(i, 1); $.ae2karas.log(123)
           break outer;
         }
       }
     }
-  }
   return res;
 }
 

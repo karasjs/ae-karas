@@ -65,13 +65,358 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 /***/ }),
 
-/***/ 511:
+/***/ 516:
 /***/ (function(module) {
 
 (function (global, factory) {
    true ? module.exports = factory() :
   0;
 })(this, (function () { 'use strict';
+
+  function _regeneratorRuntime() {
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
+    _regeneratorRuntime = function () {
+      return exports;
+    };
+
+    var exports = {},
+        Op = Object.prototype,
+        hasOwn = Op.hasOwnProperty,
+        $Symbol = "function" == typeof Symbol ? Symbol : {},
+        iteratorSymbol = $Symbol.iterator || "@@iterator",
+        asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
+        toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+    function define(obj, key, value) {
+      return Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: !0,
+        configurable: !0,
+        writable: !0
+      }), obj[key];
+    }
+
+    try {
+      define({}, "");
+    } catch (err) {
+      define = function (obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+
+    function wrap(innerFn, outerFn, self, tryLocsList) {
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
+          generator = Object.create(protoGenerator.prototype),
+          context = new Context(tryLocsList || []);
+      return generator._invoke = function (innerFn, self, context) {
+        var state = "suspendedStart";
+        return function (method, arg) {
+          if ("executing" === state) throw new Error("Generator is already running");
+
+          if ("completed" === state) {
+            if ("throw" === method) throw arg;
+            return doneResult();
+          }
+
+          for (context.method = method, context.arg = arg;;) {
+            var delegate = context.delegate;
+
+            if (delegate) {
+              var delegateResult = maybeInvokeDelegate(delegate, context);
+
+              if (delegateResult) {
+                if (delegateResult === ContinueSentinel) continue;
+                return delegateResult;
+              }
+            }
+
+            if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
+              if ("suspendedStart" === state) throw state = "completed", context.arg;
+              context.dispatchException(context.arg);
+            } else "return" === context.method && context.abrupt("return", context.arg);
+            state = "executing";
+            var record = tryCatch(innerFn, self, context);
+
+            if ("normal" === record.type) {
+              if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
+              return {
+                value: record.arg,
+                done: context.done
+              };
+            }
+
+            "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+          }
+        };
+      }(innerFn, self, context), generator;
+    }
+
+    function tryCatch(fn, obj, arg) {
+      try {
+        return {
+          type: "normal",
+          arg: fn.call(obj, arg)
+        };
+      } catch (err) {
+        return {
+          type: "throw",
+          arg: err
+        };
+      }
+    }
+
+    exports.wrap = wrap;
+    var ContinueSentinel = {};
+
+    function Generator() {}
+
+    function GeneratorFunction() {}
+
+    function GeneratorFunctionPrototype() {}
+
+    var IteratorPrototype = {};
+    define(IteratorPrototype, iteratorSymbol, function () {
+      return this;
+    });
+    var getProto = Object.getPrototypeOf,
+        NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function (method) {
+        define(prototype, method, function (arg) {
+          return this._invoke(method, arg);
+        });
+      });
+    }
+
+    function AsyncIterator(generator, PromiseImpl) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+
+        if ("throw" !== record.type) {
+          var result = record.arg,
+              value = result.value;
+          return value && "object" == typeof value && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
+            invoke("next", value, resolve, reject);
+          }, function (err) {
+            invoke("throw", err, resolve, reject);
+          }) : PromiseImpl.resolve(value).then(function (unwrapped) {
+            result.value = unwrapped, resolve(result);
+          }, function (error) {
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+
+        reject(record.arg);
+      }
+
+      var previousPromise;
+
+      this._invoke = function (method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new PromiseImpl(function (resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+
+        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      };
+    }
+
+    function maybeInvokeDelegate(delegate, context) {
+      var method = delegate.iterator[context.method];
+
+      if (undefined === method) {
+        if (context.delegate = null, "throw" === context.method) {
+          if (delegate.iterator.return && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel;
+          context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method");
+        }
+
+        return ContinueSentinel;
+      }
+
+      var record = tryCatch(method, delegate.iterator, context.arg);
+      if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+      var info = record.arg;
+      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+    }
+
+    function pushTryEntry(locs) {
+      var entry = {
+        tryLoc: locs[0]
+      };
+      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+    }
+
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal", delete record.arg, entry.completion = record;
+    }
+
+    function Context(tryLocsList) {
+      this.tryEntries = [{
+        tryLoc: "root"
+      }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+    }
+
+    function values(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod) return iteratorMethod.call(iterable);
+        if ("function" == typeof iterable.next) return iterable;
+
+        if (!isNaN(iterable.length)) {
+          var i = -1,
+              next = function next() {
+            for (; ++i < iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+
+            return next.value = undefined, next.done = !0, next;
+          };
+
+          return next.next = next;
+        }
+      }
+
+      return {
+        next: doneResult
+      };
+    }
+
+    function doneResult() {
+      return {
+        value: undefined,
+        done: !0
+      };
+    }
+
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
+      var ctor = "function" == typeof genFun && genFun.constructor;
+      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+    }, exports.mark = function (genFun) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+    }, exports.awrap = function (arg) {
+      return {
+        __await: arg
+      };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+      return this;
+    }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+      void 0 === PromiseImpl && (PromiseImpl = Promise);
+      var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
+        return result.done ? result.value : iter.next();
+      });
+    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
+      return this;
+    }), define(Gp, "toString", function () {
+      return "[object Generator]";
+    }), exports.keys = function (object) {
+      var keys = [];
+
+      for (var key in object) keys.push(key);
+
+      return keys.reverse(), function next() {
+        for (; keys.length;) {
+          var key = keys.pop();
+          if (key in object) return next.value = key, next.done = !1, next;
+        }
+
+        return next.done = !0, next;
+      };
+    }, exports.values = values, Context.prototype = {
+      constructor: Context,
+      reset: function (skipTempReset) {
+        if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
+      },
+      stop: function () {
+        this.done = !0;
+        var rootRecord = this.tryEntries[0].completion;
+        if ("throw" === rootRecord.type) throw rootRecord.arg;
+        return this.rval;
+      },
+      dispatchException: function (exception) {
+        if (this.done) throw exception;
+        var context = this;
+
+        function handle(loc, caught) {
+          return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
+        }
+
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i],
+              record = entry.completion;
+          if ("root" === entry.tryLoc) return handle("end");
+
+          if (entry.tryLoc <= this.prev) {
+            var hasCatch = hasOwn.call(entry, "catchLoc"),
+                hasFinally = hasOwn.call(entry, "finallyLoc");
+
+            if (hasCatch && hasFinally) {
+              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+            } else if (hasCatch) {
+              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+            } else {
+              if (!hasFinally) throw new Error("try statement without catch or finally");
+              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+            }
+          }
+        }
+      },
+      abrupt: function (type, arg) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+
+          if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+            var finallyEntry = entry;
+            break;
+          }
+        }
+
+        finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+        var record = finallyEntry ? finallyEntry.completion : {};
+        return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+      },
+      complete: function (record, afterLoc) {
+        if ("throw" === record.type) throw record.arg;
+        return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+      },
+      finish: function (finallyLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+        }
+      },
+      catch: function (tryLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+
+          if (entry.tryLoc === tryLoc) {
+            var record = entry.completion;
+
+            if ("throw" === record.type) {
+              var thrown = record.arg;
+              resetTryEntry(entry);
+            }
+
+            return thrown;
+          }
+        }
+
+        throw new Error("illegal catch attempt");
+      },
+      delegateYield: function (iterable, resultName, nextLoc) {
+        return this.delegate = {
+          iterator: values(iterable),
+          resultName: resultName,
+          nextLoc: nextLoc
+        }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
+      }
+    }, exports;
+  }
 
   function _typeof(obj) {
     "@babel/helpers - typeof";
@@ -81,6 +426,42 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     } : function (obj) {
       return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
     }, _typeof(obj);
+  }
+
+  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+
+  function _asyncToGenerator(fn) {
+    return function () {
+      var self = this,
+          args = arguments;
+      return new Promise(function (resolve, reject) {
+        var gen = fn.apply(self, args);
+
+        function _next(value) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+        }
+
+        function _throw(err) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+
+        _next(undefined);
+      });
+    };
   }
 
   function _defineProperties(target, props) {
@@ -263,7 +644,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
-  var Node = /*#__PURE__*/function () {
+  var Node$1 = /*#__PURE__*/function () {
     function Node() {
       this.__x = 0;
       this.__y = 0;
@@ -282,26 +663,46 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       this.__bbox = null;
       this.__filterBbox = null;
       this.__isDestroyed = true;
+      this.__cache = null;
+      this.__cacheTarget = null;
+      this.__wasmNode = null;
     }
 
     _createClass(Node, [{
       key: "__structure",
       value: function __structure(lv, j) {
-        return this.__struct = {
+        this.__struct = {
           node: this,
           childIndex: j,
           lv: lv
         };
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          wn.lv = lv;
+        }
+
+        return this.__struct;
       }
     }, {
       key: "__offsetX",
       value: function __offsetX(diff) {
         this.__x += diff;
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          wn.offset_x(diff);
+        }
       }
     }, {
       key: "__offsetY",
       value: function __offsetY(diff) {
         this.__y += diff;
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          wn.offset_y(diff);
+        }
       }
     }, {
       key: "__destroy",
@@ -451,6 +852,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
      * @returns 格式化好的[number, unit]
      */
     calUnit: function calUnit(v) {
+      if (v === 'auto') {
+        return {
+          v: 0,
+          u: AUTO$8
+        };
+      }
+
       var n = parseFloat(v) || 0;
 
       if (/%$/.test(v)) {
@@ -518,25 +926,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   };
 
   // 生成4*4单位矩阵
-  function identity$1() {
-    return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  function identity$2() {
+    return new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
   } // 矩阵a*b，固定两个matrix都是长度16
 
 
   function multiply$4(a, b) {
     if (!a && !b) {
-      return identity$1();
+      return identity$2();
     }
 
     if (isE$5(a)) {
-      return b;
+      return new Float64Array(b);
     }
 
     if (isE$5(b)) {
-      return a;
+      return new Float64Array(a);
     }
 
-    var c = [];
+    var c = identity$2();
 
     for (var i = 0; i < 4; i++) {
       var a0 = a[i] || 0;
@@ -550,7 +958,27 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
 
     return c;
-  } // 特殊优化，b为tfo，因此既只有12/13/14有值
+  } // function multiply2(a, b) {
+  //   if(isE(a)) {
+  //     assignMatrix(a, b);
+  //     return a;
+  //   }
+  //   if(isE(b)) {
+  //     return a;
+  //   }
+  //   for(let i = 0; i < 4; i++) {
+  //     let a0 = a[i] || 0;
+  //     let a1 = a[i + 4] || 0;
+  //     let a2 = a[i + 8] || 0;
+  //     let a3 = a[i + 12] || 0;
+  //     a[i] = a0 * b[0] + a1 * b[1] + a2 * b[2] + a3 * b[3];
+  //     a[i + 4] = a0 * b[4] + a1 * b[5] + a2 * b[6] + a3 * b[7];
+  //     a[i + 8] = a0 * b[8] + a1 * b[9] + a2 * b[10] + a3 * b[11];
+  //     a[i + 12] = a0 * b[12] + a1 * b[13] + a2 * b[14] + a3 * b[15];
+  //   }
+  //   return a;
+  // }
+  // 特殊优化，b为tfo，因此既只有12/13/14有值
 
 
   function multiplyTfo$1(m, x, y) {
@@ -829,6 +1257,61 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
     return point;
   }
+
+  function calPointWasm(point, m, i) {
+    if (m && !isE$5(m)) {
+      var x = point.x,
+          y = point.y,
+          z = point.z,
+          w = point.w;
+      z = z || 0;
+
+      if (w === undefined || w === null) {
+        w = 1;
+      }
+
+      var a1 = m[i],
+          b1 = m[i + 1],
+          c1 = m[i + 2],
+          d1 = m[i + 3];
+      var a2 = m[i + 4],
+          b2 = m[i + 5],
+          c2 = m[i + 6],
+          d2 = m[i + 7];
+      var a3 = m[i + 8],
+          b3 = m[i + 9],
+          c3 = m[i + 10],
+          d3 = m[i + 11];
+      var a4 = m[i + 12],
+          b4 = m[i + 13],
+          c4 = m[i + 14],
+          d4 = m[i + 15];
+      var o = {
+        x: (a1 === 1 ? x : x * a1) + (a2 ? y * a2 : 0) + (w === 1 ? a4 : a4 * w),
+        y: (b1 === 1 ? x : x * b1) + (b2 ? y * b2 : 0) + (w === 1 ? b4 : b4 * w),
+        z: 0,
+        w: w
+      };
+
+      if (d1 || d2 || d3) {
+        o.w = x * d1 + y * d2 + z * d3 + d4 * w;
+      } else if (d4 !== 1) {
+        o.w *= d4;
+      }
+
+      if (z) {
+        o.x += z * a3;
+        o.y += z * b3;
+        o.z = x * c1 + y * c2 + c4 + z * c3;
+      } else if (c1 || c2 || c4) {
+        o.z = x * c1 + y * c2 + c4;
+      }
+
+      return o;
+    }
+
+    return point;
+  }
   /**
    * 初等行变换求3*3特定css的matrix方阵，一维6长度
    * https://blog.csdn.net/iloveas2014/article/details/82930946
@@ -872,6 +1355,26 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
     return m[0] === 1 && m[1] === 0 && m[2] === 0 && m[3] === 1 && m[4] === 0 && m[5] === 0;
   }
+
+  function toE$1(m) {
+    m[0] = 1;
+    m[1] = 0;
+    m[2] = 0;
+    m[3] = 0;
+    m[4] = 0;
+    m[5] = 1;
+    m[6] = 0;
+    m[7] = 0;
+    m[8] = 0;
+    m[9] = 0;
+    m[10] = 1;
+    m[11] = 0;
+    m[12] = 0;
+    m[13] = 0;
+    m[14] = 0;
+    m[15] = 1;
+    return m;
+  }
   /**
    * 求任意4*4矩阵的逆矩阵，行列式为 0 则返回单位矩阵兜底
    * 格式：matrix3d(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4)
@@ -912,7 +1415,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var det = s[0] * inv[0] + s[1] * inv[4] + s[2] * inv[8] + s[3] * inv[12];
 
     if (det === 0) {
-      return identity$1();
+      return identity$2();
     }
 
     det = 1 / det;
@@ -1018,9 +1521,111 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     };
   }
 
+  function calRectPointWasm$1(xa, ya, xb, yb, matrix, index) {
+    var i = index * 16;
+
+    var _calPointWasm = calPointWasm({
+      x: xa,
+      y: ya,
+      z: 0,
+      w: 1
+    }, matrix, i),
+        x1 = _calPointWasm.x,
+        y1 = _calPointWasm.y,
+        z1 = _calPointWasm.z,
+        w1 = _calPointWasm.w;
+
+    var _calPointWasm2 = calPointWasm({
+      x: xb,
+      y: yb,
+      z: 0,
+      w: 1
+    }, matrix, i),
+        x3 = _calPointWasm2.x,
+        y3 = _calPointWasm2.y,
+        z3 = _calPointWasm2.z,
+        w3 = _calPointWasm2.w;
+
+    var x2, y2, z2, w2, x4, y4, z4, w4; // 无旋转的时候可以少算2个点
+
+    if (w1 === 1 && w3 === 1 && (!matrix || !matrix.length || !matrix[i + 1] && !matrix[i + 2] && !matrix[i + 4] && !matrix[i + 6] && !matrix[i + 7] && !matrix[i + 8])) {
+      x2 = x3;
+      y2 = y1;
+      z2 = z3;
+      x4 = x1;
+      y4 = y3;
+      z2 = z4 = z1;
+      w2 = w4 = 1;
+    } else {
+      var t = calPointWasm({
+        x: xb,
+        y: ya,
+        z: 0,
+        w: 1
+      }, matrix, i);
+      x2 = t.x;
+      y2 = t.y;
+      z2 = t.z;
+      w2 = t.w;
+      t = calPointWasm({
+        x: xa,
+        y: yb,
+        z: 0,
+        w: 1
+      }, matrix, i);
+      x4 = t.x;
+      y4 = t.y;
+      z4 = t.z;
+      w4 = t.w;
+    }
+
+    return {
+      x1: x1,
+      y1: y1,
+      z1: z1,
+      w1: w1,
+      x2: x2,
+      y2: y2,
+      z2: z2,
+      w2: w2,
+      x3: x3,
+      y3: y3,
+      z3: z3,
+      w3: w3,
+      x4: x4,
+      y4: y4,
+      z4: z4,
+      w4: w4
+    };
+  }
+
+  function assignMatrix$3(t, v) {
+    if (t && v) {
+      t[0] = v[0];
+      t[1] = v[1];
+      t[2] = v[2];
+      t[3] = v[3];
+      t[4] = v[4];
+      t[5] = v[5];
+      t[6] = v[6];
+      t[7] = v[7];
+      t[8] = v[8];
+      t[9] = v[9];
+      t[10] = v[10];
+      t[11] = v[11];
+      t[12] = v[12];
+      t[13] = v[13];
+      t[14] = v[14];
+      t[15] = v[15];
+    }
+
+    return t;
+  }
+
   var matrix = {
-    identity: identity$1,
+    identity: identity$2,
     multiply: multiply$4,
+    // multiply2,
     multiplyTfo: multiplyTfo$1,
     tfoMultiply: tfoMultiply$1,
     multiplyTranslateX: multiplyTranslateX$1,
@@ -1037,10 +1642,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     multiplyPerspective: multiplyPerspective$1,
     calPoint: calPoint$2,
     calRectPoint: calRectPoint$2,
+    calRectPointWasm: calRectPointWasm$1,
     point2d: point2d$1,
     inverse: inverse$1,
     isE: isE$5,
-    m2m6: m2m6
+    toE: toE$1,
+    m2m6: m2m6,
+    assignMatrix: assignMatrix$3
   };
 
   var toString = {}.toString;
@@ -1051,10 +1659,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     };
   }
 
+  function isTypes(types) {
+    return function (obj) {
+      var s = toString.call(obj);
+
+      for (var i = 0, len = types.length; i < len; i++) {
+        if (s === '[object ' + types[i] + ']') {
+          return true;
+        }
+      }
+
+      return false;
+    };
+  }
+
   var isObject$1 = isType('Object');
-  var isString$1 = isType('String');
-  var isFunction$b = isType('Function');
-  var isNumber$1 = isType('Number');
+  var isString$3 = isType('String');
+  var isFunction$b = isTypes(['Function', 'AsyncFunction', 'GeneratorFunction']);
+  var isNumber$2 = isType('Number');
   var isBoolean = isType('Boolean');
   var isDate = isType('Date');
   var hasOwn = {}.hasOwnProperty;
@@ -1258,15 +1880,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         return 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',1)';
-      } // if(color.length === 4) {
-      //   color = color.map((c, i) => i === 3 ? c : Math.floor(Math.max(0, c)));
-      //   return 'rgba(' + joinArr(color, ',') + ')';
-      // }
-      // else if(color.length === 3) {
-      //   color = color.map(c => Math.floor(c));
-      //   return 'rgba(' + joinArr(color, ',') + ',1)';
-      // }
-
+      }
     }
 
     return color || 'rgba(0,0,0,0)';
@@ -1564,29 +2178,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     return typeof Ctor === 'function' && fnToString.call(Ctor) === ObjectFunctionString;
   }
 
-  function assignMatrix$2(t, v) {
-    if (t && v) {
-      t[0] = v[0];
-      t[1] = v[1];
-      t[2] = v[2];
-      t[3] = v[3];
-      t[4] = v[4];
-      t[5] = v[5];
-      t[6] = v[6];
-      t[7] = v[7];
-      t[8] = v[8];
-      t[9] = v[9];
-      t[10] = v[10];
-      t[11] = v[11];
-      t[12] = v[12];
-      t[13] = v[13];
-      t[14] = v[14];
-      t[15] = v[15];
-    }
-
-    return t;
-  }
-
   function prefixHex(s) {
     if (s.length === 1) {
       return '0' + s;
@@ -1609,9 +2200,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
   var util = {
     isObject: isObject$1,
-    isString: isString$1,
+    isString: isString$3,
     isFunction: isFunction$b,
-    isNumber: isNumber$1,
+    isNumber: isNumber$2,
     isBoolean: isBoolean,
     isDate: isDate,
     isNil: isNil$h,
@@ -1642,26 +2233,26 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     extend: extend$3,
     joinArr: joinArr$3,
     transformBbox: transformBbox$1,
-    assignMatrix: assignMatrix$2,
     prefixHex: prefixHex,
     replaceRgba2Hex: replaceRgba2Hex$1
   };
 
-  var debug = {
-    flag: false
+  var config = {
+    debug: false,
+    offscreenCanvas: true
   };
 
   var SPF = 1000 / 60;
   var CANVAS$5 = {};
   var SUPPORT_OFFSCREEN_CANVAS = typeof OffscreenCanvas === 'function' && OffscreenCanvas.prototype.getContext;
 
-  function offscreenCanvas(key, width, height, message) {
+  function offscreenCanvas(width, height, key, message, contextAttributes) {
     var o;
 
     if (!key) {
-      o = !debug.flag && SUPPORT_OFFSCREEN_CANVAS ? new OffscreenCanvas(width, height) : document.createElement('canvas');
+      o = !config.debug && config.offscreenCanvas && SUPPORT_OFFSCREEN_CANVAS ? new OffscreenCanvas(width, height) : document.createElement('canvas');
     } else if (!CANVAS$5[key]) {
-      o = CANVAS$5[key] = !debug.flag && SUPPORT_OFFSCREEN_CANVAS ? new OffscreenCanvas(width, height) : document.createElement('canvas');
+      o = CANVAS$5[key] = !config.debug && config.offscreenCanvas && SUPPORT_OFFSCREEN_CANVAS ? new OffscreenCanvas(width, height) : document.createElement('canvas');
     } else {
       o = CANVAS$5[key];
     }
@@ -1669,7 +2260,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     o.width = width;
     o.height = height;
 
-    if (debug.flag) {
+    if (config.debug) {
       o.style.width = width + 'px';
       o.style.height = height + 'px';
 
@@ -1684,23 +2275,40 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       document.body.appendChild(o);
     }
 
-    var ctx = o.getContext('2d');
+    var ctx = o.getContext('2d', contextAttributes);
+
+    if (!ctx) {
+      inject.error('Total canvas memory use exceeds the maximum limit');
+    }
+
     return {
       canvas: o,
       ctx: ctx,
-      enabled: true,
-      available: true,
+      __enabled: true,
+      __available: true,
+
+      get enabled() {
+        return this.__enabled;
+      },
+
+      get available() {
+        return this.__available;
+      },
+
       release: function release() {
         ctx.globalAlpha = 1;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, width, height);
-        this.available = false;
+        ctx.globalCompositeOperation = 'source-over';
+        o.width = o.height = 0;
+        this.__available = false;
 
-        if (debug.flag && o) {
+        if (config.debug && o) {
           document.body.removeChild(o);
         }
 
         o = null;
+        ctx = null;
       }
     };
   }
@@ -1711,6 +2319,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   var LOADED = 2;
   var FONT = {};
   var COMPONENT = {};
+  var MAX_LOAD_NUM = 0;
+  var imgCount = 0,
+      imgQueue = [],
+      fontCount = 0,
+      fontQueue = [],
+      componentCount = 0,
+      componentQueue = [];
   var div;
   var SUPPORT_FONT = {};
   var defaultFontFamilyData;
@@ -1726,6 +2341,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   var inject = {
+    CANVAS: CANVAS$5,
     measureTextSync: function measureTextSync(str, ff, fs, fw, isUpright) {
       if (!div) {
         createDiv();
@@ -1779,6 +2395,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     INIT: INIT,
     LOADED: LOADED,
     LOADING: LOADING,
+
+    get MAX_LOAD_NUM() {
+      return MAX_LOAD_NUM;
+    },
+
+    set MAX_LOAD_NUM(v) {
+      MAX_LOAD_NUM = parseInt(v) || 0;
+    },
+
     measureImg: function measureImg(url, cb) {
       if (Array.isArray(url)) {
         if (!url.length) {
@@ -1818,49 +2443,75 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       } else if (cache.state === LOADING) {
         cb && cache.task.push(cb);
       } else {
-        cache.state = LOADING;
-        cb && cache.task.push(cb);
-        var img = new Image();
+        var load = function load(url, cache) {
+          var img = new Image();
 
-        img.onload = function () {
-          cache.state = LOADED;
-          cache.success = true;
-          cache.width = img.width;
-          cache.height = img.height;
-          cache.source = img;
-          cache.url = url;
-          var list = cache.task.splice(0);
-          list.forEach(function (cb) {
-            return cb(cache);
-          });
-        };
+          img.onload = function () {
+            cache.state = LOADED;
+            cache.success = true;
+            cache.width = img.width;
+            cache.height = img.height;
+            cache.source = img;
+            cache.url = url;
+            var list = cache.task.splice(0);
+            list.forEach(function (cb) {
+              cb(cache);
+            });
+            imgCount--;
 
-        img.onerror = function (e) {
-          cache.state = LOADED;
-          cache.success = false;
-          cache.url = url;
-          var list = cache.task.splice(0);
-          list.forEach(function (cb) {
-            return cb(cache);
-          });
-        };
+            if (imgQueue.length) {
+              var o = imgQueue.shift();
+              load(o, IMG[o]);
+            }
+          };
 
-        if (url.substr(0, 5) !== 'data:') {
-          var host = /^(?:\w+:)?\/\/([^/:]+)/.exec(url);
+          img.onerror = function (e) {
+            cache.state = LOADED;
+            cache.success = false;
+            cache.url = url;
+            var list = cache.task.splice(0);
+            list.forEach(function (cb) {
+              return cb(cache);
+            });
+            imgCount--;
 
-          if (host) {
-            if (typeof location === 'undefined' || location.hostname !== host[1]) {
-              img.crossOrigin = 'anonymous';
+            if (imgQueue.length) {
+              var o = imgQueue.shift();
+              load(o, cache);
+            }
+          };
+
+          if (url.substr(0, 5) !== 'data:') {
+            var host = /^(?:\w+:)?\/\/([^/:]+)/.exec(url);
+
+            if (host) {
+              if (typeof location === 'undefined' || location.hostname !== host[1]) {
+                img.crossOrigin = 'anonymous';
+              }
             }
           }
+
+          img.src = url;
+
+          if (config.debug && typeof document !== 'undefined') {
+            document.body.appendChild(img);
+          }
+        };
+
+        cache.state = LOADING;
+        cb && cache.task.push(cb);
+
+        if (MAX_LOAD_NUM > 0 && imgCount >= MAX_LOAD_NUM) {
+          imgQueue.push(url);
+          return;
         }
 
-        img.src = url;
-
-        if (debug.flag && typeof document !== 'undefined') {
-          document.body.appendChild(img);
-        }
+        imgCount++;
+        load(url, cache);
       }
+    },
+    log: function log(s) {
+      console.log(s);
     },
     warn: function warn(s) {
       console.warn(s);
@@ -1939,8 +2590,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     hasOffscreenCanvas: function hasOffscreenCanvas(key) {
       return key && CANVAS$5.hasOwnProperty(key);
     },
-    getOffscreenCanvas: function getOffscreenCanvas(width, height, key, message) {
-      return offscreenCanvas(key, width, height, message);
+    getOffscreenCanvas: function getOffscreenCanvas(width, height, key, message, contextAttributes) {
+      return offscreenCanvas(width, height, key, message, contextAttributes);
     },
     isDom: function isDom(o) {
       if (o) {
@@ -1974,9 +2625,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     },
     defaultFontFamily: 'arial',
-    getFontCanvas: function getFontCanvas() {
-      return inject.getOffscreenCanvas(16, 16, '__$$CHECK_SUPPORT_FONT_FAMILY$$__', null);
+    getFontCanvas: function getFontCanvas(contextAttributes) {
+      return inject.getOffscreenCanvas(16, 16, '__$$CHECK_SUPPORT_FONT_FAMILY$$__', null, contextAttributes);
     },
+    // TODO 移入font且设置默认字体可用
     checkSupportFontFamily: function checkSupportFontFamily(ff) {
       ff = ff.toLowerCase(); // 强制arial兜底
 
@@ -1988,7 +2640,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return SUPPORT_FONT[ff];
       }
 
-      var canvas = inject.getFontCanvas();
+      var canvas = inject.getFontCanvas({
+        willReadFrequently: true
+      });
       var context = canvas.ctx;
       context.textAlign = 'center';
       context.fillStyle = '#000';
@@ -2054,10 +2708,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return;
       }
 
-      if (!fontFamily) {
-        fontFamily = url;
-      }
-
       var cache = FONT[url] = FONT[url] || {
         state: INIT,
         task: []
@@ -2068,54 +2718,79 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       } else if (cache.state === LOADING) {
         cb && cache.task.push(cb);
       } else {
-        var success = function success(ab) {
-          var f = new FontFace(fontFamily, ab);
-          f.load().then(function () {
-            if (typeof document !== 'undefined') {
-              document.fonts.add(f);
-            }
+        var load = function load(fontFamily, url, cache) {
+          if (url instanceof ArrayBuffer) {
+            success(url);
+          } else {
+            var request = new XMLHttpRequest();
+            request.open('get', url, true);
+            request.responseType = 'arraybuffer';
 
+            request.onload = function () {
+              if (request.response) {
+                success(request.response);
+              } else {
+                error();
+              }
+            };
+
+            request.onerror = error;
+            request.send();
+          }
+
+          function success(ab) {
+            var f = new FontFace(fontFamily, ab);
+            f.load().then(function () {
+              if (typeof document !== 'undefined') {
+                document.fonts.add(f);
+              }
+
+              cache.state = LOADED;
+              cache.success = true;
+              cache.url = url;
+              var list = cache.task.splice(0);
+              list.forEach(function (cb) {
+                return cb(cache, ab);
+              });
+            })["catch"](error);
+            fontCount++;
+
+            if (fontQueue.length) {
+              var o = fontQueue.shift();
+              load(o.fontFamily, o.url, FONT[o.url]);
+            }
+          }
+
+          function error() {
             cache.state = LOADED;
-            cache.success = true;
+            cache.success = false;
             cache.url = url;
             var list = cache.task.splice(0);
             list.forEach(function (cb) {
-              return cb(cache, ab);
+              return cb(cache);
             });
-          })["catch"](error);
-        };
+            fontCount--;
 
-        var error = function error() {
-          cache.state = LOADED;
-          cache.success = false;
-          cache.url = url;
-          var list = cache.task.splice(0);
-          list.forEach(function (cb) {
-            return cb(cache);
-          });
+            if (fontQueue.length) {
+              var o = fontQueue.shift();
+              load(o.fontFamily, o.url, FONT[o.url]);
+            }
+          }
         };
 
         cache.state = LOADING;
         cb && cache.task.push(cb);
 
-        if (url instanceof ArrayBuffer) {
-          success(url);
-        } else {
-          var request = new XMLHttpRequest();
-          request.open('get', url, true);
-          request.responseType = 'arraybuffer';
-
-          request.onload = function () {
-            if (request.response) {
-              success(request.response);
-            } else {
-              error();
-            }
-          };
-
-          request.onerror = error;
-          request.send();
+        if (MAX_LOAD_NUM > 0 && fontCount >= MAX_LOAD_NUM) {
+          fontQueue.push({
+            fontFamily: fontFamily,
+            url: url
+          });
+          return;
         }
+
+        fontCount++;
+        load(fontFamily, url, cache);
       }
     },
     loadComponent: function loadComponent(url, cb) {
@@ -2157,35 +2832,58 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       } else if (cache.state === LOADING) {
         cb && cache.task.push(cb);
       } else {
+        var load = function load(url, cache) {
+          var script = document.createElement('script');
+          script.src = url;
+          script.async = true;
+
+          script.onload = function () {
+            cache.state = LOADED;
+            cache.success = true;
+            cache.url = url;
+            var list = cache.task.splice(0);
+            list.forEach(function (cb) {
+              return cb(cache);
+            });
+            document.head.removeChild(script);
+            componentCount--;
+
+            if (componentQueue.length) {
+              var o = componentQueue.shift();
+              load(o, COMPONENT[o]);
+            }
+          };
+
+          script.onerror = function () {
+            cache.state = LOADED;
+            cache.success = false;
+            cache.url = url;
+            var list = cache.task.splice(0);
+            list.forEach(function (cb) {
+              return cb(cache);
+            });
+            document.head.removeChild(script);
+            componentCount--;
+
+            if (componentQueue.length) {
+              var o = componentQueue.shift();
+              load(o, COMPONENT[o]);
+            }
+          };
+
+          document.head.appendChild(script);
+        };
+
         cache.state = LOADING;
         cb && cache.task.push(cb);
-        var script = document.createElement('script');
-        script.src = url;
-        script.async = true;
 
-        script.onload = function () {
-          cache.state = LOADED;
-          cache.success = true;
-          cache.url = url;
-          var list = cache.task.splice(0);
-          list.forEach(function (cb) {
-            return cb(cache);
-          });
-          document.head.removeChild(script);
-        };
+        if (MAX_LOAD_NUM > 0 && componentCount >= MAX_LOAD_NUM) {
+          componentQueue.push(url);
+          return;
+        }
 
-        script.onerror = function () {
-          cache.state = LOADED;
-          cache.success = false;
-          cache.url = url;
-          var list = cache.task.splice(0);
-          list.forEach(function (cb) {
-            return cb(cache);
-          });
-          document.head.removeChild(script);
-        };
-
-        document.head.appendChild(script);
+        componentCount++;
+        load(url, cache);
       }
     }
   };
@@ -2614,6 +3312,96 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   length_bits[28] = 0;
   length_base[28] = 258;
 
+  var decode = {};
+  /**
+   * @param {DataView} data
+   * @param {number} offset
+   * @param {number} numBytes
+   * @returns {string}
+   */
+
+  decode.UTF16 = function (data, offset, numBytes) {
+    var codePoints = [];
+    var numChars = numBytes / 2;
+
+    for (var j = 0; j < numChars; j++, offset += 2) {
+      codePoints[j] = data.getUint16(offset);
+    }
+
+    return String.fromCharCode.apply(null, codePoints);
+  }; // Data for converting old eight-bit Macintosh encodings to Unicode.
+  // This representation is optimized for decoding; encoding is slower
+  // and needs more memory. The assumption is that all opentype.js users
+  // want to open fonts, but saving a font will be comparatively rare
+  // so it can be more expensive. Keyed by IANA character set name.
+  //
+  // Python script for generating these strings:
+  //
+  //     s = u''.join([chr(c).decode('mac_greek') for c in range(128, 256)])
+  //     print(s.encode('utf-8'))
+
+  /**
+   * @private
+   */
+
+
+  var eightBitMacEncodings = {
+    'x-mac-croatian': // Python: 'mac_croatian'
+    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®Š™´¨≠ŽØ∞±≤≥∆µ∂∑∏š∫ªºΩžø' + '¿¡¬√ƒ≈Ć«Č… ÀÃÕŒœĐ—“”‘’÷◊©⁄€‹›Æ»–·‚„‰ÂćÁčÈÍÎÏÌÓÔđÒÚÛÙıˆ˜¯πË˚¸Êæˇ',
+    'x-mac-cyrillic': // Python: 'mac_cyrillic'
+    'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ†°Ґ£§•¶І®©™Ђђ≠Ѓѓ∞±≤≥іµґЈЄєЇїЉљЊњ' + 'јЅ¬√ƒ≈∆«»… ЋћЌќѕ–—“”‘’÷„ЎўЏџ№Ёёяабвгдежзийклмнопрстуфхцчшщъыьэю',
+    'x-mac-gaelic': // http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/GAELIC.TXT
+    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØḂ±≤≥ḃĊċḊḋḞḟĠġṀæø' + 'ṁṖṗɼƒſṠ«»… ÀÃÕŒœ–—“”‘’ṡẛÿŸṪ€‹›Ŷŷṫ·Ỳỳ⁊ÂÊÁËÈÍÎÏÌÓÔ♣ÒÚÛÙıÝýŴŵẄẅẀẁẂẃ',
+    'x-mac-greek': // Python: 'mac_greek'
+    'Ä¹²É³ÖÜ΅àâä΄¨çéèêë£™îï•½‰ôö¦€ùûü†ΓΔΘΛΞΠß®©ΣΪ§≠°·Α±≤≥¥ΒΕΖΗΙΚΜΦΫΨΩ' + "\u03AC\u039D\xAC\u039F\u03A1\u2248\u03A4\xAB\xBB\u2026\xA0\u03A5\u03A7\u0386\u0388\u0153\u2013\u2015\u201C\u201D\u2018\u2019\xF7\u0389\u038A\u038C\u038E\u03AD\u03AE\u03AF\u03CC\u038F\u03CD\u03B1\u03B2\u03C8\u03B4\u03B5\u03C6\u03B3\u03B7\u03B9\u03BE\u03BA\u03BB\u03BC\u03BD\u03BF\u03C0\u03CE\u03C1\u03C3\u03C4\u03B8\u03C9\u03C2\u03C7\u03C5\u03B6\u03CA\u03CB\u0390\u03B0\xAD",
+    'x-mac-icelandic': // Python: 'mac_iceland'
+    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûüÝ°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø' + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€ÐðÞþý·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+    'x-mac-inuit': // http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/INUIT.TXT
+    'ᐃᐄᐅᐆᐊᐋᐱᐲᐳᐴᐸᐹᑉᑎᑏᑐᑑᑕᑖᑦᑭᑮᑯᑰᑲᑳᒃᒋᒌᒍᒎᒐᒑ°ᒡᒥᒦ•¶ᒧ®©™ᒨᒪᒫᒻᓂᓃᓄᓅᓇᓈᓐᓯᓰᓱᓲᓴᓵᔅᓕᓖᓗ' + 'ᓘᓚᓛᓪᔨᔩᔪᔫᔭ… ᔮᔾᕕᕖᕗ–—“”‘’ᕘᕙᕚᕝᕆᕇᕈᕉᕋᕌᕐᕿᖀᖁᖂᖃᖄᖅᖏᖐᖑᖒᖓᖔᖕᙱᙲᙳᙴᙵᙶᖖᖠᖡᖢᖣᖤᖥᖦᕼŁł',
+    'x-mac-ce': // Python: 'mac_latin2'
+    'ÄĀāÉĄÖÜáąČäčĆćéŹźĎíďĒēĖóėôöõúĚěü†°Ę£§•¶ß®©™ę¨≠ģĮįĪ≤≥īĶ∂∑łĻļĽľĹĺŅ' + 'ņŃ¬√ńŇ∆«»… ňŐÕőŌ–—“”‘’÷◊ōŔŕŘ‹›řŖŗŠ‚„šŚśÁŤťÍŽžŪÓÔūŮÚůŰűŲųÝýķŻŁżĢˇ',
+    macintosh: // Python: 'mac_roman'
+    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø' + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+    'x-mac-romanian': // Python: 'mac_romanian'
+    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ĂȘ∞±≤≥¥µ∂∑∏π∫ªºΩăș' + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›Țț‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+    'x-mac-turkish': // Python: 'mac_turkish'
+    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø' + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸĞğİıŞş‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙˆ˜¯˘˙˚¸˝˛ˇ'
+  };
+  /**
+   * Decodes an old-style Macintosh string. Returns either a Unicode JavaScript
+   * string, or 'undefined' if the encoding is unsupported. For example, we do
+   * not support Chinese, Japanese or Korean because these would need large
+   * mapping tables.
+   * @param {DataView} dataView
+   * @param {number} offset
+   * @param {number} dataLength
+   * @param {string} encoding
+   * @returns {string}
+   */
+
+  decode.MACSTRING = function (dataView, offset, dataLength, encoding) {
+    var table = eightBitMacEncodings[encoding];
+
+    if (table === undefined) {
+      return undefined;
+    }
+
+    var result = '';
+
+    for (var i = 0; i < dataLength; i++) {
+      var c = dataView.getUint8(offset + i); // In all eight-bit Mac encodings, the characters 0x00..0x7F are
+      // mapped to U+0000..U+007F; we only need to look up the others.
+
+      if (c <= 0x7F) {
+        result += String.fromCharCode(c);
+      } else {
+        result += table[c & 0x7F];
+      }
+    }
+
+    return result;
+  };
+
   function getTag(dataView, offset) {
     var tag = '';
 
@@ -2637,6 +3425,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var fraction = dataView.getUint16(offset + 2, false);
     return decimal + fraction / 65535;
   }
+
+  var typeOffsets = {
+    "byte": 1,
+    uShort: 2,
+    "short": 2,
+    uLong: 4,
+    fixed: 4,
+    longDateTime: 8,
+    tag: 4
+  };
 
   function parseOpenTypeTableEntries(data, numTables) {
     var tableEntries = [];
@@ -2761,10 +3559,641 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         return major + minor / minorBase / 10;
       }
+    }, {
+      key: "skip",
+      value: function skip(type, amount) {
+        if (amount === undefined) {
+          amount = 1;
+        }
+
+        this.relativeOffset += typeOffsets[type] * amount;
+      }
     }]);
 
     return Parser;
   }();
+
+  var nameTableNames = ['copyright', // 0
+  'fontFamily', // 1
+  'fontSubfamily', // 2
+  'uniqueID', // 3
+  'fullName', // 4
+  'version', // 5
+  'postScriptName', // 6
+  'trademark', // 7
+  'manufacturer', // 8
+  'designer', // 9
+  'description', // 10
+  'manufacturerURL', // 11
+  'designerURL', // 12
+  'license', // 13
+  'licenseURL', // 14
+  'reserved', // 15
+  'preferredFamily', // 16
+  'preferredSubfamily', // 17
+  'compatibleFullName', // 18
+  'sampleText', // 19
+  'postScriptFindFontName', // 20
+  'wwsFamily', // 21
+  'wwsSubfamily' // 22
+  ];
+  var macLanguages = {
+    0: 'en',
+    1: 'fr',
+    2: 'de',
+    3: 'it',
+    4: 'nl',
+    5: 'sv',
+    6: 'es',
+    7: 'da',
+    8: 'pt',
+    9: 'no',
+    10: 'he',
+    11: 'ja',
+    12: 'ar',
+    13: 'fi',
+    14: 'el',
+    15: 'is',
+    16: 'mt',
+    17: 'tr',
+    18: 'hr',
+    19: 'zh-Hant',
+    20: 'ur',
+    21: 'hi',
+    22: 'th',
+    23: 'ko',
+    24: 'lt',
+    25: 'pl',
+    26: 'hu',
+    27: 'es',
+    28: 'lv',
+    29: 'se',
+    30: 'fo',
+    31: 'fa',
+    32: 'ru',
+    33: 'zh',
+    34: 'nl-BE',
+    35: 'ga',
+    36: 'sq',
+    37: 'ro',
+    38: 'cz',
+    39: 'sk',
+    40: 'si',
+    41: 'yi',
+    42: 'sr',
+    43: 'mk',
+    44: 'bg',
+    45: 'uk',
+    46: 'be',
+    47: 'uz',
+    48: 'kk',
+    49: 'az-Cyrl',
+    50: 'az-Arab',
+    51: 'hy',
+    52: 'ka',
+    53: 'mo',
+    54: 'ky',
+    55: 'tg',
+    56: 'tk',
+    57: 'mn-CN',
+    58: 'mn',
+    59: 'ps',
+    60: 'ks',
+    61: 'ku',
+    62: 'sd',
+    63: 'bo',
+    64: 'ne',
+    65: 'sa',
+    66: 'mr',
+    67: 'bn',
+    68: 'as',
+    69: 'gu',
+    70: 'pa',
+    71: 'or',
+    72: 'ml',
+    73: 'kn',
+    74: 'ta',
+    75: 'te',
+    76: 'si',
+    77: 'my',
+    78: 'km',
+    79: 'lo',
+    80: 'vi',
+    81: 'id',
+    82: 'tl',
+    83: 'ms',
+    84: 'ms-Arab',
+    85: 'am',
+    86: 'ti',
+    87: 'om',
+    88: 'so',
+    89: 'sw',
+    90: 'rw',
+    91: 'rn',
+    92: 'ny',
+    93: 'mg',
+    94: 'eo',
+    128: 'cy',
+    129: 'eu',
+    130: 'ca',
+    131: 'la',
+    132: 'qu',
+    133: 'gn',
+    134: 'ay',
+    135: 'tt',
+    136: 'ug',
+    137: 'dz',
+    138: 'jv',
+    139: 'su',
+    140: 'gl',
+    141: 'af',
+    142: 'br',
+    143: 'iu',
+    144: 'gd',
+    145: 'gv',
+    146: 'ga',
+    147: 'to',
+    148: 'el-polyton',
+    149: 'kl',
+    150: 'az',
+    151: 'nn'
+  }; // While Microsoft indicates a region/country for all its language
+  // IDs, we omit the region code if it's equal to the "most likely
+  // region subtag" according to Unicode CLDR. For scripts, we omit
+  // the subtag if it is equal to the Suppress-Script entry in the
+  // IANA language subtag registry for IETF BCP 47.
+  //
+  // For example, Microsoft states that its language code 0x041A is
+  // Croatian in Croatia. We transform this to the BCP 47 language code 'hr'
+  // and not 'hr-HR' because Croatia is the default country for Croatian,
+  // according to Unicode CLDR. As another example, Microsoft states
+  // that 0x101A is Croatian (Latin) in Bosnia-Herzegovina. We transform
+  // this to 'hr-BA' and not 'hr-Latn-BA' because Latin is the default script
+  // for the Croatian language, according to IANA.
+  //
+  // http://www.unicode.org/cldr/charts/latest/supplemental/likely_subtags.html
+  // http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+
+  var windowsLanguages = {
+    0x0436: 'af',
+    0x041C: 'sq',
+    0x0484: 'gsw',
+    0x045E: 'am',
+    0x1401: 'ar-DZ',
+    0x3C01: 'ar-BH',
+    0x0C01: 'ar',
+    0x0801: 'ar-IQ',
+    0x2C01: 'ar-JO',
+    0x3401: 'ar-KW',
+    0x3001: 'ar-LB',
+    0x1001: 'ar-LY',
+    0x1801: 'ary',
+    0x2001: 'ar-OM',
+    0x4001: 'ar-QA',
+    0x0401: 'ar-SA',
+    0x2801: 'ar-SY',
+    0x1C01: 'aeb',
+    0x3801: 'ar-AE',
+    0x2401: 'ar-YE',
+    0x042B: 'hy',
+    0x044D: 'as',
+    0x082C: 'az-Cyrl',
+    0x042C: 'az',
+    0x046D: 'ba',
+    0x042D: 'eu',
+    0x0423: 'be',
+    0x0845: 'bn',
+    0x0445: 'bn-IN',
+    0x201A: 'bs-Cyrl',
+    0x141A: 'bs',
+    0x047E: 'br',
+    0x0402: 'bg',
+    0x0403: 'ca',
+    0x0C04: 'zh-HK',
+    0x1404: 'zh-MO',
+    0x0804: 'zh',
+    0x1004: 'zh-SG',
+    0x0404: 'zh-TW',
+    0x0483: 'co',
+    0x041A: 'hr',
+    0x101A: 'hr-BA',
+    0x0405: 'cs',
+    0x0406: 'da',
+    0x048C: 'prs',
+    0x0465: 'dv',
+    0x0813: 'nl-BE',
+    0x0413: 'nl',
+    0x0C09: 'en-AU',
+    0x2809: 'en-BZ',
+    0x1009: 'en-CA',
+    0x2409: 'en-029',
+    0x4009: 'en-IN',
+    0x1809: 'en-IE',
+    0x2009: 'en-JM',
+    0x4409: 'en-MY',
+    0x1409: 'en-NZ',
+    0x3409: 'en-PH',
+    0x4809: 'en-SG',
+    0x1C09: 'en-ZA',
+    0x2C09: 'en-TT',
+    0x0809: 'en-GB',
+    0x0409: 'en',
+    0x3009: 'en-ZW',
+    0x0425: 'et',
+    0x0438: 'fo',
+    0x0464: 'fil',
+    0x040B: 'fi',
+    0x080C: 'fr-BE',
+    0x0C0C: 'fr-CA',
+    0x040C: 'fr',
+    0x140C: 'fr-LU',
+    0x180C: 'fr-MC',
+    0x100C: 'fr-CH',
+    0x0462: 'fy',
+    0x0456: 'gl',
+    0x0437: 'ka',
+    0x0C07: 'de-AT',
+    0x0407: 'de',
+    0x1407: 'de-LI',
+    0x1007: 'de-LU',
+    0x0807: 'de-CH',
+    0x0408: 'el',
+    0x046F: 'kl',
+    0x0447: 'gu',
+    0x0468: 'ha',
+    0x040D: 'he',
+    0x0439: 'hi',
+    0x040E: 'hu',
+    0x040F: 'is',
+    0x0470: 'ig',
+    0x0421: 'id',
+    0x045D: 'iu',
+    0x085D: 'iu-Latn',
+    0x083C: 'ga',
+    0x0434: 'xh',
+    0x0435: 'zu',
+    0x0410: 'it',
+    0x0810: 'it-CH',
+    0x0411: 'ja',
+    0x044B: 'kn',
+    0x043F: 'kk',
+    0x0453: 'km',
+    0x0486: 'quc',
+    0x0487: 'rw',
+    0x0441: 'sw',
+    0x0457: 'kok',
+    0x0412: 'ko',
+    0x0440: 'ky',
+    0x0454: 'lo',
+    0x0426: 'lv',
+    0x0427: 'lt',
+    0x082E: 'dsb',
+    0x046E: 'lb',
+    0x042F: 'mk',
+    0x083E: 'ms-BN',
+    0x043E: 'ms',
+    0x044C: 'ml',
+    0x043A: 'mt',
+    0x0481: 'mi',
+    0x047A: 'arn',
+    0x044E: 'mr',
+    0x047C: 'moh',
+    0x0450: 'mn',
+    0x0850: 'mn-CN',
+    0x0461: 'ne',
+    0x0414: 'nb',
+    0x0814: 'nn',
+    0x0482: 'oc',
+    0x0448: 'or',
+    0x0463: 'ps',
+    0x0415: 'pl',
+    0x0416: 'pt',
+    0x0816: 'pt-PT',
+    0x0446: 'pa',
+    0x046B: 'qu-BO',
+    0x086B: 'qu-EC',
+    0x0C6B: 'qu',
+    0x0418: 'ro',
+    0x0417: 'rm',
+    0x0419: 'ru',
+    0x243B: 'smn',
+    0x103B: 'smj-NO',
+    0x143B: 'smj',
+    0x0C3B: 'se-FI',
+    0x043B: 'se',
+    0x083B: 'se-SE',
+    0x203B: 'sms',
+    0x183B: 'sma-NO',
+    0x1C3B: 'sms',
+    0x044F: 'sa',
+    0x1C1A: 'sr-Cyrl-BA',
+    0x0C1A: 'sr',
+    0x181A: 'sr-Latn-BA',
+    0x081A: 'sr-Latn',
+    0x046C: 'nso',
+    0x0432: 'tn',
+    0x045B: 'si',
+    0x041B: 'sk',
+    0x0424: 'sl',
+    0x2C0A: 'es-AR',
+    0x400A: 'es-BO',
+    0x340A: 'es-CL',
+    0x240A: 'es-CO',
+    0x140A: 'es-CR',
+    0x1C0A: 'es-DO',
+    0x300A: 'es-EC',
+    0x440A: 'es-SV',
+    0x100A: 'es-GT',
+    0x480A: 'es-HN',
+    0x080A: 'es-MX',
+    0x4C0A: 'es-NI',
+    0x180A: 'es-PA',
+    0x3C0A: 'es-PY',
+    0x280A: 'es-PE',
+    0x500A: 'es-PR',
+    // Microsoft has defined two different language codes for
+    // “Spanish with modern sorting” and “Spanish with traditional
+    // sorting”. This makes sense for collation APIs, and it would be
+    // possible to express this in BCP 47 language tags via Unicode
+    // extensions (eg., es-u-co-trad is Spanish with traditional
+    // sorting). However, for storing names in fonts, the distinction
+    // does not make sense, so we give “es” in both cases.
+    0x0C0A: 'es',
+    0x040A: 'es',
+    0x540A: 'es-US',
+    0x380A: 'es-UY',
+    0x200A: 'es-VE',
+    0x081D: 'sv-FI',
+    0x041D: 'sv',
+    0x045A: 'syr',
+    0x0428: 'tg',
+    0x085F: 'tzm',
+    0x0449: 'ta',
+    0x0444: 'tt',
+    0x044A: 'te',
+    0x041E: 'th',
+    0x0451: 'bo',
+    0x041F: 'tr',
+    0x0442: 'tk',
+    0x0480: 'ug',
+    0x0422: 'uk',
+    0x042E: 'hsb',
+    0x0420: 'ur',
+    0x0843: 'uz-Cyrl',
+    0x0443: 'uz',
+    0x042A: 'vi',
+    0x0452: 'cy',
+    0x0488: 'wo',
+    0x0485: 'sah',
+    0x0478: 'ii',
+    0x046A: 'yo'
+  }; // MacOS script ID → encoding. This table stores the default case,
+  // which can be overridden by macLanguageEncodings.
+
+  var macScriptEncodings = {
+    0: 'macintosh',
+    // smRoman
+    1: 'x-mac-japanese',
+    // smJapanese
+    2: 'x-mac-chinesetrad',
+    // smTradChinese
+    3: 'x-mac-korean',
+    // smKorean
+    6: 'x-mac-greek',
+    // smGreek
+    7: 'x-mac-cyrillic',
+    // smCyrillic
+    9: 'x-mac-devanagai',
+    // smDevanagari
+    10: 'x-mac-gurmukhi',
+    // smGurmukhi
+    11: 'x-mac-gujarati',
+    // smGujarati
+    12: 'x-mac-oriya',
+    // smOriya
+    13: 'x-mac-bengali',
+    // smBengali
+    14: 'x-mac-tamil',
+    // smTamil
+    15: 'x-mac-telugu',
+    // smTelugu
+    16: 'x-mac-kannada',
+    // smKannada
+    17: 'x-mac-malayalam',
+    // smMalayalam
+    18: 'x-mac-sinhalese',
+    // smSinhalese
+    19: 'x-mac-burmese',
+    // smBurmese
+    20: 'x-mac-khmer',
+    // smKhmer
+    21: 'x-mac-thai',
+    // smThai
+    22: 'x-mac-lao',
+    // smLao
+    23: 'x-mac-georgian',
+    // smGeorgian
+    24: 'x-mac-armenian',
+    // smArmenian
+    25: 'x-mac-chinesesimp',
+    // smSimpChinese
+    26: 'x-mac-tibetan',
+    // smTibetan
+    27: 'x-mac-mongolian',
+    // smMongolian
+    28: 'x-mac-ethiopic',
+    // smEthiopic
+    29: 'x-mac-ce',
+    // smCentralEuroRoman
+    30: 'x-mac-vietnamese',
+    // smVietnamese
+    31: 'x-mac-extarabic' // smExtArabic
+
+  }; // MacOS language ID → encoding. This table stores the exceptional
+  // cases, which override macScriptEncodings. For writing MacOS naming
+  // tables, we need to emit a MacOS script ID. Therefore, we cannot
+  // merge macScriptEncodings into macLanguageEncodings.
+  //
+  // http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/Readme.txt
+
+  var macLanguageEncodings = {
+    15: 'x-mac-icelandic',
+    // langIcelandic
+    17: 'x-mac-turkish',
+    // langTurkish
+    18: 'x-mac-croatian',
+    // langCroatian
+    24: 'x-mac-ce',
+    // langLithuanian
+    25: 'x-mac-ce',
+    // langPolish
+    26: 'x-mac-ce',
+    // langHungarian
+    27: 'x-mac-ce',
+    // langEstonian
+    28: 'x-mac-ce',
+    // langLatvian
+    30: 'x-mac-icelandic',
+    // langFaroese
+    37: 'x-mac-romanian',
+    // langRomanian
+    38: 'x-mac-ce',
+    // langCzech
+    39: 'x-mac-ce',
+    // langSlovak
+    40: 'x-mac-ce',
+    // langSlovenian
+    143: 'x-mac-inuit',
+    // langInuktitut
+    146: 'x-mac-gaelic' // langIrishGaelicScript
+
+  }; // Returns a IETF BCP 47 language code, for example 'zh-Hant'
+  // for 'Chinese in the traditional script'.
+
+  function getLanguageCode(platformID, languageID, ltag) {
+    switch (platformID) {
+      case 0:
+        // Unicode
+        if (languageID === 0xFFFF) {
+          return 'und';
+        } else if (ltag) {
+          return ltag[languageID];
+        }
+
+        break;
+
+      case 1:
+        // Macintosh
+        return macLanguages[languageID];
+
+      case 3:
+        // Windows
+        return windowsLanguages[languageID];
+    }
+
+    return undefined;
+  }
+
+  var utf16 = 'utf-16';
+
+  function getEncoding(platformID, encodingID, languageID) {
+    switch (platformID) {
+      case 0:
+        // Unicode
+        return utf16;
+
+      case 1:
+        // Apple Macintosh
+        return macLanguageEncodings[languageID] || macScriptEncodings[encodingID];
+
+      case 3:
+        // Microsoft Windows
+        if (encodingID === 1 || encodingID === 10) {
+          return utf16;
+        }
+
+        break;
+    }
+
+    return undefined;
+  }
+
+  var platforms = {
+    0: 'unicode',
+    1: 'macintosh',
+    2: 'reserved',
+    3: 'windows'
+  };
+
+  function getPlatform(platformID) {
+    return platforms[platformID];
+  }
+
+  function parseNameTable(data, start, ltag) {
+    var name = {};
+    var p = new Parser(data, start);
+    var format = p.parseUShort();
+    var count = p.parseUShort();
+    var stringOffset = p.offset + p.parseUShort();
+
+    for (var i = 0; i < count; i++) {
+      var platformID = p.parseUShort();
+      var encodingID = p.parseUShort();
+      var languageID = p.parseUShort();
+      var nameID = p.parseUShort();
+      var property = nameTableNames[nameID] || nameID;
+      var byteLength = p.parseUShort();
+      var offset = p.parseUShort();
+      var language = getLanguageCode(platformID, languageID, ltag);
+      var encoding = getEncoding(platformID, encodingID, languageID);
+      var platformName = getPlatform(platformID);
+
+      if (encoding !== undefined && language !== undefined && platformName !== undefined) {
+        var text = void 0;
+
+        if (encoding === utf16) {
+          text = decode.UTF16(data, stringOffset + offset, byteLength);
+        } else {
+          text = decode.MACSTRING(data, stringOffset + offset, byteLength, encoding);
+        }
+
+        if (text) {
+          var platform = name[platformName];
+
+          if (platform === undefined) {
+            platform = name[platformName] = {};
+          }
+
+          var translations = platform[property];
+
+          if (translations === undefined) {
+            translations = platform[property] = {};
+          }
+
+          translations[language] = text;
+        }
+      }
+    }
+
+    if (format === 1) {
+      // FIXME: Also handle Microsoft's 'name' table 1.
+      p.parseUShort();
+    }
+
+    return name;
+  } // Precondition function that checks if the given predicate is true.
+  // If not, it will throw an error.
+
+
+  function argument(predicate, message) {
+    if (!predicate) {
+      fail(message);
+    }
+  }
+
+  function parseLtagTable(data, start) {
+    var p = new Parser(data, start);
+    var tableVersion = p.parseULong();
+    argument(tableVersion === 1, 'Unsupported ltag table version.'); // The 'ltag' specification does not define any flags; skip the field.
+
+    p.skip('uLong', 1);
+    var numTags = p.parseULong();
+    var tags = [];
+
+    for (var i = 0; i < numTags; i++) {
+      var tag = '';
+      var offset = start + p.parseUShort();
+      var length = p.parseUShort();
+
+      for (var j = offset; j < offset + length; ++j) {
+        tag += String.fromCharCode(data.getInt8(j));
+      }
+
+      tags.push(tag);
+    }
+
+    return tags;
+  }
 
   var opentype = {
     parse: function parse(arrayBuffer) {
@@ -2788,6 +4217,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         numTables = getUShort(data, 12);
         tableEntries = parseWOFFTableEntries(data, numTables);
+      } else if (signature === 'wOF2') {
+        var issue = 'https://github.com/opentypejs/opentype.js/issues/183#issuecomment-1147228025';
+        inject.error('WOFF2 require an external decompressor library, see examples at: ' + issue);
       } else {
         inject.error('Unsupported OpenType signature ' + signature);
       }
@@ -2795,7 +4227,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var emSquare = 2048,
           ascent,
           descent,
-          lineGap = 0;
+          lineGap = 0,
+          name,
+          ltagTable;
 
       for (var i = 0; i < numTables; i++) {
         var tableEntry = tableEntries[i];
@@ -2819,10 +4253,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           ascent = Math.abs(_p.parseShort());
           descent = Math.abs(_p.parseShort());
           lineGap = Math.abs(_p.parseShort() || 0);
+        } else if (tableEntry.tag === 'ltag') {
+          var _table2 = uncompressTable(data, tableEntry);
+
+          ltagTable = parseLtagTable(_table2.data, _table2.offset);
+        } else if (tableEntry.tag === 'name') {
+          var _table3 = uncompressTable(data, tableEntry);
+
+          var n = parseNameTable(_table3.data, _table3.offset, ltagTable); // https://learn.microsoft.com/en-us/typography/opentype/spec/name
+
+          if (n.macintosh) {
+            name = n.macintosh.fontFamily.en;
+          } else if (n.windows) {
+            name = n.windows.fontFamily.en;
+          }
         }
       }
 
       return {
+        name: name,
         emSquare: emSquare,
         ascent: ascent,
         descent: descent,
@@ -2831,7 +4280,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
   };
 
-  var isString = util.isString;
+  var isString$2 = util.isString;
   var CALLBACK = {};
   var o$3 = {
     info: {
@@ -2845,12 +4294,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         lgr: 0.03271484375 // line-gap ratio，67/2048，默认0
 
       },
+      // Times, Helvetica, Courier，3个特殊字体偏移，逻辑来自webkit历史
+      // 查看字体发现非推荐标准，先统一取osx的hhea字段，然后ascent做整体15%放大
+      // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/platform/graphics/coretext/FontCoreText.cpp#L173
       helvetica: {
         lhr: 1.14990234375,
-        // (8+1900+447)/2048
-        blr: 0.927734375,
-        // 1900/2048
-        lgr: 0.00390625 // 8/2048
+        // ((1577 + Round((1577 + 471) * 0.15)) + 471) / 2048
+        blr: 0.919921875 // (1577 + Round((1577 + 471) * 0.15)) / 2048
 
       },
       verdana: {
@@ -2889,14 +4339,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         blr: 1.06
       }
     },
-    support: function support(fontFamily) {
-      return this.info.hasOwnProperty(fontFamily) && this.info[fontFamily].checked;
-    },
     register: function register(name, url, data) {
       // url和data同时需要，也可以先data后url，不能先url后data
       name = name.toLowerCase();
 
-      if (!isString(url) && !(url instanceof ArrayBuffer)) {
+      if (!isString$2(url) && !(url instanceof ArrayBuffer)) {
         data = url;
         url = null;
       }
@@ -3229,7 +4676,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   } // 是否平行
 
 
-  function isParallel(x1, y1, x2, y2) {
+  function isParallel$1(x1, y1, x2, y2) {
     if (isZero(x1, y1, x2, y2)) {
       return true;
     }
@@ -3393,7 +4840,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     crossProduct3: crossProduct3$1,
     unitize: unitize,
     unitize3: unitize3$1,
-    isParallel: isParallel,
+    isParallel: isParallel$1,
     isParallel3: isParallel3$1,
     isZero: isZero,
     isZero3: isZero3$1,
@@ -3403,6 +4850,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     length3: length3$1,
     getPerpendicularVector3: getPerpendicularVector3
   };
+
+  var _WASM_STYLE_KEY;
 
   var STYLE_KEY$4 = {
     POSITION: 0,
@@ -3553,6 +5002,33 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     STYLE_RV_KEY$1[k2] = l;
     STYLE_V_KEY[l] = k2;
   });
+  var WASM_STYLE_KEY$2 = (_WASM_STYLE_KEY = {}, _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.TRANSLATE_X, 0), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.TRANSLATE_Y, 1), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.TRANSLATE_Z, 2), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.ROTATE_X, 3), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.ROTATE_Y, 4), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.ROTATE_Z, 5), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.ROTATE_3D, 6), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.SCALE_X, 10), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.SCALE_Y, 11), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.SCALE_Z, 12), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.SKEW_X, 13), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.SKEW_Y, 14), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.OPACITY, 15), _defineProperty(_WASM_STYLE_KEY, STYLE_KEY$4.TRANSFORM_ORIGIN, 16), _WASM_STYLE_KEY);
+  var DIRECTION$1 = {
+    reverse: 1,
+    alternate: 2,
+    'alternate-reverse': 3,
+    alternateReverse: 3
+  };
+  var FILLS$1 = {
+    forwards: 1,
+    backwards: 2,
+    both: 3
+  };
+  var EASING$1 = {
+    DEFAULT: 0,
+    LINEAR: 1,
+    EASE_IN: 2,
+    EASE_OUT: 3,
+    EASE: 4,
+    EASE_IN_OUT: 5,
+    EASE_CUSTOM: 6
+  };
+  var PLAY_STATE$1 = {
+    IDLE: 0,
+    RUNNING: 1,
+    PAUSED: 2,
+    FINISHED: 3
+  };
   var enums = {
     STYLE_KEY: STYLE_KEY$4,
     // 大写常量为k，数字为值
@@ -3564,17 +5040,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     // 小写为k，数字为值
     style2Lower: style2Lower,
     style2Upper: style2Upper$2,
-    ELLIPSIS: '…'
+    ELLIPSIS: '…',
+    WASM_STYLE_KEY: WASM_STYLE_KEY$2,
+    DIRECTION: DIRECTION$1,
+    FILLS: FILLS$1,
+    EASING: EASING$1,
+    PLAY_STATE: PLAY_STATE$1
   };
 
   var H$1 = 4 * (Math.sqrt(2) - 1) / 3;
   var crossProduct = vector.crossProduct;
   var calPoint$1 = matrix.calPoint,
       isE$4 = matrix.isE;
-  var _enums$STYLE_KEY$k = enums.STYLE_KEY,
-      WIDTH$a = _enums$STYLE_KEY$k.WIDTH,
-      HEIGHT$a = _enums$STYLE_KEY$k.HEIGHT,
-      TRANSFORM_ORIGIN$6 = _enums$STYLE_KEY$k.TRANSFORM_ORIGIN;
+  var _enums$STYLE_KEY$l = enums.STYLE_KEY,
+      WIDTH$a = _enums$STYLE_KEY$l.WIDTH,
+      HEIGHT$a = _enums$STYLE_KEY$l.HEIGHT,
+      TRANSFORM_ORIGIN$7 = _enums$STYLE_KEY$l.TRANSFORM_ORIGIN;
   /**
    * 圆弧拟合公式，根据角度求得3阶贝塞尔控制点比例长度，一般<=90，超过拆分
    * @param deg
@@ -4034,7 +5515,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         computedStyle = _node$computedStyle === void 0 ? [] : _node$computedStyle;
     var width = computedStyle[WIDTH$a],
         height = computedStyle[HEIGHT$a],
-        _computedStyle$TRANSF = computedStyle[TRANSFORM_ORIGIN$6];
+        _computedStyle$TRANSF = computedStyle[TRANSFORM_ORIGIN$7];
     _computedStyle$TRANSF = _computedStyle$TRANSF === void 0 ? [width * 0.5, height * 0.5] : _computedStyle$TRANSF;
 
     var _computedStyle$TRANSF2 = _slicedToArray(_computedStyle$TRANSF, 2),
@@ -4055,7 +5536,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var _node$computedStyle2 = node.computedStyle,
         width = _node$computedStyle2[WIDTH$a],
         height = _node$computedStyle2[HEIGHT$a],
-        _node$computedStyle2$ = _slicedToArray(_node$computedStyle2[TRANSFORM_ORIGIN$6], 2),
+        _node$computedStyle2$ = _slicedToArray(_node$computedStyle2[TRANSFORM_ORIGIN$7], 2),
         ox = _node$computedStyle2$[0],
         oy = _node$computedStyle2$[1]; // 先求无旋转时右下角相对于原点的角度ds
 
@@ -4311,7 +5792,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       if (dx === 0) {
         return dy < 0 ? // y轴负半轴，
-        1 * Math.PI : // y轴正半轴，因此，(originX, originY) 的angle视作0
+        Math.PI : // y轴正半轴，因此，(originX, originY) 的angle视作0
         0;
       } // 在x轴上
 
@@ -4397,6 +5878,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   function canvasPolygon$7(ctx, list) {
     var dx = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
     var dy = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    var close = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 
     if (!list || !list.length) {
       return;
@@ -4417,14 +5899,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       return;
     }
 
-    var first = list[start];
-    ctx.moveTo(first[0] + dx, first[1] + dy); // 特殊的情况，布尔运算数学库会打乱原有顺序，致使第一个点可能有冗余的贝塞尔值，move到正确的索引坐标
+    var first = list[start],
+        xa,
+        ya; // 特殊的情况，布尔运算数学库会打乱原有顺序，致使第一个点可能有冗余的贝塞尔值，move到正确的索引坐标
 
-    if (first.length === 4) {
-      ctx.moveTo(first[2] + dx, first[3] + dy);
+    if (first.length === 2) {
+      xa = first[0] + dx;
+      ya = first[1] + dy;
+      ctx.moveTo(xa, ya);
+    } else if (first.length === 4) {
+      xa = first[2] + dx;
+      ya = first[3] + dy;
+      ctx.moveTo(xa, ya);
     } else if (first.length === 6) {
-      ctx.moveTo(first[4] + dx, first[5] + dy);
+      xa = first[4] + dx;
+      ya = first[5] + dy;
+      ctx.moveTo(xa, ya);
     }
+
+    var xb, yb;
 
     for (var _i = start + 1, _len = list.length; _i < _len; _i++) {
       var _item = list[_i];
@@ -4434,12 +5927,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
 
       if (_item.length === 2) {
-        ctx.lineTo(_item[0] + dx, _item[1] + dy);
+        xb = _item[0] + dx;
+        yb = _item[1] + dy;
+        ctx.lineTo(xb, yb);
       } else if (_item.length === 4) {
-        ctx.quadraticCurveTo(_item[0] + dx, _item[1] + dy, _item[2] + dx, _item[3] + dy);
+        xb = _item[2] + dx;
+        yb = _item[3] + dy;
+        ctx.quadraticCurveTo(_item[0] + dx, _item[1] + dy, xb, yb);
       } else if (_item.length === 6) {
-        ctx.bezierCurveTo(_item[0] + dx, _item[1] + dy, _item[2] + dx, _item[3] + dy, _item[4] + dx, _item[5] + dy);
+        xb = _item[4] + dx;
+        yb = _item[5] + dy;
+        ctx.bezierCurveTo(_item[0] + dx, _item[1] + dy, _item[2] + dx, _item[3] + dy, xb, yb);
       }
+    }
+
+    if (close && xa === xb && ya === yb) {
+      ctx.closePath();
     }
   }
 
@@ -4562,18 +6065,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       VMIN$9 = o$4.VMIN;
   var canvasPolygon$6 = painter.canvasPolygon,
       svgPolygon$5 = painter.svgPolygon;
-  var _enums$STYLE_KEY$j = enums.STYLE_KEY,
-      BORDER_LEFT_WIDTH$a = _enums$STYLE_KEY$j.BORDER_LEFT_WIDTH,
-      BORDER_TOP_WIDTH$8 = _enums$STYLE_KEY$j.BORDER_TOP_WIDTH,
-      BORDER_BOTTOM_WIDTH$7 = _enums$STYLE_KEY$j.BORDER_BOTTOM_WIDTH,
-      PADDING_LEFT$a = _enums$STYLE_KEY$j.PADDING_LEFT,
-      PADDING_BOTTOM$7 = _enums$STYLE_KEY$j.PADDING_BOTTOM,
-      PADDING_TOP$8 = _enums$STYLE_KEY$j.PADDING_TOP,
-      BORDER_TOP_LEFT_RADIUS$5 = _enums$STYLE_KEY$j.BORDER_TOP_LEFT_RADIUS,
-      BORDER_TOP_RIGHT_RADIUS$5 = _enums$STYLE_KEY$j.BORDER_TOP_RIGHT_RADIUS,
-      BORDER_BOTTOM_LEFT_RADIUS$5 = _enums$STYLE_KEY$j.BORDER_BOTTOM_LEFT_RADIUS,
-      BORDER_BOTTOM_RIGHT_RADIUS$5 = _enums$STYLE_KEY$j.BORDER_BOTTOM_RIGHT_RADIUS,
-      FONT_SIZE$b = _enums$STYLE_KEY$j.FONT_SIZE;
+  var _enums$STYLE_KEY$k = enums.STYLE_KEY,
+      BORDER_LEFT_WIDTH$a = _enums$STYLE_KEY$k.BORDER_LEFT_WIDTH,
+      BORDER_TOP_WIDTH$8 = _enums$STYLE_KEY$k.BORDER_TOP_WIDTH,
+      BORDER_BOTTOM_WIDTH$7 = _enums$STYLE_KEY$k.BORDER_BOTTOM_WIDTH,
+      PADDING_LEFT$a = _enums$STYLE_KEY$k.PADDING_LEFT,
+      PADDING_BOTTOM$7 = _enums$STYLE_KEY$k.PADDING_BOTTOM,
+      PADDING_TOP$8 = _enums$STYLE_KEY$k.PADDING_TOP,
+      BORDER_TOP_LEFT_RADIUS$5 = _enums$STYLE_KEY$k.BORDER_TOP_LEFT_RADIUS,
+      BORDER_TOP_RIGHT_RADIUS$5 = _enums$STYLE_KEY$k.BORDER_TOP_RIGHT_RADIUS,
+      BORDER_BOTTOM_LEFT_RADIUS$5 = _enums$STYLE_KEY$k.BORDER_BOTTOM_LEFT_RADIUS,
+      BORDER_BOTTOM_RIGHT_RADIUS$5 = _enums$STYLE_KEY$k.BORDER_BOTTOM_RIGHT_RADIUS,
+      FONT_SIZE$c = _enums$STYLE_KEY$k.FONT_SIZE;
   /* 获取合适的虚线实体空白宽度ps/pd和数量n
    * 总长total，start边长bs，end边长be，内容长w，
    * 实体长范围[smin,smax]，空白长范围[dmin,dmax]
@@ -6819,7 +8322,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } else if (item.u === PERCENT$9) {
           return Math.max(0, item.v * (i ? h : w) * 0.01);
         } else if (item.u === REM$9) {
-          return Math.max(0, item.v * root.computedStyle[FONT_SIZE$b]);
+          return Math.max(0, item.v * root.computedStyle[FONT_SIZE$c]);
         } else if (item.u === VW$9) {
           return Math.max(0, item.v * root.width * 0.01);
         } else if (item.u === VH$9) {
@@ -6913,7 +8416,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function renderBorder(xom, renderMode, ctx, points, color, dx, dy) {
-    if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+    if (renderMode === mode.CANVAS) {
       ctx.beginPath();
 
       if (ctx.fillStyle !== color) {
@@ -6921,10 +8424,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
 
       points.forEach(function (point) {
-        canvasPolygon$6(ctx, point, dx, dy);
+        canvasPolygon$6(ctx, point, dx, dy, true);
       });
       ctx.fill();
-      ctx.closePath();
     } else if (renderMode === mode.SVG) {
       var s = '';
       points.forEach(function (point) {
@@ -6960,7 +8462,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       calUnit$2 = o$4.calUnit;
   var d2r$2 = geom.d2r;
   var canvasPolygon$5 = painter.canvasPolygon;
-  var FONT_SIZE$a = enums.STYLE_KEY.FONT_SIZE;
+  var FONT_SIZE$b = enums.STYLE_KEY.FONT_SIZE;
 
   function getLinearDeg(v) {
     var deg = 180;
@@ -6996,7 +8498,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var v = calUnit$2(data);
 
       if ([NUMBER$5, DEG$4].indexOf(v.u) > -1) {
-        v.v = PX$9;
+        v.u = PX$9;
       }
 
       return v;
@@ -7028,7 +8530,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (p.u === PERCENT$8) {
           list.push([item[0], p.v * 0.01]);
         } else if (p.u === REM$8) {
-          list.push([item[0], p.v * root.computedStyle[FONT_SIZE$a] / length]);
+          list.push([item[0], p.v * root.computedStyle[FONT_SIZE$b] / length]);
         } else if (p.u === VW$8) {
           list.push([item[0], p.v * root.width / length]);
         } else if (p.u === VH$8) {
@@ -7094,60 +8596,51 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         _i2 = j;
       }
-    } // 每个不能小于前面的，canvas/svg不能兼容这种情况，需处理
+    } // 每个不能小于前面的，按大小排序，canvas/svg兼容这种情况，无需处理
+    // 0之前的和1之后的要过滤掉
 
 
-    for (var _i3 = 1, _len2 = list.length; _i3 < _len2; _i3++) {
+    for (var _i3 = 0, _len2 = list.length; _i3 < _len2; _i3++) {
       var _item4 = list[_i3];
-      var prev = list[_i3 - 1];
 
-      if (_item4[1] < prev[1]) {
-        _item4[1] = prev[1];
-      }
-    } // 0之前的和1之后的要过滤掉
+      if (_item4[1] > 1) {
+        list.splice(_i3);
+        var prev = list[_i3 - 1];
 
+        if (prev && prev[1] < 1) {
+          var dr = _item4[0][0] - prev[0][0];
+          var dg = _item4[0][1] - prev[0][1];
+          var db = _item4[0][2] - prev[0][2];
+          var da = _item4[0][3] - prev[0][3];
 
-    for (var _i4 = 0, _len3 = list.length; _i4 < _len3; _i4++) {
-      var _item5 = list[_i4];
+          var _p = (1 - prev[1]) / (_item4[1] - prev[1]);
 
-      if (_item5[1] > 1) {
-        list.splice(_i4);
-        var _prev = list[_i4 - 1];
-
-        if (_prev && _prev[1] < 1) {
-          var dr = _item5[0][0] - _prev[0][0];
-          var dg = _item5[0][1] - _prev[0][1];
-          var db = _item5[0][2] - _prev[0][2];
-          var da = _item5[0][3] - _prev[0][3];
-
-          var _p = (1 - _prev[1]) / (_item5[1] - _prev[1]);
-
-          list.push([[_item5[0][0] + dr * _p, _item5[0][1] + dg * _p, _item5[0][2] + db * _p, _item5[0][3] + da * _p], 1]);
+          list.push([[_item4[0][0] + dr * _p, _item4[0][1] + dg * _p, _item4[0][2] + db * _p, _item4[0][3] + da * _p], 1]);
         }
 
         break;
       }
     }
 
-    for (var _i5 = list.length - 1; _i5 >= 0; _i5--) {
-      var _item6 = list[_i5];
+    for (var _i4 = list.length - 1; _i4 >= 0; _i4--) {
+      var _item5 = list[_i4];
 
-      if (_item6[1] < 0) {
-        list.splice(0, _i5 + 1);
-        var next = list[_i5];
+      if (_item5[1] < 0) {
+        list.splice(0, _i4 + 1);
+        var next = list[_i4];
 
         if (next && next[1] > 0) {
-          var _dr = next[0][0] - _item6[0][0];
+          var _dr = next[0][0] - _item5[0][0];
 
-          var _dg = next[0][1] - _item6[0][1];
+          var _dg = next[0][1] - _item5[0][1];
 
-          var _db = next[0][2] - _item6[0][2];
+          var _db = next[0][2] - _item5[0][2];
 
-          var _da = next[0][3] - _item6[0][3];
+          var _da = next[0][3] - _item5[0][3];
 
-          var _p2 = -_item6[1] / (next[1] - _item6[1]);
+          var _p2 = -_item5[1] / (next[1] - _item5[1]);
 
-          list.unshift([[_item6[0][0] + _dr * _p2, _item6[0][1] + _dg * _p2, _item6[0][2] + _db * _p2, _item6[0][3] + _da * _p2], 0]);
+          list.unshift([[_item5[0][0] + _dr * _p2, _item5[0][1] + _dg * _p2, _item5[0][2] + _db * _p2, _item5[0][3] + _da * _p2], 0]);
         }
 
         break;
@@ -7218,7 +8711,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     if (positionX.u === PERCENT$8) {
       cx = x1 + positionX.v * iw * 0.01;
     } else if (positionX.u === REM$8) {
-      cx = x1 + positionX.v * root.computedStyle[FONT_SIZE$a];
+      cx = x1 + positionX.v * root.computedStyle[FONT_SIZE$b];
     } else if (positionX.u === VW$8) {
       cx = x1 + positionX.v * root.width * 0.01;
     } else if (positionX.u === VH$8) {
@@ -7234,7 +8727,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     if (positionY.u === PERCENT$8) {
       cy = y1 + positionY.v * ih * 0.01;
     } else if (positionY.u === REM$8) {
-      cy = y1 + positionY.v * root.computedStyle[FONT_SIZE$a];
+      cy = y1 + positionY.v * root.computedStyle[FONT_SIZE$b];
     } else if (positionY.u === VW$8) {
       cy = y1 + positionY.v * root.width * 0.01;
     } else if (positionY.u === VH$8) {
@@ -7398,13 +8891,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       };
 
       if (o.k === 'linear') {
-        var deg = /([-+]?[\d.]+deg)|(to\s+[toprighbml]+)/i.exec(gradient[2]);
+        var deg = /([-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?deg)|(to\s+[toprighbml]+)/i.exec(gradient[2]);
 
         if (deg) {
           o.d = getLinearDeg(deg[0].toLowerCase());
         } // 扩展支持从a点到b点相对坐标，而不是css角度，sketch等ui软件中用此格式
         else {
-          var points = /([-+]?[\d.]+)\s+([-+]?[\d.]+)\s+([-+]?[\d.]+)\s+([-+]?[\d.]+)/.exec(gradient[2]);
+          var points = /([-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?)\s+([-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?)\s+([-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?)\s+([-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?)/.exec(gradient[2]);
 
           if (points) {
             o.d = [parseFloat(points[1]), parseFloat(points[2]), parseFloat(points[3]), parseFloat(points[4])];
@@ -7493,17 +8986,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
       }
 
-      var v = gradient[2].match(/(([-+]?[\d.]+[pxremvwhina%]+)?\s*((#[0-9a-f]{3,8})|(rgba?\s*\(.+?\)))\s*([-+]?[\d.]+[pxremvwhina%]+)?)|(transparent)/ig) || [];
+      var v = gradient[2].match(/(([-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?[pxremvwhina%]+)?\s*((#[0-9a-f]{3,8})|(rgba?\s*\(.+?\)))\s*([-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?[pxremvwhina%]+)?)|(transparent)/ig) || [];
       o.v = v.map(function (item) {
         var color = /(?:#[0-9a-f]{3,8})|(?:rgba?\s*\(.+?\))|(?:transparent)/i.exec(item);
         var arr = [rgba2int$2(color[0])];
-        var percent = /[-+]?[\d.]+[pxremvwhina%]+/.exec(item);
+        var percent = /[-+]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e[-+]?\d+)?[pxremvwhina%]+/.exec(item);
 
         if (percent) {
           var _v = calUnit$2(percent[0]);
 
           if ([NUMBER$5, DEG$4].indexOf(_v.u) > -1) {
-            _v.v = PX$9;
+            _v.u = PX$9;
           }
 
           arr[1] = _v;
@@ -7702,16 +9195,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       list = [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y]];
     }
 
-    if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+    if (renderMode === mode.CANVAS) {
       var offscreen = inject.getOffscreenCanvas(w, h, '__$$CONIC_GRADIENT$$__', null);
       var imgData = offscreen.ctx.getImageData(0, 0, w, h);
       gradient$1.getConicGradientImage(res.cx - x, res.cy - y, res.w, res.h, res.stop, imgData.data);
       offscreen.ctx.putImageData(imgData, 0, 0);
       ctx.save();
       ctx.beginPath();
-      canvasPolygon$5(ctx, list);
+      canvasPolygon$5(ctx, list, 0, 0, true);
       ctx.clip();
-      ctx.closePath();
       ctx.drawImage(offscreen.canvas, x, y);
       ctx.restore();
       offscreen.ctx.clearRect(0, 0, w, h);
@@ -7799,7 +9291,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
   }
 
-  var abbr$1 = {
+  var abbr = {
     margin: ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'],
     padding: ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'],
     border: ['borderTop', 'borderRight', 'borderBottom', 'borderLeft'],
@@ -8086,7 +9578,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       BORDER_TOP_COLOR$3 = STYLE_KEY$3.BORDER_TOP_COLOR,
       COLOR$8 = STYLE_KEY$3.COLOR,
       TEXT_STROKE_COLOR$7 = STYLE_KEY$3.TEXT_STROKE_COLOR,
-      FONT_SIZE$9 = STYLE_KEY$3.FONT_SIZE,
+      FONT_SIZE$a = STYLE_KEY$3.FONT_SIZE,
       BORDER_BOTTOM_WIDTH$6 = STYLE_KEY$3.BORDER_BOTTOM_WIDTH,
       BORDER_LEFT_WIDTH$9 = STYLE_KEY$3.BORDER_LEFT_WIDTH,
       BORDER_RIGHT_WIDTH$8 = STYLE_KEY$3.BORDER_RIGHT_WIDTH,
@@ -8112,17 +9604,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       LETTER_SPACING$5 = STYLE_KEY$3.LETTER_SPACING,
       PERSPECTIVE$6 = STYLE_KEY$3.PERSPECTIVE,
       TEXT_STROKE_WIDTH$7 = STYLE_KEY$3.TEXT_STROKE_WIDTH,
-      TRANSLATE_X$5 = STYLE_KEY$3.TRANSLATE_X,
-      TRANSLATE_Y$5 = STYLE_KEY$3.TRANSLATE_Y,
-      TRANSLATE_Z$5 = STYLE_KEY$3.TRANSLATE_Z,
-      SKEW_X$5 = STYLE_KEY$3.SKEW_X,
-      SKEW_Y$5 = STYLE_KEY$3.SKEW_Y,
-      SCALE_X$6 = STYLE_KEY$3.SCALE_X,
-      SCALE_Y$6 = STYLE_KEY$3.SCALE_Y,
+      TRANSLATE_X$6 = STYLE_KEY$3.TRANSLATE_X,
+      TRANSLATE_Y$6 = STYLE_KEY$3.TRANSLATE_Y,
+      TRANSLATE_Z$6 = STYLE_KEY$3.TRANSLATE_Z,
+      SKEW_X$6 = STYLE_KEY$3.SKEW_X,
+      SKEW_Y$6 = STYLE_KEY$3.SKEW_Y,
+      SCALE_X$7 = STYLE_KEY$3.SCALE_X,
+      SCALE_Y$7 = STYLE_KEY$3.SCALE_Y,
       SCALE_Z$5 = STYLE_KEY$3.SCALE_Z,
-      ROTATE_X$5 = STYLE_KEY$3.ROTATE_X,
-      ROTATE_Y$5 = STYLE_KEY$3.ROTATE_Y,
-      ROTATE_Z$7 = STYLE_KEY$3.ROTATE_Z,
+      ROTATE_X$6 = STYLE_KEY$3.ROTATE_X,
+      ROTATE_Y$6 = STYLE_KEY$3.ROTATE_Y,
+      ROTATE_Z$8 = STYLE_KEY$3.ROTATE_Z,
       BACKGROUND_IMAGE$4 = STYLE_KEY$3.BACKGROUND_IMAGE,
       FILL$5 = STYLE_KEY$3.FILL,
       STROKE$4 = STYLE_KEY$3.STROKE,
@@ -8136,11 +9628,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function isLengthKey$2(k) {
-    return k === FONT_SIZE$9 || k === TEXT_STROKE_WIDTH$7 || k === BORDER_BOTTOM_WIDTH$6 || k === BORDER_LEFT_WIDTH$9 || k === BORDER_RIGHT_WIDTH$8 || k === BORDER_TOP_WIDTH$7 || k === LEFT$4 || k === TOP$5 || k === RIGHT$4 || k === BOTTOM$5 || k === FLEX_BASIS$5 || k === WIDTH$9 || k === HEIGHT$9 || k === LINE_HEIGHT$8 || k === MARGIN_BOTTOM$7 || k === MARGIN_TOP$7 || k === MARGIN_LEFT$9 || k === MARGIN_RIGHT$8 || k === PADDING_TOP$7 || k === PADDING_RIGHT$8 || k === PADDING_LEFT$9 || k === PADDING_BOTTOM$6 || k === STROKE_WIDTH$a || k === STROKE_MITERLIMIT$3 || k === LETTER_SPACING$5 || k === PERSPECTIVE$6;
+    return k === FONT_SIZE$a || k === TEXT_STROKE_WIDTH$7 || k === BORDER_BOTTOM_WIDTH$6 || k === BORDER_LEFT_WIDTH$9 || k === BORDER_RIGHT_WIDTH$8 || k === BORDER_TOP_WIDTH$7 || k === LEFT$4 || k === TOP$5 || k === RIGHT$4 || k === BOTTOM$5 || k === FLEX_BASIS$5 || k === WIDTH$9 || k === HEIGHT$9 || k === LINE_HEIGHT$8 || k === MARGIN_BOTTOM$7 || k === MARGIN_TOP$7 || k === MARGIN_LEFT$9 || k === MARGIN_RIGHT$8 || k === PADDING_TOP$7 || k === PADDING_RIGHT$8 || k === PADDING_LEFT$9 || k === PADDING_BOTTOM$6 || k === STROKE_WIDTH$a || k === STROKE_MITERLIMIT$3 || k === LETTER_SPACING$5 || k === PERSPECTIVE$6;
   }
 
   function isExpandKey$2(k) {
-    return k === TRANSLATE_X$5 || k === TRANSLATE_Y$5 || k === TRANSLATE_Z$5 || k === SKEW_X$5 || k === SKEW_Y$5 || k === SCALE_X$6 || k === SCALE_Y$6 || k === SCALE_Z$5 || k === ROTATE_X$5 || k === ROTATE_Y$5 || k === ROTATE_Z$7;
+    return k === TRANSLATE_X$6 || k === TRANSLATE_Y$6 || k === TRANSLATE_Z$6 || k === SKEW_X$6 || k === SKEW_Y$6 || k === SCALE_X$7 || k === SCALE_Y$7 || k === SCALE_Z$5 || k === ROTATE_X$6 || k === ROTATE_Y$6 || k === ROTATE_Z$8;
   }
 
   function isGradientKey$2(k) {
@@ -8313,8 +9805,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
 
     for (var _i = 1; _i <= len; _i++) {
-      var _n = Math.pow(Math.E, -Math.pow(_i, 2) / (2 * Math.pow(sigma, 2))) / (sigma * Math.sqrt(2 * Math.PI));
-
+      var _n = list[len - _i];
       list.push(_n);
       total += _n;
     }
@@ -8337,60 +9828,60 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
   var STYLE_KEY$1 = enums.STYLE_KEY,
       style2Upper$1 = enums.style2Upper,
-      _enums$STYLE_KEY$i = enums.STYLE_KEY,
-      POSITION$6 = _enums$STYLE_KEY$i.POSITION,
-      WIDTH$8 = _enums$STYLE_KEY$i.WIDTH,
-      HEIGHT$8 = _enums$STYLE_KEY$i.HEIGHT,
-      TRANSLATE_X$4 = _enums$STYLE_KEY$i.TRANSLATE_X,
-      TRANSLATE_Y$4 = _enums$STYLE_KEY$i.TRANSLATE_Y,
-      TRANSLATE_Z$4 = _enums$STYLE_KEY$i.TRANSLATE_Z,
-      SCALE_X$5 = _enums$STYLE_KEY$i.SCALE_X,
-      SCALE_Y$5 = _enums$STYLE_KEY$i.SCALE_Y,
-      SCALE_Z$4 = _enums$STYLE_KEY$i.SCALE_Z,
-      SKEW_X$4 = _enums$STYLE_KEY$i.SKEW_X,
-      SKEW_Y$4 = _enums$STYLE_KEY$i.SKEW_Y,
-      ROTATE_X$4 = _enums$STYLE_KEY$i.ROTATE_X,
-      ROTATE_Y$4 = _enums$STYLE_KEY$i.ROTATE_Y,
-      ROTATE_Z$6 = _enums$STYLE_KEY$i.ROTATE_Z,
-      ROTATE_3D$4 = _enums$STYLE_KEY$i.ROTATE_3D,
-      PERSPECTIVE$5 = _enums$STYLE_KEY$i.PERSPECTIVE,
-      PERSPECTIVE_ORIGIN$4 = _enums$STYLE_KEY$i.PERSPECTIVE_ORIGIN,
-      TRANSFORM$6 = _enums$STYLE_KEY$i.TRANSFORM,
-      TRANSFORM_ORIGIN$5 = _enums$STYLE_KEY$i.TRANSFORM_ORIGIN,
-      BACKGROUND_IMAGE$2 = _enums$STYLE_KEY$i.BACKGROUND_IMAGE,
-      BACKGROUND_COLOR$2 = _enums$STYLE_KEY$i.BACKGROUND_COLOR,
-      BACKGROUND_POSITION_X$3 = _enums$STYLE_KEY$i.BACKGROUND_POSITION_X,
-      BACKGROUND_POSITION_Y$3 = _enums$STYLE_KEY$i.BACKGROUND_POSITION_Y,
-      BACKGROUND_SIZE$2 = _enums$STYLE_KEY$i.BACKGROUND_SIZE,
-      OPACITY$6 = _enums$STYLE_KEY$i.OPACITY,
-      Z_INDEX$5 = _enums$STYLE_KEY$i.Z_INDEX,
-      COLOR$6 = _enums$STYLE_KEY$i.COLOR,
-      FONT_SIZE$8 = _enums$STYLE_KEY$i.FONT_SIZE,
-      FONT_FAMILY$6 = _enums$STYLE_KEY$i.FONT_FAMILY,
-      FONT_WEIGHT$6 = _enums$STYLE_KEY$i.FONT_WEIGHT,
-      FONT_STYLE$4 = _enums$STYLE_KEY$i.FONT_STYLE,
-      LINE_HEIGHT$7 = _enums$STYLE_KEY$i.LINE_HEIGHT,
-      TEXT_ALIGN$3 = _enums$STYLE_KEY$i.TEXT_ALIGN,
-      FILTER$6 = _enums$STYLE_KEY$i.FILTER,
-      VISIBILITY$5 = _enums$STYLE_KEY$i.VISIBILITY,
-      BOX_SHADOW$2 = _enums$STYLE_KEY$i.BOX_SHADOW,
-      POINTER_EVENTS$2 = _enums$STYLE_KEY$i.POINTER_EVENTS,
-      FILL$3 = _enums$STYLE_KEY$i.FILL,
-      STROKE$2 = _enums$STYLE_KEY$i.STROKE,
-      STROKE_WIDTH$8 = _enums$STYLE_KEY$i.STROKE_WIDTH,
-      STROKE_DASHARRAY$1 = _enums$STYLE_KEY$i.STROKE_DASHARRAY,
-      FLEX_BASIS$4 = _enums$STYLE_KEY$i.FLEX_BASIS,
-      MATRIX$4 = _enums$STYLE_KEY$i.MATRIX,
-      LETTER_SPACING$4 = _enums$STYLE_KEY$i.LETTER_SPACING,
-      WHITE_SPACE$3 = _enums$STYLE_KEY$i.WHITE_SPACE,
-      LINE_CLAMP$2 = _enums$STYLE_KEY$i.LINE_CLAMP,
-      ORDER$2 = _enums$STYLE_KEY$i.ORDER,
-      TRANSLATE_PATH$1 = _enums$STYLE_KEY$i.TRANSLATE_PATH,
-      TEXT_STROKE_COLOR$5 = _enums$STYLE_KEY$i.TEXT_STROKE_COLOR,
-      TEXT_STROKE_WIDTH$5 = _enums$STYLE_KEY$i.TEXT_STROKE_WIDTH,
-      TEXT_STROKE_OVER$4 = _enums$STYLE_KEY$i.TEXT_STROKE_OVER,
-      WRITING_MODE$3 = _enums$STYLE_KEY$i.WRITING_MODE,
-      FONT_SIZE_SHRINK$2 = _enums$STYLE_KEY$i.FONT_SIZE_SHRINK;
+      _enums$STYLE_KEY$j = enums.STYLE_KEY,
+      POSITION$5 = _enums$STYLE_KEY$j.POSITION,
+      WIDTH$8 = _enums$STYLE_KEY$j.WIDTH,
+      HEIGHT$8 = _enums$STYLE_KEY$j.HEIGHT,
+      TRANSLATE_X$5 = _enums$STYLE_KEY$j.TRANSLATE_X,
+      TRANSLATE_Y$5 = _enums$STYLE_KEY$j.TRANSLATE_Y,
+      TRANSLATE_Z$5 = _enums$STYLE_KEY$j.TRANSLATE_Z,
+      SCALE_X$6 = _enums$STYLE_KEY$j.SCALE_X,
+      SCALE_Y$6 = _enums$STYLE_KEY$j.SCALE_Y,
+      SCALE_Z$4 = _enums$STYLE_KEY$j.SCALE_Z,
+      SKEW_X$5 = _enums$STYLE_KEY$j.SKEW_X,
+      SKEW_Y$5 = _enums$STYLE_KEY$j.SKEW_Y,
+      ROTATE_X$5 = _enums$STYLE_KEY$j.ROTATE_X,
+      ROTATE_Y$5 = _enums$STYLE_KEY$j.ROTATE_Y,
+      ROTATE_Z$7 = _enums$STYLE_KEY$j.ROTATE_Z,
+      ROTATE_3D$4 = _enums$STYLE_KEY$j.ROTATE_3D,
+      PERSPECTIVE$5 = _enums$STYLE_KEY$j.PERSPECTIVE,
+      PERSPECTIVE_ORIGIN$4 = _enums$STYLE_KEY$j.PERSPECTIVE_ORIGIN,
+      TRANSFORM$6 = _enums$STYLE_KEY$j.TRANSFORM,
+      TRANSFORM_ORIGIN$6 = _enums$STYLE_KEY$j.TRANSFORM_ORIGIN,
+      BACKGROUND_IMAGE$2 = _enums$STYLE_KEY$j.BACKGROUND_IMAGE,
+      BACKGROUND_COLOR$2 = _enums$STYLE_KEY$j.BACKGROUND_COLOR,
+      BACKGROUND_POSITION_X$3 = _enums$STYLE_KEY$j.BACKGROUND_POSITION_X,
+      BACKGROUND_POSITION_Y$3 = _enums$STYLE_KEY$j.BACKGROUND_POSITION_Y,
+      BACKGROUND_SIZE$2 = _enums$STYLE_KEY$j.BACKGROUND_SIZE,
+      OPACITY$7 = _enums$STYLE_KEY$j.OPACITY,
+      Z_INDEX$5 = _enums$STYLE_KEY$j.Z_INDEX,
+      COLOR$6 = _enums$STYLE_KEY$j.COLOR,
+      FONT_SIZE$9 = _enums$STYLE_KEY$j.FONT_SIZE,
+      FONT_FAMILY$6 = _enums$STYLE_KEY$j.FONT_FAMILY,
+      FONT_WEIGHT$6 = _enums$STYLE_KEY$j.FONT_WEIGHT,
+      FONT_STYLE$4 = _enums$STYLE_KEY$j.FONT_STYLE,
+      LINE_HEIGHT$7 = _enums$STYLE_KEY$j.LINE_HEIGHT,
+      TEXT_ALIGN$3 = _enums$STYLE_KEY$j.TEXT_ALIGN,
+      FILTER$6 = _enums$STYLE_KEY$j.FILTER,
+      VISIBILITY$5 = _enums$STYLE_KEY$j.VISIBILITY,
+      BOX_SHADOW$2 = _enums$STYLE_KEY$j.BOX_SHADOW,
+      POINTER_EVENTS$2 = _enums$STYLE_KEY$j.POINTER_EVENTS,
+      FILL$3 = _enums$STYLE_KEY$j.FILL,
+      STROKE$2 = _enums$STYLE_KEY$j.STROKE,
+      STROKE_WIDTH$8 = _enums$STYLE_KEY$j.STROKE_WIDTH,
+      STROKE_DASHARRAY$1 = _enums$STYLE_KEY$j.STROKE_DASHARRAY,
+      FLEX_BASIS$4 = _enums$STYLE_KEY$j.FLEX_BASIS,
+      MATRIX$4 = _enums$STYLE_KEY$j.MATRIX,
+      LETTER_SPACING$4 = _enums$STYLE_KEY$j.LETTER_SPACING,
+      WHITE_SPACE$3 = _enums$STYLE_KEY$j.WHITE_SPACE,
+      LINE_CLAMP$2 = _enums$STYLE_KEY$j.LINE_CLAMP,
+      ORDER$2 = _enums$STYLE_KEY$j.ORDER,
+      TRANSLATE_PATH$1 = _enums$STYLE_KEY$j.TRANSLATE_PATH,
+      TEXT_STROKE_COLOR$5 = _enums$STYLE_KEY$j.TEXT_STROKE_COLOR,
+      TEXT_STROKE_WIDTH$5 = _enums$STYLE_KEY$j.TEXT_STROKE_WIDTH,
+      TEXT_STROKE_OVER$4 = _enums$STYLE_KEY$j.TEXT_STROKE_OVER,
+      WRITING_MODE$3 = _enums$STYLE_KEY$j.WRITING_MODE,
+      FONT_SIZE_SHRINK$2 = _enums$STYLE_KEY$j.FONT_SIZE_SHRINK;
   var AUTO$7 = o$4.AUTO,
       PX$8 = o$4.PX,
       PERCENT$7 = o$4.PERCENT,
@@ -8412,7 +9903,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       equalArr$1 = util.equalArr,
       equal = util.equal,
       replaceRgba2Hex = util.replaceRgba2Hex;
-  var isGeom$2 = o$2.isGeom,
+  var isGeom$1 = o$2.isGeom,
       GEOM$2 = o$2.GEOM,
       GEOM_KEY_SET = o$2.GEOM_KEY_SET;
   var VALID_STRING_VALUE = reset.VALID_STRING_VALUE;
@@ -8433,24 +9924,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   var TRANSFORM_HASH = {
-    translateX: TRANSLATE_X$4,
-    translateY: TRANSLATE_Y$4,
-    translateZ: TRANSLATE_Z$4,
-    scaleX: SCALE_X$5,
-    scaleY: SCALE_Y$5,
+    translateX: TRANSLATE_X$5,
+    translateY: TRANSLATE_Y$5,
+    translateZ: TRANSLATE_Z$5,
+    scaleX: SCALE_X$6,
+    scaleY: SCALE_Y$6,
     scaleZ: SCALE_Z$4,
-    skewX: SKEW_X$4,
-    skewY: SKEW_Y$4,
-    rotateX: ROTATE_X$4,
-    rotateY: ROTATE_Y$4,
-    rotateZ: ROTATE_Z$6,
-    rotate: ROTATE_Z$6
+    skewX: SKEW_X$5,
+    skewY: SKEW_Y$5,
+    rotateX: ROTATE_X$5,
+    rotateY: ROTATE_Y$5,
+    rotateZ: ROTATE_Z$7,
+    rotate: ROTATE_Z$7
   };
 
   function compatibleTransform(k, arr) {
-    if (k === SCALE_X$5 || k === SCALE_Y$5 || k === SCALE_Z$4) {
+    if (k === SCALE_X$6 || k === SCALE_Y$6 || k === SCALE_Z$4) {
       arr.u = NUMBER$4;
-    } else if (k === TRANSLATE_X$4 || k === TRANSLATE_Y$4 || k === TRANSLATE_Z$4) {
+    } else if (k === TRANSLATE_X$5 || k === TRANSLATE_Y$5 || k === TRANSLATE_Z$5) {
       if (arr.u === NUMBER$4) {
         arr.u = PX$8;
       }
@@ -8515,85 +10006,85 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var temp = style.border;
 
     if (temp) {
-      abbr$1.toFull(style, 'border');
+      abbr.toFull(style, 'border');
     }
 
     ['borderTop', 'borderRight', 'borderBottom', 'borderLeft'].forEach(function (k) {
-      abbr$1.toFull(style, k);
+      abbr.toFull(style, k);
     });
     temp = style.borderWidth;
 
     if (temp) {
-      abbr$1.toFull(style, 'borderWidth');
+      abbr.toFull(style, 'borderWidth');
     }
 
     temp = style.borderColor;
 
     if (temp) {
-      abbr$1.toFull(style, 'borderColor');
+      abbr.toFull(style, 'borderColor');
     }
 
     temp = style.borderStyle;
 
     if (temp) {
-      abbr$1.toFull(style, 'borderStyle');
+      abbr.toFull(style, 'borderStyle');
     }
 
     temp = style.borderRadius;
 
     if (temp) {
-      abbr$1.toFull(style, 'borderRadius');
+      abbr.toFull(style, 'borderRadius');
     }
 
     temp = style.background; // 处理渐变背景缩写
 
     if (temp) {
-      abbr$1.toFull(style, 'background');
+      abbr.toFull(style, 'background');
     } // 背景位置
 
 
     temp = style.backgroundPosition;
 
     if (!isNil$e(temp)) {
-      abbr$1.toFull(style, 'backgroundPosition');
+      abbr.toFull(style, 'backgroundPosition');
     } // flex
 
 
     temp = style.flex;
 
     if (temp) {
-      abbr$1.toFull(style, 'flex');
+      abbr.toFull(style, 'flex');
     } // flex-flow
 
 
     temp = style.flexFlow;
 
     if (temp) {
-      abbr$1.toFull(style, 'flexFlow');
+      abbr.toFull(style, 'flexFlow');
     }
 
     temp = style.margin;
 
     if (!isNil$e(temp)) {
-      abbr$1.toFull(style, 'margin');
+      abbr.toFull(style, 'margin');
     }
 
     temp = style.padding;
 
     if (!isNil$e(temp)) {
-      abbr$1.toFull(style, 'padding');
+      abbr.toFull(style, 'padding');
     }
 
     temp = style.textStroke;
 
     if (temp) {
-      abbr$1.toFull(style, 'textStroke');
+      abbr.toFull(style, 'textStroke');
     }
 
     temp = style.rotate3d;
 
     if (temp) {
-      abbr$1.toFull(style, 'rotate3d');
+      abbr.toFull(style, 'rotate3d');
     } // 扩展css，将transform几个值拆分为独立的css为动画准备，同时不能使用transform
 
 
@@ -8601,7 +10092,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       temp = style[k];
 
       if (!isNil$e(temp)) {
-        abbr$1.toFull(style, k);
+        abbr.toFull(style, k);
       }
     }); // 扩展的不能和transform混用，给出警告
 
@@ -9111,9 +10602,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (!isNaN(temp)) {
         temp = Math.max(temp, 0);
         temp = Math.min(temp, 1);
-        res[OPACITY$6] = temp;
+        res[OPACITY$7] = temp;
       } else {
-        res[OPACITY$6] = 1;
+        res[OPACITY$7] = 1;
       }
     }
 
@@ -9131,17 +10622,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return;
       }
 
-      if (v === 'auto') {
-        v = {
-          v: 0,
-          u: AUTO$7
-        };
-      } else {
-        v = calUnit$1(v || 0); // 无单位视为px
+      v = calUnit$1(v || 0); // 无单位视为px
 
-        if ([NUMBER$4, DEG$3].indexOf(v.u) > -1) {
-          v.u = PX$8;
-        }
+      if ([NUMBER$4, DEG$3].indexOf(v.u) > -1) {
+        v.u = PX$8;
       }
 
       var k2 = STYLE_KEY$1[style2Upper$1(k)];
@@ -9235,25 +10719,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
     if (temp !== undefined) {
       if (/inherit/i.test(temp)) {
-        res[FONT_SIZE$8] = {
+        res[FONT_SIZE$9] = {
           u: INHERIT$3
         };
       } else {
         var _v = calUnit$1(temp); // fontSize不能为非正数，否则为继承
 
 
-        if (_v <= 0) {
-          res[FONT_SIZE$8] = {
+        if (_v.v <= 0) {
+          res[FONT_SIZE$9] = {
             u: INHERIT$3
           };
         } else {
           if ([NUMBER$4, DEG$3, EM].indexOf(_v.u) > -1) {
-            _v.v = parseInt(_v.v); // 防止小数
-
+            // v.v = Math.floor(v.v); // 防止小数
             _v.u = PX$8;
           }
 
-          res[FONT_SIZE$8] = _v;
+          res[FONT_SIZE$9] = _v;
         }
       }
     }
@@ -9264,14 +10747,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var _v2 = calUnit$1(temp); // 不能为非正数，否则为0
 
 
-      if (_v2 <= 0) {
+      if (_v2.v <= 0) {
         res[FONT_SIZE_SHRINK$2] = {
           v: 0,
           u: PX$8
         };
       } else {
         if ([NUMBER$4, DEG$3, EM].indexOf(_v2.u) > -1) {
-          _v2.v = parseInt(_v2.v); // 防止小数
+          _v2.v = Math.floor(_v2.v); // 防止小数
 
           _v2.u = PX$8;
         }
@@ -9291,7 +10774,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var _v3 = calUnit$1(temp); // textStrokeWidth不能为负数，否则为继承
 
 
-        if (_v3 < 0) {
+        if (_v3.v < 0) {
           res[TEXT_STROKE_WIDTH$5] = {
             u: INHERIT$3
           };
@@ -9334,6 +10817,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           v: 700,
           u: NUMBER$4
         };
+      } else if (/bolder/i.test(temp)) {
+        res[FONT_WEIGHT$6] = {
+          v: 900,
+          u: NUMBER$4
+        };
       } else if (/normal/i.test(temp)) {
         res[FONT_WEIGHT$6] = {
           v: 400,
@@ -9341,7 +10829,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         };
       } else if (/lighter/i.test(temp)) {
         res[FONT_WEIGHT$6] = {
-          v: 200,
+          v: 300,
           u: NUMBER$4
         };
       } else if (/inherit/i.test(temp)) {
@@ -9350,7 +10838,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         };
       } else {
         res[FONT_WEIGHT$6] = {
-          v: Math.max(0, parseInt(temp)) || 400,
+          v: Math.min(900, Math.max(100, parseInt(temp)) || 400),
           u: NUMBER$4
         };
       }
@@ -9389,7 +10877,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       } else {
         // 统一文字声明格式
         res[FONT_FAMILY$6] = {
-          v: temp.toString().toLowerCase().replace(/['"]/, '').replace(/\s*,\s*/g, ','),
+          v: temp.toString().trim().toLowerCase().replace(/['"]/g, '').replace(/\s*,\s*/g, ','),
           u: STRING$2
         };
       }
@@ -9759,7 +11247,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     temp = style.pointerEvents;
 
     if (temp !== undefined) {
-      if (temp === null || /inherit/i.test(temp)) {
+      if (temp === null || /inherit/i.test(temp) || /auto/i.test(temp)) {
         res[POINTER_EVENTS$2] = {
           u: INHERIT$3
         };
@@ -9880,7 +11368,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function setFontStyle(style, specialFontSize) {
-    var fontSize = specialFontSize || style[FONT_SIZE$8] || 0;
+    var fontSize = specialFontSize || style[FONT_SIZE$9] || 0;
     var fontFamily = style[FONT_FAMILY$6] || inject.defaultFontFamily || 'arial';
 
     if (/\s/.test(fontFamily)) {
@@ -9898,7 +11386,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
   function getBaseline$1(style) {
-    var fontSize = style[FONT_SIZE$8];
+    var fontSize = style[FONT_SIZE$9];
     var ff = calFontFamily$1(style[FONT_FAMILY$6]);
     var normal = calNormalLineHeight$1(style, ff);
     return (style[LINE_HEIGHT$7] - normal) * 0.5 + fontSize * (o$3.info[ff] || o$3.info[inject.defaultFontFamily] || o$3.info.arial).blr;
@@ -9914,7 +11402,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       ff = calFontFamily$1(style[FONT_FAMILY$6]);
     }
 
-    return style[FONT_SIZE$8] * (o$3.info[ff] || o$3.info[inject.defaultFontFamily] || o$3.info.arial).lhr;
+    return style[FONT_SIZE$9] * (o$3.info[ff] || o$3.info[inject.defaultFontFamily] || o$3.info.arial).lhr;
   }
 
   function calFontFamily$1(fontFamily) {
@@ -9949,7 +11437,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         n *= style.v * 0.01;
         parent = parent.domParent;
       } else if (style.u === REM$7) {
-        return n * style.v * parent.root.computedStyle[FONT_SIZE$8];
+        return n * style.v * parent.root.computedStyle[FONT_SIZE$9];
       } else if (style.u === VW$7) {
         return n * style.v * parent.root.width * 0.01;
       } else if (style.u === VH$7) {
@@ -9976,7 +11464,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         v = calRelativePercent(v.v, parent, HEIGHT$8);
       }
     } else if (v.u === REM$7) {
-      v = v.v * parent.root.computedStyle[FONT_SIZE$8];
+      v = v.v * parent.root.computedStyle[FONT_SIZE$9];
     } else if (v.u === VW$7) {
       v = v.v * parent.root.width * 0.01;
     } else if (v.u === VH$7) {
@@ -9991,7 +11479,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function isRelativeOrAbsolute$2(node) {
-    var position = node.currentStyle[POSITION$6];
+    var position = node.currentStyle[POSITION$5];
     return position === 'relative' || position === 'absolute';
   }
 
@@ -10069,7 +11557,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       return true;
     }
 
-    if (k === TRANSFORM_ORIGIN$5 || k === PERSPECTIVE_ORIGIN$4 || isRadiusKey$1(k)) {
+    if (k === TRANSFORM_ORIGIN$6 || k === PERSPECTIVE_ORIGIN$4 || isRadiusKey$1(k)) {
       return a[0].v === b[0].v && a[0].u === b[0].u && a[1].v === b[1].v && a[1].u === b[1].u;
     }
 
@@ -10241,7 +11729,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     } // multi都是纯值数组，equalArr本身即递归，非multi根据类型判断
 
 
-    if (isGeom$2(target.tagName, k) && (target.isMulti || Array.isArray(a) && Array.isArray(b))) {
+    if (isGeom$1(target.tagName, k) && (target.isMulti || Array.isArray(a) && Array.isArray(b))) {
       return equal(a, b);
     }
 
@@ -10336,7 +11824,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           res[k] = _n;
         }
-      } else if (k === TRANSFORM_ORIGIN$5 || k === PERSPECTIVE_ORIGIN$4 || isRadiusKey$1(k)) {
+      } else if (k === TRANSFORM_ORIGIN$6 || k === PERSPECTIVE_ORIGIN$4 || isRadiusKey$1(k)) {
         if (v) {
           var _n2 = new Array(2);
 
@@ -10390,7 +11878,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             }];
           });
         }
-      } else if (k === OPACITY$6 || k === Z_INDEX$5) {
+      } else if (k === OPACITY$7 || k === Z_INDEX$5) {
         res[k] = v;
       } else if (k === TRANSLATE_PATH$1) {
         if (v) {
@@ -10569,22 +12057,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     spreadFilter: spreadFilter$2
   };
 
-  var _enums$STYLE_KEY$h = enums.STYLE_KEY,
-      TRANSLATE_X$3 = _enums$STYLE_KEY$h.TRANSLATE_X,
-      TRANSLATE_Y$3 = _enums$STYLE_KEY$h.TRANSLATE_Y,
-      TRANSLATE_Z$3 = _enums$STYLE_KEY$h.TRANSLATE_Z,
-      SCALE_X$4 = _enums$STYLE_KEY$h.SCALE_X,
-      SCALE_Y$4 = _enums$STYLE_KEY$h.SCALE_Y,
-      SCALE_Z$3 = _enums$STYLE_KEY$h.SCALE_Z,
-      SKEW_X$3 = _enums$STYLE_KEY$h.SKEW_X,
-      SKEW_Y$3 = _enums$STYLE_KEY$h.SKEW_Y,
-      ROTATE_X$3 = _enums$STYLE_KEY$h.ROTATE_X,
-      ROTATE_Y$3 = _enums$STYLE_KEY$h.ROTATE_Y,
-      ROTATE_Z$5 = _enums$STYLE_KEY$h.ROTATE_Z,
-      ROTATE_3D$3 = _enums$STYLE_KEY$h.ROTATE_3D,
-      PERSPECTIVE$4 = _enums$STYLE_KEY$h.PERSPECTIVE,
-      MATRIX$3 = _enums$STYLE_KEY$h.MATRIX,
-      FONT_SIZE$7 = _enums$STYLE_KEY$h.FONT_SIZE;
+  var _enums$STYLE_KEY$i = enums.STYLE_KEY,
+      TRANSLATE_X$4 = _enums$STYLE_KEY$i.TRANSLATE_X,
+      TRANSLATE_Y$4 = _enums$STYLE_KEY$i.TRANSLATE_Y,
+      TRANSLATE_Z$4 = _enums$STYLE_KEY$i.TRANSLATE_Z,
+      SCALE_X$5 = _enums$STYLE_KEY$i.SCALE_X,
+      SCALE_Y$5 = _enums$STYLE_KEY$i.SCALE_Y,
+      SCALE_Z$3 = _enums$STYLE_KEY$i.SCALE_Z,
+      SKEW_X$4 = _enums$STYLE_KEY$i.SKEW_X,
+      SKEW_Y$4 = _enums$STYLE_KEY$i.SKEW_Y,
+      ROTATE_X$4 = _enums$STYLE_KEY$i.ROTATE_X,
+      ROTATE_Y$4 = _enums$STYLE_KEY$i.ROTATE_Y,
+      ROTATE_Z$6 = _enums$STYLE_KEY$i.ROTATE_Z,
+      ROTATE_3D$3 = _enums$STYLE_KEY$i.ROTATE_3D,
+      PERSPECTIVE$4 = _enums$STYLE_KEY$i.PERSPECTIVE,
+      MATRIX$3 = _enums$STYLE_KEY$i.MATRIX,
+      FONT_SIZE$8 = _enums$STYLE_KEY$i.FONT_SIZE;
   var PX$7 = o$4.PX,
       PERCENT$6 = o$4.PERCENT,
       REM$6 = o$4.REM,
@@ -10592,7 +12080,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       VH$6 = o$4.VH,
       VMAX$6 = o$4.VMAX,
       VMIN$6 = o$4.VMIN;
-  var identity = matrix.identity,
+  var identity$1 = matrix.identity,
       multiply$3 = matrix.multiply,
       multiplyTfo = matrix.multiplyTfo,
       tfoMultiply = matrix.tfoMultiply,
@@ -10718,32 +12206,32 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function calMatrix(transform, ow, oh, root) {
-    var m = identity();
+    var m = identity$1();
 
     for (var i = 0, len = transform.length; i < len; i++) {
       var item = transform[i];
       var k = item.k;
       var v = calSingleValue(k, item.v, ow, oh, root);
 
-      if (k === TRANSLATE_X$3) {
+      if (k === TRANSLATE_X$4) {
         m = multiplyTranslateX(m, v);
-      } else if (k === TRANSLATE_Y$3) {
+      } else if (k === TRANSLATE_Y$4) {
         m = multiplyTranslateY(m, v);
-      } else if (k === TRANSLATE_Z$3) {
+      } else if (k === TRANSLATE_Z$4) {
         m = multiplyTranslateZ(m, v);
-      } else if (k === ROTATE_X$3) {
+      } else if (k === ROTATE_X$4) {
         m = multiplyRotateX$1(m, d2r$1(v));
-      } else if (k === ROTATE_Y$3) {
+      } else if (k === ROTATE_Y$4) {
         m = multiplyRotateY$1(m, d2r$1(v));
-      } else if (k === ROTATE_Z$5) {
+      } else if (k === ROTATE_Z$6) {
         m = multiplyRotateZ$1(m, d2r$1(v));
-      } else if (k === SKEW_X$3) {
+      } else if (k === SKEW_X$4) {
         m = multiplySkewX$1(m, d2r$1(v));
-      } else if (k === SKEW_Y$3) {
+      } else if (k === SKEW_Y$4) {
         m = multiplySkewY$1(m, d2r$1(v));
-      } else if (k === SCALE_X$4) {
+      } else if (k === SCALE_X$5) {
         m = multiplyScaleX$1(m, v);
-      } else if (k === SCALE_Y$4) {
+      } else if (k === SCALE_Y$5) {
         m = multiplyScaleY$1(m, v);
       } else if (k === SCALE_Z$3) {
         m = multiplyScaleZ$1(m, v);
@@ -10751,7 +12239,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       else if (k === PERSPECTIVE$4 && !i) {
         m = multiplyPerspective(m, v);
       } else if (k === ROTATE_3D$3) {
-        var t = identity();
+        var t = identity$1();
         calRotate3d$2(t, [v[0], v[1], v[2], v[3].v]);
         m = multiply$3(m, t);
       } else if (k === MATRIX$3) {
@@ -10782,13 +12270,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function calSingleValue(k, v, ow, oh, root) {
-    if (k === TRANSLATE_X$3 || k === TRANSLATE_Y$3 || k === TRANSLATE_Z$3) {
+    if (k === TRANSLATE_X$4 || k === TRANSLATE_Y$4 || k === TRANSLATE_Z$4) {
       if (v.u === PX$7) {
         return v.v;
       } else if (v.u === PERCENT$6) {
-        return v.v * (k === TRANSLATE_Y$3 ? oh : ow) * 0.01;
+        return v.v * (k === TRANSLATE_Y$4 ? oh : ow) * 0.01;
       } else if (v.u === REM$6) {
-        return v.v * root.__computedStyle[FONT_SIZE$7];
+        return v.v * root.__computedStyle[FONT_SIZE$8];
       } else if (v.u === VW$6) {
         return v.v * root.width * 0.01;
       } else if (v.u === VH$6) {
@@ -10809,7 +12297,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
   function calPerspectiveMatrix(ppt, ox, oy) {
     if (ppt && ppt > 0) {
-      var res = identity();
+      var res = identity$1();
       ppt = Math.max(ppt, 1);
       res[11] = -1 / ppt;
 
@@ -10844,22 +12332,21 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     isPerspectiveMatrix: isPerspectiveMatrix
   };
 
-  var _enums$STYLE_KEY$g = enums.STYLE_KEY,
-      COLOR$5 = _enums$STYLE_KEY$g.COLOR,
-      FONT_WEIGHT$5 = _enums$STYLE_KEY$g.FONT_WEIGHT,
-      FONT_FAMILY$5 = _enums$STYLE_KEY$g.FONT_FAMILY,
-      FONT_SIZE$6 = _enums$STYLE_KEY$g.FONT_SIZE,
-      FONT_STYLE$3 = _enums$STYLE_KEY$g.FONT_STYLE,
-      LETTER_SPACING$3 = _enums$STYLE_KEY$g.LETTER_SPACING,
-      TEXT_STROKE_COLOR$4 = _enums$STYLE_KEY$g.TEXT_STROKE_COLOR,
-      TEXT_STROKE_WIDTH$4 = _enums$STYLE_KEY$g.TEXT_STROKE_WIDTH,
-      TEXT_STROKE_OVER$3 = _enums$STYLE_KEY$g.TEXT_STROKE_OVER,
-      ROTATE_Z$4 = _enums$STYLE_KEY$g.ROTATE_Z,
-      LINE_HEIGHT$6 = _enums$STYLE_KEY$g.LINE_HEIGHT;
+  var _enums$STYLE_KEY$h = enums.STYLE_KEY,
+      COLOR$5 = _enums$STYLE_KEY$h.COLOR,
+      FONT_WEIGHT$5 = _enums$STYLE_KEY$h.FONT_WEIGHT,
+      FONT_FAMILY$5 = _enums$STYLE_KEY$h.FONT_FAMILY,
+      FONT_SIZE$7 = _enums$STYLE_KEY$h.FONT_SIZE,
+      FONT_STYLE$3 = _enums$STYLE_KEY$h.FONT_STYLE,
+      LETTER_SPACING$3 = _enums$STYLE_KEY$h.LETTER_SPACING,
+      TEXT_STROKE_COLOR$4 = _enums$STYLE_KEY$h.TEXT_STROKE_COLOR,
+      TEXT_STROKE_WIDTH$4 = _enums$STYLE_KEY$h.TEXT_STROKE_WIDTH,
+      TEXT_STROKE_OVER$3 = _enums$STYLE_KEY$h.TEXT_STROKE_OVER,
+      ROTATE_Z$5 = _enums$STYLE_KEY$h.ROTATE_Z,
+      LINE_HEIGHT$6 = _enums$STYLE_KEY$h.LINE_HEIGHT;
   var DEG$2 = o$4.DEG;
   var CANVAS$4 = mode.CANVAS,
-      SVG$4 = mode.SVG,
-      WEBGL$4 = mode.WEBGL;
+      SVG$4 = mode.SVG;
   var TuOrU = /(?:[\xA7\xA9\xAE\xB1\xBC-\xBE\xD7\xF7\u02EA\u02EB\u1100-\u11FF\u1401-\u167F\u18B0-\u18FF\u2016\u2020\u2021\u2030\u2031\u203B\u203C\u2042\u2047-\u2049\u2051\u2065\u20DD-\u20E0\u20E2-\u20E4\u2100\u2101\u2103-\u2109\u210F\u2113\u2114\u2116\u2117\u211E-\u2123\u2125\u2127\u2129\u212E\u2135-\u213F\u2145-\u214A\u214C\u214D\u214F-\u2189\u218C-\u218F\u221E\u2234\u2235\u2300-\u2307\u230C-\u231F\u2324-\u2328\u232B\u237D-\u239A\u23BE-\u23CD\u23CF\u23D1-\u23DB\u23E2-\u2422\u2424-\u24FF\u25A0-\u2619\u2620-\u2767\u2776-\u2793\u2B12-\u2B2F\u2B50-\u2B59\u2B97\u2BB8-\u2BD1\u2BD3-\u2BEB\u2BF0-\u2BFF\u2E50\u2E51\u2E80-\u3000\u3003-\u3007\u3012\u3013\u3020-\u302F\u3031-\u3040\u3042\u3044\u3046\u3048\u304A-\u3062\u3064-\u3082\u3084\u3086\u3088-\u308D\u308F-\u3094\u3097-\u309A\u309D-\u309F\u30A2\u30A4\u30A6\u30A8\u30AA-\u30C2\u30C4-\u30E2\u30E4\u30E6\u30E8-\u30ED\u30EF-\u30F4\u30F7-\u30FB\u30FD-\u3126\u3128-\u31EF\u3200-\u32FE\u3358-\u337A\u3380-\uA4CF\uA960-\uA97F\uAC00-\uD7FF\uE000-\uFAFF\uFE10-\uFE1F\uFE30-\uFE48\uFE53-\uFE57\uFE5F-\uFE62\uFE67-\uFE6F\uFF02-\uFF07\uFF0A\uFF0B\uFF0F-\uFF19\uFF20-\uFF3A\uFF3C\uFF3E\uFF40-\uFF5A\uFFE0-\uFFE2\uFFE4-\uFFE7\uFFF0-\uFFF8\uFFFC\uFFFD]|\uD802[\uDD80-\uDD9F]|\uD805[\uDD80-\uDDFF]|\uD806[\uDE00-\uDEBF]|[\uD80C\uD81C-\uD822\uD83D\uD840-\uD87E\uD880-\uD8BE][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC5F]|\uD811[\uDC00-\uDE7F]|\uD81B[\uDFE0-\uDFFF]|\uD823[\uDC00-\uDD7F]|\uD82B[\uDFF0-\uDFFF]|\uD82C[\uDC00-\uDEFF]|\uD833[\uDF00-\uDFCF]|\uD834[\uDC00-\uDDFF\uDEE0-\uDF7F]|\uD836[\uDC00-\uDEAF]|\uD83C[\uDC00-\uDDFF\uDE02-\uDFFF]|\uD83E[\uDD00-\uDEFF]|[\uD87F\uD8BF][\uDC00-\uDFFD])/;
   /**
    * 表示一行文本的类，保存它的位置、内容、从属信息，在布局阶段生成，并在渲染阶段被Text调用render()
@@ -10935,12 +12422,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var letterSpacing = computedStyle[LETTER_SPACING$3],
             textStrokeWidth = computedStyle[TEXT_STROKE_WIDTH$4],
             textStrokeColor = computedStyle[TEXT_STROKE_COLOR$4],
-            fontSize = computedStyle[FONT_SIZE$6],
+            fontSize = computedStyle[FONT_SIZE$7],
             lineHeight = computedStyle[LINE_HEIGHT$6];
         var i = 0,
             length = content.length;
 
-        if (renderMode === CANVAS$4 || renderMode === WEBGL$4) {
+        if (renderMode === CANVAS$4) {
           var me = dom.matrixEvent,
               list;
           var dev1 = 0,
@@ -10948,7 +12435,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           if (isUpright) {
             list = [{
-              k: ROTATE_Z$4,
+              k: ROTATE_Z$5,
               v: {
                 v: 90,
                 u: DEG$2
@@ -11155,7 +12642,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             x += lineHeight * 0.5 - bv;
           }
 
-          var props = [['x', x], ['y', y], ['fill', color], ['font-family', computedStyle[FONT_FAMILY$5]], ['font-weight', computedStyle[FONT_WEIGHT$5]], ['font-style', computedStyle[FONT_STYLE$3]], ['font-size', computedStyle[FONT_SIZE$6] + 'px']]; // svg无法定义stroke的over
+          var props = [['x', x], ['y', y], ['fill', color], ['font-family', computedStyle[FONT_FAMILY$5]], ['font-weight', computedStyle[FONT_WEIGHT$5]], ['font-style', computedStyle[FONT_STYLE$3]], ['font-size', computedStyle[FONT_SIZE$7] + 'px']]; // svg无法定义stroke的over
 
           if (textStrokeWidth && (textStrokeColor[3] > 0 || textStrokeColor.length === 3 || textStrokeColor.k)) {
             var _textStrokeColor = cacheStyle[TEXT_STROKE_COLOR$4]; // 渐变
@@ -11284,14 +12771,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     return TextBox;
   }();
 
-  var _enums$STYLE_KEY$f = enums.STYLE_KEY,
-      FONT_SIZE$5 = _enums$STYLE_KEY$f.FONT_SIZE,
-      FONT_FAMILY$4 = _enums$STYLE_KEY$f.FONT_FAMILY,
-      FONT_WEIGHT$4 = _enums$STYLE_KEY$f.FONT_WEIGHT,
-      FONT_STYLE$2 = _enums$STYLE_KEY$f.FONT_STYLE,
-      COLOR$4 = _enums$STYLE_KEY$f.COLOR,
-      LINE_HEIGHT$5 = _enums$STYLE_KEY$f.LINE_HEIGHT,
-      ROTATE_Z$3 = _enums$STYLE_KEY$f.ROTATE_Z;
+  var _enums$STYLE_KEY$g = enums.STYLE_KEY,
+      FONT_SIZE$6 = _enums$STYLE_KEY$g.FONT_SIZE,
+      FONT_FAMILY$4 = _enums$STYLE_KEY$g.FONT_FAMILY,
+      FONT_WEIGHT$4 = _enums$STYLE_KEY$g.FONT_WEIGHT,
+      FONT_STYLE$2 = _enums$STYLE_KEY$g.FONT_STYLE,
+      COLOR$4 = _enums$STYLE_KEY$g.COLOR,
+      LINE_HEIGHT$5 = _enums$STYLE_KEY$g.LINE_HEIGHT,
+      ROTATE_Z$4 = _enums$STYLE_KEY$g.ROTATE_Z;
   var DEG$1 = o$4.DEG;
   var CANVAS$3 = mode.CANVAS,
       SVG$3 = mode.SVG,
@@ -11354,7 +12841,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (isUpright) {
             var me = parent.matrixEvent,
                 list = [{
-              k: ROTATE_Z$3,
+              k: ROTATE_Z$4,
               v: {
                 v: 90,
                 u: DEG$1
@@ -11372,7 +12859,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             x += computedStyle[LINE_HEIGHT$5] * 0.5 - bv;
           }
 
-          var props = [['x', x], ['y', y], ['fill', color], ['font-family', computedStyle[FONT_FAMILY$4]], ['font-weight', computedStyle[FONT_WEIGHT$4]], ['font-style', computedStyle[FONT_STYLE$2]], ['font-size', computedStyle[FONT_SIZE$5] + 'px']];
+          var props = [['x', x], ['y', y], ['fill', color], ['font-family', computedStyle[FONT_FAMILY$4]], ['font-weight', computedStyle[FONT_WEIGHT$4]], ['font-style', computedStyle[FONT_STYLE$2]], ['font-size', computedStyle[FONT_SIZE$6] + 'px']];
 
           if (isUpright) {
             props.push(['writing-mode', 'vertical-lr']);
@@ -11408,59 +12895,59 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }]);
 
     return Ellipsis;
-  }(Node);
+  }(Node$1);
 
-  var _enums$STYLE_KEY$e = enums.STYLE_KEY,
-      TX$2 = _enums$STYLE_KEY$e.TRANSLATE_X,
-      TY$2 = _enums$STYLE_KEY$e.TRANSLATE_Y,
-      TZ$2 = _enums$STYLE_KEY$e.TRANSLATE_Z,
-      OP$2 = _enums$STYLE_KEY$e.OPACITY,
-      FT$2 = _enums$STYLE_KEY$e.FILTER,
-      PPT$2 = _enums$STYLE_KEY$e.PERSPECTIVE,
-      PERSPECTIVE_ORIGIN$3 = _enums$STYLE_KEY$e.PERSPECTIVE_ORIGIN,
-      Z_INDEX$4 = _enums$STYLE_KEY$e.Z_INDEX,
-      SX$2 = _enums$STYLE_KEY$e.SCALE_X,
-      SY$2 = _enums$STYLE_KEY$e.SCALE_Y,
-      SZ$2 = _enums$STYLE_KEY$e.SCALE_Z,
-      ROTATE_X$2 = _enums$STYLE_KEY$e.ROTATE_X,
-      ROTATE_Y$2 = _enums$STYLE_KEY$e.ROTATE_Y,
-      RZ$2 = _enums$STYLE_KEY$e.ROTATE_Z,
-      ROTATE_3D$2 = _enums$STYLE_KEY$e.ROTATE_3D,
-      SKEW_X$2 = _enums$STYLE_KEY$e.SKEW_X,
-      SKEW_Y$2 = _enums$STYLE_KEY$e.SKEW_Y,
-      TF$3 = _enums$STYLE_KEY$e.TRANSFORM,
-      TRANSFORM_ORIGIN$4 = _enums$STYLE_KEY$e.TRANSFORM_ORIGIN;
+  var _enums$STYLE_KEY$f = enums.STYLE_KEY,
+      TX$1 = _enums$STYLE_KEY$f.TRANSLATE_X,
+      TY$1 = _enums$STYLE_KEY$f.TRANSLATE_Y,
+      TZ$1 = _enums$STYLE_KEY$f.TRANSLATE_Z,
+      OP$2 = _enums$STYLE_KEY$f.OPACITY,
+      FT$2 = _enums$STYLE_KEY$f.FILTER,
+      PPT$2 = _enums$STYLE_KEY$f.PERSPECTIVE,
+      PERSPECTIVE_ORIGIN$3 = _enums$STYLE_KEY$f.PERSPECTIVE_ORIGIN,
+      Z_INDEX$4 = _enums$STYLE_KEY$f.Z_INDEX,
+      SX$1 = _enums$STYLE_KEY$f.SCALE_X,
+      SY$1 = _enums$STYLE_KEY$f.SCALE_Y,
+      SZ$1 = _enums$STYLE_KEY$f.SCALE_Z,
+      ROTATE_X$3 = _enums$STYLE_KEY$f.ROTATE_X,
+      ROTATE_Y$3 = _enums$STYLE_KEY$f.ROTATE_Y,
+      RZ$1 = _enums$STYLE_KEY$f.ROTATE_Z,
+      ROTATE_3D$2 = _enums$STYLE_KEY$f.ROTATE_3D,
+      SKEW_X$3 = _enums$STYLE_KEY$f.SKEW_X,
+      SKEW_Y$3 = _enums$STYLE_KEY$f.SKEW_Y,
+      TF$2 = _enums$STYLE_KEY$f.TRANSFORM,
+      TRANSFORM_ORIGIN$5 = _enums$STYLE_KEY$f.TRANSFORM_ORIGIN;
   var isIgnore = o$2.isIgnore,
-      isRepaint$2 = o$2.isRepaint; // 低位表示<repaint级别
+      isRepaint = o$2.isRepaint; // 低位表示<repaint级别
 
   var NONE$4 = 0; //                                          0
   // cacheTotal变化需重新生成的时候
 
   var CACHE$4 = 1; //                                         1
 
-  var TRANSLATE_X$2 = 2; //                                  10
+  var TRANSLATE_X$3 = 2; //                                  10
 
-  var TRANSLATE_Y$2 = 4; //                                 100
+  var TRANSLATE_Y$3 = 4; //                                 100
 
-  var TRANSLATE_Z$2 = 8; //                                1000
+  var TRANSLATE_Z$3 = 8; //                                1000
 
   var TRANSLATE = 14; //                                 1110
 
-  var ROTATE_Z$2 = 16; //                                 10000
+  var ROTATE_Z$3 = 16; //                                 10000
 
-  var SCALE_X$3 = 32; //                                 100000
+  var SCALE_X$4 = 32; //                                 100000
 
-  var SCALE_Y$3 = 64; //                                1000000
+  var SCALE_Y$4 = 64; //                                1000000
 
   var SCALE_Z$2 = 128; //                              10000000
 
-  var SCALE$2 = 224; //                                11100000
+  var SCALE$1 = 224; //                                11100000
 
   var TRANSFORM$5 = 256; //                           100000000
 
   var TRANSFORM_ALL$4 = 510; //                       111111110
 
-  var OPACITY$5 = 512; //                            1000000000
+  var OPACITY$6 = 512; //                            1000000000
 
   var FILTER$5 = 1024; //                           10000000000
 
@@ -11481,18 +12968,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   var ENUM = {
     NONE: NONE$4,
     CACHE: CACHE$4,
-    TRANSLATE_X: TRANSLATE_X$2,
-    TRANSLATE_Y: TRANSLATE_Y$2,
-    TRANSLATE_Z: TRANSLATE_Z$2,
+    TRANSLATE_X: TRANSLATE_X$3,
+    TRANSLATE_Y: TRANSLATE_Y$3,
+    TRANSLATE_Z: TRANSLATE_Z$3,
     TRANSLATE: TRANSLATE,
-    ROTATE_Z: ROTATE_Z$2,
-    SCALE_X: SCALE_X$3,
-    SCALE_Y: SCALE_Y$3,
+    ROTATE_Z: ROTATE_Z$3,
+    SCALE_X: SCALE_X$4,
+    SCALE_Y: SCALE_Y$4,
     SCALE_Z: SCALE_Z$2,
-    SCALE: SCALE$2,
+    SCALE: SCALE$1,
     TRANSFORM: TRANSFORM$5,
     TRANSFORM_ALL: TRANSFORM_ALL$4,
-    OPACITY: OPACITY$5,
+    OPACITY: OPACITY$6,
     FILTER: FILTER$5,
     MIX_BLEND_MODE: MIX_BLEND_MODE$4,
     PERSPECTIVE: PERSPECTIVE$3,
@@ -11503,7 +12990,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   };
 
   function isTransforms(k) {
-    return k === ROTATE_X$2 || k === ROTATE_Y$2 || k === ROTATE_3D$2 || k === SKEW_X$2 || k === SKEW_Y$2 || k === TF$3 || k === TRANSFORM_ORIGIN$4;
+    return k === ROTATE_X$3 || k === ROTATE_Y$3 || k === ROTATE_3D$2 || k === SKEW_X$3 || k === SKEW_Y$3 || k === TF$2 || k === TRANSFORM_ORIGIN$5;
   }
 
   var o$1 = Object.assign({
@@ -11530,36 +13017,36 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return CACHE$4;
       }
 
-      if (k === TX$2) {
-        return TRANSLATE_X$2;
+      if (k === TX$1) {
+        return TRANSLATE_X$3;
       }
 
-      if (k === TY$2) {
-        return TRANSLATE_Y$2;
+      if (k === TY$1) {
+        return TRANSLATE_Y$3;
       }
 
-      if (k === TZ$2) {
-        return TRANSLATE_Z$2;
+      if (k === TZ$1) {
+        return TRANSLATE_Z$3;
       }
 
-      if (k === RZ$2) {
-        return ROTATE_Z$2;
+      if (k === RZ$1) {
+        return ROTATE_Z$3;
       }
 
-      if (k === SX$2) {
-        return SCALE_X$3;
+      if (k === SX$1) {
+        return SCALE_X$4;
       }
 
-      if (k === SY$2) {
-        return SCALE_Y$3;
+      if (k === SY$1) {
+        return SCALE_Y$4;
       }
 
-      if (k === SZ$2) {
+      if (k === SZ$1) {
         return SCALE_Z$2;
       }
 
       if (k === OP$2) {
-        return OPACITY$5;
+        return OPACITY$6;
       }
 
       if (k === FT$2) {
@@ -11574,7 +13061,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return TRANSFORM$5;
       }
 
-      if (isRepaint$2(k)) {
+      if (isRepaint(k)) {
         return REPAINT$4;
       }
 
@@ -11588,37 +13075,37 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
   }, ENUM);
 
-  var _enums$STYLE_KEY$d = enums.STYLE_KEY,
-      DISPLAY$7 = _enums$STYLE_KEY$d.DISPLAY,
-      POSITION$5 = _enums$STYLE_KEY$d.POSITION,
-      LINE_HEIGHT$4 = _enums$STYLE_KEY$d.LINE_HEIGHT,
-      FONT_SIZE$4 = _enums$STYLE_KEY$d.FONT_SIZE,
-      FONT_FAMILY$3 = _enums$STYLE_KEY$d.FONT_FAMILY,
-      FONT_WEIGHT$3 = _enums$STYLE_KEY$d.FONT_WEIGHT,
-      COLOR$3 = _enums$STYLE_KEY$d.COLOR,
-      VISIBILITY$4 = _enums$STYLE_KEY$d.VISIBILITY,
-      LETTER_SPACING$2 = _enums$STYLE_KEY$d.LETTER_SPACING,
-      OVERFLOW$3 = _enums$STYLE_KEY$d.OVERFLOW,
-      WHITE_SPACE$2 = _enums$STYLE_KEY$d.WHITE_SPACE,
-      TEXT_OVERFLOW$1 = _enums$STYLE_KEY$d.TEXT_OVERFLOW,
-      WIDTH$7 = _enums$STYLE_KEY$d.WIDTH,
-      HEIGHT$7 = _enums$STYLE_KEY$d.HEIGHT,
-      TEXT_STROKE_COLOR$3 = _enums$STYLE_KEY$d.TEXT_STROKE_COLOR,
-      TEXT_STROKE_WIDTH$3 = _enums$STYLE_KEY$d.TEXT_STROKE_WIDTH,
-      MARGIN_TOP$6 = _enums$STYLE_KEY$d.MARGIN_TOP,
-      MARGIN_BOTTOM$6 = _enums$STYLE_KEY$d.MARGIN_BOTTOM,
-      MARGIN_LEFT$8 = _enums$STYLE_KEY$d.MARGIN_LEFT,
-      MARGIN_RIGHT$7 = _enums$STYLE_KEY$d.MARGIN_RIGHT,
-      PADDING_TOP$6 = _enums$STYLE_KEY$d.PADDING_TOP,
-      PADDING_BOTTOM$5 = _enums$STYLE_KEY$d.PADDING_BOTTOM,
-      PADDING_LEFT$8 = _enums$STYLE_KEY$d.PADDING_LEFT,
-      PADDING_RIGHT$7 = _enums$STYLE_KEY$d.PADDING_RIGHT,
-      BORDER_TOP_WIDTH$6 = _enums$STYLE_KEY$d.BORDER_TOP_WIDTH,
-      BORDER_BOTTOM_WIDTH$5 = _enums$STYLE_KEY$d.BORDER_BOTTOM_WIDTH,
-      BORDER_LEFT_WIDTH$8 = _enums$STYLE_KEY$d.BORDER_LEFT_WIDTH,
-      BORDER_RIGHT_WIDTH$7 = _enums$STYLE_KEY$d.BORDER_RIGHT_WIDTH,
-      FILTER$4 = _enums$STYLE_KEY$d.FILTER,
-      FONT_SIZE_SHRINK$1 = _enums$STYLE_KEY$d.FONT_SIZE_SHRINK,
+  var _enums$STYLE_KEY$e = enums.STYLE_KEY,
+      DISPLAY$7 = _enums$STYLE_KEY$e.DISPLAY,
+      POSITION$4 = _enums$STYLE_KEY$e.POSITION,
+      LINE_HEIGHT$4 = _enums$STYLE_KEY$e.LINE_HEIGHT,
+      FONT_SIZE$5 = _enums$STYLE_KEY$e.FONT_SIZE,
+      FONT_FAMILY$3 = _enums$STYLE_KEY$e.FONT_FAMILY,
+      FONT_WEIGHT$3 = _enums$STYLE_KEY$e.FONT_WEIGHT,
+      COLOR$3 = _enums$STYLE_KEY$e.COLOR,
+      VISIBILITY$4 = _enums$STYLE_KEY$e.VISIBILITY,
+      LETTER_SPACING$2 = _enums$STYLE_KEY$e.LETTER_SPACING,
+      OVERFLOW$3 = _enums$STYLE_KEY$e.OVERFLOW,
+      WHITE_SPACE$2 = _enums$STYLE_KEY$e.WHITE_SPACE,
+      TEXT_OVERFLOW$1 = _enums$STYLE_KEY$e.TEXT_OVERFLOW,
+      WIDTH$7 = _enums$STYLE_KEY$e.WIDTH,
+      HEIGHT$7 = _enums$STYLE_KEY$e.HEIGHT,
+      TEXT_STROKE_COLOR$3 = _enums$STYLE_KEY$e.TEXT_STROKE_COLOR,
+      TEXT_STROKE_WIDTH$3 = _enums$STYLE_KEY$e.TEXT_STROKE_WIDTH,
+      MARGIN_TOP$6 = _enums$STYLE_KEY$e.MARGIN_TOP,
+      MARGIN_BOTTOM$6 = _enums$STYLE_KEY$e.MARGIN_BOTTOM,
+      MARGIN_LEFT$8 = _enums$STYLE_KEY$e.MARGIN_LEFT,
+      MARGIN_RIGHT$7 = _enums$STYLE_KEY$e.MARGIN_RIGHT,
+      PADDING_TOP$6 = _enums$STYLE_KEY$e.PADDING_TOP,
+      PADDING_BOTTOM$5 = _enums$STYLE_KEY$e.PADDING_BOTTOM,
+      PADDING_LEFT$8 = _enums$STYLE_KEY$e.PADDING_LEFT,
+      PADDING_RIGHT$7 = _enums$STYLE_KEY$e.PADDING_RIGHT,
+      BORDER_TOP_WIDTH$6 = _enums$STYLE_KEY$e.BORDER_TOP_WIDTH,
+      BORDER_BOTTOM_WIDTH$5 = _enums$STYLE_KEY$e.BORDER_BOTTOM_WIDTH,
+      BORDER_LEFT_WIDTH$8 = _enums$STYLE_KEY$e.BORDER_LEFT_WIDTH,
+      BORDER_RIGHT_WIDTH$7 = _enums$STYLE_KEY$e.BORDER_RIGHT_WIDTH,
+      FILTER$4 = _enums$STYLE_KEY$e.FILTER,
+      FONT_SIZE_SHRINK$1 = _enums$STYLE_KEY$e.FONT_SIZE_SHRINK,
       ELLIPSIS$1 = enums.ELLIPSIS;
   var AUTO$6 = o$4.AUTO;
   var CANVAS$2 = mode.CANVAS,
@@ -11629,7 +13116,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
    * 测量的封装，主要是增加了shrinkFontSize声明时，不断尝试fontSize--，直到限制或者满足一行展示要求
    */
 
-  function measureLineWidth(ctx, renderMode, start, length, content, w, ew, perW, computedStyle, fontFamily, fontSize, fontWeight, fontSizeShrink, letterSpacing, isUpright) {
+  function measureLineWidth(ctx, renderMode, start, length, content, w, ew, perW, computedStyle, fontFamily, fontSize, fontWeight, fontSizeShrink, letterSpacing) {
     if (start >= length) {
       // 特殊情况不应该走进这里
       return {
@@ -11639,7 +13126,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       };
     }
 
-    var res = measure(ctx, renderMode, start, length, content, w - ew, perW, fontFamily, fontSize, fontWeight, letterSpacing, isUpright);
+    var res = measure(ctx, renderMode, start, length, content, w - ew, perW, fontFamily, fontSize, fontWeight, letterSpacing);
 
     if (res.newLine && fontSizeShrink > 0 && fontSizeShrink < fontSize) {
       while (res.newLine && fontSize > fontSizeShrink) {
@@ -11649,15 +13136,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (renderMode === CANVAS$2 || renderMode === WEBGL$2) {
           ew = ctx.measureText(ELLIPSIS$1).width;
         } else {
-          ew = inject.measureTextSync(ELLIPSIS$1, computedStyle[FONT_FAMILY$3], fontSize, computedStyle[FONT_WEIGHT$3]);
+          ew = inject.measureTextSync(ELLIPSIS$1, fontFamily, fontSize, fontWeight, false);
         }
 
-        res = measure(ctx, renderMode, start, length, content, w - ew, perW, fontFamily, fontSize, fontWeight, letterSpacing, isUpright);
+        res = measure(ctx, renderMode, start, length, content, w - ew, perW, fontFamily, fontSize, fontWeight, letterSpacing);
         res.fitFontSize = fontSize;
         res.ew = ew; // 有ew的时候还要尝试没有是否放得下
 
         if (ew) {
-          var t = measure(ctx, renderMode, start, length, content, w, perW, fontFamily, fontSize, fontWeight, letterSpacing, isUpright);
+          var t = measure(ctx, renderMode, start, length, content, w, perW, fontFamily, fontSize, fontWeight, letterSpacing);
 
           if (!t.newLine) {
             t.fitFontSize = fontSize;
@@ -11680,7 +13167,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
    */
 
 
-  function measure(ctx, renderMode, start, length, content, w, perW, fontFamily, fontSize, fontWeight, letterSpacing, isUpright) {
+  function measure(ctx, renderMode, start, length, content, w, perW, fontFamily, fontSize, fontWeight, letterSpacing) {
     var i = start,
         j = length,
         rw = 0,
@@ -11725,7 +13212,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (renderMode === CANVAS$2 || renderMode === WEBGL$2) {
         _mw = ctx.measureText(str).width;
       } else if (renderMode === SVG$2) {
-        _mw = inject.measureTextSync(str, fontFamily, fontSize, fontWeight, isUpright);
+        _mw = inject.measureTextSync(str, fontFamily, fontSize, fontWeight, false);
       }
 
       if (letterSpacing) {
@@ -11819,7 +13306,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       _this.__limitCache = false;
       _this.__hasContent = false;
-      _this.__fitFontSize = 0; // 自动缩小时的字体大小
+      _this.__fitFontSize = 0; // 自动缩小时的字体大小N
 
       return _this;
     }
@@ -11880,7 +13367,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var lineHeight = computedStyle[LINE_HEIGHT$4],
             letterSpacing = computedStyle[LETTER_SPACING$2],
             whiteSpace = computedStyle[WHITE_SPACE$2],
-            fontSize = computedStyle[FONT_SIZE$4],
+            fontSize = computedStyle[FONT_SIZE$5],
             fontWeight = computedStyle[FONT_WEIGHT$3],
             fontFamily = computedStyle[FONT_FAMILY$3];
         var size = isUpright ? h : w;
@@ -11916,7 +13403,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               _w = size - endSpace - beginSpace;
 
           var _bp$computedStyle = bp.computedStyle,
-              position = _bp$computedStyle[POSITION$5],
+              position = _bp$computedStyle[POSITION$4],
               overflow = _bp$computedStyle[OVERFLOW$3],
               fontSizeShrink = _bp$computedStyle[FONT_SIZE_SHRINK$1];
           var containerSize = bp.currentStyle[isUpright ? HEIGHT$7 : WIDTH$7]; // 只要是overflow隐藏，不管textOverflow如何（默认是clip等同于overflow:hidden的功能）都截取
@@ -11956,7 +13443,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                   ctx.font = css.setFontStyle(computedStyle, --fs);
                   textWidth = ctx.measureText(content).width + letterSpacing * content.length;
                 } else if (renderMode === SVG$2) {
-                  textWidth = inject.measureTextSync(content, fontFamily, fs, fontWeight) + letterSpacing * content.length;
+                  textWidth = inject.measureTextSync(content, fontFamily, fs, fontWeight, false) + letterSpacing * content.length;
                 }
               }
 
@@ -12107,7 +13594,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           ew = ctx.measureText(ELLIPSIS$1).width;
         } else {
-          ew = inject.measureTextSync(ELLIPSIS$1, computedStyle[FONT_FAMILY$3], computedStyle[FONT_SIZE$4], computedStyle[FONT_WEIGHT$3]);
+          ew = inject.measureTextSync(ELLIPSIS$1, fontFamily, fontSize, fontWeight, false);
         }
 
         if (renderMode === CANVAS$2 || renderMode === WEBGL$2) {
@@ -12180,7 +13667,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 var _parent$computedStyle = parent.computedStyle,
                     _lineHeight = _parent$computedStyle[LINE_HEIGHT$4],
                     _letterSpacing = _parent$computedStyle[LETTER_SPACING$2],
-                    _fontSize = _parent$computedStyle[FONT_SIZE$4],
+                    _fontSize = _parent$computedStyle[FONT_SIZE$5],
                     _fontWeight = _parent$computedStyle[FONT_WEIGHT$3],
                     _fontFamily = _parent$computedStyle[FONT_FAMILY$3];
 
@@ -12339,7 +13826,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             var length = content.length;
             var _parent$computedStyle2 = parent.computedStyle,
                 letterSpacing = _parent$computedStyle2[LETTER_SPACING$2],
-                fontSize = _parent$computedStyle2[FONT_SIZE$4],
+                fontSize = _parent$computedStyle2[FONT_SIZE$5],
                 fontWeight = _parent$computedStyle2[FONT_WEIGHT$3],
                 fontFamily = _parent$computedStyle2[FONT_FAMILY$3];
 
@@ -12584,7 +14071,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.__content = s;
 
           if (isFunction$a(cb)) {
-            cb();
+            cb(true);
           }
 
           return;
@@ -12600,7 +14087,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         this.__content = s;
 
-        this.__root.__addUpdate(this.__domParent, null, o$1.REFLOW, null, null, null, cb);
+        this.__root.__addUpdate(this.__domParent, null, o$1.REFLOW, false, false, false, false, cb);
       }
     }, {
       key: "remove",
@@ -12633,7 +14120,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (this.__isDestroyed) {
           if (isFunction$a(cb)) {
-            cb();
+            cb(true);
           }
 
           return;
@@ -12646,14 +14133,31 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.__destroy();
 
           if (isFunction$a(cb)) {
-            cb();
+            cb(true);
           }
 
           return;
         } // 可见在reflow逻辑做结构关系等，text视为父变更
 
 
-        root.__addUpdate(this, null, o$1.REFLOW, null, true, null, cb);
+        root.__addUpdate(this, null, o$1.REFLOW, false, true, false, false, cb);
+      }
+    }, {
+      key: "__structure",
+      value: function __structure(lv, j) {
+        var o = _get(_getPrototypeOf(Text.prototype), "__structure", this).call(this, lv, j);
+
+        o.isText = true;
+        return o;
+      }
+    }, {
+      key: "__layoutStyle",
+      value: function __layoutStyle() {
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          wn.set_txt(this.__x1, this.__y1, this.__width, this.__height);
+        }
       }
     }, {
       key: "content",
@@ -12678,7 +14182,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             ctx = _this$root.ctx,
             renderMode = _this$root.renderMode;
         var fontFamily = computedStyle[FONT_FAMILY$3],
-            fontSize = computedStyle[FONT_SIZE$4],
+            fontSize = computedStyle[FONT_SIZE$5],
             fontWeight = computedStyle[FONT_WEIGHT$3],
             letterSpacing = computedStyle[LETTER_SPACING$2];
         var fontKey = getFontKey(fontFamily, fontSize, fontWeight, letterSpacing);
@@ -12721,7 +14225,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             ctx = _this$root2.ctx,
             renderMode = _this$root2.renderMode;
         var fontFamily = computedStyle[FONT_FAMILY$3],
-            fontSize = computedStyle[FONT_SIZE$4],
+            fontSize = computedStyle[FONT_SIZE$5],
             fontWeight = computedStyle[FONT_WEIGHT$3],
             letterSpacing = computedStyle[LETTER_SPACING$2];
         var fontKey = getFontKey(fontFamily, fontSize, fontWeight, letterSpacing);
@@ -12741,7 +14245,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             ctx.font = css.setFontStyle(computedStyle, 0);
             o.firstCharWidth = ctx.measureText(content.charAt(0)).width + letterSpacing;
           } else if (renderMode === SVG$2) {
-            o.firstCharWidth = inject.measureTextSync(content.charAt(0), fontFamily, fontSize, fontWeight) + letterSpacing;
+            o.firstCharWidth = inject.measureTextSync(content.charAt(0), fontFamily, fontSize, fontWeight, false) + letterSpacing;
           }
         }
 
@@ -12757,7 +14261,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             ctx = _this$root3.ctx,
             renderMode = _this$root3.renderMode;
         var fontFamily = computedStyle[FONT_FAMILY$3],
-            fontSize = computedStyle[FONT_SIZE$4],
+            fontSize = computedStyle[FONT_SIZE$5],
             fontWeight = computedStyle[FONT_WEIGHT$3],
             letterSpacing = computedStyle[LETTER_SPACING$2];
         var fontKey = getFontKey(fontFamily, fontSize, fontWeight, letterSpacing);
@@ -12777,7 +14281,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             ctx.font = css.setFontStyle(computedStyle, 0);
             o.textWidth = ctx.measureText(content).width + letterSpacing * content.length;
           } else if (renderMode === SVG$2) {
-            o.textWidth = inject.measureTextSync(content, fontFamily, fontSize, fontWeight) + letterSpacing * content.length;
+            o.textWidth = inject.measureTextSync(content, fontFamily, fontSize, fontWeight, false) + letterSpacing * content.length;
           }
         }
 
@@ -12908,7 +14412,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }]);
 
     return Text;
-  }(Node);
+  }(Node$1);
 
   var isFunction$9 = util.isFunction;
 
@@ -13072,6 +14576,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
   _defineProperty(Event, "END", 'end');
 
+  _defineProperty(Event, "FREEZE", 'freeze');
+
+  _defineProperty(Event, "UN_FREEZE", 'unFreeze');
+
   var isNil$d = util.isNil,
       isFunction$8 = util.isFunction,
       extend$2 = util.extend;
@@ -13085,7 +14593,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       _this = _Event.call(this) || this;
-      _this.__tagName = /(?:function|class)\s+([\w$]+)/.exec(_this.constructor.toString())[1]; // 构建工具中都是{}，手写可能出现[]情况
+      _this.__tagName = props.tagName || /(?:function|class)\s+([\w$]+)/.exec(_this.constructor.toString())[1]; // 构建工具中都是{}，手写可能出现[]情况
 
       if (Array.isArray(props)) {
         _this.props = util.arr2hash(props);
@@ -13113,7 +14621,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         this.__ref = {};
         var sr = this.__shadowRoot;
 
-        if (sr instanceof Text) ; else if (sr instanceof Node) {
+        if (sr instanceof Text) ; else if (sr instanceof Node$1) {
+          // 组件的json的动画得放到sr上
+          var ar = this.__animateRecords;
+
+          if (ar) {
+            sr.__animateRecords = ar;
+          }
+
           var style = css.normalize(this.props.style);
           var keys = Object.keys(style);
           extend$2(sr.style, style, keys);
@@ -13141,9 +14656,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         });
 
         if (isFunction$8(this.componentDidMount)) {
-          this.__root.once(Event.REFRESH, function () {
-            _this2.componentDidMount();
-          });
+          // 可能已经销毁
+          var cb = this.__cb = function () {
+            if (!_this2.__root.__isDestroyed && !_this2.__isDestroyed) {
+              _this2.componentDidMount();
+
+              _this2.__root.off(Event.REFRESH, cb);
+
+              _this2.__cb = null;
+            }
+          };
+
+          this.__root.once(Event.REFRESH, cb);
         }
       }
     }, {
@@ -13164,6 +14688,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (!isNil$d(ref) && !isFunction$8(ref)) {
           delete this.__root.__ref[ref];
+        } // 极限情况尚未触发需清除
+
+
+        if (this.__cb) {
+          this.__root.off(Event.REFRESH, this.__cb);
+
+          this.__cb = null;
         }
 
         if (isFunction$8(this.componentWillUnmount)) {
@@ -13315,7 +14846,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     });
   });
-  ['__layout', '__layoutFlow', '__layoutStyle', '__layoutAbs', '__layoutNone', '__tryLayInline', '__offsetX', '__offsetY', '__calAutoBasis', '__computeReflow', '__mp', 'animate', 'removeAnimate', 'clearAnimate', 'frameAnimate', 'updateStyle', 'getBoundingClientRect', 'getComputedStyle', 'clearCache', '__structure', '__modifyStruct', '__updateStruct', 'flowChildren', 'absChildren', '__isRealInline', '__calBasis', '__calMinMax', '__computeMeasure', 'appendChild', 'prependChild', 'insertBefore', 'insertAfter', 'removeChild', 'remove', 'addEventListener', 'removeEventListener'].forEach(function (fn) {
+  ['__layout', '__layoutFlow', '__layoutStyle', '__layoutAbs', '__layoutNone', '__tryLayInline', '__offsetX', '__offsetY', '__calAutoBasis', '__computeReflow', '__mp', 'animate', 'removeAnimate', 'clearAnimate', 'frameAnimate', 'updateStyle', 'getBoundingClientRect', 'getComputedStyle', 'getStyle', 'clearCache', '__structure', '__updateStruct', 'flowChildren', 'absChildren', '__isRealInline', '__calBasis', '__calMinMax', '__computeMeasure', 'appendChild', 'prependChild', 'insertBefore', 'insertAfter', 'removeChild', 'remove', 'addEventListener', 'removeEventListener'].forEach(function (fn) {
     Component.prototype[fn] = function () {
       var sr = this.shadowRoot;
 
@@ -13325,19 +14856,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     };
   });
 
-  var _enums$STYLE_KEY$c = enums.STYLE_KEY,
-      MARGIN_TOP$5 = _enums$STYLE_KEY$c.MARGIN_TOP,
-      MARGIN_LEFT$7 = _enums$STYLE_KEY$c.MARGIN_LEFT,
-      MARGIN_RIGHT$6 = _enums$STYLE_KEY$c.MARGIN_RIGHT,
-      MARGIN_BOTTOM$5 = _enums$STYLE_KEY$c.MARGIN_BOTTOM,
-      PADDING_TOP$5 = _enums$STYLE_KEY$c.PADDING_TOP,
-      PADDING_LEFT$7 = _enums$STYLE_KEY$c.PADDING_LEFT,
-      PADDING_RIGHT$6 = _enums$STYLE_KEY$c.PADDING_RIGHT,
-      PADDING_BOTTOM$4 = _enums$STYLE_KEY$c.PADDING_BOTTOM,
-      BORDER_TOP_WIDTH$5 = _enums$STYLE_KEY$c.BORDER_TOP_WIDTH,
-      BORDER_LEFT_WIDTH$7 = _enums$STYLE_KEY$c.BORDER_LEFT_WIDTH,
-      BORDER_RIGHT_WIDTH$6 = _enums$STYLE_KEY$c.BORDER_RIGHT_WIDTH,
-      BORDER_BOTTOM_WIDTH$4 = _enums$STYLE_KEY$c.BORDER_BOTTOM_WIDTH;
+  var _enums$STYLE_KEY$d = enums.STYLE_KEY,
+      MARGIN_TOP$5 = _enums$STYLE_KEY$d.MARGIN_TOP,
+      MARGIN_LEFT$7 = _enums$STYLE_KEY$d.MARGIN_LEFT,
+      MARGIN_RIGHT$6 = _enums$STYLE_KEY$d.MARGIN_RIGHT,
+      MARGIN_BOTTOM$5 = _enums$STYLE_KEY$d.MARGIN_BOTTOM,
+      PADDING_TOP$5 = _enums$STYLE_KEY$d.PADDING_TOP,
+      PADDING_LEFT$7 = _enums$STYLE_KEY$d.PADDING_LEFT,
+      PADDING_RIGHT$6 = _enums$STYLE_KEY$d.PADDING_RIGHT,
+      PADDING_BOTTOM$4 = _enums$STYLE_KEY$d.PADDING_BOTTOM,
+      BORDER_TOP_WIDTH$5 = _enums$STYLE_KEY$d.BORDER_TOP_WIDTH,
+      BORDER_LEFT_WIDTH$7 = _enums$STYLE_KEY$d.BORDER_LEFT_WIDTH,
+      BORDER_RIGHT_WIDTH$6 = _enums$STYLE_KEY$d.BORDER_RIGHT_WIDTH,
+      BORDER_BOTTOM_WIDTH$4 = _enums$STYLE_KEY$d.BORDER_BOTTOM_WIDTH;
   /**
    * 获取inline的每一行内容的矩形坐标4个点，同时附带上border的矩形，比前面4个点尺寸大或相等（有无border/padding）
    * @param xom
@@ -13590,9 +15121,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     getInlineWidth: getInlineWidth
   };
 
-  var _enums$STYLE_KEY$b = enums.STYLE_KEY,
-      SCALE_X$2 = _enums$STYLE_KEY$b.SCALE_X,
-      SCALE_Y$2 = _enums$STYLE_KEY$b.SCALE_Y;
+  var _enums$STYLE_KEY$c = enums.STYLE_KEY,
+      SCALE_X$3 = _enums$STYLE_KEY$c.SCALE_X,
+      SCALE_Y$3 = _enums$STYLE_KEY$c.SCALE_Y;
   var NUMBER$3 = o$4.NUMBER;
 
   function matrixResize(imgWidth, imgHeight, targetWidth, targetHeight, x, y, w, h) {
@@ -13601,13 +15132,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
 
     var list = [{
-      k: SCALE_X$2,
+      k: SCALE_X$3,
       v: {
         v: targetWidth / imgWidth,
         u: NUMBER$3
       }
     }, {
-      k: SCALE_Y$2,
+      k: SCALE_Y$3,
       v: {
         v: targetHeight / imgHeight,
         u: NUMBER$3
@@ -13620,9 +15151,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     matrixResize: matrixResize
   };
 
-  var _enums$STYLE_KEY$a = enums.STYLE_KEY,
-      BACKGROUND_POSITION_X$2 = _enums$STYLE_KEY$a.BACKGROUND_POSITION_X,
-      BACKGROUND_POSITION_Y$2 = _enums$STYLE_KEY$a.BACKGROUND_POSITION_Y;
+  var _enums$STYLE_KEY$b = enums.STYLE_KEY,
+      BACKGROUND_POSITION_X$2 = _enums$STYLE_KEY$b.BACKGROUND_POSITION_X,
+      BACKGROUND_POSITION_Y$2 = _enums$STYLE_KEY$b.BACKGROUND_POSITION_Y;
   var clone$2 = util.clone,
       joinArr$2 = util.joinArr;
   var canvasPolygon$4 = painter.canvasPolygon,
@@ -13674,7 +15205,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       });
     }
 
-    if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+    if (renderMode === mode.CANVAS) {
       if (matrix$1) {
         ctx.save();
         var me = xom.matrixEvent;
@@ -13688,9 +15219,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         ctx.fillStyle = color;
       }
 
-      canvasPolygon$4(ctx, list, dx, dy);
+      canvasPolygon$4(ctx, list, dx, dy, true);
       ctx[method]();
-      ctx.closePath();
 
       if (matrix$1) {
         ctx.restore();
@@ -13950,7 +15480,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
       }
 
-      if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+      if (renderMode === mode.CANVAS) {
         if (needMask) {
           ctx.save();
           renderBgc(this, renderMode, ctx, '#FFF', null, bx1, by1, bgW, bgH, btlr, btrr, bbrr, bblr, 'clip');
@@ -14097,9 +15627,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
   var Frame = /*#__PURE__*/function () {
     function Frame() {
-      this.__rootTask = []; // 动画刷新后，每个root注册的刷新回调执行
+      this.__rootTask = []; // 每帧先执行Root的刷新操作，之前动画或其他异步更新引发的
 
-      this.__task = [];
+      this.__roots = []; // wasm情况下每个Root实例留个钩子引用，每帧检查动画任务行
+
+      this.__task = []; // 普通比如飞wasm动画的任务执行
+
       this.__now = inject.now();
     }
 
@@ -14115,31 +15648,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           // 必须清除，可能会发生重复，当动画finish回调中gotoAndPlay(0)，下方结束判断发现aTask还有值会继续，新的init也会进入再次执行
           inject.cancelAnimationFrame(self.id);
           self.id = inject.requestAnimationFrame(function () {
+            // console.log('frame', task.length, task.slice(0))
+            var now = self.__now = inject.now();
+
             if (isPause || !task.length) {
               return;
             }
 
-            var now = self.__now = inject.now();
             var diff = now - last;
             diff = Math.max(diff, 0); // let delta = diff * 0.06; // 比例是除以1/60s，等同于*0.06
 
             last = now; // 优先动画计算
 
             var clone = task.slice(0);
-            var length = clone.length; // 普通的before/after，动画计算在before，所有回调在after
+            var len1 = clone.length; // 普通的before/after，动画计算在before，所有回调在after
 
-            traversalBefore(clone, length, diff);
+            traversalBefore(clone, len1, diff); // 刷新成功后调用after，确保图像生成
 
-            var list = self.__rootTask.splice(0);
-
-            for (var i = 0, len = list.length; i < len; i++) {
-              var item = list[i];
-              item && item(diff);
-            } // 刷新成功后调用after，确保图像生成
-
-
-            traversalAfter(clone, length, diff); // 执行每个Root的刷新并清空
-            // 还有则继续，没有则停止节省性能
+            traversalAfter(clone, len1, diff); // 还有则继续，没有则停止节省性能
 
             if (task.length) {
               cb();
@@ -14165,7 +15691,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (isFunction$7(handle)) {
           handle = {
             __after: handle,
-            __karasFramecb: handle
+            __karasFrameCb: handle
           };
         }
 
@@ -14183,7 +15709,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         for (var i = 0, len = task.length; i < len; i++) {
           var item = task[i]; // 需考虑nextFrame包裹的引用对比
 
-          if (item === handle || item.__karasFramecb === handle) {
+          if (item === handle || item.__karasFrameCb === handle) {
             task.splice(i, 1);
             break;
           }
@@ -14218,7 +15744,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             _this.offFrame(cb);
           }
         };
-        cb.__karasFramecb = handle;
+        cb.__karasFrameCb = handle;
         this.onFrame(cb);
       }
     }, {
@@ -14236,9 +15762,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
       }
     }, {
+      key: "addRoot",
+      value: function addRoot(root) {
+        this.__roots.push(root);
+      }
+    }, {
+      key: "removeRoot",
+      value: function removeRoot(root) {
+        var i = this.__roots.indexOf(root);
+
+        if (i > -1) {
+          this.__roots.splice(i, 1);
+        }
+      }
+    }, {
       key: "task",
       get: function get() {
         return this.__task;
+      }
+    }, {
+      key: "roots",
+      get: function get() {
+        return this.__roots;
       }
     }]);
 
@@ -14389,8 +15934,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (/^\s*(?:cubic-bezier\s*)?\(\s*[\d.]+\s*,\s*[-\d.]+\s*,\s*[\d.]+\s*,\s*[-\d.]+\s*\)\s*$/i.test(v)) {
           v = v.match(/[\d.]+/g);
-          timingFunction = bezier$1(v[0], v[1], v[2], v[3]);
-        } else if (v !== 'getEasing') {
+          timingFunction = bezier$1(parseFloat(v[0]), parseFloat(v[1]), parseFloat(v[2]), parseFloat(v[3]));
+        } // 防御一下
+        else if (v !== 'getEasing' && v !== 'cubicBezier') {
           timingFunction = this[v];
         }
 
@@ -14491,6 +16037,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
               options.autoPlay = false;
               var o = target.animate(value, options);
+              o.__isControlled = true;
 
               _this.add(o, list);
             });
@@ -14506,7 +16053,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             list2.forEach(function (item) {
               onList.forEach(function (arr) {
                 var cb = function cb() {
-                  var time = item.timestamp;
+                  var time = frame.__now;
 
                   if (time !== _this.__lastTime[arr[0]]) {
                     _this.__lastTime[arr[0]] = time;
@@ -14688,7 +16235,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         this.__list.forEach(function (item) {
           var cb = function cb() {
-            var time = item.timestamp;
+            var time = frame.__now;
 
             if (time !== _this2.__lastTime[id]) {
               _this2.__lastTime[id] = time;
@@ -14726,7 +16273,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "__set",
       value: function __set(key, value) {
-        this.list.forEach(function (item) {
+        this.__list.forEach(function (item) {
+          item[key] = value;
+        });
+
+        this.__list2.forEach(function (item) {
           item[key] = value;
         });
       }
@@ -14785,6 +16336,1468 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     return Controller;
   }();
 
+  var _enums$STYLE_KEY$a = enums.STYLE_KEY,
+      TRANSLATE_X$2 = _enums$STYLE_KEY$a.TRANSLATE_X,
+      TRANSLATE_Y$2 = _enums$STYLE_KEY$a.TRANSLATE_Y,
+      TRANSLATE_Z$2 = _enums$STYLE_KEY$a.TRANSLATE_Z,
+      SCALE_X$2 = _enums$STYLE_KEY$a.SCALE_X,
+      SCALE_Y$2 = _enums$STYLE_KEY$a.SCALE_Y,
+      ROTATE_X$2 = _enums$STYLE_KEY$a.ROTATE_X,
+      ROTATE_Y$2 = _enums$STYLE_KEY$a.ROTATE_Y,
+      ROTATE_Z$2 = _enums$STYLE_KEY$a.ROTATE_Z,
+      SKEW_X$2 = _enums$STYLE_KEY$a.SKEW_X,
+      SKEW_Y$2 = _enums$STYLE_KEY$a.SKEW_Y,
+      TRANSFORM_ORIGIN$4 = _enums$STYLE_KEY$a.TRANSFORM_ORIGIN,
+      OPACITY$5 = _enums$STYLE_KEY$a.OPACITY;
+  var wasm;
+  var cachedTextDecoder = new TextDecoder('utf-8', {
+    ignoreBOM: true,
+    fatal: true
+  });
+  cachedTextDecoder.decode();
+  var cachedUint8Memory0 = new Uint8Array();
+
+  function getUint8Memory0() {
+    if (cachedUint8Memory0.byteLength === 0) {
+      cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
+    }
+
+    return cachedUint8Memory0;
+  }
+
+  function getStringFromWasm0(ptr, len) {
+    return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
+  }
+  /**
+   */
+
+
+  var Animation$1 = /*#__PURE__*/function () {
+    function Animation() {}
+
+    _createClass(Animation, [{
+      key: "__destroy_into_raw",
+      value: function __destroy_into_raw() {
+        var ptr = this.ptr;
+        this.ptr = 0;
+        return ptr;
+      }
+    }, {
+      key: "free",
+      value: function free() {
+        var ptr = this.__destroy_into_raw();
+
+        wasm.__wbg_animation_free(ptr);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "duration",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_duration(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_duration(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "fps",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_fps(this.ptr);
+
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_fps(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "delay",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_delay(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_delay(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "end_delay",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_end_delay(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_end_delay(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "fill",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_fill(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_fill(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "playback_rate",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_playback_rate(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_playback_rate(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "iterations",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_iterations(this.ptr);
+
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_iterations(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "area_start",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_area_start(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_area_start(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "area_duration",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_area_duration(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_area_duration(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "easing",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_easing(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_easing(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "current_time",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_current_time(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_current_time(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "play_count",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_play_count(this.ptr);
+
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_play_count(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "play_state",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_play_state(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_play_state(this.ptr, arg0);
+      }
+      /**
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "first_play",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_first_play(this.ptr);
+
+        return ret !== 0;
+      }
+      /**
+       * @param {boolean} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_first_play(this.ptr, arg0);
+      }
+      /**
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "finished",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_finished(this.ptr);
+
+        return ret !== 0;
+      }
+      /**
+       * @param {boolean} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_finished(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "index",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_index(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_index(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "percent",
+      get: function get() {
+        var ret = wasm.__wbg_get_animation_percent(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_animation_percent(this.ptr, arg0);
+      }
+      /**
+       * @param {number} node
+       * @param {number} direction
+       * @param {number} duration
+       * @param {number} fps
+       * @param {number} delay
+       * @param {number} end_delay
+       * @param {number} fill
+       * @param {number} playback_rate
+       * @param {number} iterations
+       * @param {number} area_start
+       * @param {number} area_duration
+       * @param {number} easing
+       * @returns {Animation}
+       */
+
+    }, {
+      key: "set_bezier",
+      value:
+      /**
+       * @param {number} c1
+       * @param {number} c2
+       * @param {number} c3
+       * @param {number} c4
+       */
+      function set_bezier(c1, c2, c3, c4) {
+        wasm.animation_set_bezier(this.ptr, c1, c2, c3, c4);
+      }
+      /**
+       * @param {boolean} is_reverse
+       * @param {number} time
+       * @param {number} easing
+       * @param {number} x1
+       * @param {number} y1
+       * @param {number} x2
+       * @param {number} y2
+       */
+
+    }, {
+      key: "add_frame",
+      value: function add_frame(is_reverse, time, easing, x1, y1, x2, y2) {
+        wasm.animation_add_frame(this.ptr, is_reverse, time, easing, x1, y1, x2, y2);
+      }
+      /**
+       * @param {boolean} is_reverse
+       * @param {number} k
+       * @param {number} v
+       * @param {number} u
+       * @param {number} d
+       */
+
+    }, {
+      key: "add_item",
+      value: function add_item(is_reverse, k, v, u, d) {
+        wasm.animation_add_item(this.ptr, is_reverse, k, v, u, d);
+      }
+      /**
+       * @param {number} k
+       * @param {number} v
+       * @param {number} u
+       */
+
+    }, {
+      key: "add_origin",
+      value: function add_origin(k, v, u) {
+        wasm.animation_add_origin(this.ptr, k, v, u);
+      }
+      /**
+       */
+
+    }, {
+      key: "play",
+      value: function play() {
+        wasm.animation_play(this.ptr);
+      }
+      /**
+       * @param {number} play_count
+       */
+
+    }, {
+      key: "init_current_frames",
+      value: function init_current_frames(play_count) {
+        wasm.animation_init_current_frames(this.ptr, play_count);
+      }
+      /**
+       * @param {number} dur
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "cal_current",
+      value: function cal_current(dur) {
+        var ret = wasm.animation_cal_current(this.ptr, dur);
+        return ret !== 0;
+      }
+      /**
+       * @param {number} diff
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "before",
+      value: function before(diff) {
+        var ret = wasm.animation_before(this.ptr, diff);
+        return ret !== 0;
+      }
+      /**
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "after",
+      value: function after() {
+        var ret = wasm.animation_after(this.ptr);
+        return ret !== 0;
+      }
+      /**
+       * @param {number} v
+       * @param {number} dur
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "goto_stop",
+      value: function goto_stop(v, dur) {
+        var ret = wasm.animation_goto_stop(this.ptr, v, dur);
+        return ret !== 0;
+      }
+    }], [{
+      key: "__wrap",
+      value: function __wrap(ptr) {
+        var obj = Object.create(Animation.prototype);
+        obj.ptr = ptr;
+        return obj;
+      }
+    }, {
+      key: "new",
+      value: function _new(node, direction, duration, fps, delay, end_delay, fill, playback_rate, iterations, area_start, area_duration, easing) {
+        var ret = wasm.animation_new(node, direction, duration, fps, delay, end_delay, fill, playback_rate, iterations, area_start, area_duration, easing);
+        return Animation.__wrap(ret);
+      }
+    }]);
+
+    return Animation;
+  }();
+  /**
+   */
+
+  var Node = /*#__PURE__*/function () {
+    function Node() {}
+
+    _createClass(Node, [{
+      key: "__destroy_into_raw",
+      value: function __destroy_into_raw() {
+        var ptr = this.ptr;
+        this.ptr = 0;
+        return ptr;
+      }
+    }, {
+      key: "free",
+      value: function free() {
+        var ptr = this.__destroy_into_raw();
+
+        wasm.__wbg_node_free(ptr);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "root",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_root(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_root(this.ptr, arg0);
+      }
+      /**
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "is_text",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_is_text(this.ptr);
+
+        return ret !== 0;
+      }
+      /**
+       * @param {boolean} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_is_text(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "x",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_x(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_x(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "y",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_y(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_y(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "offset_width",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_offset_width(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_offset_width(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "offset_height",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_offset_height(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_offset_height(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "xa",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_xa(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_xa(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "ya",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_ya(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_ya(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "xb",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_xb(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_xb(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "yb",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_yb(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_yb(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "lv",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_lv(this.ptr);
+
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_lv(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "refresh_level",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_refresh_level(this.ptr);
+
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_refresh_level(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "opacity",
+      get: function get() {
+        var ret = wasm.__wbg_get_node_opacity(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_node_opacity(this.ptr, arg0);
+      }
+      /**
+       * @param {boolean} is_text
+       * @returns {Node}
+       */
+
+    }, {
+      key: "set_root",
+      value:
+      /**
+       * @param {number} root
+       */
+      function set_root(root) {
+        wasm.__wbg_set_node_root(this.ptr, root);
+      }
+      /**
+       * @param {number} animation
+       */
+
+    }, {
+      key: "add_ani",
+      value: function add_ani(animation) {
+        wasm.node_add_ani(this.ptr, animation);
+      }
+      /**
+       * @param {number} animation
+       */
+
+    }, {
+      key: "remove_ani",
+      value: function remove_ani(animation) {
+        wasm.node_remove_ani(this.ptr, animation);
+      }
+      /**
+       */
+
+    }, {
+      key: "clear",
+      value: function clear() {
+        wasm.node_clear(this.ptr);
+      }
+      /**
+       * @param {number} x
+       * @param {number} y
+       * @param {number} offset_width
+       * @param {number} offset_height
+       * @param {number} cs0
+       * @param {number} cs1
+       * @param {number} cs2
+       * @param {number} cs3
+       * @param {number} cs4
+       * @param {number} cs5
+       * @param {number} cs6
+       * @param {number} cs7
+       * @param {number} cs8
+       * @param {number} cs9
+       * @param {number} cs10
+       * @param {number} cs11
+       * @param {number} cs12
+       * @param {number} cs13
+       * @param {number} cs14
+       * @param {number} cs15
+       * @param {number} cs16
+       * @param {number} cs17
+       * @param {number} cu0
+       * @param {number} cu1
+       * @param {number} cu2
+       * @param {number} cu16
+       * @param {number} cu17
+       */
+
+    }, {
+      key: "set_style",
+      value: function set_style(x, y, offset_width, offset_height, cs0, cs1, cs2, cs3, cs4, cs5, cs6, cs7, cs8, cs9, cs10, cs11, cs12, cs13, cs14, cs15, cs16, cs17, cu0, cu1, cu2, cu16, cu17) {
+        wasm.node_set_style(this.ptr, x, y, offset_width, offset_height, cs0, cs1, cs2, cs3, cs4, cs5, cs6, cs7, cs8, cs9, cs10, cs11, cs12, cs13, cs14, cs15, cs16, cs17, cu0, cu1, cu2, cu16, cu17);
+      }
+      /**
+       * @param {number} x
+       * @param {number} y
+       * @param {number} offset_width
+       * @param {number} offset_height
+       */
+
+    }, {
+      key: "set_xywh",
+      value: function set_xywh(x, y, offset_width, offset_height) {
+        wasm.node_set_xywh(this.ptr, x, y, offset_width, offset_height);
+      }
+      /**
+       * @param {number} x
+       * @param {number} y
+       * @param {number} offset_width
+       * @param {number} offset_height
+       */
+
+    }, {
+      key: "set_txt",
+      value: function set_txt(x, y, offset_width, offset_height) {
+        wasm.node_set_txt(this.ptr, x, y, offset_width, offset_height);
+      }
+      /**
+       * @param {number} a
+       * @param {number} b
+       * @param {number} c
+       * @param {number} d
+       * @param {number} e
+       * @param {number} f
+       * @param {number} g
+       * @param {number} h
+       * @param {number} i
+       * @param {number} j
+       * @param {number} k
+       * @param {number} l
+       * @param {number} m
+       * @param {number} n
+       * @param {number} o
+       * @param {number} p
+       */
+
+    }, {
+      key: "set_transform",
+      value: function set_transform(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {
+        wasm.node_set_transform(this.ptr, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "computed_style_ptr",
+      value: function computed_style_ptr() {
+        var ret = wasm.node_computed_style_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "transform_ptr",
+      value: function transform_ptr() {
+        var ret = wasm.node_transform_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "m_ptr",
+      value: function m_ptr() {
+        var ret = wasm.node_m_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "me_ptr",
+      value: function me_ptr() {
+        var ret = wasm.node_me_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "get_op",
+      value: function get_op() {
+        var ret = wasm.__wbg_get_node_opacity(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "get_rl",
+      value: function get_rl() {
+        var ret = wasm.__wbg_get_node_refresh_level(this.ptr);
+
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} diff
+       * @returns {number}
+       */
+
+    }, {
+      key: "before",
+      value: function before(diff) {
+        var ret = wasm.node_before(this.ptr, diff);
+        return ret >>> 0;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "after",
+      value: function after() {
+        var ret = wasm.node_after(this.ptr);
+        return ret >>> 0;
+      }
+      /**
+       * @param {Animation} ani
+       */
+
+    }, {
+      key: "cal_trans",
+      value: function cal_trans(ani) {
+        _assertClass(ani, Animation$1);
+
+        wasm.node_cal_trans(this.ptr, ani.ptr);
+      }
+      /**
+       * @param {number} rl
+       */
+
+    }, {
+      key: "cal_matrix",
+      value: function cal_matrix(rl) {
+        wasm.node_cal_matrix(this.ptr, rl);
+      }
+      /**
+       * @param {number} v
+       * @param {number} u
+       * @param {number} parent
+       * @returns {number}
+       */
+
+    }, {
+      key: "cal_size",
+      value: function cal_size(v, u, parent) {
+        var ret = wasm.node_cal_size(this.ptr, v, u, parent);
+        return ret;
+      }
+      /**
+       * @param {number} k
+       * @param {number} v
+       * @param {number} u
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "equal_style",
+      value: function equal_style(k, v, u) {
+        var ret = wasm.node_equal_style(this.ptr, k, v, u);
+        return ret !== 0;
+      }
+      /**
+       * @param {number} k
+       * @param {number} v
+       * @param {number} u
+       * @returns {boolean}
+       */
+
+    }, {
+      key: "equal_set_style",
+      value: function equal_set_style(k, v, u) {
+        var ret = wasm.node_equal_set_style(this.ptr, k, v, u);
+        return ret !== 0;
+      }
+      /**
+       * @param {number} k
+       * @param {number} v
+       * @param {number} u
+       */
+
+    }, {
+      key: "update_style",
+      value: function update_style(k, v, u) {
+        wasm.node_update_style(this.ptr, k, v, u);
+      }
+      /**
+       * @param {number} v
+       */
+
+    }, {
+      key: "offset_x",
+      value: function offset_x(v) {
+        wasm.node_offset_x(this.ptr, v);
+      }
+      /**
+       * @param {number} v
+       */
+
+    }, {
+      key: "offset_y",
+      value: function offset_y(v) {
+        wasm.node_offset_y(this.ptr, v);
+      }
+      /**
+       * @param {number} v
+       */
+
+    }, {
+      key: "resize_x",
+      value: function resize_x(v) {
+        wasm.node_resize_x(this.ptr, v);
+      }
+      /**
+       * @param {number} v
+       */
+
+    }, {
+      key: "resize_y",
+      value: function resize_y(v) {
+        wasm.node_resize_y(this.ptr, v);
+      }
+    }], [{
+      key: "__wrap",
+      value: function __wrap(ptr) {
+        var obj = Object.create(Node.prototype);
+        obj.ptr = ptr;
+        return obj;
+      }
+    }, {
+      key: "new",
+      value: function _new(is_text) {
+        var ret = wasm.node_new(is_text);
+        return Node.__wrap(ret);
+      }
+    }]);
+
+    return Node;
+  }();
+  /**
+   */
+
+  var Root$1 = /*#__PURE__*/function () {
+    function Root() {}
+
+    _createClass(Root, [{
+      key: "__destroy_into_raw",
+      value: function __destroy_into_raw() {
+        var ptr = this.ptr;
+        this.ptr = 0;
+        return ptr;
+      }
+    }, {
+      key: "free",
+      value: function free() {
+        var ptr = this.__destroy_into_raw();
+
+        wasm.__wbg_root_free(ptr);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "mode",
+      get: function get() {
+        var ret = wasm.__wbg_get_root_mode(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_root_mode(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "width",
+      get: function get() {
+        var ret = wasm.__wbg_get_root_width(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_root_width(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "height",
+      get: function get() {
+        var ret = wasm.__wbg_get_root_height(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_root_height(this.ptr, arg0);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "font_size",
+      get: function get() {
+        var ret = wasm.__wbg_get_root_font_size(this.ptr);
+
+        return ret;
+      }
+      /**
+       * @param {number} arg0
+       */
+      ,
+      set: function set(arg0) {
+        wasm.__wbg_set_root_font_size(this.ptr, arg0);
+      }
+      /**
+       * @returns {Root}
+       */
+
+    }, {
+      key: "add_node",
+      value:
+      /**
+       * @param {number} node
+       */
+      function add_node(node) {
+        wasm.root_add_node(this.ptr, node);
+      }
+      /**
+       * @param {number} i
+       */
+
+    }, {
+      key: "remove_node",
+      value: function remove_node(i) {
+        wasm.root_remove_node(this.ptr, i);
+      }
+      /**
+       * @param {number} i
+       * @param {number} node
+       */
+
+    }, {
+      key: "set_node",
+      value: function set_node(i, node) {
+        wasm.root_set_node(this.ptr, i, node);
+      }
+      /**
+       * @param {number} i
+       * @param {number} node
+       */
+
+    }, {
+      key: "insert_node",
+      value: function insert_node(i, node) {
+        wasm.root_insert_node(this.ptr, i, node);
+      }
+      /**
+       */
+
+    }, {
+      key: "clear",
+      value: function clear() {
+        wasm.root_clear(this.ptr);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "size",
+      value: function size() {
+        var ret = wasm.root_size(this.ptr);
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} width
+       * @param {number} height
+       */
+
+    }, {
+      key: "resize",
+      value: function resize(width, height) {
+        wasm.root_resize(this.ptr, width, height);
+      }
+      /**
+       * @param {number} diff
+       * @returns {number}
+       */
+
+    }, {
+      key: "before",
+      value: function before(diff) {
+        var ret = wasm.root_before(this.ptr, diff);
+        return ret >>> 0;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "after",
+      value: function after() {
+        var ret = wasm.root_after(this.ptr);
+        return ret >>> 0;
+      }
+      /**
+       * @param {number} n
+       */
+
+    }, {
+      key: "add_am_state",
+      value: function add_am_state(n) {
+        wasm.root_add_am_state(this.ptr, n);
+      }
+      /**
+       */
+
+    }, {
+      key: "refresh",
+      value: function refresh() {
+        wasm.root_refresh(this.ptr);
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "rl_ptr",
+      value: function rl_ptr() {
+        var ret = wasm.root_rl_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "me_ptr",
+      value: function me_ptr() {
+        var ret = wasm.root_me_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "op_ptr",
+      value: function op_ptr() {
+        var ret = wasm.root_op_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "vt_ptr",
+      value: function vt_ptr() {
+        var ret = wasm.root_vt_ptr(this.ptr);
+        return ret;
+      }
+      /**
+       * @returns {number}
+       */
+
+    }, {
+      key: "am_states_ptr",
+      value: function am_states_ptr() {
+        var ret = wasm.root_am_states_ptr(this.ptr);
+        return ret;
+      }
+    }], [{
+      key: "__wrap",
+      value: function __wrap(ptr) {
+        var obj = Object.create(Root.prototype);
+        obj.ptr = ptr;
+        return obj;
+      }
+    }, {
+      key: "new",
+      value: function _new() {
+        var ret = wasm.root_new();
+        return Root.__wrap(ret);
+      }
+    }]);
+
+    return Root;
+  }();
+
+  function load(_x, _x2) {
+    return _load.apply(this, arguments);
+  }
+
+  function _load() {
+    _load = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(module, imports) {
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.prev = 0;
+              _context2.next = 3;
+              return WebAssembly.instantiateStreaming(module, imports);
+
+            case 3:
+              return _context2.abrupt("return", _context2.sent);
+
+            case 6:
+              _context2.prev = 6;
+              _context2.t0 = _context2["catch"](0);
+
+              if (module.headers.get('Content-Type') !== 'application/wasm') {
+                inject.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", _context2.t0);
+              } else {
+                inject.error(_context2.t0.toString());
+              }
+
+            case 9:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, null, [[0, 6]]);
+    }));
+    return _load.apply(this, arguments);
+  }
+
+  var wasm$1 = {
+    init: function init(url, cb) {
+      return _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        var req, input, imports, res;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!((typeof fetch === "undefined" ? "undefined" : _typeof(fetch)) !== undefined && util.isFunction(fetch))) {
+                  _context.next = 13;
+                  break;
+                }
+
+                req = typeof location !== 'undefined' ? new URL(url, location.href) : new URL(url);
+                input = fetch(req);
+                imports = {
+                  wbg: {
+                    __wbg_log_7bf8a72f8beaaabe: function __wbg_log_7bf8a72f8beaaabe(arg0, arg1) {
+                      inject.log(getStringFromWasm0(arg0, arg1));
+                    },
+                    __wbindgen_throw: function __wbindgen_throw(arg0, arg1) {
+                      throw new Error(getStringFromWasm0(arg0, arg1));
+                    }
+                  }
+                };
+                _context.t0 = load;
+                _context.next = 7;
+                return input;
+
+              case 7:
+                _context.t1 = _context.sent;
+                _context.t2 = imports;
+                _context.next = 11;
+                return (0, _context.t0)(_context.t1, _context.t2);
+
+              case 11:
+                res = _context.sent;
+
+                if (res) {
+                  wasm = res.instance.exports;
+                }
+
+              case 13:
+                if (cb) {
+                  cb(wasm);
+                }
+
+                return _context.abrupt("return", wasm);
+
+              case 15:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+
+    get instance() {
+      return wasm;
+    },
+
+    Node: Node,
+    Root: Root$1,
+    Animation: Animation$1,
+    isWasmStyle: function isWasmStyle(k) {
+      return k === TRANSLATE_X$2 || k === TRANSLATE_Y$2 || k === TRANSLATE_Z$2 || k === ROTATE_X$2 || k === ROTATE_Y$2 || k === ROTATE_Z$2 || k === SCALE_X$2 || k === SCALE_Y$2 || k === SKEW_X$2 || k === SKEW_Y$2 || k === OPACITY$5 || k === TRANSFORM_ORIGIN$4;
+    }
+  };
+
   var _enums$STYLE_KEY$9 = enums.STYLE_KEY,
       FILTER$3 = _enums$STYLE_KEY$9.FILTER,
       TRANSFORM_ORIGIN$3 = _enums$STYLE_KEY$9.TRANSFORM_ORIGIN,
@@ -14797,7 +17810,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       TRANSLATE_Y$1 = _enums$STYLE_KEY$9.TRANSLATE_Y,
       TRANSLATE_Z$1 = _enums$STYLE_KEY$9.TRANSLATE_Z,
       BACKGROUND_SIZE$1 = _enums$STYLE_KEY$9.BACKGROUND_SIZE,
-      FONT_SIZE$3 = _enums$STYLE_KEY$9.FONT_SIZE,
+      FONT_SIZE$4 = _enums$STYLE_KEY$9.FONT_SIZE,
       FLEX_BASIS$3 = _enums$STYLE_KEY$9.FLEX_BASIS,
       FLEX_DIRECTION$2 = _enums$STYLE_KEY$9.FLEX_DIRECTION,
       WIDTH$6 = _enums$STYLE_KEY$9.WIDTH,
@@ -14857,7 +17870,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       BORDER_LEFT_COLOR$1 = _enums$STYLE_KEY$9.BORDER_LEFT_COLOR,
       BORDER_RIGHT_COLOR$1 = _enums$STYLE_KEY$9.BORDER_RIGHT_COLOR,
       BORDER_TOP_COLOR$1 = _enums$STYLE_KEY$9.BORDER_TOP_COLOR,
-      POSITION$4 = _enums$STYLE_KEY$9.POSITION;
+      WASM_STYLE_KEY$1 = enums.WASM_STYLE_KEY,
+      DIRECTION = enums.DIRECTION,
+      FILLS = enums.FILLS,
+      EASING = enums.EASING,
+      PLAY_STATE = enums.PLAY_STATE;
   var AUTO$5 = o$4.AUTO,
       PX$6 = o$4.PX,
       PERCENT$5 = o$4.PERCENT,
@@ -14874,50 +17891,21 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       calUnit = o$4.calUnit;
   var isNil$b = util.isNil,
       isFunction$5 = util.isFunction,
-      isNumber = util.isNumber,
+      isNumber$1 = util.isNumber,
       isObject = util.isObject,
       clone$1 = util.clone,
       equalArr = util.equalArr;
   var linear = easing.linear;
   var cloneStyle = css.cloneStyle,
       equalStyle$1 = css.equalStyle;
-  var isGeom$1 = o$2.isGeom,
-      GEOM$1 = o$2.GEOM;
+  var GEOM$1 = o$2.GEOM;
   var getLevel$1 = o$1.getLevel,
-      isRepaint$1 = o$1.isRepaint,
-      NONE$3 = o$1.NONE,
-      TF$2 = o$1.TRANSFORM,
-      TX$1 = o$1.TRANSLATE_X,
-      TY$1 = o$1.TRANSLATE_Y,
-      TZ$1 = o$1.TRANSLATE_Z,
-      RZ$1 = o$1.ROTATE_Z,
-      SX$1 = o$1.SCALE_X,
-      SY$1 = o$1.SCALE_Y,
-      SZ$1 = o$1.SCALE_Z,
-      SCALE$1 = o$1.SCALE;
+      NONE$3 = o$1.NONE;
   var isColorKey = key.isColorKey,
       isExpandKey = key.isExpandKey,
       isLengthKey = key.isLengthKey,
       isGradientKey = key.isGradientKey,
       isRadiusKey = key.isRadiusKey;
-  /**
-   * 通知root更新当前动画，需要根据frame的状态来决定是否是同步插入
-   * 在异步时，因为动画本身是异步，需要addRefreshTask
-   * 而如果此时frame在执行before过程中，说明帧动画本身是在before计算的，需要同步插入
-   * @param keys 样式所有的key
-   * @param root
-   * @param node
-   * @param aniParams 动画更新的特殊优化参数
-   * @param cb
-   */
-
-  function genBeforeRefresh(keys, root, node, aniParams, cb) {
-    if (aniParams && !aniParams.allInFn) {
-      aniParams = null;
-    }
-
-    root.__addUpdate(node, keys, null, null, null, aniParams, cb);
-  }
   /**
    * 将每帧的样式格式化，提取出offset属性并转化为时间，提取出缓动曲线easing
    * 加好空数组transition/keys，后续计算两帧之间变化时存入
@@ -14926,7 +17914,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
    * @param duration 动画时间长度
    * @param es options的easing曲线控制，frame没有自定义则使用全局的
    */
-
 
   function framing(style, duration, es) {
     var _style = style,
@@ -14958,7 +17945,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       timingFunction: getEasing(easing || es),
       transition: [],
       // 变化的属性
-      keys: [],
+      trans: [],
       // 变化的k
       fixed: [],
       // 不变的k
@@ -14971,7 +17958,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (n.u === PERCENT$5) {
         return n.v * 0.01 * container - p.v;
       } else if (n.u === REM$5) {
-        return n.v * root.computedStyle[FONT_SIZE$3] - p.v;
+        return n.v * root.computedStyle[FONT_SIZE$4] - p.v;
       } else if (n.u === VW$5) {
         return n.v * root.__width * 0.01 - p.v;
       } else if (n.u === VH$5) {
@@ -14985,7 +17972,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (n.u === PX$6) {
         return n.v * 100 / container - p.v;
       } else if (n.u === REM$5) {
-        return n.v * root.computedStyle[FONT_SIZE$3] * 100 / container - p.v;
+        return n.v * root.computedStyle[FONT_SIZE$4] * 100 / container - p.v;
       } else if (n.u === VW$5) {
         return n.v * root.__width / container - p.v;
       } else if (n.u === VH$5) {
@@ -14997,23 +17984,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     } else if (p.u === REM$5) {
       if (n.u === PX$6) {
-        return n.v / root.computedStyle[FONT_SIZE$3] - p.v;
+        return n.v / root.computedStyle[FONT_SIZE$4] - p.v;
       } else if (n.u === PERCENT$5) {
-        return n.v * 0.01 * container / root.computedStyle[FONT_SIZE$3] - p.v;
+        return n.v * 0.01 * container / root.computedStyle[FONT_SIZE$4] - p.v;
       } else if (n.u === VW$5) {
-        return n.v * root.__width * 0.01 / root.computedStyle[FONT_SIZE$3] - p.v;
+        return n.v * root.__width * 0.01 / root.computedStyle[FONT_SIZE$4] - p.v;
       } else if (n.u === VH$5) {
-        return n.v * root.__height * 0.01 / root.computedStyle[FONT_SIZE$3] - p.v;
+        return n.v * root.__height * 0.01 / root.computedStyle[FONT_SIZE$4] - p.v;
       } else if (n.u === VMAX$5) {
-        return n.v * Math.max(root.__width, root.__height) * 0.01 / root.computedStyle[FONT_SIZE$3] - p.v;
+        return n.v * Math.max(root.__width, root.__height) * 0.01 / root.computedStyle[FONT_SIZE$4] - p.v;
       } else if (n.u === VMIN$5) {
-        return n.v * Math.min(root.__width, root.__height) * 0.01 / root.computedStyle[FONT_SIZE$3] - p.v;
+        return n.v * Math.min(root.__width, root.__height) * 0.01 / root.computedStyle[FONT_SIZE$4] - p.v;
       }
     } else if (p.u === VW$5) {
       if (n.u === PX$6) {
         return n.v * 100 / root.__width - p.v;
       } else if (n.u === REM$5) {
-        return n.v * 100 * root.computedStyle[FONT_SIZE$3] / root.__width - p.v;
+        return n.v * 100 * root.computedStyle[FONT_SIZE$4] / root.__width - p.v;
       } else if (n.u === PERCENT$5) {
         return n.v * container / root.__width - p.v;
       } else if (n.u === VH$5) {
@@ -15027,7 +18014,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (n.u === PX$6) {
         return n.v * 100 / root.__height - p.v;
       } else if (n.u === REM$5) {
-        return n.v * 100 * root.computedStyle[FONT_SIZE$3] / root.__height - p.v;
+        return n.v * 100 * root.computedStyle[FONT_SIZE$4] / root.__height - p.v;
       } else if (n.u === VW$5) {
         return n.v * root.__width / root.__height - p.v;
       } else if (n.u === PERCENT$5) {
@@ -15041,7 +18028,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (n.u === PX$6) {
         return n.v * 100 / Math.max(root.__width, root.__height) - p.v;
       } else if (n.u === REM$5) {
-        return n.v * 100 * root.computedStyle[FONT_SIZE$3] / Math.max(root.__width, root.__height) - p.v;
+        return n.v * 100 * root.computedStyle[FONT_SIZE$4] / Math.max(root.__width, root.__height) - p.v;
       } else if (n.u === PERCENT$5) {
         return n.v * container / Math.max(root.__width, root.__height) - p.v;
       } else if (n.u === VW$5) {
@@ -15055,7 +18042,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (n.u === PX$6) {
         return n.v * 100 / Math.min(root.__width, root.__height) - p.v;
       } else if (n.u === REM$5) {
-        return n.v * 100 * root.computedStyle[FONT_SIZE$3] / Math.min(root.__width, root.__height) - p.v;
+        return n.v * 100 * root.computedStyle[FONT_SIZE$4] / Math.min(root.__width, root.__height) - p.v;
       } else if (n.u === PERCENT$5) {
         return n.v * container / Math.min(root.__width, root.__height) - p.v;
       } else if (n.u === VW$5) {
@@ -15150,7 +18137,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             if (pvv.u === nvv.u) {
               v.push(nvv.v - pvv.v);
             } else {
-              var v2 = calByUnit(pvv, nvv, 0, target.root);
+              var v2 = calByUnit(pvv, nvv, 0, target.__root);
               v.push(v2);
             }
           } else if (_k === 'hueRotate' || _k === 'saturate' || _k === 'brightness' || _k === 'contrast' || _k === 'sepia' || _k === 'invert' || _k === 'grayscale') {
@@ -15165,7 +18152,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               if (a.u === b.u) {
                 _v.push(b.v - a.v);
               } else {
-                _v.push(calByUnit(a, b, _i === 1 ? target.clientHeight : target.clientWidth, target.root));
+                _v.push(calByUnit(a, b, _i === 1 ? target.__clientHeight : target.__clientWidth, target.__root));
               }
             }
 
@@ -15196,7 +18183,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (pi.u === ni.u) {
           res.v.push(ni.v - pi.v);
         } else {
-          var _v2 = calByUnit(pi, ni, target[_i2 ? 'outerHeight' : 'outerWidth'], target.root);
+          var _v2 = calByUnit(pi, ni, target[_i2 ? '__outerHeight' : '__outerWidth'], target.__root);
 
           res.v.push(_v2);
         }
@@ -15217,14 +18204,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var k2 = void 0;
 
           if (['padding-box', 'paddingBox'].indexOf(target.computedStyle[BACKGROUND_CLIP$1]) > -1) {
-            k2 = k === BACKGROUND_POSITION_X$1 ? 'clientWidth' : 'clientHeight';
+            k2 = k === BACKGROUND_POSITION_X$1 ? '__clientWidth' : '__clientHeight';
           } else if (['content-box', 'contentBox'].indexOf(target.computedStyle[BACKGROUND_CLIP$1]) > -1) {
-            k2 = k === BACKGROUND_POSITION_X$1 ? 'width' : 'height';
+            k2 = k === BACKGROUND_POSITION_X$1 ? '__width' : '__height';
           } else {
-            k2 = k === BACKGROUND_POSITION_X$1 ? 'offsetWidth' : 'offsetHeight';
+            k2 = k === BACKGROUND_POSITION_X$1 ? '__offsetWidth' : '__offsetHeight';
           }
 
-          var _v4 = calByUnit(_pi, _ni, target[k2], target.root);
+          var _v4 = calByUnit(_pi, _ni, target[k2], target.__root);
 
           res.v.push(_v4);
         }
@@ -15247,7 +18234,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (_a[j].u === _b[j].u) {
             _v5.push(_b[j].v - _a[j].v);
           } else {
-            var _v6 = calByUnit(_a[j], _b[j], _i4 === 1 ? target.offsetHeight : target.offsetWidth, target.root);
+            var _v6 = calByUnit(_a[j], _b[j], _i4 === 1 ? target.__offsetHeight : target.__offsetWidth, target.__root);
 
             _v5.push(_v6);
           }
@@ -15292,14 +18279,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             var _k2 = void 0;
 
             if (['padding-box', 'paddingBox'].indexOf(target.computedStyle[BACKGROUND_CLIP$1]) > -1) {
-              _k2 = _i5 ? 'clientWidth' : 'clientHeight';
+              _k2 = _i5 ? '__clientWidth' : '__clientHeight';
             } else if (['content-box', 'contentBox'].indexOf(target.computedStyle[BACKGROUND_CLIP$1]) > -1) {
-              _k2 = _i5 ? 'width' : 'height';
+              _k2 = _i5 ? '__width' : '__height';
             } else {
-              _k2 = _i5 ? 'offsetWidth' : 'offsetHeight';
+              _k2 = _i5 ? '__offsetWidth' : '__offsetHeight';
             }
 
-            var _v7 = calByUnit(pp, nn, target[_k2], target.root);
+            var _v7 = calByUnit(pp, nn, target[_k2], target.__root);
 
             temp.push(_v7);
           }
@@ -15337,23 +18324,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           res.v.push(_v9);
         }
 
-        var _v8 = calByUnit(_pi3, _ni3, target.offsetWidth, target.root);
+        var _v8 = calByUnit(_pi3, _ni3, target.__offsetWidth, target.__root);
 
         res.v.push(_v8);
       }
     } // 特殊的path，不存在style中但在动画某帧中，不会统一化所以可能反向计算frameR时后一帧没有
     else if (k === TRANSLATE_PATH && p) {
-      var k1 = 'offsetWidth',
-          _k3 = 'offsetHeight';
+      var k1 = '__offsetWidth',
+          _k3 = '__offsetHeight';
       var computedStyle = target && target.__computedStyle;
 
       if (computedStyle) {
         if (['padding-box', 'paddingBox'].indexOf(computedStyle[BACKGROUND_CLIP$1]) > -1) {
-          k1 = 'clientWidth';
-          _k3 = 'clientHeight';
+          k1 = '__clientWidth';
+          _k3 = '__clientHeight';
         } else if (['content-box', 'contentBox'].indexOf(computedStyle[BACKGROUND_CLIP$1]) > -1) {
-          k1 = 'width';
-          _k3 = 'height';
+          k1 = '__width';
+          _k3 = '__height';
         }
       }
 
@@ -15375,27 +18362,27 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
         } else if (u === REM$5) {
           return {
-            v: (parseFloat(v) || 0) * target.root.computedStyle[FONT_SIZE$3] * 100,
+            v: (parseFloat(v) || 0) * target.__root.computedStyle[FONT_SIZE$4] * 100,
             u: PX$6
           };
         } else if (u === VW$5) {
           return {
-            v: (parseFloat(v) || 0) * 0.01 * target.root.__width,
+            v: (parseFloat(v) || 0) * 0.01 * target.__root.__width,
             u: PX$6
           };
         } else if (u === VH$5) {
           return {
-            v: (parseFloat(v) || 0) * 0.01 * target.root.__height,
+            v: (parseFloat(v) || 0) * 0.01 * target.__root.__height,
             u: PX$6
           };
         } else if (u === VMAX$5) {
           return {
-            v: (parseFloat(v) || 0) * 0.01 * Math.max(target.root.__width, target.root.__height),
+            v: (parseFloat(v) || 0) * 0.01 * Math.max(target.__root.__width, target.__root.__height),
             u: PX$6
           };
         } else if (u === VMIN$5) {
           return {
-            v: (parseFloat(v) || 0) * 0.01 * Math.min(target.root.__width, target.root.__height),
+            v: (parseFloat(v) || 0) * 0.01 * Math.min(target.__root.__width, target.__root.__height),
             u: PX$6
           };
         } else {
@@ -15415,7 +18402,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         res.v = _v10;
       } else {
-        var _v11 = calByUnit(p, n, target[k === TRANSLATE_X$1 || k === TRANSLATE_Z$1 ? 'outerWidth' : 'outerHeight'], target.root);
+        var _v11 = calByUnit(p, n, target[k === TRANSLATE_X$1 || k === TRANSLATE_Z$1 ? '__outerWidth' : '__outerHeight'], target.__root);
 
         if (!_v11) {
           return;
@@ -15429,27 +18416,27 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return;
       }
 
-      var _computedStyle = target.computedStyle;
-      var parentComputedStyle = (target.domParent || target).computedStyle;
+      var _computedStyle = target.__computedStyle;
+      var parentComputedStyle = (target.__domParent || target).__computedStyle;
       var diff = 0;
 
       if (p.u === n.u) {
         diff = n.v - p.v;
       } // lineHeight奇怪的单位变化，%相对于fontSize
       else if (k === LINE_HEIGHT$3) {
-        diff = calByUnit(p, n, _computedStyle[FONT_SIZE$3], target.root);
+        diff = calByUnit(p, n, _computedStyle[FONT_SIZE$4], target.__root);
       } // fontSize的%相对于parent的
-      else if (k === FONT_SIZE$3) {
-        diff = calByUnit(p, n, parentComputedStyle[FONT_SIZE$3], target.root);
+      else if (k === FONT_SIZE$4) {
+        diff = calByUnit(p, n, parentComputedStyle[FONT_SIZE$4], target.__root);
       } // 相对于父height的特殊属性
       else if (k === FLEX_BASIS$3 && ['column', 'column-reverse', 'columnReverse'].indexOf(_computedStyle[FLEX_DIRECTION$2]) > -1 || [HEIGHT$6, TOP$4, BOTTOM$4].indexOf(k) > -1) {
         if (p.u !== AUTO$5 && n.u !== AUTO$5) {
-          diff = calByUnit(p, n, parentComputedStyle[HEIGHT$6], target.root);
+          diff = calByUnit(p, n, parentComputedStyle[HEIGHT$6], target.__root);
         }
       } // 其余都是相对于父width的
       else {
         if (p.u !== AUTO$5 && n.u !== AUTO$5) {
-          diff = calByUnit(p, n, parentComputedStyle[WIDTH$6], target.root);
+          diff = calByUnit(p, n, parentComputedStyle[WIDTH$6], target.__root);
         }
       } // 兜底NaN非法
 
@@ -15701,7 +18688,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (a[1].u === b[1].u) {
           t.push(b[1].v - a[1].v);
         } else {
-          var v = calByUnit(a[1], b[1], target.clientWidth, target.root);
+          var v = calByUnit(a[1], b[1], target.__clientWidth, target.__root);
           t.push(v || 0);
         }
       }
@@ -15779,7 +18766,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (pp.u === np.u) {
             temp[2].push(np.v - pp.v);
           } else {
-            var _v17 = calByUnit(pp, np, target[_i14 ? 'clientWidth' : 'clientHeight'], target.root);
+            var _v17 = calByUnit(pp, np, target[_i14 ? '__clientWidth' : '__clientHeight'], target.__root);
 
             temp[2].push(_v17 || 0);
           }
@@ -15800,7 +18787,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (_pp[1] === _np[1]) {
           temp[2].push(_np[0] - _pp[0]);
         } else {
-          var _v18 = calByUnit(_pp, _np, target[_i15 ? 'clientWidth' : 'clientHeight'], target.root);
+          var _v18 = calByUnit(_pp, _np, target[_i15 ? '__clientWidth' : '__clientHeight'], target.__root);
 
           temp[2].push(_v18 || 0);
         }
@@ -15815,9 +18802,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
    */
 
 
-  function calFrame(prev, next, keys, target) {
-    var currentStyle = target.__currentStyle,
-        hasTp,
+  function calFrame(prev, next, keys, target, isGeom) {
+    var hasTp,
         allInFn = true;
 
     for (var i = 0, len = keys.length; i < len; i++) {
@@ -15829,8 +18815,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           hasTp = true;
         }
 
-        ts.cs = currentStyle[k];
-        var fn = CAL_HASH[k];
+        var fn = CAL_HASH[k]; // Geom特殊属性没有fn
 
         if (fn) {
           ts.fn = fn;
@@ -15839,8 +18824,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         prev.transition.push(ts);
-        prev.keys.push(k);
-      } else if (k !== TRANSLATE_PATH) {
+        prev.trans.push(k);
+      } // 无法形成连续计算的或者不变的记录下来
+      else if (k !== TRANSLATE_PATH) {
         prev.fixed.push(k);
         allInFn = false;
       }
@@ -15848,16 +18834,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
     if (hasTp) {
-      var _i16 = prev.keys.indexOf(TRANSLATE_X$1);
+      var _i16 = prev.trans.indexOf(TRANSLATE_X$1);
 
       if (_i16 === -1) {
-        prev.keys.push(TRANSLATE_X$1);
+        prev.trans.push(TRANSLATE_X$1);
       }
 
-      _i16 = prev.keys.indexOf(TRANSLATE_Y$1);
+      _i16 = prev.trans.indexOf(TRANSLATE_Y$1);
 
       if (_i16 === -1) {
-        prev.keys.push(TRANSLATE_Y$1);
+        prev.trans.push(TRANSLATE_Y$1);
       }
 
       _i16 = prev.fixed.indexOf(TRANSLATE_X$1);
@@ -15871,44 +18857,32 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       if (_i16 > -1) {
         prev.fixed.splice(_i16, 1);
       }
-    }
-
-    prev.allInFn = allInFn; // 特殊优化，加速通知Root的更新
-
-    if (allInFn) {
-      var lv = NONE$3;
-      var computedStyle = target.__computedStyle;
-
-      for (var _i17 = 0, _len8 = keys.length; _i17 < _len8; _i17++) {
-        var _k5 = keys[_i17];
-        lv |= getLevel$1(_k5);
-
-        if (_k5 === Z_INDEX$3) {
-          prev.hasZ = ['relative', 'absolute'].indexOf(computedStyle[POSITION$4]) > -1;
-        } else if (_k5 === COLOR$2) {
-          prev.hasColor = true;
-        } else if (_k5 === TEXT_STROKE_COLOR$2) {
-          prev.hasTsColor = true;
-        } else if (_k5 === TEXT_STROKE_WIDTH$2) {
-          prev.hasTsWidth = true;
-        } else if (_k5 === TEXT_STROKE_OVER$2) {
-          prev.hasTsOver = true;
-        }
-      } // 提前计算
+    } // 特殊优化，加速通知Root的更新
 
 
-      prev.lv = lv;
-      prev.isRepaint = isRepaint$1(lv); // 常见的几种动画matrix计算是否可优化提前计算
+    var lv = NONE$3;
+    var trans = prev.trans; // 此帧过程中一定变化的，预先计算lv加速，一些影响继承的标识后续特殊处理
 
-      if (prev.isRepaint && lv & (TX$1 | TY$1 | TZ$1 | RZ$1 | SCALE$1)) {
-        if (lv & TF$2 || lv & SX$1 && !computedStyle[SCALE_X$1] || lv & SY$1 && !computedStyle[SCALE_Y$1] || lv & SZ$1 && !computedStyle[SCALE_Z$1] || lv & RZ$1 && (computedStyle[ROTATE_X$1] || computedStyle[ROTATE_Y$1] || computedStyle[SKEW_X$1] || computedStyle[SKEW_Y$1])) {
-          prev.optimize = false;
-        } else {
-          prev.optimize = true;
-        }
-      }
-    }
+    for (var _i17 = 0, _len8 = trans.length; _i17 < _len8; _i17++) {
+      var _k5 = trans[_i17];
+      lv |= getLevel$1(_k5);
 
+      if (_k5 === COLOR$2) {
+        prev.hasColor = true;
+      } else if (_k5 === TEXT_STROKE_COLOR$2) {
+        prev.hasTsColor = true;
+      } else if (_k5 === TEXT_STROKE_WIDTH$2) {
+        prev.hasTsWidth = true;
+      } else if (_k5 === TEXT_STROKE_OVER$2) {
+        prev.hasTsOver = true;
+      } // display和visibility固定在fixed里这里不出现，zIndex需要考虑abs等这里也不处理
+
+    } // 提前计算，不包含fixed的
+
+
+    prev.lv = lv;
+    prev.allInFn = allInFn;
+    prev.isGeom = isGeom;
     return next;
   }
 
@@ -15924,8 +18898,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           // steps有效定义正整数
           if (steps && steps > 0) {
             var per = 1 / steps;
-            var n = stepsD === 'start' ? Math.ceil(percent / per) : Math.floor(percent / per);
-            return n / steps;
+            var res = Math.floor(percent / per); // 默认end
+
+            if (stepsD === 'start') {
+              res++;
+            }
+
+            return res / steps;
           }
 
           return percent;
@@ -15953,7 +18932,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   CAL_HASH[BACKGROUND_SIZE$1] = calBgSize;
   CAL_HASH[OPACITY$4] = CAL_HASH[Z_INDEX$3] = calNumber;
   CAL_HASH[TRANSLATE_PATH] = calPath;
-  CAL_HASH[FONT_SIZE$3] = CAL_HASH[TEXT_STROKE_WIDTH$2] = CAL_HASH[BORDER_BOTTOM_WIDTH$3] = CAL_HASH[BORDER_LEFT_WIDTH$6] = CAL_HASH[BORDER_RIGHT_WIDTH$5] = CAL_HASH[BORDER_TOP_WIDTH$4] = CAL_HASH[LEFT$3] = CAL_HASH[TOP$4] = CAL_HASH[RIGHT$3] = CAL_HASH[BOTTOM$4] = CAL_HASH[FLEX_BASIS$3] = CAL_HASH[WIDTH$6] = CAL_HASH[HEIGHT$6] = CAL_HASH[LINE_HEIGHT$3] = CAL_HASH[MARGIN_BOTTOM$4] = CAL_HASH[MARGIN_TOP$4] = CAL_HASH[MARGIN_LEFT$6] = CAL_HASH[MARGIN_RIGHT$5] = CAL_HASH[PADDING_TOP$4] = CAL_HASH[PADDING_RIGHT$5] = CAL_HASH[PADDING_LEFT$6] = CAL_HASH[PADDING_BOTTOM$3] = CAL_HASH[STROKE_WIDTH$7] = CAL_HASH[STROKE_MITERLIMIT$1] = CAL_HASH[LETTER_SPACING$1] = CAL_HASH[PERSPECTIVE$2] = CAL_HASH[TRANSLATE_X$1] = CAL_HASH[TRANSLATE_Y$1] = CAL_HASH[TRANSLATE_Z$1] = CAL_HASH[SKEW_X$1] = CAL_HASH[SKEW_Y$1] = CAL_HASH[SCALE_X$1] = CAL_HASH[SCALE_Y$1] = CAL_HASH[SCALE_Z$1] = CAL_HASH[ROTATE_X$1] = CAL_HASH[ROTATE_Y$1] = CAL_HASH[ROTATE_Z$1] = calLength;
+  CAL_HASH[FONT_SIZE$4] = CAL_HASH[TEXT_STROKE_WIDTH$2] = CAL_HASH[BORDER_BOTTOM_WIDTH$3] = CAL_HASH[BORDER_LEFT_WIDTH$6] = CAL_HASH[BORDER_RIGHT_WIDTH$5] = CAL_HASH[BORDER_TOP_WIDTH$4] = CAL_HASH[LEFT$3] = CAL_HASH[TOP$4] = CAL_HASH[RIGHT$3] = CAL_HASH[BOTTOM$4] = CAL_HASH[FLEX_BASIS$3] = CAL_HASH[WIDTH$6] = CAL_HASH[HEIGHT$6] = CAL_HASH[LINE_HEIGHT$3] = CAL_HASH[MARGIN_BOTTOM$4] = CAL_HASH[MARGIN_TOP$4] = CAL_HASH[MARGIN_LEFT$6] = CAL_HASH[MARGIN_RIGHT$5] = CAL_HASH[PADDING_TOP$4] = CAL_HASH[PADDING_RIGHT$5] = CAL_HASH[PADDING_LEFT$6] = CAL_HASH[PADDING_BOTTOM$3] = CAL_HASH[STROKE_WIDTH$7] = CAL_HASH[STROKE_MITERLIMIT$1] = CAL_HASH[LETTER_SPACING$1] = CAL_HASH[PERSPECTIVE$2] = CAL_HASH[TRANSLATE_X$1] = CAL_HASH[TRANSLATE_Y$1] = CAL_HASH[TRANSLATE_Z$1] = CAL_HASH[SKEW_X$1] = CAL_HASH[SKEW_Y$1] = CAL_HASH[SCALE_X$1] = CAL_HASH[SCALE_Y$1] = CAL_HASH[SCALE_Z$1] = CAL_HASH[ROTATE_X$1] = CAL_HASH[ROTATE_Y$1] = CAL_HASH[ROTATE_Z$1] = calLength;
   CAL_HASH[BACKGROUND_IMAGE$1] = CAL_HASH[FILL$2] = CAL_HASH[STROKE$1] = calGradient;
   CAL_HASH[BACKGROUND_COLOR$1] = CAL_HASH[BORDER_BOTTOM_COLOR$1] = CAL_HASH[BORDER_LEFT_COLOR$1] = CAL_HASH[BORDER_RIGHT_COLOR$1] = CAL_HASH[BORDER_TOP_COLOR$1] = CAL_HASH[COLOR$2] = CAL_HASH[TEXT_STROKE_COLOR$2] = calColor; // transform特殊处理，只有1个matrix，有可能不存在，需给默认矩阵
 
@@ -16188,21 +19167,40 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var currentStyle = target.__currentStyle,
         currentProps = target.__currentProps,
         res = [];
+    var wn = target.__wasmNode;
 
     for (var i = 0, len = keys.length; i < len; i++) {
       var k = keys[i],
           v = style[k];
+      var isGeom = GEOM$1.hasOwnProperty(k);
 
-      var _isGeom = GEOM$1.hasOwnProperty(k);
-
-      if (!equalStyle$1(k, v, _isGeom ? currentProps[k] : currentStyle[k], target)) {
-        if (_isGeom) {
+      if (isGeom) {
+        if (!equalStyle$1(k, v, currentProps[k], target)) {
           currentProps[k] = v;
-        } else {
-          currentStyle[k] = v;
+          res.push(k);
         }
+      } // wasm的情况transform和opacity都是在wasm上计算存储
+      else if (wn && wasm$1.isWasmStyle(k)) {
+        var n = WASM_STYLE_KEY$1[k];
 
-        res.push(k);
+        if (k === TRANSFORM_ORIGIN$3) {
+          if (!wn.equal_set_style(n, v[0].v, v[0].u) || !wn.equal_set_style(n, v[1].v, v[1].u)) {
+            res.push(k);
+          }
+        } else if (k === ROTATE_3D$1) {
+          if (!wn.equal_set_style(n, v[0].v, v[0].u) || !wn.equal_set_style(n, v[1].v, v[1].u) || !wn.equal_set_style(n, v[2].v, v[2].u)) {
+            res.push(k);
+          }
+        } else {
+          if (!wn.equal_set_style(n, v.v, v.u)) {
+            res.push(k);
+          }
+        }
+      } else {
+        if (!equalStyle$1(k, v, currentStyle[k], target)) {
+          currentStyle[k] = v;
+          res.push(k);
+        }
       }
     }
 
@@ -16232,7 +19230,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function frameCb(self) {
-    self.emit(Event.FRAME, self.__isChange);
+    self.emit(Event.FRAME, self.__isDelay);
 
     if (self.__firstPlay) {
       self.__firstPlay = false;
@@ -16241,11 +19239,108 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
     var cb = self.__playCb;
 
-    if (isFunction$5(cb)) {
-      cb(self.__isChange); // 清理要检查，gotoAndStop()这种cb回调中直接再次调用goto的话cb会不一致不能删除
+    if (cb) {
+      self.__playCb = null;
+      cb(true); // 标明异步回调
+    }
+  }
 
-      if (self.__playCb === cb) {
-        self.__playCb = null;
+  function wasmFrame(wa, wList, wHash, frames, isReverse) {
+    for (var i = 0, len = frames.length; i < len; i++) {
+      var _frames$i = frames[i],
+          style = _frames$i.style,
+          transition = _frames$i.transition,
+          trans = _frames$i.trans,
+          time = _frames$i.time,
+          _easing = _frames$i.easing;
+      var eType = EASING.DEFAULT,
+          x1 = 0,
+          y1 = 0,
+          x2 = 1,
+          y2 = 1;
+
+      if (Array.isArray(_easing)) {
+        if (_easing.length === 4) {
+          eType = EASING.EASE_CUSTOM;
+          x1 = parseFloat(_easing[0]) || 0;
+          y1 = parseFloat(_easing[1]) || 0;
+          x2 = parseFloat(_easing[2]) || 0;
+          y2 = parseFloat(_easing[3]) || 0;
+        }
+      } else if (_easing) {
+        _easing = _easing.toString();
+
+        if (/^\s*(?:cubic-bezier\s*)?\(\s*[\d.]+\s*,\s*[-\d.]+\s*,\s*[\d.]+\s*,\s*[-\d.]+\s*\)\s*$/i.test(_easing)) {
+          _easing = _easing.match(/[\d.]+/g);
+          eType = EASING.EASE_CUSTOM;
+          x1 = parseFloat(_easing[0]) || 0;
+          y1 = parseFloat(_easing[1]) || 0;
+          x2 = parseFloat(_easing[2]) || 0;
+          y2 = parseFloat(_easing[3]) || 0;
+        } else if (_easing === 'easeIn' || _easing === 'ease-in') {
+          eType = EASING.EASE_IN;
+        } else if (_easing === 'easeOut' || _easing === 'ease-out') {
+          eType = EASING.EASE_OUT;
+        } else if (_easing === 'ease') {
+          eType = EASING.EASE;
+        } else if (_easing === 'easeInOut' || _easing === 'ease-in-out') {
+          eType = EASING.EASE_IN_OUT;
+        } else if (_easing === 'linear') {
+          eType = EASING.LINEAR;
+        }
+      }
+
+      wa.add_frame(isReverse, time, eType, x1, y1, x2, y2); // 除了最后一帧，都有transition
+
+      if (i < len - 1) {
+        for (var j = 0, _len9 = transition.length; j < _len9; j++) {
+          var item = transition[j],
+              k = item.k;
+
+          if (wHash.hasOwnProperty(k)) {
+            var o = style[k];
+            var n = WASM_STYLE_KEY$1[k];
+            var diff = item.v; // 相关记录提取出来存到wasm记录上标识
+
+            transition.splice(j, 1);
+            trans.splice(j, 1); // transformOrigin和rotate3d是复合型对应多条，其它简单型
+
+            if (k === TRANSFORM_ORIGIN$3) {
+              wa.add_item(isReverse, n, o[0].v, o[0].u, diff[0]);
+              wa.add_item(isReverse, n + 1, o[1].v, o[1].u, diff[1]);
+            } else if (k === ROTATE_3D$1) {
+              wa.add_item(isReverse, n, o[0].v, o[0].u, diff[0]);
+              wa.add_item(isReverse, n + 1, o[1].v, o[1].u, diff[1]);
+              wa.add_item(isReverse, n + 1, o[2].v, o[2].u, diff[2]);
+            } else {
+              wa.add_item(isReverse, n, o.v, o.u, diff);
+            }
+
+            j--;
+            _len9--;
+          }
+        }
+      } // 最后一帧特殊处理，将样式存入，diff都设置0即可
+      else {
+        for (var _j6 = 0, _len10 = wList.length; _j6 < _len10; _j6++) {
+          var _k6 = wList[_j6];
+
+          if (style.hasOwnProperty(_k6)) {
+            var _o = style[_k6];
+            var _n = WASM_STYLE_KEY$1[_k6];
+
+            if (_k6 === TRANSFORM_ORIGIN$3) {
+              wa.add_item(isReverse, _n, _o[0].v, _o[0].u, 0);
+              wa.add_item(isReverse, _n + 1, _o[1].v, _o[1].u, 0);
+            } else if (_k6 === ROTATE_3D$1) {
+              wa.add_item(isReverse, _n, _o[0].v, _o[0].u, 0);
+              wa.add_item(isReverse, _n + 1, _o[1].v, _o[1].u, 0);
+              wa.add_item(isReverse, _n + 1, _o[2].v, _o[2].u, 0);
+            } else {
+              wa.add_item(isReverse, _n, _o.v, _o.u, 0);
+            }
+          }
+        }
       }
     }
   }
@@ -16260,6 +19355,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       _this = _Event.call(this) || this;
       _this.__id = uuid$3++;
+      _this.__wasmAnimation = null;
+      _this.__ignore = false; // wasm全部接管无需运行before/after
+
+      _this.__fromGoto = false; // play()和gotoAndPlay()区分来源
+
       list = clone$1(list || []);
 
       if (Array.isArray(list)) {
@@ -16286,9 +19386,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         list = [];
       }
 
-      if (isNumber(options)) {
+      if (isNumber$1(options)) {
         _this.__options = {
-          duration: options
+          duration: options,
+          fill: 'forwards'
         };
         options = _this.__options;
       }
@@ -16296,30 +19397,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var op = _this.__options = options || {
         duration: 0
       };
-      _this.__begin = true;
       _this.__playState = 'idle';
       _this.__target = target;
-      _this.__root = target.root;
-      _this.__isChange = false; // 每帧是否有变化，无变化不刷新也会触发frame事件
-
-      _this.__firstPlay = true;
-      _this.__firstEnter = true;
-      var iterations = _this.iterations = op.iterations;
+      _this.__root = target.__root;
       var duration = _this.duration = op.duration;
-
-      var _this$__init = _this.__init(list, iterations, duration, op.easing, target),
-          frames = _this$__init.frames,
-          framesR = _this$__init.framesR,
-          keys = _this$__init.keys,
-          originStyle = _this$__init.originStyle;
-
-      _this.__frames = frames;
-      _this.__framesR = framesR;
-      _this.__keys = keys;
-      _this.__originStyle = originStyle;
-      _this.__isDelay = false;
-      _this.__outBeginDelay = false;
-      _this.__playCount = 0;
+      var ea = _this.easing = op.easing;
       var fps = parseInt(op.fps) || 0;
 
       if (fps <= 0) {
@@ -16327,38 +19409,54 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
 
       _this.fps = fps;
-      _this.spfLimit = op.spfLimit;
       _this.delay = op.delay;
       _this.endDelay = op.endDelay;
       _this.playbackRate = op.playbackRate;
       _this.fill = op.fill;
       _this.iterations = op.iterations;
       _this.direction = op.direction;
-      _this.easing = op.easing;
       _this.areaStart = op.areaStart; // ae中的功能，播放中间一段动画，为0忽略
 
       _this.areaDuration = op.areaDuration;
+
+      var _this$__init = _this.__init(list, duration, ea, target, op.isGeom),
+          frames = _this$__init.frames,
+          framesR = _this$__init.framesR,
+          keys = _this$__init.keys,
+          originStyle = _this$__init.originStyle;
+
+      _this.__frames = frames;
+      _this.__framesR = framesR;
+      _this.__fps = fps;
+      _this.__keys = keys;
+      _this.__originStyle = originStyle;
+      _this.__firstPlay = true;
+      _this.__begin = true;
+      _this.__end = false;
+      _this.__isDelay = false;
+      _this.__isEndDelay = false;
+      _this.__playCount = 0;
       _this.__currentFrames = {
         reverse: true,
         'alternate-reverse': true,
         alternateReverse: true
-      }.hasOwnProperty(op.direction) ? framesR : frames;
+      }.hasOwnProperty(_this.__direction) ? framesR : frames;
       var controller = op.controller;
 
-      if (controller instanceof Controller) {
+      if (controller && controller instanceof Controller) {
         controller.add(_assertThisInitialized(_this));
       } else if (controller) {
         _this.addControl();
       } // 时间戳
 
 
-      _this.__timestamp = frame.__now;
+      _this.__startTime = 0;
       return _this;
     }
 
     _createClass(Animation, [{
       key: "__init",
-      value: function __init(list, iterations, duration, easing, target) {
+      value: function __init(list, duration, ea, target, isGeom) {
         if (list.length < 1) {
           return {
             frames: [],
@@ -16369,17 +19467,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // 标准化帧
 
 
-        var frames = Animation.parse(list, duration, easing, target); // 为方便两帧之间计算变化，强制统一所有帧的css属性相同，没有写的为节点的当前样式currentStyle
+        var frames = Animation.parse(list, duration, ea, target); // 为方便两帧之间计算变化，强制统一所有帧的css属性相同，没有写的为节点的当前样式currentStyle
 
         var keys = Animation.unify(frames, target);
-        Animation.inherit(frames, keys, target);
+        Animation.inherit(frames, keys, target); // 反向的帧复制出来
+
         var framesR = clone$1(frames).reverse(); // 存储原本样式以便恢复用
 
         var __currentStyle = target.__currentStyle,
             __currentProps = target.__currentProps;
         var originStyle = {};
         keys.forEach(function (k) {
-          if (isGeom$1(target.tagName, k)) {
+          if (isGeom && o$2.isGeom(target.tagName, k)) {
             originStyle[k] = __currentProps[k];
           }
 
@@ -16387,12 +19486,69 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         });
         originStyle = cloneStyle(originStyle, keys); // 再计算两帧之间的变化，存入transition/fixed属性
 
-        Animation.calTransition(frames, keys, target); // 反向存储帧的倒排结果
+        Animation.calTransition(frames, keys, target, isGeom); // 反向存储帧的倒排结果
 
-        framesR.forEach(function (item) {
+        framesR.forEach(function (item, i) {
           item.time = duration - item.time;
+          item.index = i;
         });
-        Animation.calTransition(framesR, keys, target);
+        Animation.calTransition(framesR, keys, target, isGeom); // wasm优化和matrix有关的，提取出来交给rust处理
+
+        var wn = target.__wasmNode,
+            wList = [],
+            wHash = {};
+
+        if (wn) {
+          for (var i = 0, len = keys.length; i < len; i++) {
+            var k = keys[i];
+
+            if (wasm$1.isWasmStyle(k)) {
+              wList.push(k);
+              wHash[k] = true;
+            }
+          } // 有相关的才交给wasm，并移除js中transition计算
+
+
+          if (wList.length) {
+            var iter = this.__iterations === Infinity ? 0 : this.__iterations;
+            var easeType = getEaseType(ea);
+            var wa = this.__wasmAnimation = wasm$1.Animation["new"](target.__wasmNode.ptr, DIRECTION[this.__direction] || 0, this.__duration, this.__fps, this.__delay, this.__endDelay, FILLS[this.__fill] || 0, this.__playbackRate, iter, this.__areaStart, this.__areaDuration, easeType);
+
+            if (easeType === EASING.EASE_CUSTOM) {
+              var v = ea.match(/[\d.]+/g);
+
+              if (v.length === 4) {
+                wa.set_bezier(parseFloat(v[0]), parseFloat(v[1]), parseFloat(v[2]), parseFloat(v[3]));
+              }
+            }
+
+            wasmFrame(wa, wList, wHash, frames, false);
+            wasmFrame(wa, wList, wHash, framesR, true); // originStyle也需要wasm保存下来等结束还原用
+
+            for (var _i18 = 0, _len11 = wList.length; _i18 < _len11; _i18++) {
+              var _k7 = wList[_i18],
+                  n = WASM_STYLE_KEY$1[_k7],
+                  _v20 = __currentStyle[_k7];
+
+              if (_k7 === TRANSFORM_ORIGIN$3) {
+                wa.add_origin(n, _v20[0].v, _v20[0].u);
+                wa.add_origin(n + 1, _v20[1].v, _v20[1].u);
+              } else if (_k7 === ROTATE_3D$1) {
+                wa.add_origin(n, _v20[0].v, _v20[0].u);
+                wa.add_origin(n + 1, _v20[1].v, _v20[1].u);
+                wa.add_origin(n + 2, _v20[2].v, _v20[2].u);
+              } else {
+                wa.add_origin(n, _v20.v, _v20.u);
+              }
+            } // 没有其他的则全部交由wasm
+
+
+            if (wList.length === keys.length) {
+              this.__ignore = true;
+            }
+          }
+        }
+
         return {
           frames: frames,
           framesR: framesR,
@@ -16405,8 +19561,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       value: function __clean(isFinish) {
         this.__cancelTask();
 
-        this.__nextTime = 0;
-
         if (isFinish) {
           // gotoAndStop到一个很大的时间的话，也需要防止超过
           this.__currentTime = this.__delay + this.__duration * this.__iterations + this.__endDelay;
@@ -16414,6 +19568,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } else {
           this.__playCount = this.__currentTime = 0;
           this.__playState = 'idle';
+        }
+
+        var currentFrame = this.__currentFrame;
+
+        if (currentFrame) {
+          currentFrame.lastPercent = -1;
+          this.__currentFrame = null;
         }
       }
     }, {
@@ -16429,82 +19590,123 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         if (playState === 'running') {
+          if (isFunction$5(cb)) {
+            cb(true); // 同步回调
+          }
+
           return this;
         }
-
-        this.__cancelTask();
 
         this.__playCb = cb;
         this.__playState = 'running'; // 每次play调用标识第一次运行，需响应play事件和回调
 
-        this.__firstPlay = true;
-        this.__firstEnter = true;
-        this.__playCount = 0; // 防止finish/cancel事件重复触发，每次播放重置
+        this.__firstPlay = true; // gotoAndPlay时间已经计算好
 
-        this.__hasFin = false;
-        this.__hasCancel = false; // 只有第一次调用会进初始化，另外finish/cancel视为销毁也会重新初始化
+        var fromGoto = this.__fromGoto;
 
-        if (!this.__enterFrame) {
-          this.__enterFrame = true;
-          var framesR = this.__framesR;
-          var direction = this.__direction; // 初始化根据方向确定帧序列
+        if (fromGoto) {
+          this.__fromGoto = false;
+        } else {
+          this.__currentTime = 0;
+          this.__playCount = 0;
+        }
 
-          this.__currentFrames = {
-            reverse: true,
-            'alternate-reverse': true,
-            alternateReverse: true
-          }.hasOwnProperty(direction) ? framesR : frames;
-          this.__currentTime = this.__nextTime = this.__fpsTime = 0;
-        } // 添加每帧回调且立刻执行，本次执行调用refreshTask也是下一帧再渲染，frame的每帧都是下一帧
-        // frame.offFrame(this);
+        var currentTime = this.__currentTime;
+        this.__fpsTime = 0;
+
+        var currentFrames = this.__initCurrentFrames(this.__playCount); // fill停留在开始同步更新首帧样式，gotoPlay若不足delay亦是
 
 
-        frame.onFrame(this);
-        this.__startTime = frame.__now;
+        if (!fromGoto && this.__stayBegin || fromGoto && currentTime < this.__delay) {
+          var currentFrame = this.__currentFrame = currentFrames[0];
+          var target = this.__target,
+              _root = this.__root;
+          var keys = calLastStyle(currentFrame.style, target, this.__keys);
+          var isChange = !!keys.length;
+
+          if (this.__stopCb) {
+            _root.__cancelAsyncDraw(this.__stopCb);
+          } // 有变化的backwards才更新，否则无需理会，不需要回调，极端情况立刻pause()回造成一次无用刷新
+
+
+          if (isChange) {
+            _root.__addUpdate(target, keys, false, false, false, false, false, null);
+          }
+        } // 非首帧，gotoPlay要同步执行更新样式
+        else if (fromGoto) {
+          var areaDuration = this.__areaDuration;
+          var dur = areaDuration ? Math.min(duration, areaDuration) : duration; // 只有2帧可优化，否则2分查找当前帧
+
+          var i,
+              length = currentFrames.length;
+
+          if (length === 2) {
+            i = currentTime < dur ? 0 : 1;
+          } else {
+            i = Animation.binarySearch(0, length - 1, currentTime, currentFrames);
+          }
+
+          var _currentFrame = currentFrames[i]; // 一定不会是最后一帧
+
+          var percent;
+
+          if (length === 2) {
+            percent = currentTime / duration; // 不能是dur，按照原本计算
+          } else {
+            var time = _currentFrame.time;
+            var total = currentFrames[i + 1].time - time;
+            percent = (currentTime - time) / total;
+          } // 强制认为不是同一帧防止不执行
+
+
+          Animation.calIntermediateStyle(_currentFrame, percent, this.__target, true);
+        } // 开始时间为调用play时的帧时间
+
+
+        this.__startTime = frame.__now || (frame.__now = inject.now());
+        this.__begin = true;
         this.__end = false;
+        this.__isDelay = false;
+        this.__isEndDelay = false;
+        var wa = this.__wasmAnimation;
+
+        if (wa && !fromGoto) {
+          wa.play();
+        } // 由root统一控制，防止重复play
+
+
+        var root = this.__root;
+
+        root.__onAniFrame(this);
+
         return this;
       }
     }, {
       key: "__before",
       value: function __before(diff) {
-        this.__timestamp = frame.__now;
-        var target = this.__target;
+        // 有wasm且完全被包含情况忽略js计算，返回true标识，即便不完全包含，其它的引发的刷新逻辑也包含matrix+opacity
+        if (this.__ignore) {
+          return true;
+        }
+
         var fps = this.__fps;
         var currentFrames = this.__currentFrames;
         var iterations = this.__iterations;
-        var stayBegin = this.__stayBegin;
-        var stayEnd = this.__stayEnd;
         var delay = this.__delay;
         var areaStart = this.__areaStart;
         var areaDuration = this.__areaDuration;
-        var root = this.__root;
         var duration = this.__duration;
-        var endDelay = this.__endDelay;
-        var length = currentFrames.length;
         var playbackRate = this.__playbackRate;
-        var spfLimit = this.__spfLimit;
-        var currentTime = this.__currentTime = this.__nextTime;
-        var lastFrame = this.__currentFrame;
-        var dur = areaDuration ? Math.min(duration, areaDuration) : duration;
-        this.__isChange = false; // 定帧限制每帧时间间隔最大为spf
+        var dur = areaDuration ? Math.min(duration, areaDuration) : duration; // 播放时间累加，并且考虑播放速度加成
 
-        if (spfLimit) {
-          if (spfLimit === true) {
-            diff = Math.min(diff, 1000 / fps);
-          } else if (spfLimit > 0) {
-            diff = Math.min(diff, spfLimit);
-          }
-        } // 播放时间累加，并且考虑播放速度加成
-
-
-        if (playbackRate !== 1 && playbackRate > 0) {
+        if (playbackRate !== 1) {
           diff *= playbackRate;
         } // 用本帧和上帧时间差，计算累加运行时间currentTime，以便定位当前应该处于哪个时刻
 
 
-        this.__nextTime += diff; // 增加的fps功能，当<60时计算跳帧，每帧运行依旧累加时间，达到fps时重置，第一帧强制不跳
+        var currentTime = this.__currentTime += diff; // 增加的fps功能，当<60时计算跳帧，每帧运行依旧累加时间，达到fps时重置，第一帧强制不跳
 
-        if (!this.__firstEnter && fps < 60) {
+        if (!this.__firstPlay && fps > 0 && fps !== 60 && fps !== 120) {
           diff = this.__fpsTime += diff;
 
           if (diff < 1000 / fps) {
@@ -16513,46 +19715,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
 
           this.__fpsTime = 0;
-        }
+        } // delay仅第一次生效等待
 
-        this.__firstEnter = false; // delay仅第一次生效等待
 
         if (currentTime < delay - areaStart) {
-          if (stayBegin && !this.__isDelay) {
-            var _currentFrame = this.__currentFrame = currentFrames[0];
-
-            var _keys = calLastStyle(_currentFrame.style, target, this.__keys); // 特殊处理，将ts上的cs指向当前currentStyle，一些继承样式如color被更新，否则delay后计算会报错
-
-
-            var transition = _currentFrame.transition;
-
-            if (transition) {
-              var currentStyle = target.__currentStyle;
-
-              for (var _i18 = 0, len = transition.length; _i18 < len; _i18++) {
-                var item = transition[_i18];
-                item.cs = currentStyle[item.k] = item.st;
-              }
-            }
-
-            this.__isChange = !!_keys.length;
-            genBeforeRefresh(_keys, root, target, _currentFrame, null);
-          }
-
           this.__begin = false; // 默认是true，delay置false防触发
           // 即便不刷新，依旧执行帧回调，同时标明让后续第一帧响应begin
 
-          this.__outBeginDelay = true;
           this.__isDelay = true;
           return;
-        }
+        } // 减去delay，计算在哪一帧
 
-        this.__isDelay = false; // 减去delay，计算在哪一帧
 
         currentTime -= delay - areaStart;
 
-        if (this.__outBeginDelay) {
-          this.__outBeginDelay = false;
+        if (this.__isDelay) {
+          this.__isDelay = false;
           this.__begin = true;
         } // 超过duration非尾轮需处理回到开头，触发新一轮动画事件，这里可能时间间隔非常大直接跳过几轮
 
@@ -16563,106 +19741,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (this.__playCount < playCount) {
           this.__begin = true;
           this.__playCount = playCount;
-          var direction = this.__direction;
-          var frames = this.__frames;
-          var framesR = this.__framesR; // 有正反向播放需要重设帧序列
-
-          if (direction === 'alternate' || direction === 'alternate-reverse' || direction === 'alternateReverse') {
-            var isEven = playCount % 2 === 0;
-
-            if (direction === 'alternate') {
-              currentFrames = this.__currentFrames = isEven ? frames : framesR;
-            } else {
-              currentFrames = this.__currentFrames = isEven ? framesR : frames;
-            }
-          }
+          currentFrames = this.__initCurrentFrames(playCount);
         }
 
-        var isLastCount = playCount >= iterations - 1; // 只有2帧可优化，否则2分查找当前帧
-
-        var i, frameTime;
-
-        if (length === 2) {
-          i = currentTime < dur ? 0 : 1;
-          frameTime = dur;
-        } else {
-          i = Animation.binarySearch(0, length - 1, currentTime, currentFrames);
-          frameTime = currentFrames[i].time;
-        } // 最后一帧结束动画，仅最后一轮才会进入，需处理endDelay
-
-
-        var isLastFrame = isLastCount && i === length - 1;
-        var percent = 0;
-
-        if (isLastFrame) ; // 否则根据目前到下一帧的时间差，计算百分比，再反馈到变化数值上
-        else if (length === 2) {
-          percent = currentTime / duration; // 不能是dur，按照原本计算
-        } else {
-          var total = currentFrames[i + 1].time - frameTime;
-          percent = (currentTime - frameTime) / total;
-        }
-
-        var inEndDelay,
-            currentFrame = currentFrames[i];
-        var notSameFrame = lastFrame !== currentFrame; // 对比前后两帧是否为同一关键帧，不是则清除之前关键帧上的percent标识为-1，这样可以识别跳帧和本轮第一次进入此帧
-
-        if (notSameFrame) {
-          lastFrame && (lastFrame.lastPercent = -1);
-          this.__currentFrame = currentFrame;
-        }
-        /** 这里要考虑全几种场景：
-         * 1. 单次播放无endDelay且fill不停留（有/无差异，下同）
-         * 2. 单次播放无endDelay且fill停留
-         * 3. 单次播放有endDelay且fill不停留
-         * 4. 单次播放有endDelay且fill停留
-         * 5. 多次播放无endDelay且fill不停留（尾次/非尾次，下同）
-         * 6. 多次播放无endDelay且fill停留
-         * 7. 多次播放有endDelay且fill不停留
-         * 8. 多次播放有endDelay且fill停留
-         */
-
-
-        var needClean;
-        var keys;
-
-        if (isLastFrame) {
-          inEndDelay = currentTime < dur + endDelay; // 停留对比最后一帧，endDelay可能会多次进入这里，第二次进入样式相等不再重绘
-
-          if (stayEnd) {
-            keys = calLastStyle(currentFrame.style, target, this.__keys);
-          } // 不停留或超过endDelay则计算还原，有endDelay且fill模式不停留会再次进入这里
-          else {
-            keys = calLastStyle(this.__originStyle, target, this.__keys);
-            currentFrame = null; // 特殊清空，genBeforeRefresh（）时不传过去
-          } // 进入endDelay或结束阶段触发end事件，注意只触发一次，防重在触发的地方做
-
-
-          this.__nextEnd = true;
-
-          if (!inEndDelay) {
-            this.__playCount++;
-            this.__finished = true;
-            frame.offFrame(this);
-            needClean = true;
-            this.__nextTime = 0;
-          }
-        } else {
-          keys = Animation.calIntermediateStyle(currentFrame, percent, target, notSameFrame);
-        }
-
-        this.__isChange = !keys.length;
-        genBeforeRefresh(keys, root, target, currentFrame, null);
-
-        if (needClean) {
-          var playCb = this.__playCb;
-
-          this.__clean(true); // 丑陋的做法，防止gotoAndStop()这样的cb被clean()掉
-
-
-          if (playCb) {
-            this.__playCb = playCb;
-          }
-        }
+        this.__calCurrent(currentFrames, this.__currentFrame, currentTime, dur, duration, null);
       }
     }, {
       key: "__after",
@@ -16680,36 +19762,44 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // end事件只触发一次，末轮进入endDelay或直接结束时
 
 
-        if (this.__nextEnd && !this.__end) {
-          this.__end = true;
+        if (this.__end) {
+          this.__end = false;
           this.emit(Event.END, this.__playCount - 1);
         }
 
         if (this.__finished) {
-          this.__begin = this.__end = this.__isDelay = this.__finished = this.__inFps = this.__enterFrame = false;
+          this.__begin = this.__end = this.__isDelay = this.__isEndDelay = this.__finished = false;
           this.__playState = 'finished';
-          this.emit(Event.FINISH, this.__isChange);
+          this.emit(Event.FINISH, true);
+
+          this.__clean(true);
         }
       }
     }, {
       key: "pause",
-      value: function pause(silence) {
+      value: function pause() {
         var isDestroyed = this.__isDestroyed;
         var duration = this.__duration;
         var pending = this.pending;
 
         if (isDestroyed || duration <= 0 || pending) {
           return this;
+        } // 不能清空stopCb
+
+
+        if (this.__playState === 'running') {
+          this.__root.__offAniFrame(this);
         }
 
+        this.__playCb = null;
         this.__playState = 'paused';
+        var wa = this.__wasmAnimation;
 
-        this.__cancelTask();
-
-        if (!silence) {
-          this.emit(Event.PAUSE);
+        if (wa) {
+          wa.play_state = PLAY_STATE.PAUSED;
         }
 
+        this.emit(Event.PAUSE);
         return this;
       }
     }, {
@@ -16741,7 +19831,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (playState === 'finished') {
           if (isFunction$5(cb)) {
-            cb();
+            cb(true);
           }
 
           return this;
@@ -16750,50 +19840,53 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         this.__clean(true);
 
-        this.__begin = this.__end = this.__isDelay = this.__finished = this.__inFps = this.__enterFrame = false;
+        this.__begin = this.__end = this.__isDelay = this.__isEndDelay = this.__finished = this.__inFps = false;
         this.__playState = 'finished';
+        var wa = this.__wasmAnimation;
+
+        if (wa) {
+          wa.play_state = PLAY_STATE.FINISHED;
+        }
+
         var root = this.__root;
 
         if (root) {
           var target = this.__target;
           var style; // 是否停留在最后一帧
 
-          var currentFrame = null;
-
           if (this.__stayEnd) {
-            var framesR = this.__framesR;
-            var direction = this.__direction;
-            var iterations = this.__iterations;
+            var currentFrames = this.__initCurrentFrames(this.__playCount);
 
-            if ('reverse'.indexOf(direction) > -1) {
-              var _ref = [framesR, frames];
-              frames = _ref[0];
-              framesR = _ref[1];
-            }
-
-            if (iterations === Infinity || iterations % 2) {
-              currentFrame = frames[frames.length - 1];
-              style = currentFrame.style;
-            } else {
-              currentFrame = framesR[framesR.length - 1];
-              style = currentFrame.style;
-            }
+            var currentFrame = this.__currentFrame = currentFrames[currentFrames.length - 1];
+            style = currentFrame.style;
           } else {
             style = this.__originStyle;
           }
 
-          this.__currentFrame = currentFrame;
           var keys = calLastStyle(style, target, this.__keys);
-          this.__isChange = !keys.length;
-          genBeforeRefresh(keys, root, target, currentFrame, function () {
-            frameCb(_this2);
+          var isChange = !!keys.length;
 
-            _this2.emit(Event.FINISH, _this2.__isChange);
+          if (this.__stopCb) {
+            root.__cancelAsyncDraw(this.__stopCb);
+          }
+
+          this.__stopCb = function () {
+            if (isChange) {
+              frameCb(_this2);
+            }
+
+            _this2.emit(Event.FINISH, isChange);
 
             if (isFunction$5(cb)) {
-              cb(_this2.__isChange);
+              cb(isChange);
             }
-          });
+          };
+
+          if (isChange) {
+            root.__addUpdate(target, keys, false, false, false, false, false, this.__stopCb);
+          } else {
+            this.__stopCb();
+          }
         }
 
         return this;
@@ -16814,32 +19907,51 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (playState === 'idle') {
           if (isFunction$5(cb)) {
-            cb();
+            cb(true);
           }
 
           return this;
         }
 
-        this.__clean();
+        this.__clean(false);
 
-        this.__begin = this.__end = this.__isDelay = this.__finished = this.__inFps = this.__enterFrame = false;
+        this.__begin = this.__end = this.__isDelay = this.__isEndDelay = this.__finished = this.__inFps = false;
         this.__playState = 'idle';
+        var wa = this.__wasmAnimation;
+
+        if (wa) {
+          wa.play_state = PLAY_STATE.IDLE;
+        }
+
         this.__currentFrame = null;
         var root = this.__root;
 
         if (root) {
           var target = this.__target;
           var keys = calLastStyle(this.__originStyle, target, this.__keys);
-          this.__isChange = !keys.length;
-          genBeforeRefresh(keys, root, target, null, function () {
-            frameCb(_this3);
+          var isChange = !!keys.length;
 
-            _this3.emit(Event.CANCEL, _this3.__isChange);
+          if (this.__stopCb) {
+            root.__offFrame(this.__stopCb);
+          }
+
+          this.__stopCb = function () {
+            if (isChange) {
+              frameCb(_this3);
+            }
+
+            _this3.emit(Event.CANCEL, isChange);
 
             if (isFunction$5(cb)) {
-              cb(_this3.__isChange);
+              cb(isChange);
             }
-          });
+          };
+
+          if (isChange) {
+            root.__addUpdate(target, keys, false, false, false, false, false, this.__stopCb);
+          } else {
+            this.__stopCb();
+          }
         }
 
         return this;
@@ -16853,61 +19965,112 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var isDestroyed = this.__isDestroyed;
         var duration = this.__duration;
         var frames = this.__frames;
-        var delay = this.__delay;
-        var areaStart = this.__areaStart;
         var areaDuration = this.__areaDuration;
         var endDelay = this.__endDelay;
+        var currentTime = this.__currentTime;
         var dur = areaDuration ? Math.min(duration, areaDuration) : duration;
 
         if (isDestroyed || dur <= 0 || frames.length < 1) {
           return this;
+        } // 重复相同时间，且正在播放中，且
+
+
+        if (v === currentTime && this.__playState === 'running') {
+          if (isFunction$5(cb)) {
+            cb(true);
+          }
+
+          return;
         } // 计算出时间点直接累加播放
 
 
-        this.__goto(v, options.isFrame, options.excludeDelay);
+        v = this.__goto(v, options.isFrame, options.excludeDelay); // 已经结束提前跳出
 
-        if (v > dur + delay - areaStart + endDelay) {
-          return this.finish(cb);
+        if (v >= dur + endDelay) {
+          if (this.__stayEnd) {
+            this.finish(cb);
+          } else {
+            this.cancel(cb);
+          }
+
+          return;
         }
+
+        if (this.__playState === 'running') {
+          this.__cancelTask();
+        }
+
+        this.__playState = 'idle';
+        this.__fromGoto = true;
+        var wa = this.__wasmAnimation;
+        var wasmChange = false;
+
+        if (wa) {
+          wasmChange = wa.goto_stop(this.__currentTime, dur);
+        }
+
+        this.__calCurrent(this.__currentFrames, this.__currentFrame, v, dur, duration, {
+          wasmChange: wasmChange,
+          cb: cb
+        });
 
         return this.play(cb);
       }
     }, {
       key: "gotoAndStop",
       value: function gotoAndStop(v, options, cb) {
-        var _this4 = this;
-
         var t = gotoOverload(this, options, cb);
         options = t.options;
         cb = t.cb;
         var isDestroyed = this.__isDestroyed;
         var duration = this.__duration;
         var frames = this.__frames;
-        var delay = this.__delay;
-        var areaStart = this.__areaStart;
         var areaDuration = this.__areaDuration;
         var endDelay = this.__endDelay;
+        var currentTime = this.__currentTime;
         var dur = areaDuration ? Math.min(duration, areaDuration) : duration;
 
         if (isDestroyed || dur <= 0 || frames.length < 1) {
           return this;
+        } // 重复相同时间忽略
+
+
+        if (v === currentTime) {
+          if (isFunction$5(cb)) {
+            cb(true);
+          }
+
+          return;
         }
 
-        v = this.__goto(v, options.isFrame, options.excludeDelay);
+        v = this.__goto(v, options.isFrame, options.excludeDelay); // 已经结束提前跳出
 
-        if (v > dur + delay - areaStart + endDelay) {
-          return this.finish(cb);
-        } // 先play一帧，回调里模拟暂停
-
-
-        return this.play(function () {
-          _this4.__playState = 'paused';
-
-          _this4.__cancelTask();
-
-          if (isFunction$5(cb)) {
-            cb();
+        if (v >= dur + endDelay) {
+          if (this.__stayEnd) {
+            this.finish(cb);
+          } else {
+            this.cancel(cb);
           }
+
+          return;
+        }
+
+        if (this.__playState === 'running') {
+          this.__cancelTask();
+        }
+
+        this.__startTime = frame.__now = frame.__now || inject.now();
+        this.__playState = 'paused';
+        var wa = this.__wasmAnimation;
+        var wasmChange = false;
+
+        if (wa) {
+          wasmChange = wa.goto_stop(this.__currentTime, dur);
+        }
+
+        this.__calCurrent(this.__currentFrames, this.__currentFrame, v, dur, duration, {
+          wasmChange: wasmChange,
+          cb: cb
         });
       } // 返回不包含delay且去除多轮的时间
 
@@ -16918,7 +20081,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var duration = this.__duration;
         var areaDuration = this.__areaDuration;
         var dur = areaDuration ? Math.min(duration, areaDuration) : duration;
-        this.__playState = 'paused';
 
         if (isNaN(v) || v < 0) {
           throw new Error('Param of gotoAnd(Play/Stop) is illegal: ' + v);
@@ -16933,22 +20095,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // 在时间范围内设置好时间，复用play直接跳到播放点
 
 
-        this.__nextTime = v;
-        v -= this.__delay; // 超过时间长度需要累加次数，这里可以超过iterations，因为设定也许会非常大
+        this.__currentTime = v;
+        v -= this.__delay - this.__areaStart;
 
-        var playCount = 0;
+        if (v < 0) {
+          v = 0;
+        } // 超过时间长度需要累加次数，这里可以超过iterations，因为设定也许会非常大
 
-        while (v >= dur && playCount < iterations - 1) {
-          playCount++;
-          v -= dur;
-        }
 
-        this.__playCount = playCount; // 防止play()重置时间和当前帧组，提前计算好
+        var playCount = Math.min(iterations - 1, Math.floor(v / dur));
+        v -= dur * playCount;
+        this.__playCount = playCount;
 
-        this.__enterFrame = true;
+        this.__initCurrentFrames(playCount);
+
+        return v;
+      }
+    }, {
+      key: "__initCurrentFrames",
+      value: function __initCurrentFrames(playCount) {
         var frames = this.__frames;
         var framesR = this.__framesR;
-        var direction = this.__direction;
+        var direction = this.__direction; // 初始化根据方向确定帧序列
 
         if ({
           alternate: true,
@@ -16958,13 +20126,143 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var isEven = playCount % 2 === 0;
 
           if (direction === 'alternate') {
-            this.__currentFrames = isEven ? frames : framesR;
+            return this.__currentFrames = isEven ? frames : framesR;
           } else {
-            this.__currentFrames = isEven ? framesR : frames;
+            return this.__currentFrames = isEven ? framesR : frames;
           }
         }
 
-        return v;
+        return this.__currentFrames = direction === 'reverse' ? framesR : frames;
+      } // 有gotoCb时是来自gotoAndStop，gotoAndPlay则复用play
+
+    }, {
+      key: "__calCurrent",
+      value: function __calCurrent(currentFrames, lastFrame, currentTime, dur, duration, gotoParams) {
+        var isLastCount = this.__playCount >= this.__iterations - 1,
+            length = currentFrames.length; // 只有2帧可优化，否则2分查找当前帧
+
+        var i;
+
+        if (length === 2) {
+          i = currentTime < dur ? 0 : 1;
+        } else {
+          i = Animation.binarySearch(0, length - 1, currentTime, currentFrames);
+        }
+
+        var currentFrame = currentFrames[i]; // 最后一帧结束动画，仅最后一轮才会进入
+
+        var isLastFrame = isLastCount && i === length - 1;
+        var percent = 0;
+
+        if (isLastFrame) ; // 否则根据目前到下一帧的时间差，计算百分比，再反馈到变化数值上
+        else if (length === 2) {
+          percent = currentTime / duration; // 不能是dur，按照原本计算
+        } else {
+          var time = currentFrame.time;
+          var total = currentFrames[i + 1].time - time;
+          percent = (currentTime - time) / total;
+        }
+
+        var notSameFrame = lastFrame !== currentFrame; // 对比前后两帧是否为同一关键帧，不是则清除之前关键帧上的percent标识为-1，这样可以识别跳帧和本轮第一次进入此帧
+
+        if (notSameFrame) {
+          lastFrame && (lastFrame.lastPercent = -1);
+          this.__currentFrame = currentFrame;
+        }
+        /** 这里要考虑全几种场景：
+         * 1. 单次播放无endDelay且fill不停留（有/无差异，下同）
+         * 2. 单次播放无endDelay且fill停留
+         * 3. 单次播放有endDelay且fill不停留
+         * 4. 单次播放有endDelay且fill停留
+         * 5. 多次播放无endDelay且fill不停留（尾次/非尾次，下同）
+         * 6. 多次播放无endDelay且fill停留
+         * 7. 多次播放有endDelay且fill不停留
+         * 8. 多次播放有endDelay且fill停留
+         */
+
+
+        var root = this.__root,
+            target = this.__target; // 最后结束特殊处理
+
+        if (isLastFrame) {
+          var keys; // 是否停留在最后一帧
+
+          if (this.__stayEnd) {
+            // 第一次进入endDelay触发后续不再，并且设置__end标识在after触发END事件
+            if (!this.__isEndDelay) {
+              this.__isEndDelay = true;
+              this.__end = true;
+              keys = calLastStyle(currentFrame.style, target, this.__keys);
+            } else {
+              keys = [];
+            } // 有可能刚进endDelay（只有1ms很短）就超过直接finish了，所以只用时间对比
+
+
+            if (currentTime >= dur + this.__endDelay) {
+              this.__playCount++;
+              this.__finished = true;
+            }
+          } else {
+            keys = calLastStyle(this.__originStyle, target, this.__keys);
+            currentFrame = this.__currentFrame = null;
+            this.__end = true;
+            this.__playCount++;
+            this.__finished = true;
+          } // gotoAndStop有参数回调特殊对待
+
+
+          if (gotoParams) {
+            this.__gotoStopCb(root, target, keys, currentFrame, gotoParams);
+          } // 普通动画有样式变更才触发真实刷新，且sync标识同步应用，和动画节奏一样，
+          // wasmChange无需，因为即便wasm接管，这块逻辑也在wasm中，这是动画更新没有gotoStop
+          else if (keys.length) {
+            root.__addUpdate(target, keys, false, false, false, true, false, null);
+          }
+        } // 动画内部除非同帧内且本帧没有任何变化，否则会一直触发，哪怕diff时间为0
+        else {
+          var _Animation$calInterme = Animation.calIntermediateStyle(currentFrame, percent, target, notSameFrame),
+              trans = _Animation$calInterme.trans,
+              fixed = _Animation$calInterme.fixed; // gotoAndStop有参数回调特殊对待
+
+
+          if (gotoParams) {
+            var _keys = trans.concat(fixed);
+
+            this.__gotoStopCb(root, target, _keys, currentFrame, gotoParams);
+          } // 普通动画同步更新sync
+          else if (trans.length || fixed.length) {
+            root.__addAniUpdate(target, trans, fixed, currentFrame);
+          }
+        }
+      }
+    }, {
+      key: "__gotoStopCb",
+      value: function __gotoStopCb(root, target, keys, currentFrame, gotoParams) {
+        var _this4 = this;
+
+        if (this.__stopCb) {
+          root.__cancelAsyncDraw(this.__stopCb);
+        }
+
+        var isChange = gotoParams.wasmChange || !!keys.length;
+
+        this.__stopCb = function () {
+          if (isChange) {
+            frameCb(_this4);
+          }
+
+          if (isFunction$5(gotoParams.cb)) {
+            gotoParams.cb(isChange);
+          }
+        };
+
+        if (isChange) {
+          // 因为wasm情况会导致js不计算可能没有keys（缺少wasm计算的那些），需传参标识
+          root.__addUpdate(target, keys, false, false, false, false, gotoParams.wasmChange, this.__stopCb);
+        } else {
+          this.__stopCb(isChange); // 无变化同步执行
+
+        }
       }
     }, {
       key: "addControl",
@@ -16975,9 +20273,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           return;
         }
 
-        var ac = root.animateController;
+        var ac = root.__animateController;
 
         if (ac) {
+          this.__isControlled = true;
           ac.add(this);
         }
       }
@@ -16986,7 +20285,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       value: function removeControl() {
         var root = this.__root;
 
-        if (!root) {
+        if (!root || !this.__isControlled) {
           return;
         }
 
@@ -16997,15 +20296,32 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
       }
     }, {
-      key: "__setTarget",
-      value: function __setTarget(target) {
-        this.__target = target;
-      }
-    }, {
       key: "__cancelTask",
       value: function __cancelTask() {
-        frame.offFrame(this);
-        this.__playCb = null;
+        var root = this.__root;
+
+        if (!root) {
+          return;
+        }
+
+        root.__offAniFrame(this);
+
+        if (this.__stopCb) {
+          root.__cancelAsyncDraw(this.__stopCb);
+        }
+
+        this.__playCb = this.__stopCb = null;
+      }
+    }, {
+      key: "remove",
+      value: function remove() {
+        if (this.__target) {
+          this.cancel();
+
+          this.__target.removeAnimate(this);
+
+          this.__destroy();
+        }
       }
     }, {
       key: "__destroy",
@@ -17016,11 +20332,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         this.removeControl();
 
-        this.__clean();
+        this.__cancelTask();
 
         this.__target = this.__root = null;
         this.__startTime = 0;
         this.__isDestroyed = true;
+        var wa = this.__wasmAnimation;
+
+        if (wa) {
+          wa.free();
+          this.__wasmAnimation = null;
+        }
       }
     }, {
       key: "__checkModify",
@@ -17068,6 +20390,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.__checkModify();
         }
 
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.duration = v;
+        }
+
         return v;
       }
     }, {
@@ -17082,6 +20410,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.__delay = v;
 
           this.__checkModify();
+        }
+
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.delay = v;
         }
 
         return v;
@@ -17100,6 +20434,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.__checkModify();
         }
 
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.end_delay = v;
+        }
+
         return v;
       }
     }, {
@@ -17116,6 +20456,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
 
           this.__fps = v;
+        }
+
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.fps = v;
         }
 
         return v;
@@ -17139,6 +20485,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (isNaN(v) || v < 0) {
             v = 1;
           }
+        }
+
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.iterations = v === Infinity ? 0 : v;
         }
 
         if (this.__iterations !== v) {
@@ -17169,6 +20521,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           forwards: true,
           both: true
         }.hasOwnProperty(v);
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.fill = FILLS[v] || 0;
+        }
+
         return v;
       }
     }, {
@@ -17178,6 +20536,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       },
       set: function set(v) {
         v = v || 'normal';
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.direction = DIRECTION[v] || 0;
+        }
 
         if (this.__direction !== v) {
           this.__direction = v;
@@ -17209,6 +20572,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           v = 1;
         }
 
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.playback_rate = v;
+        }
+
         if (this.__playbackRate !== v) {
           this.__playbackRate = v;
         }
@@ -17221,6 +20590,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return this.__easing;
       },
       set: function set(v) {
+        var wa = this.__wasmAnimation;
+
+        if (wa) {
+          var easeType = getEaseType(v);
+
+          if (easeType === EASING.EASE_CUSTOM) {
+            v = v.match(/[\d.]+/g);
+
+            if (v.length === 4) {
+              wa.set_bezier(parseFloat(v[0]), parseFloat(v[1]), parseFloat(v[2]), parseFloat(v[3]));
+            }
+          }
+        }
+
         this.__easing = v;
       }
     }, {
@@ -17231,45 +20614,42 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "currentTime",
       get: function get() {
+        if (this.__ignore) {
+          return this.__wasmAnimation.current_time;
+        }
+
         return this.__currentTime;
       },
       set: function set(v) {
         v = Math.max(0, parseFloat(v) || 0);
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.current_time = v;
+        }
 
         if (this.__currentTime !== v) {
           this.__currentTime = v;
-          this.__nextTime = v;
         }
 
         return v;
-      }
-    }, {
-      key: "nextTime",
-      get: function get() {
-        return this.__nextTime;
-      },
-      set: function set(v) {
-        v = Math.max(0, parseFloat(v) || 0);
-
-        if (this.__nextTime !== v) {
-          this.__nextTime = v;
-        }
-
-        return v;
-      }
-    }, {
-      key: "timestamp",
-      get: function get() {
-        return this.__timestamp;
       }
     }, {
       key: "pending",
       get: function get() {
+        if (this.__ignore) {
+          return this.__wasmAnimation.play_state !== 1; // 硬编码，wasm对应状态
+        }
+
         return this.__playState !== 'running';
       }
     }, {
       key: "finished",
       get: function get() {
+        if (this.__ignore) {
+          return this.__wasmAnimation.play_state === 3; // 硬编码，wasm对应状态
+        }
+
         return this.__playState === 'finished';
       }
     }, {
@@ -17280,10 +20660,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "playCount",
       get: function get() {
+        if (this.__ignore) {
+          return this.__wasmAnimation.play_count;
+        }
+
         return this.__playCount;
       },
       set: function set(v) {
         v = Math.max(0, parseInt(v) || 0);
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.play_count = v;
+        }
 
         if (this.__playCount !== v) {
           this.__playCount = v;
@@ -17298,6 +20687,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       },
       set: function set(v) {
         v = Math.max(0, parseInt(v) || 0);
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.area_start = v;
+        }
 
         if (this.__areaStart !== v) {
           this.__areaStart = v;
@@ -17312,6 +20706,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       },
       set: function set(v) {
         v = Math.max(0, parseInt(v) || 0);
+        var wn = this.__wasmAnimation;
+
+        if (wn) {
+          wn.area_duration = v;
+        }
 
         if (this.__areaDuration !== v) {
           this.__areaDuration = v;
@@ -17335,31 +20734,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         return playState !== 'finished' || this.__stayEnd || this.__stayBegin;
       }
-    }, {
-      key: "spfLimit",
-      get: function get() {
-        return this.__spfLimit;
-      },
-      set: function set(v) {
-        if (util.isNumber(v) || /^\d/.test(v)) {
-          v = Math.max(0, parseInt(v) || 0);
-        } else {
-          v = !!v;
-        }
-
-        if (this.__spfLimit !== v) {
-          this.__spfLimit = v;
-        }
-
-        return v;
-      }
     }], [{
       key: "parse",
       value: function parse(list, duration, easing, target) {
         // 过滤时间非法的，过滤后续offset<=前面的
         var offset = -1;
 
-        var _loop = function _loop(_i19, _len9) {
+        var _loop = function _loop(_i19, _len12) {
           var current = list[_i19];
 
           if (current.hasOwnProperty('offset')) {
@@ -17370,25 +20751,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             if (isNaN(current.offset) || current.offset < 0 || current.offset > 1) {
               list.splice(_i19, 1);
               _i19--;
-              _len9--;
+              _len12--;
               i = _i19;
-              len = _len9;
+              len = _len12;
               return "continue";
             } // <=前面的
             else if (current.offset <= offset) {
               list.splice(_i19, 1);
               _i19--;
-              _len9--;
+              _len12--;
               i = _i19;
-              len = _len9;
+              len = _len12;
               return "continue";
             }
           } // 缩写处理
 
 
           Object.keys(current).forEach(function (k) {
-            if (abbr$1.hasOwnProperty(k)) {
-              abbr$1.toFull(current, k);
+            if (abbr.hasOwnProperty(k)) {
+              abbr.toFull(current, k);
             }
           }); // 检查key合法性
 
@@ -17398,7 +20779,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             }
           });
           i = _i19;
-          len = _len9;
+          len = _len12;
         };
 
         for (var i = 0, len = list.length; i < len; i++) {
@@ -17451,14 +20832,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // 计算没有设置offset的帧
 
 
-        for (var _i20 = 1, _len10 = list.length; _i20 < _len10; _i20++) {
+        for (var _i20 = 1, _len13 = list.length; _i20 < _len13; _i20++) {
           var start = list[_i20]; // 从i=1开始offset一定>0，找到下一个有offset的，均分中间无声明的
 
           if (!start.hasOwnProperty('offset')) {
             var end = void 0;
             var j = _i20 + 1;
 
-            for (; j < _len10; j++) {
+            for (; j < _len13; j++) {
               end = list[j];
 
               if (end.hasOwnProperty('offset')) {
@@ -17481,8 +20862,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         var frames = [];
 
-        for (var _i21 = 0, _len11 = list.length; _i21 < _len11; _i21++) {
-          frames[_i21] = framing(list[_i21], duration, easing);
+        for (var _i21 = 0, _len14 = list.length; _i21 < _len14; _i21++) {
+          var o = framing(list[_i21], duration, easing);
+          o.index = _i21;
+          frames[_i21] = o;
         }
 
         return frames;
@@ -17597,13 +20980,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "calTransition",
       value: function calTransition(frames, keys, target) {
+        var isGeom = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
         var prev = frames[0];
         prev.clone = cloneStyle(prev.style, keys);
 
-        for (var _i22 = 1, _len12 = frames.length; _i22 < _len12; _i22++) {
+        for (var _i22 = 1, _len15 = frames.length; _i22 < _len15; _i22++) {
           var next = frames[_i22];
           next.clone = cloneStyle(next.style, keys);
-          prev = calFrame(prev, next, keys, target);
+          prev = calFrame(prev, next, keys, target, isGeom);
         }
       }
     }, {
@@ -17634,6 +21018,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         return i;
       }
+      /**
+       * 计算真变化，对于有连续变化补间的，即有trans的，优化认为一定触发了重绘，哪怕和原始style相等或者diff为0
+       * 对于无补间的如display这种，在不同帧之间才认为可能触发重绘，因为性能开销小可以再次比对真实情况判断是否需要真实重绘
+       */
+
     }, {
       key: "calIntermediateStyle",
       value: function calIntermediateStyle(frame, percent, target, notSameFrame) {
@@ -17644,52 +21033,53 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (timingFunction && timingFunction !== linear) {
           percent = timingFunction(percent);
-        } // 同一关键帧同一percent可以不刷新，比如diff为0时，或者steps情况，离开会清空
+        } // 同一关键帧同一percent可以不刷新，比如diff为0时，或者steps情况，离开会清空，notSameFrame判断防止pause更新在0的情况
 
 
-        if (frame.lastPercent === percent) {
-          return [];
+        if (!notSameFrame && frame.lastPercent === percent) {
+          return {
+            trans: [],
+            fixed: []
+          };
         }
 
         frame.lastPercent = percent;
         var currentStyle = target.__currentStyle,
-            res = frame.keys; // 特殊性能优化，for拆开v8会提升不少
+            trans = frame.trans,
+            fixed = []; // 特殊性能优化，for拆开v8会提升不少
 
         if (allInFn) {
-          for (var _i23 = 0, _len13 = transition.length; _i23 < _len13; _i23++) {
+          for (var _i23 = 0, _len16 = transition.length; _i23 < _len16; _i23++) {
             var item = transition[_i23];
             var k = item.k,
                 v = item.v,
-                cs = item.cs,
+                st = item.st,
                 cl = item.cl,
-                fn = item.fn; // 同一帧内计算可避免赋值currentStyle
+                fn = item.fn; // 可能updateStyle()甚至手动修改了currentStyle，需要重新赋值
 
-            if (notSameFrame) {
-              cs = item.cs = currentStyle[k] = item.st;
+            if (currentStyle[k] !== st) {
+              currentStyle[k] = st;
             }
 
-            fn(k, v, percent, cs, cl, frame, currentStyle);
+            fn(k, v, percent, st, cl, frame, currentStyle);
           }
         } else {
-          var currentProps = target.__currentProps,
-              modify;
+          var currentProps = target.__currentProps;
 
-          var _loop2 = function _loop2(_i24, _len14) {
+          var _loop2 = function _loop2(_i24, _len17) {
             var item = transition[_i24];
             var k = item.k,
                 v = item.v,
-                cs = item.cs,
                 st = item.st,
                 cl = item.cl,
                 fn = item.fn;
 
             if (fn) {
-              // 同一帧内计算可避免赋值currentStyle
-              if (notSameFrame) {
-                cs = item.cs = currentStyle[k] = item.st;
+              if (currentStyle[k] !== st) {
+                currentStyle[k] = st;
               }
 
-              fn(k, v, percent, cs, cl, frame, currentStyle);
+              fn(k, v, percent, st, cl, frame, currentStyle);
             } else if (GEOM$1.hasOwnProperty(k)) {
               var tagName = target.tagName;
 
@@ -17705,7 +21095,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 }
               } else if (target.isMulti) {
                 if (k === 'points' || k === 'controls') {
-                  for (var _i26 = 0, _len16 = Math.min(st.length, v.length); _i26 < _len16; _i26++) {
+                  for (var _i26 = 0, _len19 = Math.min(st.length, v.length); _i26 < _len19; _i26++) {
                     var o = st[_i26];
                     var n = v[_i26];
                     var cli = cl[_i26];
@@ -17716,9 +21106,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                         var n2 = n[j];
 
                         if (!isNil$b(o2) && !isNil$b(n2)) {
-                          for (var _k7 = 0, len3 = Math.min(o2.length, n2.length); _k7 < len3; _k7++) {
-                            if (!isNil$b(o2[_k7]) && !isNil$b(n2[_k7])) {
-                              o2[_k7] = cli[j][_k7] + n2[_k7] * percent;
+                          for (var _k9 = 0, len3 = Math.min(o2.length, n2.length); _k9 < len3; _k9++) {
+                            if (!isNil$b(o2[_k9]) && !isNil$b(n2[_k9])) {
+                              o2[_k9] = cli[j][_k9] + n2[_k9] * percent;
                             }
                           }
                         }
@@ -17746,14 +21136,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 }
               } else {
                 if (k === 'points' || k === 'controls') {
-                  for (var _i27 = 0, _len17 = Math.min(st.length, v.length); _i27 < _len17; _i27++) {
-                    var _o = st[_i27];
-                    var _n = v[_i27];
+                  for (var _i27 = 0, _len20 = Math.min(st.length, v.length); _i27 < _len20; _i27++) {
+                    var _o2 = st[_i27];
+                    var _n2 = v[_i27];
 
-                    if (!isNil$b(_o) && !isNil$b(_n)) {
-                      for (var _j6 = 0, _len18 = Math.min(_o.length, _n.length); _j6 < _len18; _j6++) {
-                        if (!isNil$b(_o[_j6]) && !isNil$b(_n[_j6])) {
-                          _o[_j6] = cl[_i27][_j6] + _n[_j6] * percent;
+                    if (!isNil$b(_o2) && !isNil$b(_n2)) {
+                      for (var _j7 = 0, _len21 = Math.min(_o2.length, _n2.length); _j7 < _len21; _j7++) {
+                        if (!isNil$b(_o2[_j7]) && !isNil$b(_n2[_j7])) {
+                          _o2[_j7] = cl[_i27][_j7] + _n2[_j7] * percent;
                         }
                       }
                     }
@@ -17774,58 +21164,65 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
 
               currentProps[k] = st;
-            } // string等的直接量，在不同帧之间可能存在变化，同帧变化后不再改变
-            else {
-              if (currentStyle[k] !== st) {
-                currentStyle[k] = st;
-              } else {
-                if (!modify) {
-                  modify = true;
-                  res = res.slice(0);
-                }
-
-                var _j7 = res.indexOf(k);
-
-                res.splice(_j7, 1);
-              }
             }
           };
 
-          for (var _i24 = 0, _len14 = transition.length; _i24 < _len14; _i24++) {
-            _loop2(_i24, _len14);
-          } // 无变化的也得检查是否和当前相等，防止跳到一个不变化的帧上，而前一帧有变化的情况，allInFn不会有这里
+          for (var _i24 = 0, _len17 = transition.length; _i24 < _len17; _i24++) {
+            _loop2(_i24, _len17);
+          } // string等的直接量，在不同帧之间可能存在变化，同帧变化后不再改变引用，因此前提是发生帧变化
+          // 再检查是否和当前相等，防止跳到一个不变化的帧上，而前一帧有变化的情况，大部分都是无变化
 
 
-          var fixed = frame.fixed;
+          if (notSameFrame) {
+            var f = frame.fixed;
 
-          for (var _i25 = 0, _len15 = fixed.length; _i25 < _len15; _i25++) {
-            var _k6 = fixed[_i25];
+            for (var _i25 = 0, _len18 = f.length; _i25 < _len18; _i25++) {
+              var _k8 = f[_i25];
+              var isGeom = frame.isGeom && GEOM$1.hasOwnProperty(_k8);
 
-            var _isGeom2 = GEOM$1.hasOwnProperty(_k6);
+              if (!equalStyle$1(_k8, style[_k8], isGeom ? currentProps[_k8] : currentStyle[_k8], target)) {
+                if (GEOM$1.hasOwnProperty(_k8)) {
+                  currentProps[_k8] = style[_k8];
+                } else {
+                  currentStyle[_k8] = style[_k8];
+                }
 
-            if (!equalStyle$1(_k6, style[_k6], _isGeom2 ? currentProps[_k6] : currentStyle[_k6], target)) {
-              if (GEOM$1.hasOwnProperty(_k6)) {
-                currentProps[_k6] = style[_k6];
-              } else {
-                currentStyle[_k6] = style[_k6];
+                fixed.push(_k8);
               }
-
-              if (!modify) {
-                modify = true;
-                res = res.slice(0);
-              }
-
-              res.push(_k6);
             }
           }
         }
 
-        return res;
+        return {
+          trans: trans,
+          fixed: fixed
+        };
       }
     }]);
 
     return Animation;
   }(Event);
+
+  function getEaseType(ea) {
+    var tf = getEasing(ea),
+        easeType = EASING.LINEAR;
+
+    if (tf && tf !== easing.linear) {
+      if (tf === easing.easeIn) {
+        easeType = EASING.EASE_IN;
+      } else if (tf === easing.easeOut) {
+        easeType = EASING.EASE_OUT;
+      } else if (tf === easing.ease) {
+        easeType = EASING.EASE;
+      } else if (tf === easing.easeInOut) {
+        easeType = EASING.EASE_IN_OUT;
+      } else {
+        easeType = EASING.EASE_CUSTOM;
+      }
+    }
+
+    return easeType;
+  }
 
   var int2rgba$2 = util.int2rgba;
   var canvasPolygon$3 = painter.canvasPolygon,
@@ -17855,7 +21252,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var outer = [[x1 - n, y1 - n], [x1 - n, y2 + n], [x2 + n, y2 + n], [x2 + n, y1 - n], [x1 - n, y1 - n]];
 
     if (color[3] > 0) {
-      if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+      if (renderMode === mode.CANVAS) {
         ctx.save();
         ctx.beginPath(); // inset裁剪box外面
 
@@ -18302,7 +21699,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       BORDER_BOTTOM = _enums$STYLE_KEY$8.BORDER_BOTTOM,
       BORDER_LEFT = _enums$STYLE_KEY$8.BORDER_LEFT,
       BACKGROUND_CLIP = _enums$STYLE_KEY$8.BACKGROUND_CLIP,
-      FONT_SIZE$2 = _enums$STYLE_KEY$8.FONT_SIZE,
+      FONT_SIZE$3 = _enums$STYLE_KEY$8.FONT_SIZE,
       FONT_FAMILY$1 = _enums$STYLE_KEY$8.FONT_FAMILY,
       LINE_HEIGHT$2 = _enums$STYLE_KEY$8.LINE_HEIGHT,
       TEXT_STROKE_COLOR$1 = _enums$STYLE_KEY$8.TEXT_STROKE_COLOR,
@@ -18326,7 +21723,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       TRANSFORM_STYLE$1 = _enums$STYLE_KEY$8.TRANSFORM_STYLE,
       BACKFACE_VISIBILITY$1 = _enums$STYLE_KEY$8.BACKFACE_VISIBILITY,
       BOX_SIZING = _enums$STYLE_KEY$8.BOX_SIZING,
-      FONT_SIZE_SHRINK = _enums$STYLE_KEY$8.FONT_SIZE_SHRINK;
+      FONT_SIZE_SHRINK = _enums$STYLE_KEY$8.FONT_SIZE_SHRINK,
+      WASM_STYLE_KEY = enums.WASM_STYLE_KEY;
   var AUTO$4 = o$4.AUTO,
       PX$5 = o$4.PX,
       PERCENT$4 = o$4.PERCENT,
@@ -18355,6 +21753,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   var mbmName$1 = mbm.mbmName,
       isValidMbm = mbm.isValidMbm;
   var point2d = matrix.point2d,
+      toE = matrix.toE,
+      identity = matrix.identity,
+      assignMatrix$2 = matrix.assignMatrix,
       multiply$2 = matrix.multiply,
       multiplyRotateX = matrix.multiplyRotateX,
       multiplyRotateY = matrix.multiplyRotateY,
@@ -18478,14 +21879,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       _this.__isInline = false;
       _this.__hasContent = false;
       _this.__opacity = 1;
-      _this.__matrix = [];
-      _this.__matrixEvent = [];
-      _this.__perspectiveMatrix = null;
+      _this.__matrix = identity();
+      _this.__matrixEvent = identity();
+      _this.__perspectiveMatrix = identity();
+      _this.__selfPerspectiveMatrix = identity();
       _this.__frameAnimateList = [];
       _this.__contentBoxList = []; // inline存储内容用
 
       _this.__cacheAsBitmap = !!_this.props.cacheAsBitmap;
-      _this.__cache = _this.__cacheTotal = _this.__cacheFilter = _this.__cacheMask;
+      _this.__cacheTotal = _this.__cacheFilter = _this.__cacheMask = null;
       _this.__layoutData = null; // 缓存上次布局x/y/w/h数据
 
       _this.__hasComputeReflow = false; // 每次布局计算缓存标，使得每次开始只computeReflow一次
@@ -18493,6 +21895,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       _this.__parentLineBox = null; // inline时指向
 
       _this.__fontRegister = {}; // 优先级字体尚未加载时记录回调hash，销毁时删除回调
+
+      _this.__firstInit = true; // 标识是否第一次创建，布局后置false
 
       return _this;
     }
@@ -18507,10 +21911,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         return res;
-      }
-    }, {
-      key: "__modifyStruct",
-      value: function __modifyStruct() {} // 设置margin/padding的实际值，layout时执行，inline的垂直方向仍然计算值，但在布局时被忽略
+      } // 设置margin/padding的实际值，layout时执行，inline的垂直方向仍然计算值，但在布局时被忽略
 
     }, {
       key: "__mp",
@@ -18533,8 +21934,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (includePercent) {
             return v.v * w * 0.01;
           }
-        } else if (v.u === REM$4 || v.u === REM$4) {
-          return v.v * this.__root.computedStyle[FONT_SIZE$2];
+        } else if (v.u === REM$4) {
+          return v.v * this.__root.computedStyle[FONT_SIZE$3];
         } else if (v.u === VW$4) {
           return v.v * this.__root.width * 0.01;
         } else if (v.u === VH$4) {
@@ -18563,7 +21964,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var isRoot = !parent;
         var parentComputedStyle = parent && parent.__computedStyle; // 继承的特殊处理，根节点用默认值
 
-        [FONT_SIZE$2, FONT_FAMILY$1, FONT_WEIGHT$1, WRITING_MODE$2, FONT_SIZE_SHRINK].forEach(function (k) {
+        [FONT_SIZE$3, FONT_FAMILY$1, FONT_WEIGHT$1, WRITING_MODE$2, FONT_SIZE_SHRINK].forEach(function (k) {
           var v = currentStyle[k]; // ff特殊处理
 
           if (k === FONT_FAMILY$1) {
@@ -18592,9 +21993,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             computedStyle[k] = isRoot ? reset.INHERIT[STYLE_RV_KEY[k]] : parentComputedStyle[k];
           } // fontSize和shrinkFontSize会有%
           else if (v.u === PERCENT$4) {
-            computedStyle[k] = isRoot ? reset.INHERIT[STYLE_RV_KEY[k]] : _this3.root.computedStyle[FONT_SIZE$2] * v.v * 0.01;
+            computedStyle[k] = isRoot ? reset.INHERIT[STYLE_RV_KEY[k]] : _this3.root.computedStyle[FONT_SIZE$3] * v.v * 0.01;
           } else if (v.u === REM$4) {
-            computedStyle[k] = isRoot ? reset.INHERIT[STYLE_RV_KEY[k]] : _this3.root.computedStyle[FONT_SIZE$2] * v.v;
+            computedStyle[k] = isRoot ? reset.INHERIT[STYLE_RV_KEY[k]] : _this3.root.computedStyle[FONT_SIZE$3] * v.v;
           } else if (v.u === VW$4) {
             computedStyle[k] = isRoot ? reset.INHERIT[STYLE_RV_KEY[k]] : _this3.root.width * 0.01 * v.v;
           } else if (v.u === VH$4) {
@@ -18635,7 +22036,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           computedStyle[TEXT_ALIGN$1] = textAlign.v;
         }
 
-        var fontSize = computedStyle[FONT_SIZE$2];
+        var fontSize = computedStyle[FONT_SIZE$3];
         var lineHeight = currentStyle[LINE_HEIGHT$2]; // lineHeight继承很特殊，数字和normal不同于普通单位
 
         if (lineHeight.u === INHERIT$1) {
@@ -18693,7 +22094,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         var width = currentStyle[WIDTH$5],
             height = currentStyle[HEIGHT$5];
-        this.__width = this.__height = 0; // 布局前固定尺寸的线设置好，子元素percent尺寸要用到，flex的子元素侧轴stretch也要特殊提前处理，认为定高
+        this.__width = this.__height = 0; // 布局前固定尺寸的先设置好，子元素percent尺寸要用到，flex的子元素侧轴stretch也要特殊提前处理，认为定高
 
         if (width.u !== AUTO$4) {
           this.__width = computedStyle[WIDTH$5] = this.__calSize(width, isRoot ? this.__width : parent.__width, true);
@@ -18706,7 +22107,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           if (p) {
             var crs = p.__currentStyle;
-            var alignSelf = currentStyle[ALIGN_SELF$1]; // flex的子元素stretch提前处理认为高度，以便其子元素%高度计算
+            var alignSelf = currentStyle[ALIGN_SELF$1]; // flex的子元素stretch提前处理认为有高度，以便其子元素%高度计算
 
             if (crs[DISPLAY$6] === 'flex' && p.__height) {
               if (crs[FLEX_DIRECTION$1].indexOf('row') > -1 && (alignSelf === 'stretch' || crs[ALIGN_ITEMS$1] === 'stretch' && alignSelf === 'auto')) {
@@ -18748,7 +22149,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (item === fontFamily) {
             // 加载成功回调可能没注册信息，需要多判断一下
             if (o$3.hasRegister(item)) {
-              root.__addUpdate(node, null, REFLOW$3, null, null, null, null);
+              root.__addUpdate(node, null, REFLOW$3, false, false, false, false, null);
             } // 后面低优先级的无需再看
 
 
@@ -18882,7 +22283,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               next = next.next;
             }
 
-            this.__hasMask = count;
+            this.__hasMask = count; // appendChild一个parse好的节点引用对象，会先生成struct，此时遗漏hasMask
+
+            if (this.__struct) {
+              this.__struct.hasMask = count;
+            }
           }
         }
 
@@ -19034,8 +22439,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           __computedStyle[WIDTH$5] = this.__width;
           __computedStyle[HEIGHT$5] = this.__height; // abs为parse的根节点时特殊自己执行，前提是真布局
 
-          if (position !== 'absolute') {
-            this.__execAr();
+          if (position !== 'absolute' && this.__animateRecords) {
+            this.__root.__addAr(this);
           }
 
           this.__hasComputeReflow = false;
@@ -19050,9 +22455,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var computedStyle = this.__computedStyle;
         var cacheStyle = this.__cacheStyle;
 
-        this.__calStyle(o$1.REFLOW, currentStyle, computedStyle, cacheStyle);
+        this.__calStyle(REFLOW$3, currentStyle, computedStyle, cacheStyle);
 
-        this.__calPerspective(currentStyle, computedStyle, cacheStyle);
+        this.__calPerspective(currentStyle, computedStyle, cacheStyle); // 每次reflow传数据到wasm
+
+
+        this.__wasmStyle(currentStyle);
+      } // 传递transform/opacity相关样式到wasm中计算
+
+    }, {
+      key: "__wasmStyle",
+      value: function __wasmStyle(currentStyle) {
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          // 第一次布局时全部传入，后续由updateStyle更新wasm数据，transform/opacity相关不能再用初始赋值会错
+          if (this.__firstInit) {
+            this.__firstInit = false;
+            wn.set_style(this.__x1, this.__y1, this.__offsetWidth, this.__offsetHeight, currentStyle[TRANSLATE_X].v, currentStyle[TRANSLATE_Y].v, currentStyle[TRANSLATE_Z].v, currentStyle[ROTATE_X].v, currentStyle[ROTATE_Y].v, currentStyle[ROTATE_Z].v, currentStyle[ROTATE_3D][0], currentStyle[ROTATE_3D][1], currentStyle[ROTATE_3D][2], currentStyle[ROTATE_3D][3].v, currentStyle[SCALE_X].v, currentStyle[SCALE_Y].v, currentStyle[SCALE_Z].v, currentStyle[SKEW_X].v, currentStyle[SKEW_Y].v, currentStyle[OPACITY$3], currentStyle[TRANSFORM_ORIGIN$2][0].v, currentStyle[TRANSFORM_ORIGIN$2][1].v, currentStyle[TRANSLATE_X].u, currentStyle[TRANSLATE_Y].u, currentStyle[TRANSLATE_Z].u, currentStyle[TRANSFORM_ORIGIN$2][0].u, currentStyle[TRANSFORM_ORIGIN$2][1].u);
+          } else {
+            wn.set_xywh(this.__x1, this.__y1, this.__offsetWidth, this.__offsetHeight);
+          }
+        }
       }
     }, {
       key: "__execAr",
@@ -19068,7 +22492,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               item.target = item.target.vd;
             }
           });
-          var ac = ar.controller || this.root.animateController; // 不自动播放进入记录列表，初始化并等待手动调用
+          var ac = ar.controller || this.__root.animateController; // 不自动播放进入记录列表，初始化并等待手动调用
 
           if (ar.options && ar.options.autoPlay === false) {
             ac.__records2 = ac.__records2.concat(ar.list);
@@ -19280,7 +22704,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     }, {
       key: "__calMatrix",
-      value: function __calMatrix(lv, __currentStyle, __computedStyle, __cacheStyle, optimize) {
+      value: function __calMatrix(lv, __currentStyle, __computedStyle, __cacheStyle) {
         var _this4 = this;
 
         var __x1 = this.__x1,
@@ -19290,19 +22714,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (this.__isInline) {
           __computedStyle[TRANSFORM_ORIGIN$2] = [__x1, __y1];
-          return __cacheStyle[MATRIX$1] = this.__matrix = matrix.identity();
+          return __cacheStyle[MATRIX$1] = toE(this.__matrix);
         }
 
-        var matrixCache = __cacheStyle[MATRIX$1]; // 优化计算scale不能为0，无法计算倍数差，rotateZ优化不能包含rotateX/rotateY/skew
+        var optimize = true;
+        var matrixCache = this.__matrix; // 优化计算scale不能为0，无法计算倍数差，rotateZ优化不能包含rotateX/rotateY/skew
 
-        if (!isNil$a(optimize)) ; else if (matrixCache && lv < REFLOW$3 && !(lv & TF$1)) {
-          if (lv & SX && !__computedStyle[SCALE_X] || lv & SY && !__computedStyle[SCALE_Y] || lv & SZ && !__computedStyle[SCALE_Z] || lv & RZ && (__computedStyle[ROTATE_X] || __computedStyle[ROTATE_Y] || __computedStyle[SKEW_X] || __computedStyle[SKEW_Y])) ; else {
-            optimize = true;
-          }
+        if (lv >= REFLOW$3 || lv & TF$1) {
+          optimize = false;
+        } else if (lv & SX && !__computedStyle[SCALE_X] || lv & SY && !__computedStyle[SCALE_Y] || lv & SZ && !__computedStyle[SCALE_Z] || lv & RZ && (__computedStyle[ROTATE_X] || __computedStyle[ROTATE_Y] || __computedStyle[SKEW_X] || __computedStyle[SKEW_Y])) {
+          optimize = false;
         } // translate/scale变化特殊优化，d/h/l不能有值，否则不能这样直接简化运算，因为这里不包含perspective，所以一定没有
 
 
-        if (optimize && matrixCache) {
+        if (optimize) {
           var transform = __computedStyle[TRANSFORM$3];
 
           if (lv & TX) {
@@ -19359,9 +22784,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (lv & RZ) {
             var _v3 = __currentStyle[ROTATE_Z].v;
             __computedStyle[ROTATE_Z] = _v3;
-            _v3 = d2r(_v3);
-            var sin = Math.sin(_v3),
-                cos = Math.cos(_v3);
+            var r = d2r(_v3);
+            var sin = Math.sin(r),
+                cos = Math.cos(r);
             var _x = __computedStyle[SCALE_X],
                 _y = __computedStyle[SCALE_Y];
             var cx = matrixCache[0] = transform[0] = cos * _x;
@@ -19379,10 +22804,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           if (lv & SCALE) {
             if (lv & SX) {
-              if (!__computedStyle[SCALE_X]) {
-                return this.__calMatrix(REFLOW$3, __currentStyle, __computedStyle, __cacheStyle, false);
-              }
-
+              // if(!__computedStyle[SCALE_X]) {
+              //   return this.__calMatrix(REFLOW, __currentStyle, __computedStyle, __cacheStyle, false);
+              // }
               var _v4 = __currentStyle[SCALE_X].v;
 
               var _x2 = _v4 / __computedStyle[SCALE_X];
@@ -19397,10 +22821,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             }
 
             if (lv & SY) {
-              if (!__computedStyle[SCALE_Y]) {
-                return this.__calMatrix(lv, __currentStyle, __computedStyle, __cacheStyle, false);
-              }
-
+              // if(!__computedStyle[SCALE_Y]) {
+              //   return this.__calMatrix(REFLOW, __currentStyle, __computedStyle, __cacheStyle, false);
+              // }
               var _v5 = __currentStyle[SCALE_Y].v;
 
               var _y2 = _v5 / __computedStyle[SCALE_Y];
@@ -19415,10 +22838,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             }
 
             if (lv & SZ) {
-              if (!__computedStyle[SCALE_Z]) {
-                return this.__calMatrix(lv, __currentStyle, __computedStyle, __cacheStyle, false);
-              }
-
+              // if(!__computedStyle[SCALE_Z]) {
+              //   return this.__calMatrix(REFLOW, __currentStyle, __computedStyle, __cacheStyle, false);
+              // }
               var _v6 = __currentStyle[SCALE_Z].v;
 
               var _z = _v6 / __computedStyle[SCALE_Z];
@@ -19445,28 +22867,29 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         else {
           if (__cacheStyle[TRANSFORM_ORIGIN$2] === undefined) {
             __cacheStyle[TRANSFORM_ORIGIN$2] = true;
-            matrixCache = null;
             __computedStyle[TRANSFORM_ORIGIN$2] = __currentStyle[TRANSFORM_ORIGIN$2].map(function (item, i) {
               return _this4.__calSize(item, i ? __offsetHeight : __offsetWidth, true);
             });
-          }
+          } // 任何一个transform子项变更会清空cacheStyle，即重新计算
+
 
           if (__cacheStyle[TRANSFORM$3] === undefined || __cacheStyle[TRANSLATE_X] === undefined || __cacheStyle[TRANSLATE_Y] === undefined || __cacheStyle[TRANSLATE_Z] === undefined || __cacheStyle[ROTATE_X] === undefined || __cacheStyle[ROTATE_Y] === undefined || __cacheStyle[ROTATE_Z] === undefined || __cacheStyle[ROTATE_3D] === undefined || __cacheStyle[SCALE_X] === undefined || __cacheStyle[SCALE_Y] === undefined || __cacheStyle[SCALE_Z] === undefined || __cacheStyle[SKEW_X] === undefined || __cacheStyle[SKEW_Y] === undefined) {
             __cacheStyle[TRANSFORM$3] = __cacheStyle[TRANSLATE_X] = __cacheStyle[TRANSLATE_Y] = __cacheStyle[TRANSLATE_Z] = __cacheStyle[ROTATE_X] = __cacheStyle[ROTATE_Y] = __cacheStyle[ROTATE_Z] = __cacheStyle[SCALE_X] = __cacheStyle[SCALE_Y] = __cacheStyle[SCALE_Z] = __cacheStyle[SKEW_X] = __cacheStyle[SKEW_Y] = true;
-            matrixCache = null;
             this.__selfPerspective = 0;
-            this.__selfPerspectiveMatrix = null;
             var matrix$1,
-                ct = __currentStyle[TRANSFORM$3]; // transform相对于自身
+                spm = this.__selfPerspectiveMatrix,
+                ct = __currentStyle[TRANSFORM$3];
+            toE(spm); // transform相对于自身
 
             if (ct && ct.length) {
+              inject.warn('CSS transform is deprecated');
               var first = ct[0]; // 特殊处理，抽取出来transform的ppt，视为tfo原点的透视
 
               if (first.k === PERSPECTIVE$1) {
                 var ppt = this.__selfPerspective = this.__calSize(first.v, this.__clientWidth, true);
 
-                var tfo = __computedStyle[TRANSFORM_ORIGIN$2];
-                this.__selfPerspectiveMatrix = transform$1.calPerspectiveMatrix(ppt, tfo[0] + __x1, tfo[1] + __y1);
+                var _tfo = __computedStyle[TRANSFORM_ORIGIN$2];
+                assignMatrix$2(spm, transform$1.calPerspectiveMatrix(ppt, _tfo[0] + __x1, _tfo[1] + __y1));
                 matrix$1 = transform$1.calMatrix(ct.slice(1), __offsetWidth, __offsetHeight, this.__root);
               } else {
                 matrix$1 = transform$1.calMatrix(ct, __offsetWidth, __offsetHeight, this.__root);
@@ -19652,17 +23075,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
             }
 
-            __computedStyle[TRANSFORM$3] = matrix$1 || matrix.identity();
+            __computedStyle[TRANSFORM$3] = __computedStyle[TRANSFORM$3] || matrix.identity();
+            assignMatrix$2(__computedStyle[TRANSFORM$3], matrix$1);
           }
 
-          if (!matrixCache) {
-            var m = __computedStyle[TRANSFORM$3];
-            var _tfo = __computedStyle[TRANSFORM_ORIGIN$2];
-            matrixCache = __cacheStyle[MATRIX$1] = transform$1.calMatrixByOrigin(m, _tfo[0] + __x1, _tfo[1] + __y1);
-          }
+          var m = __computedStyle[TRANSFORM$3];
+          var tfo = __computedStyle[TRANSFORM_ORIGIN$2];
+
+          var _t2 = transform$1.calMatrixByOrigin(m, tfo[0] + __x1, tfo[1] + __y1);
+
+          assignMatrix$2(this.__matrix, _t2);
+          matrixCache = __cacheStyle[MATRIX$1] = this.__matrix;
         }
 
-        return this.__matrix = matrixCache;
+        return matrixCache;
       }
       /**
        * 将currentStyle计算为computedStyle，同时存入cacheStyle可缓存的结果防止无变更重复计算，返回背景渲染范围
@@ -19721,7 +23147,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
         if (isNil$a(__cacheStyle[MATRIX$1]) || lv & TRANSFORM_ALL$3) {
-          this.__calMatrix(lv, __currentStyle, __computedStyle, __cacheStyle, false);
+          var wn = this.__wasmNode;
+
+          if (!wn) {
+            this.__calMatrix(lv, __currentStyle, __computedStyle, __cacheStyle, false);
+          }
         }
 
         if (isNil$a(__cacheStyle[BACKGROUND_POSITION_X])) {
@@ -19796,16 +23226,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 loadBgi.source = null;
                 var node = _this5;
                 var root = _this5.__root;
-                _this5.ctx;
                 inject.measureImg(bgi.v, function (data) {
                   // 还需判断url，防止重复加载时老的替换新的，失败不绘制bgi
-                  if (data.success && data.url === loadBgi.url && !_this5.isDestroyed) {
+                  if (data.success && data.url === loadBgi.url && !_this5.__isDestroyed) {
                     loadBgi.source = data.source;
                     loadBgi.width = data.width;
                     loadBgi.height = data.height;
                     __cacheStyle[BACKGROUND_IMAGE] = undefined;
 
-                    root.__addUpdate(node, null, REPAINT$3, null, null, null, null);
+                    root.__addUpdate(node, null, REPAINT$3, false, false, false, false, null);
                   }
                 });
               }
@@ -19977,7 +23406,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var _v9 = __currentStyle[TEXT_STROKE_WIDTH$1];
 
           if (_v9.u === REM$4) {
-            _v9 = _v9.v * this.__root.__computedStyle[FONT_SIZE$2];
+            _v9 = _v9.v * this.__root.__computedStyle[FONT_SIZE$3];
           } else if (_v9.u === VW$4) {
             _v9 = _v9.v * this.__root.width * 0.01;
           } else if (_v9.u === VH$4) {
@@ -20379,11 +23808,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             borderLeftWidth = computedStyle[BORDER_LEFT_WIDTH$5],
             borderRightWidth = computedStyle[BORDER_RIGHT_WIDTH$4],
             borderTopWidth = computedStyle[BORDER_TOP_WIDTH$3],
-            borderBottomWidth = computedStyle[BORDER_BOTTOM_WIDTH$2];
-        var isRealInline = this.__isInline; // cache的canvas模式已经提前计算好了，其它需要现在计算
-
-        var matrix$1 = this.__matrix;
-        var backgroundColor = computedStyle[BACKGROUND_COLOR],
+            borderBottomWidth = computedStyle[BORDER_BOTTOM_WIDTH$2],
+            backgroundColor = computedStyle[BACKGROUND_COLOR],
             borderTopColor = computedStyle[BORDER_TOP_COLOR],
             borderRightColor = computedStyle[BORDER_RIGHT_COLOR],
             borderBottomColor = computedStyle[BORDER_BOTTOM_COLOR],
@@ -20403,6 +23829,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             mixBlendMode = computedStyle[MIX_BLEND_MODE$3],
             backgroundClip = computedStyle[BACKGROUND_CLIP],
             writingMode = computedStyle[WRITING_MODE$2];
+        var isRealInline = this.__isInline; // cache的canvas模式已经提前计算好了，其它需要现在计算
+
+        var matrix$1 = this.__matrix;
         var isUpright = writingMode.indexOf('vertical') === 0;
 
         if (renderMode === SVG$1) {
@@ -20521,7 +23950,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           if (length) {
             var _ret = function () {
-              var fontSize = computedStyle[FONT_SIZE$2],
+              var fontSize = computedStyle[FONT_SIZE$3],
                   fontFamily = computedStyle[FONT_FAMILY$1],
                   lineHeight = computedStyle[LINE_HEIGHT$2];
               var iw = 0,
@@ -20916,7 +24345,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         if (root && !this.__isDestroyed) {
-          root.__addUpdate(this, null, lv, null, null, null, cb);
+          root.__addUpdate(this, null, lv, false, false, false, false, cb);
         } else if (isFunction$4(cb)) {
           cb(-1);
         }
@@ -20950,6 +24379,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         this.__host = this.__hostRoot = this.__root = this.__prev = this.__next = this.__parent = this.__domParent = null;
 
         this.__reset0();
+
+        var wa = this.__wasmNode;
+
+        if (wa) {
+          wa.clear();
+          wa.free();
+          this.__wasmNode = null;
+        }
       } // 先查找到注册了事件的节点，再捕获冒泡判断增加性能
 
     }, {
@@ -21218,6 +24655,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           __cacheMask.release();
         }
 
+        this.__cacheTarget = onlyTotal ? __cache && __cache.__available ? __cache : null : null;
         this.__refreshLevel |= CACHE$3;
         this.clearTopCache();
       }
@@ -21227,6 +24665,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var p = this.__domParent;
 
         while (p) {
+          var __cache = p.__cache;
           var __cacheTotal = p.__cacheTotal;
           var __cacheFilter = p.__cacheFilter;
           var __cacheMask = p.__cacheMask;
@@ -21244,6 +24683,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             __cacheMask.release();
           }
 
+          p.__cacheTarget = __cache && __cache.__available ? __cache : null;
           p = p.__domParent;
         }
       }
@@ -21257,40 +24697,70 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "updateFormatStyle",
       value: function updateFormatStyle(style, cb) {
-        var _this10 = this;
-
         var root = this.__root,
             currentStyle = this.__currentStyle,
             currentProps = this.__currentProps;
         var keys = [];
-        Object.keys(style).forEach(function (i) {
-          var isGeom = GEOM.hasOwnProperty(i);
+        var wn = this.__wasmNode;
 
-          if (!isGeom) {
-            i = parseInt(i);
-          }
+        for (var k in style) {
+          if (style.hasOwnProperty(k)) {
+            var isGeom = GEOM.hasOwnProperty(k);
+            var v = style[k];
 
-          if (!equalStyle(i, isGeom ? currentProps[i] : currentStyle[i], style[i], _this10)) {
             if (isGeom) {
-              currentProps[i] = style[i];
+              if (!equalStyle(k, currentProps[k], v, this)) {
+                currentProps[k] = v;
+                keys.push(k);
+              }
             } else {
-              currentStyle[i] = style[i];
-            }
+              k = parseInt(k);
 
-            keys.push(i);
+              if (wn && wasm$1.isWasmStyle(k)) {
+                var k2 = WASM_STYLE_KEY[k];
+
+                if (k === TRANSFORM_ORIGIN$2) {
+                  var res = void 0;
+
+                  if (!wn.equal_style(k2, v[0].v, v[0].u)) {
+                    wn.update_style(k2, v[0].v, v[0].u);
+                    res = true;
+                  }
+
+                  k2++;
+
+                  if (!wn.equal_style(k2, v[1].v, v[1].u)) {
+                    wn.update_style(k2, v[1].v, v[1].u);
+                    res = true;
+                  }
+
+                  if (res) {
+                    keys.push(k);
+                  }
+                } else {
+                  if (!wn.equal_style(k2, v.v, v.u)) {
+                    wn.update_style(k2, v.v, v.u);
+                    keys.push(k);
+                  }
+                }
+              } else if (!equalStyle(k, currentStyle[k], v, this)) {
+                currentStyle[k] = v;
+                keys.push(k);
+              }
+            }
           }
-        });
+        }
 
         if (!keys.length || this.__isDestroyed) {
           if (isFunction$4(cb)) {
-            cb();
+            cb(true);
           }
 
           return;
         }
 
         if (root) {
-          root.__addUpdate(this, keys, null, null, null, null, cb);
+          root.__addUpdate(this, keys, null, false, false, false, false, cb);
         }
       }
     }, {
@@ -21303,6 +24773,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           animation.__destroy();
 
           return animation;
+        }
+
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          var wa = animation.__wasmAnimation;
+
+          if (wa) {
+            wn.add_ani(wa.ptr);
+          }
         }
 
         this.__animationList.push(animation);
@@ -21325,6 +24805,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             o.__destroy();
 
             this.__animationList.splice(i, 1);
+
+            var wn = this.__wasmNode;
+
+            if (wn) {
+              var wa = animation.__wasmAnimation;
+
+              if (wa) {
+                wn.remove_ani(wa.ptr);
+              }
+            }
           }
         }
       }
@@ -21336,46 +24826,43 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           o.__destroy();
         });
+
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          wn.clear();
+        }
       }
     }, {
       key: "frameAnimate",
       value: function frameAnimate(cb) {
         if (isFunction$4(cb)) {
-          var list = this.__frameAnimateList; // 防止重复
+          this.__frameAnimateList.push(cb);
 
-          for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].__karasFramecb === cb) {
-              return cb;
-            }
-          }
-
-          var enter = {
-            __after: function __after(diff) {
-              cb(diff);
-            },
-            __karasFramecb: cb
-          };
-          list.push(enter);
-          frame.onFrame(enter);
-          return cb;
+          this.__root.__onFrame(cb);
         }
       }
     }, {
       key: "removeFrameAnimate",
       value: function removeFrameAnimate(cb) {
-        for (var i = 0, list = this.__frameAnimateList, len = list.length; i < len; i++) {
-          if (list[i].__karasFramecb === cb) {
-            list.splice(i, 1);
-            frame.offFrame(cb);
-            return;
+        if (isFunction$4(cb)) {
+          var frameAnimateList = this.__frameAnimateList;
+          var i = frameAnimateList.indexOf(cb);
+
+          if (i > -1) {
+            frameAnimateList.splice(i, 1);
+
+            this.__root.__offFrame(cb);
           }
         }
       }
     }, {
       key: "clearFrameAnimate",
       value: function clearFrameAnimate() {
+        var root = this.__root;
+
         this.__frameAnimateList.splice(0).forEach(function (o) {
-          frame.offFrame(o);
+          root.__offFrame(o);
         });
       } // isLayout为false时，为relative，true则是absolute/justify/marginAuto等直接改layoutData数据的
       // lv是reflow偏移时传入，需要清除cacheStyle，并且对位图cache进行偏移设置
@@ -21407,7 +24894,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (lv >= REFLOW$3) {
             this.__cacheStyle = [];
 
-            this.__calStyle(lv, this.__currentStyle, this.__computedStyle, this.__cacheStyle);
+            this.__layoutStyle(lv);
           }
 
           if (this.__bbox) {
@@ -21447,7 +24934,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (lv >= REFLOW$3) {
             this.__cacheStyle = [];
 
-            this.__calStyle(lv, this.__currentStyle, this.__computedStyle, this.__cacheStyle);
+            this.__layoutStyle(lv);
           }
 
           if (this.__bbox) {
@@ -21503,8 +24990,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (lv >= REFLOW$3) {
             this.__cacheStyle = [];
 
-            this.__calStyle(lv, this.__currentStyle, this.__computedStyle, this.__cacheStyle);
+            this.__layoutStyle(lv);
           }
+        }
+
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          wn.resize_x(diff);
         }
 
         this.clearCache();
@@ -21535,8 +25028,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (lv >= REFLOW$3) {
             this.__cacheStyle = [];
 
-            this.__calStyle(lv, this.__currentStyle, this.__computedStyle, this.__cacheStyle);
+            this.__layoutStyle(lv);
           }
+        }
+
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          wn.resize_y(diff);
         }
 
         this.clearCache();
@@ -21558,8 +25057,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
 
           temp.forEach(function (k) {
-            if (abbr$1.hasOwnProperty(k)) {
-              abbr$1[k].forEach(function (k) {
+            if (abbr.hasOwnProperty(k)) {
+              abbr[k].forEach(function (k) {
                 keys.push(STYLE_KEY[style2Upper(k)]);
               });
             } else {
@@ -21570,14 +25069,58 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           keys = Object.keys(computedStyle);
         }
 
+        var wn = this.__wasmNode,
+            wasmCps;
         keys.forEach(function (k) {
           if (GEOM.hasOwnProperty(k)) {
             res[k] = computedStyle[k];
           } else {
-            res[STYLE_RV_KEY[k]] = computedStyle[k];
+            if (wn && wasm$1.isWasmStyle(k)) {
+              if (!wasmCps) {
+                wasmCps = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+              }
+
+              if (k === TRANSFORM_ORIGIN$2) {
+                var k2 = WASM_STYLE_KEY[k];
+                res[STYLE_RV_KEY[k]] = [wasmCps[k2], wasmCps[k2 + 1]];
+              } else {
+                res[STYLE_RV_KEY[k]] = wasmCps[WASM_STYLE_KEY[k]];
+              }
+            } else {
+              res[STYLE_RV_KEY[k]] = computedStyle[k];
+            }
           }
         });
         return res;
+      }
+    }, {
+      key: "getStyle",
+      value: function getStyle(k) {
+        if (!k || !util.isString(k) || abbr.hasOwnProperty(k)) {
+          throw new Error('Param must be a single style key');
+        }
+
+        var computedStyle = this.__computedStyle;
+
+        if (GEOM.hasOwnProperty(k)) {
+          return computedStyle[k];
+        }
+
+        var k2 = STYLE_KEY[style2Upper(k)];
+        var wn = this.__wasmNode;
+
+        if (wn && wasm$1.isWasmStyle(k2)) {
+          var wasmCps = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+
+          if (k === TRANSFORM_ORIGIN$2) {
+            k2 = WASM_STYLE_KEY[k2];
+            return [wasmCps[k2], wasmCps[k2 + 1]];
+          } else {
+            return wasmCps[WASM_STYLE_KEY[k2]];
+          }
+        }
+
+        return computedStyle[k2];
       }
     }, {
       key: "getBoundingClientRect",
@@ -21612,10 +25155,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           y: box[3]
         }, matrixEvent));
         return {
-          left: Math.min(p1.x, Math.min(p2.x, Math.min(p3.x, p4.x))),
-          top: Math.min(p1.y, Math.min(p2.y, Math.min(p3.y, p4.y))),
-          right: Math.max(p1.x, Math.max(p2.x, Math.max(p3.x, p4.x))),
-          bottom: Math.max(p1.y, Math.max(p2.y, Math.max(p3.y, p4.y))),
+          left: Math.min(p1.x, p2.x, p3.x, p4.x),
+          top: Math.min(p1.y, p2.y, p3.y, p4.y),
+          right: Math.max(p1.x, p2.x, p3.x, p4.x),
+          bottom: Math.max(p1.y, p2.y, p3.y, p4.y),
           points: [p1, p2, p3, p4]
         };
       } // img和geom返回false，在inline布局时判断是否是真的inline
@@ -21637,11 +25180,21 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var target = this.isShadowRoot ? this.hostRoot : this;
           i = parent.__children.indexOf(target);
 
+          if (i === -1) {
+            throw new Error('Invalid index of remove()');
+          }
+
           parent.__children.splice(i, 1);
 
-          i = parent.__zIndexChildren.indexOf(target);
+          if (parent.__zIndexChildren) {
+            i = parent.__zIndexChildren.indexOf(target);
 
-          parent.__zIndexChildren.splice(i, 1);
+            if (i === -1) {
+              throw new Error('Invalid index of remove()');
+            }
+
+            parent.__zIndexChildren.splice(i, 1);
+          }
 
           var __prev = target.__prev,
               __next = target.__next;
@@ -21657,27 +25210,27 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (this.__isDestroyed) {
           if (isFunction$4(cb)) {
-            cb();
+            cb(true);
           }
 
           return;
-        }
-
-        parent.__deleteStruct(this, i); // 不可见仅改变数据结构
+        } // root没有
 
 
-        if (this.__computedStyle[DISPLAY$6] === 'none' || parent.__computedStyle[DISPLAY$6] === 'none') {
+        parent && parent.__deleteStruct(this, i); // 不可见仅改变数据结构
+
+        if (this.__computedStyle[DISPLAY$6] === 'none' || parent && parent.__computedStyle[DISPLAY$6] === 'none') {
           this.__destroy();
 
           if (isFunction$4(cb)) {
-            cb();
+            cb(true);
           }
 
           return;
         } // 可见在reflow逻辑做结构关系等
 
 
-        root.__addUpdate(this, null, REFLOW$3, null, true, null, cb);
+        root.__addUpdate(this, null, REFLOW$3, false, true, false, false, cb);
       }
     }, {
       key: "addEventListener",
@@ -21714,6 +25267,27 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
         } else if (isFunction$4(arr) && arr === cb) {
           delete this.__listener[type];
+        }
+      } // 加速，用cacheTarget指向当前可用最高优先级的cache，无则null
+
+    }, {
+      key: "__updateCache",
+      value: function __updateCache() {
+        var __cacheMask = this.__cacheMask,
+            __cacheFilter = this.__cacheFilter,
+            __cacheTotal = this.__cacheTotal,
+            __cache = this.__cache;
+
+        if (__cacheMask && __cacheMask.__available) {
+          this.__cacheTarget = __cacheMask;
+        } else if (__cacheFilter && __cacheFilter.__available) {
+          this.__cacheTarget = __cacheFilter;
+        } else if (__cacheTotal && __cacheTotal.__available) {
+          this.__cacheTarget = __cacheTotal;
+        } else if (__cache && __cache.__available) {
+          this.__cacheTarget = __cache;
+        } else {
+          this.__cacheTarget = null;
         }
       }
     }, {
@@ -21785,26 +25359,36 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "opacity",
       get: function get() {
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          return wn.get_op();
+        }
+
         return this.__opacity;
       }
     }, {
       key: "matrix",
       get: function get() {
+        var wn = this.__wasmNode;
+
+        if (wn) {
+          return new Float64Array(wasm$1.instance.memory.buffer, wn.m_ptr(), 16);
+        }
+
         return this.__matrix;
-      }
+      } // TODO 渲染之前尚无数据，需判断refreshLevel
+
     }, {
       key: "matrixEvent",
       get: function get() {
-        var __domParent = this.__domParent,
-            matrix$1 = this.__matrix;
+        var wn = this.__wasmNode;
 
-        while (__domParent) {
-          matrix$1 = matrix.multiply(__domParent.__perspectiveMatrix, matrix$1);
-          matrix$1 = matrix.multiply(__domParent.__matrix, matrix$1);
-          __domParent = __domParent.__domParent;
+        if (wn) {
+          return new Float64Array(wasm$1.instance.memory.buffer, wn.me_ptr(), 16);
         }
 
-        return matrix$1;
+        return this.__matrixEvent;
       }
     }, {
       key: "perspectiveMatrix",
@@ -21884,7 +25468,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
             }
 
-            root.__addUpdate(this, null, MASK$2, null, null, null, null);
+            root.__addUpdate(this, null, MASK$2, false, false, false, false, null);
           }
         }
       }
@@ -21911,7 +25495,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
             }
 
-            root.__addUpdate(this, null, MASK$2, null, null, null, null);
+            root.__addUpdate(this, null, MASK$2, false, false, false, false, null);
           }
         }
       }
@@ -21934,7 +25518,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               this.__computedStyle[TRANSFORM_STYLE$1] = this.__currentStyle[TRANSFORM_STYLE$1];
             }
 
-            root.__addUpdate(this, null, REPAINT$3, null, null, null, null);
+            root.__addUpdate(this, null, REPAINT$3, false, false, false, false, null);
           }
         }
       }
@@ -21961,7 +25545,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }]);
 
     return Xom;
-  }(Node);
+  }(Node$1);
 
   var _enums$STYLE_KEY$7 = enums.STYLE_KEY,
       DISPLAY$5 = _enums$STYLE_KEY$7.DISPLAY,
@@ -22030,7 +25614,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               if (n !== baseline) {
                 var d = baseline - n;
 
-                item.__offsetX(d, true); // 同下方
+                item.__offsetX(d, true);
+
+                if (item instanceof TextBox) {
+                  item.__parent.__offsetX(d, false);
+                } // 同下方
 
 
                 increase = Math.max(increase, item.offsetWidth + d);
@@ -22041,7 +25629,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               if (_n !== baseline) {
                 var _d = baseline - _n;
 
-                item.__offsetY(_d, true); // text的话对齐下移可能影响整体高度，在同行有img/ib这样的替换元素下，需记录最大偏移导致的高度调整值
+                item.__offsetY(_d, true); // TextBox偏移后，Text也要更改x/y坐标，否则bbox不对，webgl渲染缓存位图就会偏差
+
+
+                if (item instanceof TextBox) {
+                  item.__parent.__offsetY(_d, false);
+                } // text的话对齐下移可能影响整体高度，在同行有img/ib这样的替换元素下，需记录最大偏移导致的高度调整值
                 // 比如一个字符和img，字符下调y即字符的baseline和图片底部对齐，导致高度增加lineHeight和baseline的差值
 
 
@@ -22168,15 +25761,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var first = list[0];
           var last = list[length - 1];
           var x1 = first.x;
-          var dom = first instanceof TextBox ? first.parent.domParent : first.domParent; // 因为inline可以嵌套inline，所以一直向上查找到非inline为止，每层inline如果是首个则减去左侧mbp
+          var dom = first instanceof TextBox ? first.__parent.__domParent : first.__domParent; // 因为inline可以嵌套inline，所以一直向上查找到非inline为止，每层inline如果是首个则减去左侧mbp
 
           while (true) {
-            var _list = dom.contentBoxList;
-            var _dom$computedStyle = dom.computedStyle,
-                display = _dom$computedStyle[DISPLAY$5],
-                marginLeft = _dom$computedStyle[MARGIN_LEFT$4],
-                borderLeftWidth = _dom$computedStyle[BORDER_LEFT_WIDTH$4],
-                paddingLeft = _dom$computedStyle[PADDING_LEFT$4];
+            var _list = dom.__contentBoxList;
+            var _dom$__computedStyle = dom.__computedStyle,
+                display = _dom$__computedStyle[DISPLAY$5],
+                marginLeft = _dom$__computedStyle[MARGIN_LEFT$4],
+                borderLeftWidth = _dom$__computedStyle[BORDER_LEFT_WIDTH$4],
+                paddingLeft = _dom$__computedStyle[PADDING_LEFT$4];
 
             if (display !== 'inline') {
               break;
@@ -22186,19 +25779,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               x1 -= marginLeft + borderLeftWidth + paddingLeft;
             }
 
-            dom = dom.domParent;
+            dom = dom.__domParent;
           }
 
           var x2 = last.x + last.outerWidth;
-          dom = last instanceof TextBox ? last.parent.domParent : last.domParent; // 同向上查非inline，每层inline如果是最后一个则加上右侧mbp
+          dom = last instanceof TextBox ? last.__parent.__domParent : last.__domParent; // 同向上查非inline，每层inline如果是最后一个则加上右侧mbp
 
           while (true) {
-            var _list2 = dom.contentBoxList;
-            var _dom$computedStyle2 = dom.computedStyle,
-                _display = _dom$computedStyle2[DISPLAY$5],
-                marginRight = _dom$computedStyle2[MARGIN_RIGHT$3],
-                borderRightWidth = _dom$computedStyle2[BORDER_RIGHT_WIDTH$3],
-                paddingRight = _dom$computedStyle2[PADDING_RIGHT$3];
+            var _list2 = dom.__contentBoxList;
+            var _dom$__computedStyle2 = dom.__computedStyle,
+                _display = _dom$__computedStyle2[DISPLAY$5],
+                marginRight = _dom$__computedStyle2[MARGIN_RIGHT$3],
+                borderRightWidth = _dom$__computedStyle2[BORDER_RIGHT_WIDTH$3],
+                paddingRight = _dom$__computedStyle2[PADDING_RIGHT$3];
 
             if (_display !== 'inline') {
               break;
@@ -22208,7 +25801,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               x2 += marginRight + borderRightWidth + paddingRight;
             }
 
-            dom = dom.domParent;
+            dom = dom.__domParent;
           }
 
           return x2 - x1;
@@ -22230,15 +25823,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var first = list[0];
           var last = list[length - 1];
           var y1 = first.y;
-          var dom = first instanceof TextBox ? first.parent.domParent : first.domParent; // 因为inline可以嵌套inline，所以一直向上查找到非inline为止，每层inline如果是首个则减去左侧mbp
+          var dom = first instanceof TextBox ? first.__parent.__domParent : first.__domParent; // 因为inline可以嵌套inline，所以一直向上查找到非inline为止，每层inline如果是首个则减去左侧mbp
 
           while (true) {
-            var _list3 = dom.contentBoxList;
-            var _dom$computedStyle3 = dom.computedStyle,
-                display = _dom$computedStyle3[DISPLAY$5],
-                marginTop = _dom$computedStyle3[MARGIN_TOP$2],
-                borderTopWidth = _dom$computedStyle3[BORDER_TOP_WIDTH$2],
-                paddingTop = _dom$computedStyle3[PADDING_TOP$2];
+            var _list3 = dom.__contentBoxList;
+            var _dom$__computedStyle3 = dom.__computedStyle,
+                display = _dom$__computedStyle3[DISPLAY$5],
+                marginTop = _dom$__computedStyle3[MARGIN_TOP$2],
+                borderTopWidth = _dom$__computedStyle3[BORDER_TOP_WIDTH$2],
+                paddingTop = _dom$__computedStyle3[PADDING_TOP$2];
 
             if (display !== 'inline') {
               break;
@@ -22248,19 +25841,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               y1 -= marginTop + borderTopWidth + paddingTop;
             }
 
-            dom = dom.domParent;
+            dom = dom.__domParent;
           }
 
           var y2 = last.y + last.outerHeight;
-          dom = last instanceof TextBox ? last.parent.domParent : last.domParent; // 同向上查非inline，每层inline如果是最后一个则加上右侧mbp
+          dom = last instanceof TextBox ? last.__parent.__domParent : last.__domParent; // 同向上查非inline，每层inline如果是最后一个则加上右侧mbp
 
           while (true) {
-            var _list4 = dom.contentBoxList;
-            var _dom$computedStyle4 = dom.computedStyle,
-                _display2 = _dom$computedStyle4[DISPLAY$5],
-                marginBottom = _dom$computedStyle4[MARGIN_BOTTOM$2],
-                borderBottomWidth = _dom$computedStyle4[BORDER_BOTTOM_WIDTH$1],
-                paddingBottom = _dom$computedStyle4[PADDING_BOTTOM$1];
+            var _list4 = dom.__contentBoxList;
+            var _dom$computedStyle = dom.computedStyle,
+                _display2 = _dom$computedStyle[DISPLAY$5],
+                marginBottom = _dom$computedStyle[MARGIN_BOTTOM$2],
+                borderBottomWidth = _dom$computedStyle[BORDER_BOTTOM_WIDTH$1],
+                paddingBottom = _dom$computedStyle[PADDING_BOTTOM$1];
 
             if (_display2 !== 'inline') {
               break;
@@ -22270,7 +25863,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               y2 += marginBottom + borderBottomWidth + paddingBottom;
             }
 
-            dom = dom.domParent;
+            dom = dom.__domParent;
           }
 
           return y2 - y1;
@@ -22796,6 +26389,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       GRADIENT = o$4.GRADIENT;
   var int2rgba = util.int2rgba,
       isNil$9 = util.isNil,
+      isNumber = util.isNumber,
       joinArr = util.joinArr;
   var canvasPolygon$2 = painter.canvasPolygon,
       svgPolygon$1 = painter.svgPolygon;
@@ -23299,10 +26893,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           if (isMulti) {
             list.forEach(function (item) {
-              return canvasPolygon$2(ctx, item, dx, dy);
+              return canvasPolygon$2(ctx, item, dx, dy, true);
             });
           } else {
-            canvasPolygon$2(ctx, list, dx, dy);
+            canvasPolygon$2(ctx, list, dx, dy, true);
           }
 
           if (isFill && fill && fill !== 'none') {
@@ -23312,8 +26906,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           if (isStroke && stroke && stroke !== 'none' && strokeWidth && strokeWidth > 0) {
             ctx.stroke();
           }
-
-          ctx.closePath();
         } else if (renderMode === mode.SVG) {
           var d = '';
 
@@ -23446,14 +27038,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           if (isMulti) {
             list.forEach(function (item) {
-              return painter.canvasPolygon(ctx, item);
+              return painter.canvasPolygon(ctx, item, 0, 0, true);
             });
           } else {
-            canvasPolygon$2(ctx, list);
+            canvasPolygon$2(ctx, list, 0, 0, true);
           }
 
           ctx[method]();
-          ctx.closePath();
 
           if (matrix$1) {
             ctx.restore();
@@ -23517,18 +27108,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             list.forEach(function (item) {
               ctx.save();
               ctx.beginPath();
-              canvasPolygon$2(ctx, item, dx, dy);
+              canvasPolygon$2(ctx, item, dx, dy, true);
               ctx.clip();
-              ctx.closePath();
               ctx.drawImage(offscreen.canvas, x1 + dx, y1 + dy);
               ctx.restore();
             });
           } else {
             ctx.save();
             ctx.beginPath();
-            canvasPolygon$2(ctx, list, dx, dy);
+            canvasPolygon$2(ctx, list, dx, dy, true);
             ctx.clip();
-            ctx.closePath();
             ctx.drawImage(offscreen.canvas, x1 + dx, y1 + dy);
             ctx.restore();
           }
@@ -23659,6 +27248,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       key: "__isRealInline",
       value: function __isRealInline() {
         return false;
+      }
+    }, {
+      key: "animate",
+      value: function animate(list) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        if (isNumber(options)) {
+          options = {
+            duration: options,
+            isGeom: true
+          };
+        } else {
+          options.isGeom = true;
+        }
+
+        return _get(_getPrototypeOf(Geom.prototype), "animate", this).call(this, list, options);
       }
     }, {
       key: "isMulti",
@@ -24383,7 +27988,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         children.__prev = options.prev;
       }
 
-      options.prev = children;
+      options.prev = children; // wasm
+
+      var wr = root.__wasmRoot;
+
+      if (wr) {
+        if (children instanceof Xom) {
+          children.__wasmNode = wasm$1.Node["new"](false);
+        } else if (children instanceof Text) {
+          children.__wasmNode = wasm$1.Node["new"](true);
+        }
+      } // ref
+
 
       if (!(children instanceof Text)) {
         var ref = children.props.ref;
@@ -24413,7 +28029,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           sr = res;
         }
 
-        if (!(sr instanceof Node)) {
+        if (!(sr instanceof Node$1)) {
           sr = new Text(sr);
         }
 
@@ -24441,6 +28057,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (sr instanceof Xom && sr.__children) {
           relation(root, children, sr, sr.__children, {});
+        } // wasm
+
+
+        if (wr) {
+          if (sr instanceof Xom) {
+            sr.__wasmNode = wasm$1.Node["new"](false);
+          } else if (sr instanceof Text) {
+            sr.__wasmNode = wasm$1.Node["new"](true);
+          }
         }
       }
     }
@@ -24498,7 +28123,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       FLEX_WRAP = _enums$STYLE_KEY$4.FLEX_WRAP,
       ALIGN_CONTENT = _enums$STYLE_KEY$4.ALIGN_CONTENT,
       OVERFLOW$1 = _enums$STYLE_KEY$4.OVERFLOW,
-      FONT_SIZE$1 = _enums$STYLE_KEY$4.FONT_SIZE,
+      FONT_SIZE$2 = _enums$STYLE_KEY$4.FONT_SIZE,
       FONT_FAMILY = _enums$STYLE_KEY$4.FONT_FAMILY,
       FONT_WEIGHT = _enums$STYLE_KEY$4.FONT_WEIGHT,
       WRITING_MODE$1 = _enums$STYLE_KEY$4.WRITING_MODE,
@@ -24514,15 +28139,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   var isRelativeOrAbsolute = css.isRelativeOrAbsolute,
       getBaseline = css.getBaseline,
       getVerticalBaseline = css.getVerticalBaseline;
-  var extend$1 = util.extend;
-      util.isNil;
-      var isFunction$3 = util.isFunction,
-      assignMatrix$1 = util.assignMatrix;
+  var extend$1 = util.extend,
+      isFunction$3 = util.isFunction;
   var CANVAS = mode.CANVAS,
       SVG = mode.SVG,
       WEBGL = mode.WEBGL;
   var isE$2 = matrix.isE,
-      multiply$1 = matrix.multiply;
+      multiply$1 = matrix.multiply,
+      assignMatrix$1 = matrix.assignMatrix;
   var REFLOW$1 = o$1.REFLOW; // 渲染获取zIndex顺序
 
   function genZIndexChildren(dom) {
@@ -24663,7 +28287,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       ew = ctx.measureText(ELLIPSIS).width;
     } else {
-      ew = inject.measureTextSync(ELLIPSIS, computedStyle[FONT_FAMILY], computedStyle[FONT_SIZE$1], computedStyle[FONT_WEIGHT]);
+      ew = inject.measureTextSync(ELLIPSIS, computedStyle[FONT_FAMILY], computedStyle[FONT_SIZE$2], computedStyle[FONT_WEIGHT], false);
     }
 
     for (var i = list.length - 1; i >= 0; i--) {
@@ -24764,39 +28388,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return arr;
       }
     }, {
-      key: "__modifyStruct",
-      value: function __modifyStruct() {
-        var _root$__structs;
-
-        var struct = this.__struct;
-        var total = struct.total || 0;
-        var root = this.__root,
-            __structs = root.__structs; // 新生成了struct，引用也变了
-
-        var nss = this.__structure(struct.lv, struct.childIndex);
-
-        var i = __structs.indexOf(struct);
-
-        (_root$__structs = root.__structs).splice.apply(_root$__structs, [i, total + 1].concat(_toConsumableArray(nss)));
-
-        var d = 0;
-
-        if (this !== root) {
-          struct = this.__struct;
-          d = (struct.total || 0) - total;
-
-          if (d) {
-            var p = this.__domParent;
-
-            while (p) {
-              p.__struct.total = p.__struct.total || 0;
-              p.__struct.total += d;
-              p = p.__domParent;
-            }
-          }
-        }
-      }
-    }, {
       key: "__insertStruct",
       value: function __insertStruct(child, childIndex) {
         var struct = this.__struct;
@@ -24819,14 +28410,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           i = structs.indexOf(struct) + 1;
         }
 
-        var total;
+        var total,
+            wr = root.__wasmRoot;
 
         if (Array.isArray(cs)) {
           structs.splice.apply(structs, [i, 0].concat(_toConsumableArray(cs)));
           total = (cs[0].total || 0) + 1;
+
+          if (wr) {
+            for (var j = cs.length - 1; j >= 0; j--) {
+              wr.insert_node(i, cs[j].node.__wasmNode.ptr);
+            }
+          }
         } else {
           structs.splice(i, 0, cs);
           total = (cs.total || 0) + 1;
+
+          if (wr) {
+            wr.insert_node(i, cs.node.__wasmNode.ptr);
+          }
         } // 调整后面children的childIndex，+1
 
 
@@ -24851,12 +28453,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "__deleteStruct",
       value: function __deleteStruct(child, childIndex) {
-        var cs = child.__struct;
+        var cs = child.__struct; // 未添加到真实DOM时没有
+
+        if (!cs) {
+          return;
+        }
+
         var total = (cs.total || 0) + 1;
         var root = this.__root,
             structs = root.__structs;
         var i = structs.indexOf(cs);
-        structs.splice(i, total); // zIndexChildren后面的childIndex偏移
+        structs.splice(i, total);
+        var wr = root.__wasmRoot;
+
+        if (wr) {
+          for (var j = i + total; j >= i; j--) {
+            wr.remove_node(j);
+          }
+        } // zIndexChildren后面的childIndex偏移
+
 
         var zIndexChildren = this.__zIndexChildren;
 
@@ -24885,7 +28500,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "__updateStruct",
       value: function __updateStruct() {
-        var structs = this.__root.__structs;
+        var root = this.__root;
+        var structs = root.__structs;
         var struct = this.__struct;
         var total = struct.total || 0;
         var index = structs.indexOf(struct);
@@ -24929,6 +28545,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             list = list.concat(item.list);
           });
           structs.splice.apply(structs, [index + 1, total].concat(_toConsumableArray(list)));
+          var wr = root.__wasmRoot;
+
+          if (wr) {
+            for (var _i3 = index + 1; _i3 <= index + total; _i3++) {
+              wr.set_node(structs[_i3].node, _i3);
+            }
+          }
         }
       }
       /**
@@ -25285,6 +28908,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         return this.__addMBP(isDirectionRow, w, currentStyle, computedStyle, [b, min, max], isDirectChild);
       } // flow的layout包裹方法，布局后递归计算computedStyle，abs节点在__layoutAbs中做
+      // 布局完成后才能计算相关样式，因为需要布局确定尺寸，很多样式有百分比或继承
 
     }, {
       key: "__layout",
@@ -25300,9 +28924,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         _get(_getPrototypeOf(Dom.prototype), "__layoutStyle", this).call(this);
 
         this.flowChildren.forEach(function (child) {
-          if (!(child instanceof Text)) {
-            child.__layoutStyle();
-          }
+          // 文本不需要，但wasm情况要传入一些信息
+          child.__layoutStyle();
         });
       }
     }, {
@@ -26788,37 +30411,37 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
         } else {
           if (justifyContent === 'flexEnd') {
-            for (var _i3 = 0; _i3 < len; _i3++) {
-              var _child = line[_i3];
+            for (var _i4 = 0; _i4 < len; _i4++) {
+              var _child = line[_i4];
               isDirectionRow ? _child.__offsetX(free, true, null) : _child.__offsetY(free, true, null);
             }
           } else if (justifyContent === 'center') {
             var center = free * 0.5;
 
-            for (var _i4 = 0; _i4 < len; _i4++) {
-              var _child2 = line[_i4];
+            for (var _i5 = 0; _i5 < len; _i5++) {
+              var _child2 = line[_i5];
               isDirectionRow ? _child2.__offsetX(center, true, null) : _child2.__offsetY(center, true, null);
             }
           } else if (justifyContent === 'spaceBetween') {
             var between = free / (len - 1);
 
-            for (var _i5 = 1; _i5 < len; _i5++) {
-              var _child3 = line[_i5];
-              isDirectionRow ? _child3.__offsetX(between * _i5, true, null) : _child3.__offsetY(between * _i5, true, null);
+            for (var _i6 = 1; _i6 < len; _i6++) {
+              var _child3 = line[_i6];
+              isDirectionRow ? _child3.__offsetX(between * _i6, true, null) : _child3.__offsetY(between * _i6, true, null);
             }
           } else if (justifyContent === 'spaceAround') {
             var around = free * 0.5 / len;
 
-            for (var _i6 = 0; _i6 < len; _i6++) {
-              var _child4 = line[_i6];
-              isDirectionRow ? _child4.__offsetX(around * (_i6 * 2 + 1), true, null) : _child4.__offsetY(around * (_i6 * 2 + 1), true, null);
+            for (var _i7 = 0; _i7 < len; _i7++) {
+              var _child4 = line[_i7];
+              isDirectionRow ? _child4.__offsetX(around * (_i7 * 2 + 1), true, null) : _child4.__offsetY(around * (_i7 * 2 + 1), true, null);
             }
           } else if (justifyContent === 'spaceEvenly') {
             var _around = free / (len + 1);
 
-            for (var _i7 = 0; _i7 < len; _i7++) {
-              var _child5 = line[_i7];
-              isDirectionRow ? _child5.__offsetX(_around * (_i7 + 1), true, null) : _child5.__offsetY(_around * (_i7 + 1), true, null);
+            for (var _i8 = 0; _i8 < len; _i8++) {
+              var _child5 = line[_i8];
+              isDirectionRow ? _child5.__offsetX(_around * (_i8 + 1), true, null) : _child5.__offsetY(_around * (_i8 + 1), true, null);
             }
           }
         } // 再侧轴
@@ -27986,9 +31609,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               sr.__layoutAbs(sr, data, null);
             }
           }
-        }); // 根节点自己特殊执行，不在layout统一
+        }); // parse的abs根节点自己特殊执行，不在layout统一
 
-        this.__execAr();
+        this.__animateRecords && this.__root.__addAr(this);
       }
     }, {
       key: "render",
@@ -28055,13 +31678,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (computedStyle[OVERFLOW$1] === 'hidden' && !this.willResponseEvent(e, true)) {
           return;
-        } // __cacheTotal可提前判断是否在bbox范围内，svg没有bbox防止进入判断
+        } // __cacheTotal可提前判断是否在bbox范围内，svg没有bbox防止进入判断，
+        // img比较特殊，cache只有自己，不能进入，否则鼠标移入mousemove会错误覆盖matrixEvent
 
 
-        if (__cacheTotal && __cacheTotal.available && __cacheTotal.bbox) {
+        if (__cacheTotal && __cacheTotal.__available && __cacheTotal.bbox && this.__tagName !== 'img') {
           // 不是E的话，因为缓存缘故影响cache的子元素，先左乘可能的父matrix（嵌套cache），再赋值给pm递归传下去
-          if (!isE$2(this.__matrix)) {
-            pm = multiply$1(pm, this.__matrix);
+          if (!isE$2(this.matrix)) {
+            pm = multiply$1(pm, this.matrix);
             assignMatrix$1(this.__matrixEvent, pm);
           } else if (this.__perspectiveMatrix) {
             pm = this.__perspectiveMatrix;
@@ -28073,8 +31697,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             return;
           }
         } // 递归传下来的pm如果有说明是cache的子元素且需要重新计算matrix
-        else if (!matrix.isE(pm)) {
-          util.assignMatrix(this.__matrixEvent, matrix.multiply(pm, this.__matrix));
+        else if (!isE$2(pm)) {
+          assignMatrix$1(this.__matrixEvent, matrix.multiply(pm, this.matrix));
         } // 找到对应的callback
 
 
@@ -28123,7 +31747,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             host = this.__host,
             children = this.__children;
 
-        if (!(child instanceof Node || child instanceof Component)) {
+        if (!(child instanceof Node$1 || child instanceof Component)) {
           child = new Text(child);
         }
 
@@ -28138,8 +31762,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         child.__parent = this;
-        children.push(child);
-        var zIndexChildren = this.__zIndexChildren = genZIndexChildren(this); // 离屏情况，不刷新
+        children.push(child); // 离屏情况，不刷新
 
         if (this.__isDestroyed) {
           if (isFunction$3(cb)) {
@@ -28150,7 +31773,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // 在dom中则整体设置关系和struct，不可见提前跳出
 
 
-        builder.relation(root, host, this, child, {});
+        builder.relation(root, host || root, this, child, {});
+        var zIndexChildren = this.__zIndexChildren = genZIndexChildren(this);
 
         this.__insertStruct(child, zIndexChildren.indexOf(child)); // 可能为component，不能用__currentStyle
 
@@ -28170,7 +31794,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           child = this;
         }
 
-        root.__addUpdate(child, null, REFLOW$1, true, null, null, cb);
+        root.__addUpdate(child, null, REFLOW$1, true, false, false, false, cb);
       }
     }, {
       key: "prependChild",
@@ -28179,7 +31803,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             host = this.__host,
             children = this.__children;
 
-        if (!(child instanceof Node || child instanceof Component)) {
+        if (!(child instanceof Node$1 || child instanceof Component)) {
           child = new Text(child);
         }
 
@@ -28194,8 +31818,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         child.__parent = this;
-        children.unshift(child);
-        var zIndexChildren = this.__zIndexChildren = genZIndexChildren(this); // 离屏情况，不刷新
+        children.unshift(child); // 离屏情况，不刷新
 
         if (this.__isDestroyed) {
           if (isFunction$3(cb)) {
@@ -28207,6 +31830,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
         builder.relation(root, host, this, child, {});
+        var zIndexChildren = this.__zIndexChildren = genZIndexChildren(this);
 
         this.__insertStruct(child, zIndexChildren.indexOf(child)); // 可能为component，不能用__currentStyle
 
@@ -28226,14 +31850,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           child = this;
         }
 
-        root.__addUpdate(child, null, REFLOW$1, true, null, null, cb);
+        root.__addUpdate(child, null, REFLOW$1, true, false, false, false, cb);
       }
     }, {
       key: "insertBefore",
       value: function insertBefore(child, cb) {
         var root = this.__root;
 
-        if (!(child instanceof Node || child instanceof Component)) {
+        if (!(child instanceof Node$1 || child instanceof Component)) {
           child = new Text(child);
         }
 
@@ -28260,7 +31884,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           child.__next = target;
           target.__prev = child;
           children.splice(i, 0, child);
-          parent.__zIndexChildren = genZIndexChildren(parent);
         } else {
           throw new Error('InsertBefore() illegal');
         } // 离屏情况，不刷新
@@ -28276,6 +31899,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
         builder.relation(root, parent.__host, parent, child, {});
+        parent.__zIndexChildren = genZIndexChildren(parent);
 
         parent.__insertStruct(child, parent.__zIndexChildren.indexOf(child));
 
@@ -28293,14 +31917,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           child = parent;
         }
 
-        root.__addUpdate(child, null, REFLOW$1, true, null, null, cb);
+        root.__addUpdate(child, null, REFLOW$1, true, false, false, false, cb);
       }
     }, {
       key: "insertAfter",
       value: function insertAfter(child, cb) {
         var root = this.__root;
 
-        if (!(child instanceof Node || child instanceof Component)) {
+        if (!(child instanceof Node$1 || child instanceof Component)) {
           child = new Text(child);
         }
 
@@ -28320,7 +31944,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           target.__next = child;
           child.__prev = target;
           children.splice(i + 1, 0, child);
-          parent.__zIndexChildren = genZIndexChildren(parent);
         } else {
           throw new Error('InsertAfter() illegal');
         } // 离屏情况，不刷新
@@ -28336,6 +31959,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
         builder.relation(root, parent.__host, parent, child, {});
+        parent.__zIndexChildren = genZIndexChildren(parent);
 
         parent.__insertStruct(child, parent.__zIndexChildren.indexOf(child));
 
@@ -28353,12 +31977,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           child = parent;
         }
 
-        root.__addUpdate(child, null, REFLOW$1, true, null, null, cb);
+        root.__addUpdate(child, null, REFLOW$1, true, false, false, false, cb);
       }
     }, {
       key: "removeChild",
       value: function removeChild(target, cb) {
-        if ((target.__parent === this || target.__domParent === this) && (target instanceof Node || target instanceof Component)) {
+        if ((target.__parent === this || target.__domParent === this) && (target instanceof Node$1 || target instanceof Component)) {
           target.remove(cb);
         } else {
           inject.error('Invalid parameter of removeChild()');
@@ -28472,8 +32096,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     _createClass(Cache, [{
       key: "__init",
       value: function __init(w, h, bbox, page, pos, x1, y1) {
-        this.__width = w;
-        this.__height = h;
+        this.__width = this.__tw = w; // 由于图片共享一个，可能出现绘制尺寸和缓存尺寸不一致，所以单独存2份数据
+
+        this.__height = this.__th = h;
         this.__bbox = bbox;
         this.__page = page;
         this.__pos = pos;
@@ -28506,9 +32131,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         this.dy = this.__y - bbox[1];
         this.dbx = x1 - bbox[0]; // 原始sx1/sy1和box原点的差值
 
-        this.dby = y1 - bbox[1];
-        this.update();
-      }
+        this.dby = y1 - bbox[1]; // this.update();
+      } // canvas绘制时主动调用更新bbox, x1, y1
+
     }, {
       key: "update",
       value: function update() {
@@ -28652,6 +32277,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             pos = res.pos;
         return new cacheKlass(renderMode, ctx, rootId, w, h, bbox, page, pos, x1, y1);
       }
+    }, {
+      key: "getImgInstance",
+      value: function getImgInstance(renderMode, ctx, rootId, bbox, x1, y1, w, h, cacheKlass, pageKlass, excludePage) {
+        var n = Math.max(w, h);
+
+        if (n <= 0) {
+          return;
+        }
+
+        var res = pageKlass.getInstance(renderMode, ctx, rootId, n, excludePage);
+
+        if (!res) {
+          return;
+        }
+
+        var page = res.page,
+            pos = res.pos;
+        var o = new cacheKlass(renderMode, ctx, rootId, w, h, bbox, page, pos, x1, y1);
+        o.__tw = bbox[2] - bbox[0];
+        o.__th = bbox[3] - bbox[1];
+        return o;
+      }
     }]);
 
     return Cache;
@@ -28683,17 +32330,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       this.__number = number;
       this.__width = this.__height = size; // 标识n*n个单元格是否空闲可用，一维数组表示
 
-      var grid = [];
-
-      for (var i = 0, len = number * number; i < len; i++) {
-        grid.push(0);
-      }
-
-      this.__grid = new Int32Array(grid);
+      this.__grid = new Uint16Array(number * number);
       this.__uuid = uuid$1++; // webgl贴图缓存更新使用，canvas/img等发生变更需刷新重新生成texture，fbo的texture不需要
 
       this.__update = false;
       this.time = 0;
+      this.__ctx = ctx;
+      this.__count = 0;
     }
 
     _createClass(Page, [{
@@ -28709,6 +32352,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             grid[i + j * number] = unitSize;
           }
         }
+
+        this.__count++;
       }
     }, {
       key: "del",
@@ -28728,6 +32373,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             }
           }
         }
+
+        this.__count--;
       }
     }, {
       key: "getCoords",
@@ -28747,7 +32394,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             grid = this.grid;
 
         outer: for (var i = 0; i < number; i++) {
-          var u = grid[i];
+          var u = grid[i]; // 有值，判断是否相同可归同列
 
           if (u) {
             if (u === unitSize) {
@@ -28760,13 +32407,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 }
               }
             } else {
-              i += u;
+              i += u - 1;
             }
-          } else {
-            // 空白列检查尺寸是否符合
-            for (var _j = i + 1, len = i + unitSize; _j < len; _j++) {
-              if (grid[i]) {
-                continue outer;
+          } // 无值，先防止到右边距离不够
+          else if (i + unitSize <= number) {
+            // 如果需要占用这些列，那么所有数据都必须为空，因为可能之前其它尺寸的占了，但上面开头数据被删除了
+            for (var _j = i, len = i + unitSize; _j < len; _j++) {
+              for (var k = 0; k < number; k++) {
+                if (grid[_j + k * number]) {
+                  i = Math.max(i, _j - 1); // 防止首列检查就不符合死循环，至少列数增1
+
+                  continue outer;
+                }
               }
             }
 
@@ -28829,12 +32481,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         var m = MAX,
-            n = NUMBER; // 只有超过一定尺寸时用8192最大尺寸，大部分情况4096足够，且8192会轻微卡顿一下
-
-        if (size <= 2048 && MAX === 8192) {
-          m = 4096;
-          n = Math.ceil(m / UNIT);
-        }
+            n = NUMBER; // 限制使用2048，部分机型大尺寸会卡或者黑屏，webgl甚至不渲染，超过的 TODO:
+        // if(size < 2048 && MAX === 8192) {
+        //   m = 2048;
+        //   n = Math.ceil(m / UNIT);
+        // }
 
         var key = rootId + ',' + renderMode; // 每个root复用自己的合图，webgl中为了隔离不同实例
 
@@ -28848,7 +32499,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             continue;
           }
 
-          if ((pos = item.getFreePos(unitSize)) > -1) {
+          pos = item.getFreePos(unitSize);
+
+          if (pos > -1) {
             page = item;
             break;
           }
@@ -28877,7 +32530,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return MAX;
       },
       set: function set(MAX_TEXTURE_SIZE) {
-        // 确保MAX_TEXTURE_SIZE是2的幂级数，如果不是向下取整
+        _init = true; // 确保MAX_TEXTURE_SIZE是2的幂级数，如果不是向下取整
+
         var n = 2;
 
         while (n < MAX_TEXTURE_SIZE) {
@@ -28907,16 +32561,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     }, {
       key: "init",
-      value: function init(MAX_TEXTURE_SIZE) {
-        if (_init) {
+      value: function init(MAX_TEXTURE_SIZE, isAuto) {
+        // 手动随时设置，自动仅第一次生效
+        if (_init && isAuto) {
           return;
         }
 
-        _init = true;
-
         if (MAX_TEXTURE_SIZE !== MAX) {
           // 超过限制会明显卡一下
-          Page.MAX = Math.min(MAX_TEXTURE_SIZE, 8192);
+          Page.MAX = Math.min(MAX_TEXTURE_SIZE, 2048);
         }
       }
     }]);
@@ -28925,6 +32578,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }();
 
   var calRectPoint$1 = matrix.calRectPoint,
+      calRectPointWasm = matrix.calRectPointWasm,
       calPoint = matrix.calPoint;
   /**
    * 初始化 shader
@@ -29098,7 +32752,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
    * 然后相同纹理单元的形成一批，设置uniform的纹理单元号进行绘制，如此循环
    */
 
-  function drawTextureCache$1(gl, list, cx, cy, dx, dy) {
+  function drawTextureCache$1(gl, list, cx, cy, dx, dy, wasmOp, wasmMe) {
     var length = list.length;
 
     if (!length) {
@@ -29126,12 +32780,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
 
     for (var i = 0; i < length; i++) {
-      var _list$i = list[i],
-          cache = _list$i.cache,
-          opacity = _list$i.opacity,
-          matrix = _list$i.matrix;
-      var width = cache.__width,
-          height = cache.__height,
+      var item = list[i];
+      var cache = item.cache,
+          index = item.index,
+          wasm = item.wasm;
+      var opacity = void 0,
+          matrix = void 0;
+      var width = cache.__tw,
+          height = cache.__th,
           tx1 = cache.__tx1,
           ty1 = cache.__ty1,
           tx2 = cache.__tx2,
@@ -29146,8 +32802,32 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         bindTexture$1(gl, page.texture, 0);
+      }
+
+      if (wasm) {
+        opacity = wasmOp[index];
+      } else {
+        opacity = item.opacity;
+        matrix = item.matrix;
       } // 计算顶点坐标和纹理坐标，转换[0,1]对应关系
 
+
+      var x1 = void 0,
+          y1 = void 0,
+          z1 = void 0,
+          w1 = void 0,
+          x2 = void 0,
+          y2 = void 0,
+          z2 = void 0,
+          w2 = void 0,
+          x3 = void 0,
+          y3 = void 0,
+          z3 = void 0,
+          w3 = void 0,
+          x4 = void 0,
+          y4 = void 0,
+          z4 = void 0,
+          w4 = void 0; // wasm中的matrix和普通js取的方式不一样
 
       var bx = bbox[0],
           by = bbox[1];
@@ -29155,26 +32835,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           ya = by + height + dy;
       var xb = bx + width + dx,
           yb = by + dy;
-
-      var _calRectPoint = calRectPoint$1(xa, ya, xb, yb, matrix),
-          x1 = _calRectPoint.x1,
-          y1 = _calRectPoint.y1,
-          z1 = _calRectPoint.z1,
-          w1 = _calRectPoint.w1,
-          x2 = _calRectPoint.x2,
-          y2 = _calRectPoint.y2,
-          z2 = _calRectPoint.z2,
-          w2 = _calRectPoint.w2,
-          x3 = _calRectPoint.x3,
-          y3 = _calRectPoint.y3,
-          z3 = _calRectPoint.z3,
-          w3 = _calRectPoint.w3,
-          x4 = _calRectPoint.x4,
-          y4 = _calRectPoint.y4,
-          z4 = _calRectPoint.z4,
-          w4 = _calRectPoint.w4; // console.warn(x1,y1,z1,w1,',',x2,y2,z2,w2,',',x3,y3,z3,w3,',',x4,y4,z4,w4);
+      var t = wasm ? calRectPointWasm(xa, ya, xb, yb, wasmMe, index) : calRectPoint$1(xa, ya, xb, yb, matrix);
+      x1 = t.x1;
+      y1 = t.y1;
+      z1 = t.z1;
+      w1 = t.w1;
+      x2 = t.x2;
+      y2 = t.y2;
+      z2 = t.z2;
+      w2 = t.w2;
+      x3 = t.x3;
+      y3 = t.y3;
+      z3 = t.z3;
+      w3 = t.w3;
+      x4 = t.x4;
+      y4 = t.y4;
+      z4 = t.z4;
+      w4 = t.w4; // console.warn(x1,y1,z1,w1,',',x2,y2,z2,w2,',',x3,y3,z3,w3,',',x4,y4,z4,w4);
       // z范围取所有、对角线最大值，只有当非0有值时才求
-
 
       var z = Math.max(Math.abs(z1), Math.abs(z2));
       z = Math.max(z, Math.abs(z3));
@@ -29184,7 +32862,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         z = Math.max(z, Math.sqrt(cx * cx + cy * cy));
       }
 
-      var t = convertCoords2Gl(x1, y1, z1, w1, cx, cy, z);
+      t = convertCoords2Gl(x1, y1, z1, w1, cx, cy, z);
       x1 = t.x;
       y1 = t.y;
       z1 = t.z;
@@ -29669,7 +33347,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     bindTexture$1(gl, tex2, 0);
     gl.uniform1i(u_texture, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    bindTexture$1(gl, null, 0);
+    bindTexture$1(gl, null, 0); // gl.deleteBuffer(pointBuffer);
+    // gl.deleteBuffer(texBuffer);
+    // gl.deleteBuffer(opacityBuffer);
   }
 
   function drawTex2Cache$1(gl, program, cache, tex, width, height) {
@@ -29776,7 +33456,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var u_texture = gl.getUniformLocation(program, 'u_texture');
     bindTexture$1(gl, texture, 0);
     gl.uniform1i(u_texture, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.drawArrays(gl.TRIANGLES, 0, 6); // gl.deleteBuffer(pointBuffer);
+    // gl.deleteBuffer(texBuffer);
+    // gl.deleteBuffer(opacityBuffer);
   }
 
   function drawSameSize(gl, tex, opacity) {
@@ -29820,11 +33502,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var u_texture = gl.getUniformLocation(gl.program, 'u_texture'); // 循环所有顺序拼图/平面
 
     for (var i = 0, len = list.length; i < len; i++) {
-      var _list$i2 = list[i],
-          isPuzzle = _list$i2.isPuzzle,
-          node = _list$i2.node,
-          target = _list$i2.target,
-          points = _list$i2.points;
+      var _list$i = list[i],
+          isPuzzle = _list$i.isPuzzle,
+          node = _list$i.node,
+          target = _list$i.target,
+          points = _list$i.points;
       var width = target.__width,
           height = target.__height,
           tx1 = target.__tx1,
@@ -29949,23 +33631,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var xb = bx + width + dx,
             yb = by + dy;
 
-        var _calRectPoint2 = calRectPoint$1(xa, ya, xb, yb, matrix),
-            x1 = _calRectPoint2.x1,
-            y1 = _calRectPoint2.y1,
-            z1 = _calRectPoint2.z1,
-            w1 = _calRectPoint2.w1,
-            x2 = _calRectPoint2.x2,
-            y2 = _calRectPoint2.y2,
-            z2 = _calRectPoint2.z2,
-            w2 = _calRectPoint2.w2,
-            x3 = _calRectPoint2.x3,
-            y3 = _calRectPoint2.y3,
-            z3 = _calRectPoint2.z3,
-            w3 = _calRectPoint2.w3,
-            x4 = _calRectPoint2.x4,
-            y4 = _calRectPoint2.y4,
-            z4 = _calRectPoint2.z4,
-            w4 = _calRectPoint2.w4;
+        var _calRectPoint = calRectPoint$1(xa, ya, xb, yb, matrix),
+            x1 = _calRectPoint.x1,
+            y1 = _calRectPoint.y1,
+            z1 = _calRectPoint.z1,
+            w1 = _calRectPoint.w1,
+            x2 = _calRectPoint.x2,
+            y2 = _calRectPoint.y2,
+            z2 = _calRectPoint.z2,
+            w2 = _calRectPoint.w2,
+            x3 = _calRectPoint.x3,
+            y3 = _calRectPoint.y3,
+            z3 = _calRectPoint.z3,
+            w3 = _calRectPoint.w3,
+            x4 = _calRectPoint.x4,
+            y4 = _calRectPoint.y4,
+            z4 = _calRectPoint.z4,
+            w4 = _calRectPoint.w4;
 
         var _t2 = convertCoords2Gl(x1, y1, z1, w1, cx, cy, ppt);
 
@@ -30078,11 +33760,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     _inherits(CanvasPage, _Page);
 
     function CanvasPage(renderMode, ctx, size, number) {
-      var _this;
-
-      _this = _Page.call(this, renderMode, ctx, size, number) || this;
-      _this.__offscreen = inject.getOffscreenCanvas(size, size, null, number);
-      return _this;
+      return _Page.call(this, renderMode, ctx, size, number) || this;
     }
 
     _createClass(CanvasPage, [{
@@ -30099,6 +33777,36 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.texture = webgl.createTexture(gl, this.__offscreen.canvas, 0, null, null); // 默认0单元
 
           gl.bindTexture(gl.TEXTURE_2D, null);
+        }
+      }
+    }, {
+      key: "add",
+      value: function add(unitSize, pos) {
+        _get(_getPrototypeOf(CanvasPage.prototype), "add", this).call(this, unitSize, pos);
+
+        if (!this.__offscreen) {
+          this.__offscreen = inject.getOffscreenCanvas(this.__size, this.__size, null, this.__number);
+        }
+      }
+    }, {
+      key: "del",
+      value: function del(pos) {
+        _get(_getPrototypeOf(CanvasPage.prototype), "del", this).call(this, pos);
+
+        if (!this.__count) {
+          var t = this.texture;
+
+          if (t) {
+            var gl = this.__ctx;
+            gl.deleteTexture(t);
+            this.texture = null;
+          }
+
+          if (this.__offscreen) {
+            this.__offscreen.release();
+
+            this.__offscreen = null;
+          }
         }
       }
     }, {
@@ -30226,9 +33934,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       value: function genMask(target, node, callback) {
         var cacheMask = genSingle(target, 'mask1');
         var list = [];
-        var _node$__computedStyle = node.__computedStyle,
-            transform = _node$__computedStyle[TRANSFORM$2],
-            tfo = _node$__computedStyle[TRANSFORM_ORIGIN$1];
+        var transform,
+            tfo,
+            wn = node.__wasmNode;
+
+        if (wn) {
+          transform = new Float64Array(wasm$1.instance.memory.buffer, wn.transform_ptr(), 16);
+          var cs = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+          tfo = [cs[16], cs[17]];
+        } else {
+          transform = node.__computedStyle[TRANSFORM$2];
+          tfo = node.__computedStyle[TRANSFORM_ORIGIN$1];
+        }
+
         var next = node.next;
         var isClip = next.__clip;
 
@@ -30327,43 +34045,186 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       key: "release",
       value: function release() {
         if (this.__enabled) {
-          this.clear();
-          var key = this.key;
+          var key = this.key; // 一定有
 
-          if (HASH$1.hasOwnProperty(key)) {
-            var o = HASH$1[key];
-            o.count--;
+          var o = HASH$1[key];
+          o.count--;
 
-            if (!o.count) {
-              delete HASH$1[key];
+          if (!o.count) {
+            this.clear();
+            delete HASH$1[key];
 
-              this.__page.del(this.__pos);
+            this.__page.del(this.__pos);
 
-              this.__page = null;
-            }
+            this.__page = null;
           }
 
           this.__enabled = false;
           return true;
         }
       }
+    }, {
+      key: "count",
+      get: function get() {
+        return HASH$1[this.key].count;
+      }
     }], [{
       key: "getInstance",
       value: function getInstance(renderMode, ctx, rootId, bbox, loadImg, x1, y1) {
+        var w = loadImg.width,
+            h = loadImg.height;
+        var w2 = bbox[2] - bbox[0],
+            h2 = bbox[3] - bbox[1];
         var key = rootId + ',' + loadImg.width + ' ' + loadImg.height + ' ' + loadImg.src;
 
         if (HASH$1.hasOwnProperty(key)) {
           var o = HASH$1[key];
           o.count++;
-          var w = bbox[2] - bbox[0],
-              h = bbox[3] - bbox[1];
           var _cache = o.cache;
+
+          if (w > Page.MAX * 0.5 || h > Page.MAX * 0.5) {
+            return {
+              key: key,
+              renderMode: renderMode,
+              ctx: ctx,
+              rootId: rootId,
+              __bbox: bbox,
+              __tx1: 0,
+              __ty1: 0,
+              __tx2: 1,
+              __ty2: 1,
+              __width: w,
+              __height: h,
+              __tw: w2,
+              __th: h2,
+              __available: true,
+              __enabled: true,
+
+              get available() {
+                return this.__available;
+              },
+
+              get enabled() {
+                return this.__enabled;
+              },
+
+              __page: _cache.page,
+
+              get page() {
+                return this.__page;
+              },
+
+              get bbox() {
+                return this.__bbox;
+              },
+
+              reset: function reset(bbox, x1, y1) {
+                this.release();
+                this.__bbox = bbox;
+              },
+              release: function release() {
+                if (this.__enabled) {
+                  var _key = this.key; // 一定有
+
+                  var _o = HASH$1[_key];
+                  _o.count--;
+
+                  if (!_o.count) {
+                    delete HASH$1[_key];
+
+                    this.__page.del();
+
+                    this.__page = null;
+                  }
+
+                  this.__enabled = false;
+                  return true;
+                }
+              }
+            };
+          }
+
           var res = new ImgWebglCache(renderMode, ctx, rootId, w, h, bbox, _cache.page, _cache.pos, x1, y1);
+          res.__tw = w2;
+          res.__th = h2;
           res.key = key;
           return res;
+        } // 超过动态合图纹理MAX一半的使用单图纹理，没有count数据不调用render
+
+
+        if (w > Page.MAX * 0.5 || h > Page.MAX * 0.5) {
+          var _cache2 = {
+            key: key,
+            renderMode: renderMode,
+            ctx: ctx,
+            rootId: rootId,
+            __bbox: bbox,
+            __tx1: 0,
+            __ty1: 0,
+            __tx2: 1,
+            __ty2: 1,
+            __width: w,
+            __height: h,
+            __tw: w2,
+            __th: h2,
+            __available: true,
+            __enabled: true,
+
+            get available() {
+              return this.__available;
+            },
+
+            get enabled() {
+              return this.__enabled;
+            },
+
+            __page: {
+              del: function del() {
+                ctx.deleteTexture(this.texture);
+              },
+              texture: webgl.createTexture(ctx, loadImg.source, 0, null, null)
+            },
+
+            get page() {
+              return this.__page;
+            },
+
+            get bbox() {
+              return this.__bbox;
+            },
+
+            reset: function reset(bbox, x1, y1) {
+              this.release();
+              this.__bbox = bbox;
+            },
+            release: function release() {
+              if (this.__enabled) {
+                var _key2 = this.key; // 一定有
+
+                var _o2 = HASH$1[_key2];
+                _o2.count--;
+
+                if (!_o2.count) {
+                  delete HASH$1[_key2];
+
+                  this.__page.del();
+
+                  this.__page = null;
+                }
+
+                this.__enabled = false;
+                return true;
+              }
+            }
+          };
+          HASH$1[key] = {
+            cache: _cache2,
+            count: 1
+          };
+          return _cache2;
         }
 
-        var cache = Cache.getInstance(renderMode, ctx, rootId, bbox, x1, y1, this, CanvasPage, null); // 超限为空
+        var cache = Cache.getImgInstance(renderMode, ctx, rootId, bbox, x1, y1, w, h, this, CanvasPage, null); // 超限为空
 
         if (cache) {
           cache.key = key;
@@ -30376,6 +34237,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             return cache;
           }
         }
+      }
+    }, {
+      key: "HASH",
+      get: function get() {
+        return HASH$1;
       }
     }]);
 
@@ -30397,7 +34263,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       MARGIN_LEFT = _enums$STYLE_KEY$2.MARGIN_LEFT,
       PADDING_RIGHT = _enums$STYLE_KEY$2.PADDING_RIGHT,
       PADDING_LEFT = _enums$STYLE_KEY$2.PADDING_LEFT,
-      FONT_SIZE = _enums$STYLE_KEY$2.FONT_SIZE,
+      FONT_SIZE$1 = _enums$STYLE_KEY$2.FONT_SIZE,
       FLEX_BASIS = _enums$STYLE_KEY$2.FLEX_BASIS;
   var AUTO = o$4.AUTO,
       PX$1 = o$4.PX,
@@ -30429,11 +34295,27 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var ca = inject.IMG[src];
 
         if (!ca) {
-          inject.measureImg(src, null);
+          inject.measureImg(src, function (res) {
+            if (src === loadImg.src) {
+              if (res.success) {
+                if (isFunction$2(props.onLoad)) {
+                  props.onLoad();
+                }
+              } else {
+                if (isFunction$2(props.onError)) {
+                  props.onError();
+                }
+              }
+            }
+          });
         } else if (ca.state === inject.LOADED) {
-          loadImg.source = ca.source;
-          loadImg.width = loadImg.__width = ca.width;
-          loadImg.height = loadImg.__height = ca.height;
+          if (ca.success) {
+            loadImg.source = ca.source;
+            loadImg.width = loadImg.__width = ca.width;
+            loadImg.height = loadImg.__height = ca.height;
+          } else {
+            loadImg.error = true;
+          }
         }
       }
 
@@ -30465,9 +34347,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               this.__loadAndRefresh(loadImg, null);
             }
           } else if (cache && cache.state === inject.LOADED && cache.success) {
-            loadImg.source = cache.source;
-            loadImg.width = loadImg.__width = cache.width;
-            loadImg.height = loadImg.__height = cache.height;
+            loadImg.loading = false;
+
+            if (cache.success) {
+              loadImg.source = cache.source;
+              loadImg.width = loadImg.__width = cache.width;
+              loadImg.height = loadImg.__height = cache.height;
+            } else {
+              loadImg.error = true;
+            }
           }
 
           loadImg.cache = false;
@@ -30531,7 +34419,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           loadImg.onlyImg = false;
         }
 
-        return res;
+        return this.__hasContent = res;
       }
     }, {
       key: "render",
@@ -30574,7 +34462,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var r = strokeWidth * 5;
           var pts = [[originX + width * 0.15, originY + height * 0.7], [originX + width * 0.3, originY + height * 0.4], [originX + width * 0.5, originY + height * 0.6], [originX + width * 0.6, originY + height * 0.5], [originX + width * 0.9, originY + height * 0.8], [originX + width * 0.15, originY + height * 0.8]];
 
-          if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+          if (renderMode === mode.CANVAS) {
             ctx.strokeStyle = stroke;
             ctx.lineWidth = strokeWidth;
             ctx.fillStyle = fill;
@@ -30588,9 +34476,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             ctx.closePath();
             ctx.beginPath();
             var points = geom.ellipsePoints(cx, cy, r, r);
-            painter.canvasPolygon(ctx, points, 0, 0);
+            painter.canvasPolygon(ctx, points, 0, 0, true);
             ctx.fill();
-            ctx.closePath();
             ctx.beginPath();
             ctx.moveTo(pts[0][0], pts[0][1]);
 
@@ -30625,14 +34512,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           // 圆角需要生成一个mask
           var list = border.calRadius(originX, originY, width, height, borderTopLeftRadius, borderTopRightRadius, borderBottomRightRadius, borderBottomLeftRadius);
 
-          if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+          if (renderMode === mode.CANVAS) {
             // 有border-radius需模拟遮罩裁剪
             if (list) {
               ctx.save();
               ctx.beginPath();
-              canvasPolygon$1(ctx, list, dx, dy);
+              canvasPolygon$1(ctx, list, dx, dy, true);
               ctx.clip();
-              ctx.closePath();
               ctx.drawImage(source, originX, originY, width, height);
               ctx.restore();
             } else {
@@ -30742,7 +34628,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             } else if (height.u === PERCENT) {
               w -= loadImg.width * height.v * total * 0.01 / loadImg.height;
             } else if (height.u === REM) {
-              w -= loadImg.width * height.v * this.root.computedStyle[FONT_SIZE] / loadImg.height;
+              w -= loadImg.width * height.v * this.root.computedStyle[FONT_SIZE$1] / loadImg.height;
             } else if (height.u === VW) {
               w -= loadImg.width * height.v * this.root.width * 0.01 / loadImg.height;
             } else if (height.u === VH) {
@@ -30820,7 +34706,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         loadImg.loading = true;
         var root = this.__root,
             ctx = root.ctx;
-        var placeholder = this.props.placeholder,
+        var props = this.props;
+        var placeholder = props.placeholder,
             computedStyle = this.__computedStyle;
         var width = computedStyle[WIDTH$1],
             height = computedStyle[HEIGHT$1]; // 再测量，可能瞬间完成替换掉上面的
@@ -30834,9 +34721,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                   height = _self$__currentStyle[HEIGHT$1];
 
               if (width.u !== AUTO && height.u !== AUTO) {
-                root.__addUpdate(self, null, o$1.REPAINT, null, null, null, cb);
+                root.__addUpdate(self, null, o$1.REPAINT, false, false, false, false, cb);
               } else {
-                root.__addUpdate(self, null, o$1.REFLOW, null, null, null, cb);
+                root.__addUpdate(self, null, o$1.REFLOW, false, false, false, false, cb);
               }
             };
 
@@ -30847,6 +34734,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               loadImg.source = data.source;
               loadImg.width = data.width;
               loadImg.height = data.height;
+
+              if (isFunction$2(props.onLoad)) {
+                props.onLoad();
+              }
             } else if (placeholder) {
               loadImg.error = true;
               inject.measureImg(placeholder, function (data) {
@@ -30865,9 +34756,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 width: width,
                 height: height
               });
+
+              if (isFunction$2(props.onError)) {
+                props.onError();
+              }
+
               return;
             } else {
               loadImg.error = true;
+
+              if (isFunction$2(props.onError)) {
+                props.onError();
+              }
             } // 可见状态进行刷新操作，visibility某些情况需要刷新，可能宽高未定义要重新布局
 
 
@@ -30880,14 +34780,33 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }, {
       key: "updateSrc",
       value: function updateSrc(v, cb) {
+        var _this2 = this;
+
         var loadImg = this.__loadImg; // 相等或空且当前error直接返回
 
         if (v === loadImg.src || this.__isDestroyed || !v && loadImg.error) {
+          if (v && v !== loadImg.src) {
+            inject.measureImg(v, function (res) {
+              if (loadImg.src === v) {
+                var props = _this2.props;
+
+                if (res.success) {
+                  if (isFunction$2(props.onLoad)) {
+                    props.onLoad();
+                  }
+                } else {
+                  if (isFunction$2(props.onError)) {
+                    props.onError();
+                  }
+                }
+              }
+            });
+          }
+
           loadImg.src = v;
-          inject.measureImg(v, null);
 
           if (isFunction$2(cb)) {
-            cb();
+            cb(true);
           }
 
           return;
@@ -30917,7 +34836,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     }], [{
       key: "toWebglCache",
-      value: function toWebglCache(gl, root, src, cb) {
+      value: function toWebglCache(gl, root, src, x1, y1, cb) {
         if (!gl || !src) {
           return;
         }
@@ -30932,7 +34851,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             loadImg.source = ca.source;
             loadImg.width = loadImg.__width = ca.width;
             loadImg.height = loadImg.__height = ca.height;
-            var res = ImgWebglCache.getInstance(mode.CANVAS, gl, root.__uuid, [0, 0, loadImg.width, loadImg.height], loadImg, 0, 0);
+            var res = ImgWebglCache.getInstance(mode.CANVAS, gl, root.__uuid, [x1, y1, x1 + loadImg.width, y1 + loadImg.height], loadImg, x1, y1);
 
             if (isFunction$2(cb)) {
               cb(res);
@@ -30942,7 +34861,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           loadImg.source = ca.source;
           loadImg.width = loadImg.__width = ca.width;
           loadImg.height = loadImg.__height = ca.height;
-          var res = ImgWebglCache.getInstance(mode.CANVAS, gl, root.__uuid, [0, 0, loadImg.width, loadImg.height], loadImg, 0, 0);
+          var res = ImgWebglCache.getInstance(mode.CANVAS, gl, root.__uuid, [x1, y1, x1 + loadImg.width, y1 + loadImg.height], loadImg, x1, y1);
 
           if (isFunction$2(cb)) {
             cb(res);
@@ -31570,13 +35489,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         ctx.beginPath();
 
         if (_list) {
-          canvasPolygon(ctx, _list);
+          canvasPolygon(ctx, _list, 0, 0, true);
         } else {
           ctx.rect(x, y, offsetWidth, offsetHeight);
         }
 
         ctx.fill();
-        ctx.closePath();
         ctx.globalCompositeOperation = 'source-over';
         ctx = origin;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -32026,7 +35944,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     if (degree === 1) {
       root = bisection(min, max, coefs);
 
-      if (root != null) {
+      if (root !== undefined) {
         roots.push(root);
       }
     } else {
@@ -32037,7 +35955,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         // find root on [min, droots[0]]
         root = bisection(min, droots[0], coefs);
 
-        if (root != null) {
+        if (root !== undefined) {
           roots.push(root);
         } // find root on [droots[i],droots[i+1]] for 0 <= i <= count-2
 
@@ -32045,7 +35963,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         for (var i = 0; i <= droots.length - 2; i++) {
           root = bisection(droots[i], droots[i + 1], coefs);
 
-          if (root != null) {
+          if (root !== undefined) {
             roots.push(root);
           }
         } // find root on [droots[count-1],xmax]
@@ -32053,14 +35971,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         root = bisection(droots[droots.length - 1], max, coefs);
 
-        if (root != null) {
+        if (root !== undefined) {
           roots.push(root);
         }
       } else {
         // polynomial is monotone on [min,max], has at most one root
         root = bisection(min, max, coefs);
 
-        if (root != null) {
+        if (root !== undefined) {
           roots.push(root);
         }
       }
@@ -32351,6 +36269,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   function intersectBezier2Line(ax1, ay1, ax2, ay2, ax3, ay3, bx1, by1, bx2, by2) {
     var c2, c1, c0;
     var cl, n;
+    var isV = bx1 === bx2;
+    var isH = by1 === by2;
     var result = [];
     var minbx = Math.min(bx1, bx2);
     var minby = Math.min(by1, by2);
@@ -32425,6 +36345,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     }
 
+    if (isH || isV) {
+      result.forEach(function (item) {
+        if (isV) {
+          if (item.x < minbx) {
+            item.x = minbx;
+          } else if (item.x > maxbx) {
+            item.x = maxbx;
+          }
+        } else {
+          if (item.y < minby) {
+            item.y = minby;
+          } else if (item.y > maxby) {
+            item.y = maxby;
+          }
+        }
+      });
+    }
+
     return result;
   }
   /**
@@ -32439,6 +36377,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   function intersectBezier3Line(ax1, ay1, ax2, ay2, ax3, ay3, ax4, ay4, bx1, by1, bx2, by2) {
     var c3, c2, c1, c0;
     var cl, n;
+    var isV = bx1 === bx2;
+    var isH = by1 === by2;
     var result = [];
     var minbx = Math.min(bx1, bx2);
     var minby = Math.min(by1, by2);
@@ -32522,6 +36462,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           result.push(p10);
         }
       }
+    }
+
+    if (isH || isV) {
+      result.forEach(function (item) {
+        if (isV) {
+          if (item.x < minbx) {
+            item.x = minbx;
+          } else if (item.x > maxbx) {
+            item.x = maxbx;
+          }
+        } else {
+          if (item.y < minby) {
+            item.y = minby;
+          } else if (item.y > maxby) {
+            item.y = maxby;
+          }
+        }
+      });
     }
 
     return result;
@@ -33600,7 +37558,32 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       return _this;
     }
 
-    _createClass(TexturePage, null, [{
+    _createClass(TexturePage, [{
+      key: "add",
+      value: function add(unitSize, pos) {
+        _get(_getPrototypeOf(TexturePage.prototype), "add", this).call(this, unitSize, pos);
+
+        if (!this.texture) {
+          this.texture = webgl.createTexture(this.gl, null, 0, this.__size, this.__size);
+          this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+        }
+      }
+    }, {
+      key: "del",
+      value: function del(pos) {
+        _get(_getPrototypeOf(TexturePage.prototype), "del", this).call(this, pos);
+
+        if (!this.__count) {
+          var t = this.texture;
+
+          if (t) {
+            var gl = this.gl;
+            gl.deleteTexture(t);
+            this.texture = null;
+          }
+        }
+      }
+    }], [{
       key: "getInstance",
       value: function getInstance(renderMode, gl, rootId, size, excludePage) {
         return _get(_getPrototypeOf(TexturePage), "getInstance", this).call(this, renderMode, gl, rootId, size, this, excludePage);
@@ -33660,9 +37643,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     return TextureCache;
   }(Cache);
 
-  var vertexBlur = "#version 100\n#define GLSLIFY 1\nattribute vec4 a_position;attribute vec2 a_texCoords;varying vec2 v_texCoordsBlur[3];uniform vec2 u_direction;void main(){gl_Position=a_position;}"; // eslint-disable-line
+  var vertexBlur = "#version 100\n#define GLSLIFY 1\nattribute vec4 a_position;attribute vec2 a_texCoords;varying vec2 v_texCoords;void main(){gl_Position=a_position;v_texCoords=a_texCoords;}"; // eslint-disable-line
 
-  var fragmentBlur = "#version 100\n#ifdef GL_ES\nprecision mediump float;\n#define GLSLIFY 1\n#endif\nvarying vec2 v_texCoordsBlur[3];uniform sampler2D u_texture;void main(){gl_FragColor=vec4(0.0);}"; // eslint-disable-line
+  var fragmentBlur = "#version 100\n#ifdef GL_ES\nprecision mediump float;\n#define GLSLIFY 1\n#endif\nvarying vec2 v_texCoords;uniform sampler2D u_texture;uniform vec2 u_direction;void main(){gl_FragColor=vec4(0.0);placeholder;}"; // eslint-disable-line
 
   var HASH = {};
   /**
@@ -33821,10 +37804,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   var isE = matrix.isE,
       inverse = matrix.inverse,
       multiply = matrix.multiply,
-      calRectPoint = matrix.calRectPoint;
+      calRectPoint = matrix.calRectPoint,
+      assignMatrix = matrix.assignMatrix;
   var mbmName = mbm.mbmName;
-  var assignMatrix = util.assignMatrix,
-      transformBbox = util.transformBbox;
+  var transformBbox = util.transformBbox;
   var drawTextureCache = webgl.drawTextureCache,
       createTexture = webgl.createTexture,
       bindTexture = webgl.bindTexture,
@@ -33833,22 +37816,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   var DOM_RENDER = Dom.prototype.render;
   var IMG_RENDER = Img.prototype.render;
   var GEOM_RENDER = Geom.prototype.render;
-
-  function getCache(list) {
-    for (var i = 0, len = list.length; i < len; i++) {
-      var item = list[i];
-
-      if (item && item.available) {
-        return item;
-      }
-    }
-  }
   /**
    * 生成一个节点及其子节点所包含的矩形范围盒，canvas和webgl的最大尺寸限制不一样，由外部传入
    * 如果某个子节点超限，则视为整个超限，超限返回空
    * isPpt为webgl下有perspective的节点，需考虑透视
    */
-
 
   function genBboxTotal(node, __structs, index, total, lv, isPpt) {
     var __cache = node.__cache;
@@ -33857,7 +37829,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
     var bboxTotal;
 
-    if (__cache && __cache.available) {
+    if (__cache && __cache.__available) {
       bboxTotal = __cache.bbox;
     } else {
       bboxTotal = node.bbox;
@@ -33874,7 +37846,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
 
     if (node.__selfPerspective) {
-      var bbox = transformBbox(bboxTotal, multiply(pm, node.__matrix), 0, 0);
+      var bbox = transformBbox(bboxTotal, multiply(pm, node.matrix), 0, 0);
       mergeBbox(bboxTotal, bbox);
     }
 
@@ -33884,9 +37856,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var _structs$i = __structs[i],
           _node = _structs$i.node,
           _total = _structs$i.total,
-          hasMask = _structs$i.hasMask;
+          hasMask = _structs$i.hasMask,
+          isText = _structs$i.isText;
 
-      if (_node instanceof Text) {
+      if (isText) {
         if (_node.__limitCache) {
           inject.warn('Bbox of Text(' + index + ')' + ' is oversize' + _node.offsetWidth + ', ' + _node.offsetHeight);
           return;
@@ -33925,13 +37898,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         continue;
       }
 
-      var __cache2 = _node.__cache,
-          __cacheTotal2 = _node.__cacheTotal,
-          __cacheFilter2 = _node.__cacheFilter,
-          __cacheMask2 = _node.__cacheMask;
+      var __cache2 = _node.__cache;
       var p = _node.__domParent;
-      _node.__opacity = __computedStyle2[OPACITY$1] * p.__opacity;
-      var m = _node.__matrix;
+      _node.__opacity = __computedStyle2[OPACITY$1] * p.__opacity; // 由于wasm的存在，使用getter取，没有wasm时不影响，有时获取到wasm计算的节点结果，因为私有__matrix为空
+
+      var m = _node.matrix;
 
       if (p !== top) {
         m = multiply(p.__matrixEvent, m);
@@ -33962,7 +37933,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var _bbox = void 0; // 子元素有cacheTotal优先使用
 
 
-      var target = getCache([__cacheMask2, __cacheFilter2, __cacheTotal2, __cache2]);
+      var target = _node.__cacheTarget;
 
       if (target) {
         if (target !== __cache2) {
@@ -34011,7 +37982,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   function genTotal(renderMode, ctx, root, node, index, lv, total, __structs, width, height) {
     var __cacheTotal = node.__cacheTotal;
 
-    if (__cacheTotal && __cacheTotal.available) {
+    if (__cacheTotal && __cacheTotal.__available) {
       return __cacheTotal;
     }
 
@@ -34101,9 +38072,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           _node2 = _structs$i2.node,
           _lv = _structs$i2.lv,
           _total2 = _structs$i2.total,
-          hasMask = _structs$i2.hasMask; // 排除Text
+          hasMask = _structs$i2.hasMask,
+          isText = _structs$i2.isText; // 排除Text
 
-      if (_node2 instanceof Text) {
+      if (isText) {
         _node2.render(renderMode, ctxTotal, dx, dy);
 
         var oh = offscreenHash[i];
@@ -34112,9 +38084,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           ctxTotal = applyOffscreen(ctxTotal, oh, width, height, false);
         }
       } else {
-        var __computedStyle2 = _node2.__computedStyle; // none跳过这棵子树，判断下最后一个节点的离屏应用即可
+        var __computedStyle = _node2.__computedStyle; // none跳过这棵子树，判断下最后一个节点的离屏应用即可
 
-        if (__computedStyle2[DISPLAY$1] === 'none') {
+        if (__computedStyle[DISPLAY$1] === 'none') {
           i += _total2 || 0;
 
           if (hasMask) {
@@ -34130,12 +38102,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           continue;
         }
 
-        var __cacheTotal2 = _node2.__cacheTotal,
-            __cacheFilter2 = _node2.__cacheFilter,
-            __cacheMask2 = _node2.__cacheMask;
-        var transform = __computedStyle2[TRANSFORM$1],
-            tfo = __computedStyle2[TRANSFORM_ORIGIN],
-            visibility = __computedStyle2[VISIBILITY$1];
+        var visibility = __computedStyle[VISIBILITY$1];
         var mh = maskStartHash[i];
 
         if (mh) {
@@ -34194,7 +38161,21 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // 不变是同级兄弟，无需特殊处理 else {}
 
 
-        lastLv = _lv; // 特殊渲染的matrix，局部根节点为原点考虑，当需要计算时（不为E）再计算
+        lastLv = _lv; // wasm取transform不同的方式
+
+        var transform = void 0,
+            tfo = void 0,
+            wn = _node2.__wasmNode;
+
+        if (wn) {
+          transform = new Float64Array(wasm$1.instance.memory.buffer, wn.transform_ptr(), 16);
+          var cs = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+          tfo = [cs[16], cs[17]];
+        } else {
+          transform = __computedStyle[TRANSFORM$1];
+          tfo = __computedStyle[TRANSFORM_ORIGIN];
+        } // 特殊渲染的matrix，局部根节点为原点考虑，当需要计算时（不为E）再计算
+
 
         var m = void 0;
 
@@ -34208,7 +38189,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         lastMatrix = m; // 子元素有cacheTotal优先使用
 
-        var target = i > index && getCache([__cacheMask2, __cacheFilter2, __cacheTotal2]);
+        var target = i > index && _node2.__cacheTarget;
+
+        if (target === _node2.__cache) {
+          target = null;
+        }
 
         if (target) {
           i += _total2 || 0;
@@ -34226,7 +38211,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               ctxTotal.setTransform(1, 0, 0, 1, 0, 0);
             }
 
-            var mixBlendMode = __computedStyle2[MIX_BLEND_MODE$1];
+            var mixBlendMode = __computedStyle[MIX_BLEND_MODE$1];
 
             if (mixBlendMode !== 'normal') {
               ctxTotal.globalCompositeOperation = mbmName(mixBlendMode);
@@ -34247,7 +38232,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               offscreenFilter = void 0,
               offscreenOverflow = void 0;
 
-          var _offscreen = i > index && _node2.__calOffscreen(ctxTotal, __computedStyle2);
+          var _offscreen = i > index && _node2.__calOffscreen(ctxTotal, __computedStyle);
 
           if (_offscreen) {
             ctxTotal = _offscreen.ctx;
@@ -34373,13 +38358,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         needGen;
 
     if (filter && filter.length) {
-      if (!__cacheFilter || !__cacheFilter.available || needGen) {
+      if (!__cacheFilter || !__cacheFilter.__available || needGen) {
         target = node.__cacheFilter = CanvasCache.genFilter(target, filter);
         needGen = true;
       }
     }
 
-    if (hasMask && (!__cacheMask || !__cacheMask.available || needGen)) {
+    if (hasMask && (!__cacheMask || !__cacheMask.__available || needGen)) {
       target = node.__cacheMask = CanvasCache.genMask(target, node, function (item, cacheMask, inverse) {
         // 和外面没cache的类似，mask生成hash记录，这里mask节点一定是个普通无cache的独立节点
         var maskStartHash = {};
@@ -34412,9 +38397,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               _node3 = _structs$i3.node,
               _lv2 = _structs$i3.lv,
               _total4 = _structs$i3.total,
-              _hasMask2 = _structs$i3.hasMask; // 排除Text
+              _hasMask2 = _structs$i3.hasMask,
+              isText = _structs$i3.isText; // 排除Text
 
-          if (_node3 instanceof Text) {
+          if (isText) {
             _node3.render(renderMode, ctx, dx, dy);
 
             if (offscreenHash.hasOwnProperty(i)) {
@@ -34436,10 +38422,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
               continue;
             }
-
-            var _cacheTotal = _node3.__cacheTotal,
-                _cacheFilter = _node3.__cacheFilter,
-                _cacheMask = _node3.__cacheMask;
 
             if (maskStartHash.hasOwnProperty(i)) {
               var _maskStartHash$i = maskStartHash[i],
@@ -34504,9 +38486,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
             lastLv = _lv2; // 计算临时的matrix，先以此节点为局部根节点原点，后面考虑逆矩阵
 
-            var transform = _computedStyle[TRANSFORM$1],
-                tfo = _computedStyle[TRANSFORM_ORIGIN],
-                opacity = _computedStyle[OPACITY$1];
+            var opacity = _computedStyle[OPACITY$1];
+            var transform = void 0,
+                tfo = void 0,
+                wn = _node3.__wasmNode;
+
+            if (wn) {
+              transform = new Float64Array(wasm$1.instance.memory.buffer, wn.transform_ptr(), 16);
+              var cs = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+              tfo = [cs[16], cs[17]];
+            } else {
+              transform = _node3.__computedStyle[TRANSFORM$1];
+              tfo = _node3.__computedStyle[TRANSFORM_ORIGIN];
+            }
 
             if (i !== index) {
               opacity *= parentOpacity;
@@ -34541,7 +38533,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             m = m || matrix.identity();
             assignMatrix(_node3.__matrixEvent, m); // 特殊渲染的matrix，局部根节点为原点考虑，本节点需inverse反向
 
-            var _target2 = getCache([_cacheMask, _cacheFilter, _cacheTotal]);
+            var _target2 = _node3.__cacheTarget;
+
+            if (_target2 === _node3.__cache) {
+              _target2 = null;
+            }
 
             if (_target2) {
               i += _total4 || 0;
@@ -34560,15 +38556,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 ctx.globalCompositeOperation = 'source-over';
               }
 
-              var x = _target2.x,
-                  y = _target2.y,
-                  canvas = _target2.canvas,
-                  _width = _target2.width,
-                  _height = _target2.height,
-                  x2 = _target2.x1,
-                  y2 = _target2.y1,
-                  dbx2 = _target2.dbx,
-                  dby2 = _target2.dby;
+              var _target4 = _target2,
+                  x = _target4.x,
+                  y = _target4.y,
+                  canvas = _target4.canvas,
+                  _width = _target4.width,
+                  _height = _target4.height,
+                  x2 = _target4.x1,
+                  y2 = _target4.y1,
+                  dbx2 = _target4.dbx,
+                  dby2 = _target4.dby;
               var ox = tx + x2 - x1 + dbx - dbx2;
               var oy = ty + y2 - y1 + dby - dby2;
               ctx.drawImage(canvas, x, y, _width, _height, ox, oy, _width, _height);
@@ -34726,7 +38723,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
   function genTotalWebgl(renderMode, __cacheTotal, gl, root, node, index, lv, total, __structs, W, H, isPpt, pptNode, oitHash) {
-    if (__cacheTotal && __cacheTotal.available) {
+    if (__cacheTotal && __cacheTotal.__available) {
       return __cacheTotal;
     }
 
@@ -34785,7 +38782,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             perspectiveOrigin = _pptNode$__computedSt[PERSPECTIVE_ORIGIN];
         pm = transform$1.calPerspectiveMatrix(perspective, x1 + dx + perspectiveOrigin[0], y1 + dy + perspectiveOrigin[1]);
       } else {
-        var _perspectiveOrigin = pptNode.__computedStyle[TRANSFORM_ORIGIN];
+        var _perspectiveOrigin,
+            wn = pptNode.__wasmNode;
+
+        if (wn) {
+          var cs = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+          _perspectiveOrigin = [cs[16], cs[17]];
+        } else {
+          _perspectiveOrigin = pptNode.__computedStyle[TRANSFORM_ORIGIN];
+        }
+
         pm = transform$1.calPerspectiveMatrix(pptNode.__selfPerspective, x1 + dx + _perspectiveOrigin[0], y1 + dy + _perspectiveOrigin[1]);
       }
     }
@@ -34822,26 +38828,27 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var _structs$i4 = __structs[i],
           _node4 = _structs$i4.node,
           _total6 = _structs$i4.total,
-          hasMask = _structs$i4.hasMask; // 先看text，visibility会在内部判断，display会被parent判断
+          hasMask = _structs$i4.hasMask,
+          isText = _structs$i4.isText; // 先看text，visibility会在内部判断，display会被parent判断
 
-      if (_node4 instanceof Text) {
+      if (isText) {
         var __cache = _node4.__cache;
 
-        if (__cache && __cache.available) {
+        if (__cache && __cache.__available) {
           var _node4$__domParent = _node4.__domParent,
               __opacity = _node4$__domParent.__opacity,
-              __matrixEvent = _node4$__domParent.__matrixEvent;
+              matrixEvent = _node4$__domParent.matrixEvent;
           var p = __cache.__page;
 
           if (lastPage && lastPage !== p) {
-            drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+            drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
           }
 
           lastPage = p;
           list.push({
             cache: __cache,
             opacity: __opacity,
-            matrix: __matrixEvent
+            matrix: matrixEvent
           });
         }
       } // 再看total缓存/cache，都没有的是无内容的Xom节点
@@ -34861,8 +38868,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         }
 
         var visibility = __computedStyle[VISIBILITY$1],
-            transform = __computedStyle[TRANSFORM$1],
-            tfo = __computedStyle[TRANSFORM_ORIGIN],
             mixBlendMode = __computedStyle[MIX_BLEND_MODE$1],
             backfaceVisibility = __computedStyle[BACKFACE_VISIBILITY];
 
@@ -34881,6 +38886,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var m = void 0;
 
         if (i > index) {
+          // wasm取transform不同的方式
+          var transform = void 0,
+              tfo = void 0,
+              _wn = _node4.__wasmNode;
+
+          if (_wn) {
+            transform = new Float64Array(wasm$1.instance.memory.buffer, _wn.transform_ptr(), 16);
+
+            var _cs = new Float64Array(wasm$1.instance.memory.buffer, _wn.computed_style_ptr(), 18);
+
+            tfo = [_cs[16], _cs[17]];
+          } else {
+            transform = __computedStyle[TRANSFORM$1];
+            tfo = __computedStyle[TRANSFORM_ORIGIN];
+          }
+
           if (!isE(transform)) {
             m = transform$1.calMatrixByOrigin(transform, tfo[0] + _node4.__x1 + dx, tfo[1] + _node4.__y1 + dy);
           }
@@ -34900,7 +38921,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           assignMatrix(_node4.__matrixEvent, m); // 后面不可见，只有rotateX和rotateY翻转导致的0/5/10位的cos值为负，同时转2次抵消10位是正
 
           if (backfaceVisibility === 'hidden') {
-            var _m = _node4.__matrix,
+            var _m = _node4.matrix,
                 x = _m[5] < 0 && _m[10] < 0,
                 y = _m[0] < 0 && _m[10] < 0;
 
@@ -34920,16 +38941,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var _oit = oitHash && oitHash[i];
 
         if (_oit) {
-          drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+          drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
           lastPage = null; // 只求子节点的matrix即可
 
           for (var j = i + 1, _len = i + (_total6 || 0) + 1; j < _len; j++) {
             var _structs$j = __structs[j],
                 _node5 = _structs$j.node,
                 _total7 = _structs$j.total,
-                _hasMask4 = _structs$j.hasMask;
+                _hasMask4 = _structs$j.hasMask,
+                _isText = _structs$j.isText;
 
-            if (!(_node5 instanceof Text)) {
+            if (!_isText) {
               var _computedStyle2 = _node5.__computedStyle;
 
               if (_computedStyle2[DISPLAY$1] === 'none' || _node5.__mask) {
@@ -34943,8 +38965,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
 
               var _visibility = _computedStyle2[VISIBILITY$1],
-                  _transform = _computedStyle2[TRANSFORM$1],
-                  _tfo = _computedStyle2[TRANSFORM_ORIGIN],
                   _backfaceVisibility = _computedStyle2[BACKFACE_VISIBILITY];
 
               if (_visibility === 'hidden' && !_total7) {
@@ -34956,6 +38976,21 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
 
               var _p3 = _node5.__domParent;
+
+              var _transform = void 0,
+                  _tfo = void 0,
+                  _wn2 = _node5.__wasmNode;
+
+              if (_wn2) {
+                _transform = new Float64Array(wasm$1.instance.memory.buffer, _wn2.transform_ptr(), 16);
+
+                var _cs2 = new Float64Array(wasm$1.instance.memory.buffer, _wn2.computed_style_ptr(), 18);
+
+                _tfo = [_cs2[16], _cs2[17]];
+              } else {
+                _transform = _computedStyle2[TRANSFORM$1];
+                _tfo = _computedStyle2[TRANSFORM_ORIGIN];
+              }
 
               var _m2 = void 0;
 
@@ -34973,7 +39008,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               assignMatrix(_node5.__matrixEvent, _m2); // 后面不可见，只有rotateX和rotateY翻转导致的0/5/10位的cos值为负，同时转2次抵消10位是正
 
               if (_backfaceVisibility === 'hidden') {
-                var _m3 = _node5.__matrix,
+                var _m3 = _node5.matrix,
                     _x = _m3[5] < 0 && _m3[10] < 0,
                     _y = _m3[0] < 0 && _m3[10] < 0;
 
@@ -34988,10 +39023,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 }
               }
 
-              var _cacheTotal2 = _node5.__cacheTotal,
-                  __cacheFilter = _node5.__cacheFilter,
-                  __cacheMask = _node5.__cacheMask;
-              var target = getCache([__cacheMask, __cacheFilter, _cacheTotal2]);
+              var target = _node5.__cacheTarget;
+
+              if (target === _node5.__cache) {
+                target = null;
+              }
 
               if (target) {
                 j += _total7 || 0;
@@ -35013,7 +39049,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var render = _node4.render;
 
           if (render !== DOM_RENDER && render !== IMG_RENDER && render !== GEOM_RENDER) {
-            drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+            drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
             lastPage = null;
 
             _node4.render(renderMode, gl, dx, dy);
@@ -35021,24 +39057,21 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             gl.useProgram(gl.program);
           }
         } else {
-          var _cache = _node4.__cache,
-              _cacheTotal3 = _node4.__cacheTotal,
-              _cacheFilter2 = _node4.__cacheFilter,
-              _cacheMask2 = _node4.__cacheMask;
+          var _cache = _node4.__cache;
 
-          var _target4 = i > index ? getCache([_cacheMask2, _cacheFilter2, _cacheTotal3, _cache]) : _cache;
+          var _target5 = i > index ? _node4.__cacheTarget : _cache;
 
-          if (_target4) {
+          if (_target5) {
             if (opacity > 0) {
               // 局部的mbm和主画布一样，先刷新当前fbo，然后把后面这个mbm节点绘入一个新的等画布尺寸的fbo中，再进行2者mbm合成
               if (i > index && mixBlendMode !== 'normal') {
                 if (list.length) {
-                  drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+                  drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
                 }
 
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-                var res = genMbmWebgl(gl, texture, _target4, mixBlendMode, _node4.__opacity, m, dx, dy, cx, cy, size, size);
+                var res = genMbmWebgl(gl, texture, _target5, mixBlendMode, _node4.__opacity, m, dx, dy, cx, cy, size, size);
 
                 if (res) {
                   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0);
@@ -35053,22 +39086,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
                 lastPage = null;
               } else {
-                var _p4 = _target4.__page;
+                var _p4 = _target5.__page;
 
                 if (lastPage && lastPage !== _p4) {
-                  drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+                  drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
                 }
 
                 lastPage = _p4;
                 list.push({
-                  cache: _target4,
+                  cache: _target5,
                   opacity: _node4.__opacity,
                   matrix: m
                 });
               }
             }
 
-            if (_target4 !== _cache) {
+            if (_target5 !== _cache) {
               i += _total6 || 0;
 
               if (hasMask) {
@@ -35078,11 +39111,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           } // webgl特殊的外部钩子，比如粒子组件自定义渲染时调用
 
 
-          if ((!_target4 || _target4 === _cache) && opacity > 0) {
+          if ((!_target5 || _target5 === _cache) && opacity > 0) {
             var _render = _node4.render;
 
             if (_render !== DOM_RENDER && _render !== IMG_RENDER && _render !== GEOM_RENDER) {
-              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
               lastPage = null;
 
               _node4.render(renderMode, gl, dx, dy);
@@ -35095,7 +39128,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     } // 删除fbo恢复
 
 
-    drawTextureCache(gl, list, cx, cy, dx, dy);
+    drawTextureCache(gl, list, cx, cy, dx, dy, null, null);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0); // 汇入集合
 
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, page.texture, 0);
@@ -35112,7 +39145,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function genPptWebgl(renderMode, __cacheTotal, gl, root, node, index, lv, total, __structs, W, H) {
-    if (__cacheTotal && __cacheTotal.available) {
+    if (__cacheTotal && __cacheTotal.__available) {
       return __cacheTotal;
     }
 
@@ -35127,9 +39160,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           _lv3 = _structs$i5.lv,
           _node6 = _structs$i5.node,
           _total8 = _structs$i5.total,
-          hasMask = _structs$i5.hasMask;
+          hasMask = _structs$i5.hasMask,
+          isText = _structs$i5.isText;
 
-      if (_node6 instanceof Text) {
+      if (isText) {
         var mh = mergeHash[i];
 
         if (mh) {
@@ -35171,11 +39205,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           continue;
         }
 
-        var _cacheTotal4 = _node6.__cacheTotal,
-            __cacheFilter = _node6.__cacheFilter,
-            __cacheMask = _node6.__cacheMask,
-            p = _node6.__domParent;
-        var target = getCache([__cacheMask, __cacheFilter, _cacheTotal4]); // flat变化的局部子节点，或者flat根的直接子节点，生成局部根，已生成过的不用再生成
+        var p = _node6.__domParent;
+        var target = _node6.__cacheTarget;
+
+        if (target === _node6.__cache) {
+          target = null;
+        } // flat变化的局部子节点，或者flat根的直接子节点，生成局部根，已生成过的不用再生成
+
 
         if (_total8 && !target && (transformStyle !== p.__computedStyle[TRANSFORM_STYLE] || p === top && transformStyle === 'flat')) {
           var j = i + (_total8 || 0);
@@ -35255,17 +39291,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             planeList = [];
 
         if (_node7.__hasContent) {
-          var __cache = _node7.__cache,
-              _cacheTotal5 = _node7.__cacheTotal,
-              _cacheFilter3 = _node7.__cacheFilter,
-              _cacheMask3 = _node7.__cacheMask;
-
-          var _target5 = getCache([_cacheMask3, _cacheFilter3, _cacheTotal5, __cache]);
-
+          var _target6 = _node7.__cacheTarget;
           var o = {
             index: _index,
             node: _node7,
-            target: _target5,
+            target: _target6,
             points: [{
               x: 0,
               y: 0,
@@ -35291,17 +39321,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           var _structs$_i = __structs[_i2],
               _node8 = _structs$_i.node,
               _total10 = _structs$_i.total,
-              _hasMask5 = _structs$_i.hasMask;
+              _hasMask5 = _structs$_i.hasMask,
+              _isText2 = _structs$_i.isText;
 
-          if (_node8 instanceof Text) {
-            var _cache2 = _node8.__cache;
+          if (_isText2) {
+            var __cache = _node8.__cache;
 
-            if (_cache2 && _cache2.available) {
+            if (__cache && __cache.__available) {
               var __matrixEvent = _node8.__domParent.__matrixEvent;
-              var x = _cache2.x1,
-                  y = _cache2.y1,
-                  width = _cache2.__width,
-                  height = _cache2.__height;
+              var x = __cache.x1,
+                  y = __cache.y1,
+                  width = __cache.__width,
+                  height = __cache.__height;
               var xa = x - x0,
                   ya = y - y0;
               var xb = x + width - x0,
@@ -35324,7 +39355,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               var _o = {
                 index: _i2,
                 node: _node8,
-                target: _cache2,
+                target: __cache,
                 points: [{
                   x: x1,
                   y: y1,
@@ -35359,8 +39390,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             }
 
             var _visibility2 = _computedStyle3[VISIBILITY$1],
-                transform = _computedStyle3[TRANSFORM$1],
-                tfo = _computedStyle3[TRANSFORM_ORIGIN],
                 backfaceVisibility = _computedStyle3[BACKFACE_VISIBILITY];
 
             if (_visibility2 === 'hidden' && !_total10) {
@@ -35369,12 +39398,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
 
               continue;
+            } // wasm取transform不同的方式
+
+
+            var transform = void 0,
+                tfo = void 0,
+                wn = _node8.__wasmNode;
+
+            if (wn) {
+              transform = new Float64Array(wasm$1.instance.memory.buffer, wn.transform_ptr(), 16);
+              var cs = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+              tfo = [cs[16], cs[17]];
+            } else {
+              transform = _computedStyle3[TRANSFORM$1];
+              tfo = _computedStyle3[TRANSFORM_ORIGIN];
             }
 
-            var _cache3 = _node8.__cache,
-                _cacheTotal6 = _node8.__cacheTotal,
-                _cacheFilter4 = _node8.__cacheFilter,
-                _cacheMask4 = _node8.__cacheMask,
+            var _cache2 = _node8.__cache,
                 _p5 = _node8.__domParent,
                 ppt = _node8.__selfPerspective; // 当前局部根为原点坐标系下的matrix，只求交用
 
@@ -35396,7 +39436,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             assignMatrix(_node8.__matrixEvent, m); // 后面不可见，只有rotateX和rotateY翻转导致的0/5/10位的cos值为负，同时转2次抵消10位是正
 
             if (backfaceVisibility === 'hidden') {
-              var _m4 = _node8.__matrix,
+              var _m4 = _node8.matrix,
                   _x2 = _m4[5] < 0 && _m4[10] < 0,
                   _y2 = _m4[0] < 0 && _m4[10] < 0;
 
@@ -35411,13 +39451,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               }
             }
 
-            var _target6 = getCache([_cacheMask4, _cacheFilter4, _cacheTotal6, _cache3]);
+            var _target7 = _node8.__cacheTarget;
 
-            if (_target6) {
-              var _x3 = _target6.x1,
-                  _y3 = _target6.y1,
-                  _width2 = _target6.__width,
-                  _height2 = _target6.__height; // 坐标计算还是以局部根为原点
+            if (_target7) {
+              var _x3 = _target7.x1,
+                  _y3 = _target7.y1,
+                  _width2 = _target7.__width,
+                  _height2 = _target7.__height; // 坐标计算还是以局部根为原点
 
               var _xa = _x3 - x0,
                   _ya = _y3 - y0;
@@ -35442,7 +39482,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               var _o2 = {
                 index: _i2,
                 node: _node8,
-                target: _target6,
+                target: _target7,
                 points: [{
                   x: _x4,
                   y: _y4,
@@ -35463,7 +39503,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               };
               planeList.push(_o2);
 
-              if (_target6 !== _cache3) {
+              if (_target7 !== _cache2) {
                 _i2 += _total10 || 0;
 
                 if (_hasMask5) {
@@ -35502,6 +39542,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         oitHash[_index] = oit.sortPuzzleZ(list);
       }
+
+      _node7.__updateCache();
     } // 最后一次循环绘制到局部根节点上，类似genTotalWebgl()逻辑，但要考虑ppt透视
 
 
@@ -35662,29 +39704,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     }
 
     var weights = blur.gaussianWeight(sigma, d);
-    var vert = '';
     var frag = '';
     var r = Math.floor(d * 0.5);
 
     for (var i = 0; i < r; i++) {
       var c = (r - i) * 0.01;
-      vert += "v_texCoordsBlur[".concat(i, "] = a_texCoords + vec2(-").concat(c, ", -").concat(c, ") * u_direction;");
-      frag += "gl_FragColor += texture2D(u_texture, v_texCoordsBlur[".concat(i, "]) * ").concat(weights[i], ";");
+      frag += "gl_FragColor += texture2D(u_texture, v_texCoords + vec2(-".concat(c, ", -").concat(c, ") * u_direction) * ").concat(weights[i], ";\n      gl_FragColor += texture2D(u_texture, v_texCoords + vec2(").concat(c, ", ").concat(c, ") * u_direction) * ").concat(weights[i], ";\n");
     }
 
-    vert += "v_texCoordsBlur[".concat(r, "] = a_texCoords;");
-    frag += "gl_FragColor += texture2D(u_texture, v_texCoordsBlur[".concat(r, "]) * ").concat(weights[r], ";");
-
-    for (var _i5 = 0; _i5 < r; _i5++) {
-      var _c = (_i5 + 1) * 0.01;
-
-      vert += "v_texCoordsBlur[".concat(_i5 + r + 1, "] = a_texCoords + vec2(").concat(_c, ", ").concat(_c, ") * u_direction;");
-      frag += "gl_FragColor += texture2D(u_texture, v_texCoordsBlur[".concat(_i5 + r + 1, "]) * ").concat(weights[_i5 + r + 1], ";");
-    }
-
-    vert = vertexBlur.replace('[3]', '[' + d + ']').replace(/}$/, vert + '}');
-    frag = fragmentBlur.replace('[3]', '[' + d + ']').replace(/}$/, frag + '}');
-    return gl[key] = webgl.initShaders(gl, vert, frag);
+    frag += "gl_FragColor += texture2D(u_texture, v_texCoords) * ".concat(weights[r], ";");
+    frag = fragmentBlur.replace('placeholder', frag);
+    return gl[key] = webgl.initShaders(gl, vertexBlur, frag);
   }
   /**
    * https://www.w3.org/TR/2018/WD-filter-effects-1-20181218/#feGaussianBlurElement
@@ -35702,12 +39732,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         width = cache.width,
         height = cache.height;
     var d = blur.kernelSize(sigma);
-    var max = Math.max(15, gl.getParameter(gl.MAX_VARYING_VECTORS));
-
-    while (d > max) {
-      d -= 2;
-    }
-
     var spread = blur.outerSizeByD(d); // 防止超限，webgl最大纹理尺寸限制
 
     if (width > Page.MAX + spread || height > Page.MAX + spread) {
@@ -35779,9 +39803,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     __cacheMask.__available = true;
     node.__cacheMask = __cacheMask; // 先求得被遮罩的matrix，用作inverse给mask计算，以被遮罩左上角为原点
 
-    var _node$__computedStyle = node.__computedStyle,
-        transform = _node$__computedStyle[TRANSFORM$1],
-        tfo = _node$__computedStyle[TRANSFORM_ORIGIN];
+    var transform,
+        tfo,
+        wn = node.__wasmNode;
+
+    if (wn) {
+      transform = new Float64Array(wasm$1.instance.memory.buffer, wn.transform_ptr(), 16);
+      var cs = new Float64Array(wasm$1.instance.memory.buffer, wn.computed_style_ptr(), 18);
+      tfo = [cs[16], cs[17]];
+    } else {
+      transform = node.__computedStyle[TRANSFORM$1];
+      tfo = node.__computedStyle[TRANSFORM_ORIGIN];
+    }
+
     var inverse;
 
     if (isE(transform)) {
@@ -35820,19 +39854,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             _node9 = _structs$i6.node,
             _lv5 = _structs$i6.lv,
             _total11 = _structs$i6.total,
-            hasMask = _structs$i6.hasMask;
+            hasMask = _structs$i6.hasMask,
+            isText = _structs$i6.isText;
 
-        if (_node9 instanceof Text) {
+        if (isText) {
           var __cache = _node9.__cache;
 
-          if (__cache && __cache.available) {
+          if (__cache && __cache.__available) {
             var _node9$__domParent = _node9.__domParent,
                 __matrixEvent = _node9$__domParent.__matrixEvent,
                 __opacity = _node9$__domParent.__opacity;
             var p = __cache.__page;
 
             if (lastPage && lastPage !== p) {
-              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
             }
 
             lastPage = p;
@@ -35858,8 +39893,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           var opacity = computedStyle[OPACITY$1],
               visibility = computedStyle[VISIBILITY$1],
-              _transform2 = computedStyle[TRANSFORM$1],
-              _tfo2 = computedStyle[TRANSFORM_ORIGIN],
               backfaceVisibility = computedStyle[BACKFACE_VISIBILITY];
 
           if (visibility === 'hidden' && !_total11) {
@@ -35870,10 +39903,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             continue;
           }
 
-          var _cache4 = _node9.__cache,
-              __cacheTotal = _node9.__cacheTotal,
-              __cacheFilter = _node9.__cacheFilter,
-              _cacheMask5 = _node9.__cacheMask; // lv变大说明是child，相等是sibling，变小可能是parent或另一棵子树，根节点是第一个特殊处理
+          var _cache3 = _node9.__cache; // lv变大说明是child，相等是sibling，变小可能是parent或另一棵子树，根节点是第一个特殊处理
 
           if (i === index) ; else if (_lv5 > lastLv) {
             parentMatrix = lastMatrix;
@@ -35895,7 +39925,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           } // 不变是同级兄弟，无需特殊处理 else {}
 
 
-          lastLv = _lv5; // 不考虑mbm
+          lastLv = _lv5;
+
+          var _transform2 = void 0,
+              _tfo2 = void 0,
+              _wn3 = _node9.__wasmNode;
+
+          if (_wn3) {
+            _transform2 = new Float64Array(wasm$1.instance.memory.buffer, _wn3.transform_ptr(), 16);
+
+            var _cs3 = new Float64Array(wasm$1.instance.memory.buffer, _wn3.computed_style_ptr(), 18);
+
+            _tfo2 = [_cs3[16], _cs3[17]];
+          } else {
+            _transform2 = computedStyle[TRANSFORM$1];
+            _tfo2 = computedStyle[TRANSFORM_ORIGIN];
+          } // 不考虑mbm
+
 
           var m = void 0;
 
@@ -35911,13 +39957,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
           lastMatrix = m;
           lastOpacity = parentOpacity * opacity;
-          var target = getCache([_cacheMask5, __cacheFilter, __cacheTotal, _cache4]);
+          var target = _node9.__cacheTarget;
 
-          if (target && (target !== _cache4 || visibility === 'visible')) {
+          if (target && (target !== _cache3 || visibility === 'visible')) {
             m = matrix.multiply(inverse, m); // 后面不可见，只有rotateX和rotateY翻转导致的0/5/10位的cos值为负，同时转2次抵消10位是正
 
             if (backfaceVisibility === 'hidden') {
-              var _m5 = _node9.__matrix,
+              var _m5 = _node9.matrix,
                   x = _m5[5] < 0 && _m5[10] < 0,
                   y = _m5[0] < 0 && _m5[10] < 0;
 
@@ -35935,7 +39981,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             var _p7 = target.__page;
 
             if (lastPage && lastPage !== _p7) {
-              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
             }
 
             lastPage = _p7;
@@ -35945,7 +39991,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               matrix: m
             });
 
-            if (target !== _cache4) {
+            if (target !== _cache3) {
               i += _total11 || 0;
 
               if (hasMask) {
@@ -35955,11 +40001,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           } // webgl特殊的外部钩子，比如粒子组件自定义渲染时调用
 
 
-          if (!target || target === _cache4) {
+          if (!target || target === _cache3) {
             var render = _node9.render;
 
             if (render !== DOM_RENDER && render !== IMG_RENDER && render !== GEOM_RENDER) {
-              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy);
+              drawTextureCache(gl, list.splice(0), cx, cy, dx, dy, null, null);
               lastPage = null;
 
               _node9.render(renderMode, gl, dx, dy);
@@ -35974,7 +40020,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     } // 绘制到fbo的纹理对象上并删除fbo恢复
 
 
-    drawTextureCache(gl, list, cx, cy, dx, dy);
+    drawTextureCache(gl, list, cx, cy, dx, dy, null, null);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.deleteFramebuffer(frameBuffer);
@@ -36020,12 +40066,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         color = _v[4];
 
     var d = blur.kernelSize(sigma);
-    var max = Math.max(15, gl.getParameter(gl.MAX_VARYING_VECTORS));
-
-    while (d > max) {
-      d -= 2;
-    }
-
     var spread = blur.outerSizeByD(d); // 防止超限，webgl最大纹理尺寸限制
 
     if (width > Page.MAX + spread || height > Page.MAX + spread) {
@@ -36100,7 +40140,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       cache: cache,
       opacity: opacity,
       matrix: matrix
-    }], cx, cy, dx, dy);
+    }], cx, cy, dx, dy, null, null);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.deleteFramebuffer(frameBuffer); // 获取对应的mbm程序
@@ -36165,7 +40205,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var _structs$i7 = __structs[i],
             node = _structs$i7.node,
             total = _structs$i7.total,
-            hasMask = _structs$i7.hasMask;
+            hasMask = _structs$i7.hasMask,
+            isText = _structs$i7.isText;
         var __cacheDefs = node.__cacheDefs;
         var __refreshLevel = node.__refreshLevel; // 只要涉及到matrix和opacity就影响mask
 
@@ -36190,7 +40231,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               });
             }
           } // 去除特殊的filter，普通节点或不影响的mask在<REPAINT下defs的其它都可缓存
-          else if (!(node instanceof Text)) {
+          else if (!isText) {
             __cacheDefs.forEach(function (item) {
               ctx.addCache(item);
             });
@@ -36209,19 +40250,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var lastRefreshLv = 0;
     var lastNode;
 
-    var _loop = function _loop(_i7, _len6) {
-      var _structs$_i2 = __structs[_i7],
+    var _loop = function _loop(_i6, _len6) {
+      var _structs$_i2 = __structs[_i6],
           node = _structs$_i2.node,
           lv = _structs$_i2.lv,
           total = _structs$_i2.total,
-          hasMask = _structs$_i2.hasMask;
+          hasMask = _structs$_i2.hasMask,
+          isText = _structs$_i2.isText;
 
       var computedStyle = void 0,
           __refreshLevel = void 0,
           __cacheDefs = void 0,
           __cacheTotal = void 0;
 
-      if (node instanceof Text) {
+      if (isText) {
         computedStyle = node.computedStyle;
         __refreshLevel = lastRefreshLv;
       } else {
@@ -36236,13 +40278,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var display = computedStyle[DISPLAY$1]; // 将随后的若干个mask节点范围存下来
 
       if (hasMask && display !== 'none') {
-        var _start = _i7 + (total || 0) + 1;
+        var _start = _i6 + (total || 0) + 1;
 
         var _end = _start + hasMask; // svg限制了只能Geom单节点，不可能是Dom，所以end只有唯一
 
 
         maskHash[_end - 1] = {
-          index: _i7,
+          index: _i6,
           start: _start,
           end: _end,
           isClip: __structs[_start].node.__clip // 第一个节点是clip为准
@@ -36268,14 +40310,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       lastLv = lv;
       var virtualDom = void 0; // svg小刷新等级时直接修改vd，这样Geom不再感知
 
-      if (__refreshLevel < REPAINT$1 && !(node instanceof Text)) {
+      if (__refreshLevel < REPAINT$1 && !isText) {
         virtualDom = node.__virtualDom; // total可以跳过所有孩子节点省略循环
 
-        if (__cacheTotal && __cacheTotal.available) {
-          _i7 += total || 0;
+        if (__cacheTotal && __cacheTotal.__available) {
+          _i6 += total || 0;
           virtualDom.cache = true;
         } else {
-          __cacheTotal && (__cacheTotal.available = true);
+          __cacheTotal && (__cacheTotal.__available = true);
           virtualDom = node.__virtualDom = util.extend({}, virtualDom); // dom要清除children缓存，geom和img无需
 
           if (node instanceof Dom && !(node instanceof Img)) {
@@ -36284,10 +40326,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
           if (display === 'none') {
-            _i7 += total || 0;
+            _i6 += total || 0;
 
             if (hasMask) {
-              _i7 += hasMask;
+              _i6 += hasMask;
             }
           } else {
             delete virtualDom.cache;
@@ -36344,7 +40386,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         virtualDom.lv = __refreshLevel;
       } else {
         // >=REPAINT会调用render，重新生成defsCache，text没有这个东西
-        if (!(node instanceof Text)) {
+        if (!isText) {
           node.__cacheDefs.splice(0);
 
           var _matrix = node.__matrix;
@@ -36359,24 +40401,30 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         node.render(renderMode, ctx, 0, 0);
         virtualDom = node.__virtualDom; // svg mock，每次都生成，每个节点都是局部根，更新时自底向上清除
 
-        if (!(node instanceof Text)) {
-          node.__cacheTotal = node.__cacheTotal || {
-            available: true,
+        if (!isText) {
+          var o = node.__cacheTotal = node.__cacheTotal || {
+            __available: true,
+
+            get available() {
+              _i5 = _i6;
+              return this.__available;
+            },
+
             release: function release() {
-              this.available = false;
+              this.__available = false;
               delete virtualDom.cache;
             },
             __offsetY: function __offsetY() {}
           };
-          node.__cacheTotal.available = true;
+          o.__available = true;
         } // 渲染后更新取值
 
 
         display = computedStyle[DISPLAY$1];
 
         if (display === 'none') {
-          _i7 += total || 0;
-          _i7 += hasMask || 0;
+          _i6 += total || 0;
+          _i6 += hasMask || 0;
         }
       }
       /**
@@ -36386,9 +40434,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
        */
 
 
-      var mh = maskHash[_i7];
+      var mh = maskHash[_i6];
 
-      if (mh && (maskEffectHash[_i7] || __refreshLevel >= REPAINT$1 || __refreshLevel & (TRANSFORM_ALL$1 | OP$1))) {
+      if (mh && (maskEffectHash[_i6] || __refreshLevel >= REPAINT$1 || __refreshLevel & (TRANSFORM_ALL$1 | OP$1))) {
         var index = mh.index,
             _start2 = mh.start,
             _end2 = mh.end,
@@ -36478,24 +40526,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // 清掉上次的
 
 
-        for (var _i8 = __cacheDefs.length - 1; _i8 >= 0; _i8--) {
-          var _item = __cacheDefs[_i8];
+        for (var _i7 = __cacheDefs.length - 1; _i7 >= 0; _i7--) {
+          var _item = __cacheDefs[_i7];
 
           if (_item.tagName === 'mask') {
-            __cacheDefs.splice(_i8, 1);
+            __cacheDefs.splice(_i7, 1);
 
             ctx.removeCache(_item);
           }
         }
 
-        var o = {
+        var _o4 = {
           tagName: 'mask',
           props: [],
           children: mChildren
         };
-        var id = ctx.add(o);
+        var id = ctx.add(_o4);
 
-        __cacheDefs.push(o);
+        __cacheDefs.push(_o4);
 
         id = 'url(#' + id + ')';
         dom.virtualDom.mask = id;
@@ -36506,27 +40554,38 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         parentVd.children.push(virtualDom);
       }
 
-      if (_i7 === 0) {
+      if (_i6 === 0) {
         parentMatrix = node.__matrix;
         parentVd = virtualDom;
       }
 
-      _i6 = _i7;
+      _i5 = _i6;
     };
 
-    for (var _i6 = 0, _len6 = __structs.length; _i6 < _len6; _i6++) {
-      _loop(_i6);
+    for (var _i5 = 0, _len6 = __structs.length; _i5 < _len6; _i5++) {
+      _loop(_i5);
     }
   }
 
+  var lastList = [];
+
   function renderWebgl$1(renderMode, gl, root, isFirst, rlv) {
     if (isFirst) {
-      Page.init(gl.getParameter(gl.MAX_TEXTURE_SIZE));
+      Page.init(gl.getParameter(gl.MAX_TEXTURE_SIZE), true);
     }
 
     var __structs = root.__structs,
         width = root.width,
-        height = root.height;
+        height = root.height,
+        __wasmRoot = root.__wasmRoot;
+    var wasmOp, wasmMe;
+
+    if (__wasmRoot) {
+      var len = __structs.length;
+      wasmOp = new Float64Array(wasm$1.instance.memory.buffer, __wasmRoot.op_ptr(), len);
+      wasmMe = new Float64Array(wasm$1.instance.memory.buffer, __wasmRoot.me_ptr(), len * 16);
+    }
+
     var cx = width * 0.5,
         cy = height * 0.5; // 栈代替递归，存父节点的matrix/opacity，matrix为E时存null省略计算
 
@@ -36552,16 +40611,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       var lastPptNode = null;
       var lastLv = 0; // 节点开始有ppt得记录，后续孩子中如果有flat的，得强制生成cacheTotal
 
-      for (var i = 0, len = __structs.length; i < len; i++) {
+      for (var i = 0, _len10 = __structs.length; i < _len10; i++) {
         var _structs$i8 = __structs[i],
             node = _structs$i8.node,
             lv = _structs$i8.lv,
             total = _structs$i8.total,
-            hasMask = _structs$i8.hasMask;
+            hasMask = _structs$i8.hasMask,
+            isText = _structs$i8.isText;
         node.__index = i; // 生成total需要
         // Text特殊处理，webgl中先渲染为bitmap，再作为贴图绘制，缓存交由text内部判断，直接调用渲染纹理方法
 
-        if (node instanceof Text) {
+        if (isText) {
           if (lastRefreshLevel >= REPAINT$1) {
             var bbox = node.bbox,
                 x = node.__x,
@@ -36579,9 +40639,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               __cache.__available = true;
               node.__cache = __cache;
               node.render(mode.CANVAS, __cache.ctx, __cache.dx, __cache.dy);
+
+              __cache.update();
+
+              node.__cacheTarget = __cache;
             } else {
               __cache && __cache.release();
               node.__limitCache = true;
+              node.__cacheTarget = null;
             }
           }
 
@@ -36642,6 +40707,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
          */
 
         if (!__refreshLevel) ; else if (__refreshLevel < REPAINT$1) {
+          var hasContent = node.__hasContent;
           var mixBlendMode = __computedStyle[MIX_BLEND_MODE$1];
           var isMbm = __refreshLevel & MBM$1 && mixBlendMode !== 'normal';
           var need = node.__cacheAsBitmap || hasMask;
@@ -36654,9 +40720,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             }
           }
 
+          var isPpt = void 0;
+
           if (!need && __refreshLevel & (PPT$1 | CACHE$1)) {
             var __domParent = node.__domParent;
-            var isPpt = !isE(__domParent && __domParent.__perspectiveMatrix) || node.__selfPerspectiveMatrix;
+            isPpt = total && perspective && (!isE(__domParent && __domParent.__perspectiveMatrix) || !isE(node.__selfPerspectiveMatrix));
 
             if (isPpt) {
               need = true;
@@ -36668,19 +40736,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           } // 这里和canvas不一样，前置cacheAsBitmap条件变成或条件之一，新的ppt层级且画中画需要新的fbo
 
 
-          if (need) {
+          if (need && (hasContent || total)) {
             mergeList.push({
               i: i,
               lv: lv,
               total: total,
               node: node,
               hasMask: hasMask,
-              isPpt: total && perspective || node.__selfPerspectiveMatrix
+              isPpt: isPpt
             });
           } // total可以跳过所有孩子节点省略循环，filter/mask等的强制前提是有total
 
 
-          if (__cacheTotal && __cacheTotal.available) {
+          if (__cacheTotal && __cacheTotal.__available) {
             i += total || 0;
 
             if (__refreshLevel === NONE$1 && hasMask) {
@@ -36693,12 +40761,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
          * Geom没有子节点无需汇总局部根，Dom中Img也是，它们的局部根等于自身的cache，其它符合条件的Dom需要生成
          */
         else {
-          var hasContent = node.calContent(__currentStyle, __computedStyle),
+          var _hasContent = node.calContent(__currentStyle, __computedStyle),
               onlyImg = void 0; // 有内容先以canvas模式绘制到离屏画布上，自定义渲染设置无内容不实现即可跳过
 
-          if (hasContent) {
+
+          if (_hasContent) {
             var _bbox3 = node.bbox,
-                _cache5 = node.__cache,
+                _cache4 = node.__cache,
                 x1 = node.__x1,
                 y1 = node.__y1; // 单图特殊对待缓存
 
@@ -36707,57 +40776,79 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
               if (loadImg.onlyImg && !loadImg.error && loadImg.source) {
                 onlyImg = true;
-                _cache5 = node.__cache = ImgWebglCache.getInstance(mode.CANVAS, gl, root.__uuid, _bbox3, loadImg, x1, y1);
+                _cache4 = node.__cache = ImgWebglCache.getInstance(mode.CANVAS, gl, root.__uuid, _bbox3, loadImg, x1, y1); // 纯img按原尺寸绘制
+
+                if (_cache4 && _cache4.enabled && _cache4.count === 1) {
+                  _cache4.ctx.drawImage(loadImg.source, x1 + _cache4.dx, y1 + _cache4.dy);
+
+                  _cache4.update();
+                }
               }
             }
 
             if (!onlyImg) {
-              if (_cache5) {
-                _cache5.reset(_bbox3, x1, y1);
+              if (_cache4) {
+                _cache4.reset(_bbox3, x1, y1); // 特殊的单独img变为非纯img，需重新生成cache
+
+
+                if (!(_cache4 instanceof CanvasCache)) {
+                  _cache4 = node.__cache = CanvasCache.getInstance(mode.CANVAS, gl, root.__uuid, _bbox3, x1, y1, null);
+                }
               } else {
-                _cache5 = CanvasCache.getInstance(mode.CANVAS, gl, root.__uuid, _bbox3, x1, y1, null);
+                _cache4 = node.__cache = CanvasCache.getInstance(mode.CANVAS, gl, root.__uuid, _bbox3, x1, y1, null);
               }
             }
 
-            if (_cache5 && _cache5.enabled) {
-              _cache5.__bbox = _bbox3;
-              _cache5.__available = true;
-              node.__cache = _cache5;
-              node.render(mode.CANVAS, _cache5.ctx, _cache5.dx, _cache5.dy);
+            if (_cache4 && _cache4.enabled) {
+              _cache4.__bbox = _bbox3;
+              _cache4.__available = true;
+              node.__cache = _cache4;
+
+              if (!onlyImg) {
+                node.render(mode.CANVAS, _cache4.ctx, _cache4.dx, _cache4.dy);
+
+                _cache4.update();
+              }
             } else {
-              _cache5 && _cache5.release();
+              _cache4 && _cache4.release();
               node.__limitCache = true;
+              node.__cacheTarget = null;
               return;
             }
+
+            node.__updateCache();
           } else {
             node.__limitCache = false;
+            node.__cacheTarget = null;
           }
 
-          var overflow = __computedStyle[OVERFLOW],
-              _filter = __computedStyle[FILTER],
-              _mixBlendMode = __computedStyle[MIX_BLEND_MODE$1],
-              _perspective2 = __computedStyle[PERSPECTIVE];
+          if (_hasContent || total) {
+            var overflow = __computedStyle[OVERFLOW],
+                _filter = __computedStyle[FILTER],
+                _mixBlendMode = __computedStyle[MIX_BLEND_MODE$1],
+                _perspective2 = __computedStyle[PERSPECTIVE];
 
-          var _isMbm = _mixBlendMode !== 'normal';
+            var _isMbm = _mixBlendMode !== 'normal';
 
-          var _isPpt = total && _perspective2 || node.__selfPerspectiveMatrix;
+            var _isPpt = total && _perspective2 || !isE(node.__selfPerspectiveMatrix);
 
-          var isOverflow = overflow === 'hidden' && total;
-          var isFilter = _filter && _filter.length;
+            var isOverflow = overflow === 'hidden' && total;
+            var isFilter = _filter && _filter.length;
 
-          if (_isMbm) {
-            hasMbm = true;
-          }
+            if (_isMbm) {
+              hasMbm = true;
+            }
 
-          if (node.__cacheAsBitmap || hasMask || isFilter || isOverflow || _isPpt) {
-            mergeList.push({
-              i: i,
-              lv: lv,
-              total: total,
-              node: node,
-              hasMask: hasMask,
-              isPpt: _isPpt
-            });
+            if (node.__cacheAsBitmap || hasMask || isFilter || isOverflow || _isPpt) {
+              mergeList.push({
+                i: i,
+                lv: lv,
+                total: total,
+                node: node,
+                hasMask: hasMask,
+                isPpt: _isPpt
+              });
+            }
           }
         }
 
@@ -36778,9 +40869,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }); // ppt只有嵌套才需要生成，最下面的孩子节点的ppt无需，因此记录一个hash存index，
       // 同时因为是后序遍历，孩子先存所有父亲的index即可保证父亲才能生成cacheTotal
 
-      for (var ii = 0, _len10 = mergeList.length; ii < _len10; ii++) {
+      for (var ii = 0, _len11 = mergeList.length; ii < _len11; ii++) {
         var _mergeList$ii = mergeList[ii],
-            _i9 = _mergeList$ii.i,
+            _i8 = _mergeList$ii.i,
             _lv6 = _mergeList$ii.lv,
             _total12 = _mergeList$ii.total,
             _node11 = _mergeList$ii.node,
@@ -36790,7 +40881,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var _filter2 = _computedStyle4[FILTER]; // 有ppt的，向上查找所有父亲index记录，可能出现重复记得提前跳出
 
         var __limitCache = _node11.__limitCache,
-            _cacheTotal7 = _node11.__cacheTotal,
+            _cacheTotal = _node11.__cacheTotal,
             __cacheFilter = _node11.__cacheFilter,
             __cacheMask = _node11.__cacheMask;
 
@@ -36800,28 +40891,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         var needGen = void 0; // 可能没变化，比如被遮罩节点、filter变更等
 
-        if (!_cacheTotal7 || !_cacheTotal7.available) {
+        if (!_cacheTotal || !_cacheTotal.__available) {
           var res = void 0;
 
           if (_isPpt2) {
-            res = genPptWebgl(renderMode, _cacheTotal7, gl, root, _node11, _i9, _lv6, _total12 || 0, __structs, width, height);
+            res = genPptWebgl(renderMode, _cacheTotal, gl, root, _node11, _i8, _lv6, _total12 || 0, __structs, width, height);
           } else {
-            res = genTotalWebgl(renderMode, _cacheTotal7, gl, root, _node11, _i9, _lv6, _total12 || 0, __structs, width, height, null, null, null);
+            res = genTotalWebgl(renderMode, _cacheTotal, gl, root, _node11, _i8, _lv6, _total12 || 0, __structs, width, height, null, null, null);
           }
 
           if (!res) {
             return;
           }
 
-          _cacheTotal7 = res;
+          _cacheTotal = res;
           needGen = true;
         } // 即使超限，也有total结果
 
 
-        var target = _cacheTotal7;
+        var target = _cacheTotal;
 
         if (_filter2.length) {
-          if (!__cacheFilter || !__cacheFilter.available || needGen) {
+          if (!__cacheFilter || !__cacheFilter.__available || needGen) {
             var _res9 = genFilterWebgl(renderMode, gl, _node11, target, _filter2, width, height);
 
             if (_res9) {
@@ -36831,18 +40922,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
         }
 
-        if (_hasMask6 && (!__cacheMask || !__cacheMask.available || needGen)) {
-          genMaskWebgl(renderMode, gl, root, _node11, target, width, height, _i9 + (_total12 || 0) + 1, _lv6, __structs);
+        if (_hasMask6 && (!__cacheMask || !__cacheMask.__available || needGen)) {
+          genMaskWebgl(renderMode, gl, root, _node11, target, width, height, _i8 + (_total12 || 0) + 1, _lv6, __structs);
         }
+
+        _node11.__updateCache();
       }
+    } // 非首次，没有cache变更重新生成的，可以直接用上次的缓存渲染列表
+    else if (wasmOp && !isFirst && rlv < REPAINT$1 && !(rlv & (CACHE$1 | FT$1 | PPT$1 | MASK$1))) {
+      for (var _i9 = 0, _len12 = lastList.length; _i9 < _len12; _i9++) {
+        drawTextureCache(gl, lastList[_i9], cx, cy, 0, 0, wasmOp, wasmMe);
+      }
+
+      return;
     }
+
+    lastList.splice(0);
     /**
      * 最后先序遍历一次应用__cacheTotal即可，没有的用__cache，以及剩下的超尺寸的和Text
      * 由于mixBlendMode的存在，需先申请个fbo纹理，所有绘制默认向该纹理绘制，最后fbo纹理再进入主画布
      * 前面循环时有记录是否出现mbm，只有出现才申请，否则不浪费直接输出到主画布
      * 超尺寸的不绘制并给出警告，实现会扰乱逻辑且很少会出现这种情况
      */
-
 
     var frameBuffer, texture;
 
@@ -36857,32 +40958,44 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var lastPage,
         list = [];
 
-    for (var _i10 = 0, _len11 = __structs.length; _i10 < _len11; _i10++) {
+    for (var _i10 = 0, _len13 = __structs.length; _i10 < _len13; _i10++) {
       var _structs$_i3 = __structs[_i10],
           _node12 = _structs$_i3.node,
           _total13 = _structs$_i3.total,
-          _hasMask7 = _structs$_i3.hasMask; // text如果display不可见，parent会直接跳过，不会走到这里，这里一定是直接绘制到root的，visibility在其内部判断
+          _hasMask7 = _structs$_i3.hasMask,
+          _isText3 = _structs$_i3.isText; // text如果display不可见，parent会直接跳过，不会走到这里，这里一定是直接绘制到root的，visibility在其内部判断
 
-      if (_node12 instanceof Text) {
+      if (_isText3) {
         // text特殊之处，__config部分是复用parent的
-        var _cache6 = _node12.__cache;
+        var _cache5 = _node12.__cache;
 
-        if (_cache6 && _cache6.available) {
+        if (_cache5 && _cache5.__available) {
           var _node12$__domParent = _node12.__domParent,
               __matrixEvent = _node12$__domParent.__matrixEvent,
               __opacity = _node12$__domParent.__opacity;
-          var p = _cache6.__page;
+          var p = _cache5.__page;
 
           if (lastPage && lastPage !== p) {
-            drawTextureCache(gl, list.splice(0), cx, cy, 0, 0);
+            var o = list.splice(0);
+            lastList.push(o);
+            drawTextureCache(gl, o, cx, cy, 0, 0, wasmOp, wasmMe);
           }
 
           lastPage = p;
-          list.push({
-            cache: _cache6,
-            opacity: __opacity,
-            matrix: __matrixEvent
-          });
+
+          if (wasmOp) {
+            list.push({
+              cache: _cache5,
+              index: _i10,
+              wasm: true
+            });
+          } else {
+            list.push({
+              cache: _cache5,
+              opacity: __opacity,
+              matrix: __matrixEvent
+            });
+          }
         }
       } else {
         var _computedStyle5 = _node12.__computedStyle; // none跳过这棵子树，判断下最后一个节点的离屏应用即可
@@ -36897,44 +41010,45 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           continue;
         }
 
-        var opacity = _computedStyle5[OPACITY$1],
-            _mixBlendMode2 = _computedStyle5[MIX_BLEND_MODE$1],
+        var _mixBlendMode2 = _computedStyle5[MIX_BLEND_MODE$1],
             visibility = _computedStyle5[VISIBILITY$1],
             backfaceVisibility = _computedStyle5[BACKFACE_VISIBILITY];
-        var _cache7 = _node12.__cache,
-            _cacheTotal8 = _node12.__cacheTotal,
-            _cacheFilter5 = _node12.__cacheFilter,
-            _cacheMask6 = _node12.__cacheMask,
-            _domParent = _node12.__domParent,
-            __matrix = _node12.__matrix,
-            __selfPerspectiveMatrix = _node12.__selfPerspectiveMatrix;
-        var m = __matrix;
+        var opacity = wasmOp ? wasmOp[_i10] : _computedStyle5[OPACITY$1];
+        var _cache6 = _node12.__cache;
+        var m = void 0;
 
-        if (__selfPerspectiveMatrix) {
-          m = multiply(__selfPerspectiveMatrix, m);
+        if (!wasmOp) {
+          m = _node12.__matrix;
+          var __selfPerspectiveMatrix = _node12.__selfPerspectiveMatrix;
+
+          if (!isE(__selfPerspectiveMatrix)) {
+            m = multiply(__selfPerspectiveMatrix, m);
+          }
+
+          var _domParent = _node12.__domParent;
+
+          if (_domParent) {
+            var op = _domParent.__opacity;
+
+            if (op !== 1) {
+              opacity *= _domParent.__opacity;
+            }
+
+            var pm = _domParent.__perspectiveMatrix,
+                me = _domParent.__matrixEvent;
+
+            if (pm && pm.length) {
+              m = multiply(pm, m);
+            }
+
+            if (me && me.length) {
+              m = multiply(me, m);
+            }
+          }
+
+          _node12.__opacity = opacity;
+          assignMatrix(_node12.__matrixEvent, m);
         }
-
-        if (_domParent) {
-          var op = _domParent.__opacity;
-
-          if (op !== 1) {
-            opacity *= _domParent.__opacity;
-          }
-
-          var pm = _domParent.__perspectiveMatrix,
-              me = _domParent.__matrixEvent;
-
-          if (pm && pm.length) {
-            m = multiply(_domParent.__perspectiveMatrix, m);
-          }
-
-          if (me && me.length) {
-            m = multiply(_domParent.__matrixEvent, m);
-          }
-        }
-
-        _node12.__opacity = opacity;
-        assignMatrix(_node12.__matrixEvent, m);
 
         if (visibility === 'hidden' && !_total13) {
           if (_hasMask7) {
@@ -36946,7 +41060,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
         if (backfaceVisibility === 'hidden') {
-          var _m6 = _node12.__matrix,
+          var _m6 = _node12.matrix,
               _x8 = _m6[5] < 0 && _m6[10] < 0,
               _y8 = _m6[0] < 0 && _m6[10] < 0;
 
@@ -36962,14 +41076,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // total和自身cache的尝试，visibility不可见时没有cache
 
 
-        var _target7 = getCache([_cacheMask6, _cacheFilter5, _cacheTotal8, _cache7]);
+        var _target8 = _node12.__cacheTarget;
 
-        if (_target7) {
+        if (_target8) {
           if (opacity > 0) {
             // 有mbm则需要混合之前的纹理和新纹理到fbo上面，连续的mbm则依次交替绘制到画布或离屏fbo上
             if (_mixBlendMode2 !== 'normal') {
               if (list.length) {
-                drawTextureCache(gl, list.splice(0), cx, cy, 0, 0);
+                var _o5 = list.splice(0);
+
+                lastList.push(_o5);
+                drawTextureCache(gl, _o5, cx, cy, 0, 0, wasmOp, wasmMe);
                 lastPage = null;
               }
 
@@ -36977,7 +41094,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               gl.bindFramebuffer(gl.FRAMEBUFFER, null);
               gl.deleteFramebuffer(frameBuffer);
 
-              var _res10 = genMbmWebgl(gl, texture, _target7, _mixBlendMode2, opacity, m, 0, 0, cx, cy, width, height);
+              var _res10 = genMbmWebgl(gl, texture, _target8, _mixBlendMode2, opacity, m, 0, 0, cx, cy, width, height);
 
               if (_res10) {
                 gl.deleteTexture(texture);
@@ -36985,22 +41102,34 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 frameBuffer = _res10.frameBuffer;
               }
             } else {
-              var _p8 = _target7.__page;
+              var _p8 = _target8.__page;
 
               if (lastPage && lastPage !== _p8) {
-                drawTextureCache(gl, list.splice(0), cx, cy, 0, 0);
+                var _o6 = list.splice(0);
+
+                lastList.push(_o6);
+                drawTextureCache(gl, _o6, cx, cy, 0, 0, wasmOp, wasmMe);
               }
 
               lastPage = _p8;
-              list.push({
-                cache: _target7,
-                opacity: opacity,
-                matrix: m
-              });
+
+              if (wasmOp) {
+                list.push({
+                  cache: _target8,
+                  index: _i10,
+                  wasm: true
+                });
+              } else {
+                list.push({
+                  cache: _target8,
+                  opacity: opacity,
+                  matrix: m
+                });
+              }
             }
           }
 
-          if (_target7 !== _cache7) {
+          if (_target8 !== _cache6) {
             _i10 += _total13 || 0;
 
             if (_hasMask7) {
@@ -37010,11 +41139,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // webgl特殊的外部钩子，比如粒子组件自定义渲染时调用
 
 
-        if ((!_target7 || _target7 === _cache7) && opacity > 0) {
+        if ((!_target8 || _target8 === _cache6) && opacity > 0) {
           var render = _node12.render;
 
           if (render !== DOM_RENDER && render !== IMG_RENDER && render !== GEOM_RENDER) {
-            drawTextureCache(gl, list.splice(0), cx, cy, 0, 0);
+            var _o7 = list.splice(0);
+
+            lastList.push(_o7);
+            drawTextureCache(gl, _o7, cx, cy, 0, 0, wasmOp, wasmMe);
             lastPage = null;
 
             _node12.render(renderMode, gl, 0, 0);
@@ -37025,7 +41157,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
     }
 
-    drawTextureCache(gl, list, cx, cy, 0, 0); // 有mbm时将汇总的fbo绘入主画布，否则本身就是到主画布无需多余操作
+    lastList.push(list);
+    drawTextureCache(gl, list, cx, cy, 0, 0, wasmOp, wasmMe); // 有mbm时将汇总的fbo绘入主画布，否则本身就是到主画布无需多余操作
 
     if (hasMbm) {
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0);
@@ -37069,7 +41202,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   function renderCanvas$1(renderMode, ctx, root, isFirst, rlv) {
     var __structs = root.__structs,
         width = root.width,
-        height = root.height;
+        height = root.height,
+        __wasmRoot = root.__wasmRoot;
+    var wasmOp, wasmMe;
+
+    if (__wasmRoot) {
+      var len = __structs.length;
+      wasmOp = new Float64Array(wasm$1.instance.memory.buffer, __wasmRoot.op_ptr(), len);
+      wasmMe = new Float64Array(wasm$1.instance.memory.buffer, __wasmRoot.me_ptr(), len * 16);
+    }
+
     var mergeList = [];
     /**
      * 先一遍先序遍历收集cacheAsBitmap的节点，说明这棵子树需要缓存，可能出现嵌套，深层级优先、后面优先
@@ -37078,14 +41220,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
      */
 
     if (isFirst || rlv >= REPAINT$1 || rlv & (CACHE$1 | FT$1 | MASK$1)) {
-      for (var i = 0, len = __structs.length; i < len; i++) {
+      for (var i = 0, _len14 = __structs.length; i < _len14; i++) {
         var _structs$i9 = __structs[i],
             node = _structs$i9.node,
             lv = _structs$i9.lv,
             total = _structs$i9.total,
-            hasMask = _structs$i9.hasMask; // 排除Text，要么根节点直接绘制，要么被局部根节点汇总，自身并不缓存（fillText比位图更快）
+            hasMask = _structs$i9.hasMask,
+            isText = _structs$i9.isText; // 排除Text，要么根节点直接绘制，要么被局部根节点汇总，自身并不缓存（fillText比位图更快）
 
-        if (node instanceof Text) {
+        if (isText) {
           continue;
         }
 
@@ -37105,7 +41248,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         var __refreshLevel = node.__refreshLevel,
             __cacheTotal = node.__cacheTotal;
         node.__refreshLevel = NONE$1; // filter变化需重新生成，cacheTotal本身就存在要判断下；CACHE取消重新生成则无需判断
-        // img在只有自身的情况下自动生成并特殊对待，多个相同引用的img使用同一份资源
+        // img在只有自身的情况下自动生成并特殊对待，cache是<img>标签，多个相同引用的img使用同一份资源
 
         var need = node.__cacheAsBitmap && (__refreshLevel & (CACHE$1 | FT$1) || __refreshLevel >= REPAINT$1);
 
@@ -37129,7 +41272,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         } // total可以跳过所有孩子节点省略循环，filter/mask等的强制前提是有total
 
 
-        if (__cacheTotal && __cacheTotal.available) {
+        if (__cacheTotal && __cacheTotal.__available) {
           i += total || 0;
 
           if (__refreshLevel === NONE$1 && hasMask) {
@@ -37163,6 +41306,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (__cacheTotal) {
           genTotalOther(renderMode, __structs, __cacheTotal, node, hasMask, width, height);
+
+          node.__updateCache();
         }
       });
     }
@@ -37183,14 +41328,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var offscreenHash = [];
     var lastOpacity = -1;
 
-    for (var _i11 = 0, _len12 = __structs.length; _i11 < _len12; _i11++) {
+    for (var _i11 = 0, _len15 = __structs.length; _i11 < _len15; _i11++) {
       var _structs$_i4 = __structs[_i11],
           _node13 = _structs$_i4.node,
           _lv7 = _structs$_i4.lv,
           _total14 = _structs$_i4.total,
-          _hasMask8 = _structs$_i4.hasMask; // text如果display不可见，parent会直接跳过，不会走到这里，这里一定是直接绘制到root的，visibility在其内部判断
+          _hasMask8 = _structs$_i4.hasMask,
+          _isText4 = _structs$_i4.isText; // text如果display不可见，parent会直接跳过，不会走到这里，这里一定是直接绘制到root的，visibility在其内部判断
 
-      if (_node13 instanceof Text) {
+      if (_isText4) {
         _node13.render(renderMode, ctx, 0, 0);
 
         var oh = offscreenHash[_i11];
@@ -37217,15 +41363,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
 
           continue;
-        }
-
-        var _cacheTotal9 = _node13.__cacheTotal,
-            __cacheFilter = _node13.__cacheFilter,
-            __cacheMask = _node13.__cacheMask,
-            __domParent = _node13.__domParent,
-            __matrix = _node13.__matrix; // 遮罩对象申请了个离屏，其第一个mask申请另外一个离屏mask2，开始聚集所有mask元素的绘制，
+        } // 遮罩对象申请了个离屏，其第一个mask申请另外一个离屏mask2，开始聚集所有mask元素的绘制，
         // 这是一个十分特殊的逻辑，保存的index是最后一个节点的索引，OFFSCREEN_MASK2是最低优先级，
         // 这样当mask本身有filter时优先自身，然后才是OFFSCREEN_MASK2
+
 
         var msh = maskStartHash[_i11];
 
@@ -37234,9 +41375,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               _hasMask9 = msh.hasMask,
               offscreenMask = msh.offscreenMask;
 
-          var _target8 = inject.getOffscreenCanvas(width, height, null, 'mask2');
+          var _target9 = inject.getOffscreenCanvas(width, height, null, 'mask2');
 
-          offscreenMask.mask = _target8; // 应用mask用到
+          offscreenMask.mask = _target9; // 应用mask用到
 
           offscreenMask.isClip = _node13.__clip; // 定位到最后一个mask元素上的末尾
 
@@ -37262,67 +41403,85 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             offscreen: {
               ctx: ctx,
               // 保存等待OFFSCREEN_MASK2时还原
-              target: _target8
+              target: _target9
             }
           });
-          ctx = _target8.ctx;
+          ctx = _target9.ctx;
         } // 设置opacity/matrix，根节点是没有父节点的不计算继承值
 
 
-        var opacity = _computedStyle6[OPACITY$1];
-        var m = __matrix;
+        var opacity = wasmOp ? wasmOp[_i11] : _computedStyle6[OPACITY$1];
+        var m = void 0;
 
-        if (__domParent) {
-          var op = __domParent.__opacity;
+        if (!wasmOp) {
+          m = _node13.__matrix;
+          var __domParent = _node13.__domParent;
 
-          if (op !== 1) {
-            opacity *= __domParent.__opacity;
+          if (__domParent) {
+            var op = __domParent.__opacity;
+
+            if (op !== 1) {
+              opacity *= __domParent.__opacity;
+            }
+
+            var me = __domParent.__matrixEvent;
+
+            if (me && me.length) {
+              m = multiply(me, m);
+            }
           }
 
-          var me = __domParent.__matrixEvent;
+          _node13.__opacity = opacity;
+          assignMatrix(_node13.__matrixEvent, m);
+        } // 有cache声明从而有total的可以直接绘制并跳过子节点索，total生成可能会因超限而失败
 
-          if (me && me.length) {
-            m = multiply(me, m);
-          }
+
+        var target = _node13.__cacheTarget;
+
+        if (target === _node13.__cache) {
+          target = null;
         }
 
-        _node13.__opacity = opacity;
-        assignMatrix(_node13.__matrixEvent, m); // 有cache声明从而有total的可以直接绘制并跳过子节点索，total生成可能会因超限而失败
-
-        var target = getCache([__cacheMask, __cacheFilter, _cacheTotal9]);
-
         if (target) {
-          _i11 += _total14 || 0;
-
-          if (_hasMask8) {
-            _i11 += countMaskNum(__structs, _i11 + 1, _hasMask8);
-          }
-
           if (lastOpacity !== opacity) {
             ctx.globalAlpha = opacity;
             lastOpacity = opacity;
           }
 
           if (opacity > 0) {
-            ctx.setTransform(m[0], m[1], m[4], m[5], m[12], m[13]);
+            if (wasmOp) {
+              var _idx = _i11 * 16;
+
+              ctx.setTransform(wasmMe[_idx], wasmMe[_idx + 1], wasmMe[_idx + 4], wasmMe[_idx + 5], wasmMe[_idx + 12], wasmMe[_idx + 13]);
+            } else {
+              ctx.setTransform(m[0], m[1], m[4], m[5], m[12], m[13]);
+            }
+
             var mixBlendMode = _computedStyle6[MIX_BLEND_MODE$1];
 
             if (mixBlendMode !== 'normal') {
               ctx.globalCompositeOperation = mbmName(mixBlendMode);
             }
 
-            var x = target.x,
-                y = target.y,
-                canvas = target.canvas,
-                x1 = target.x1,
-                y1 = target.y1,
-                dbx = target.dbx,
-                dby = target.dby,
-                w = target.width,
-                h = target.height;
+            var _target10 = target,
+                x = _target10.x,
+                y = _target10.y,
+                canvas = _target10.canvas,
+                x1 = _target10.x1,
+                y1 = _target10.y1,
+                dbx = _target10.dbx,
+                dby = _target10.dby,
+                w = _target10.width,
+                h = _target10.height;
             ctx.drawImage(canvas, x, y, w, h, x1 - dbx, y1 - dby, w, h); // total应用后记得设置回来
 
             ctx.globalCompositeOperation = 'source-over';
+          }
+
+          _i11 += _total14 || 0;
+
+          if (_hasMask8) {
+            _i11 += countMaskNum(__structs, _i11 + 1, _hasMask8);
           } // 父超限但子有total的时候，i此时已经增加到了末尾，也需要检查
 
 
@@ -37357,7 +41516,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }
 
           if (opacity > 0) {
-            ctx.setTransform(m[0], m[1], m[4], m[5], m[12], m[13]);
+            if (wasmOp) {
+              var _idx2 = _i11 * 16;
+
+              ctx.setTransform(wasmMe[_idx2], wasmMe[_idx2 + 1], wasmMe[_idx2 + 4], wasmMe[_idx2 + 5], wasmMe[_idx2 + 12], wasmMe[_idx2 + 13]);
+            } else {
+              ctx.setTransform(m[0], m[1], m[4], m[5], m[12], m[13]);
+            }
 
             _node13.render(renderMode, ctx, 0, 0);
           } // 这里离屏顺序和xom里返回的一致，和下面应用离屏时的list相反
@@ -37451,9 +41616,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     alpha: true,
     antialias: true,
     premultipliedAlpha: true,
-    preserveDrawingBuffer: true,
-    depth: true // stencil: true,
-
+    preserveDrawingBuffer: false,
+    depth: true,
+    stencil: true
   };
 
   var vertex = "#version 100\n#define GLSLIFY 1\nattribute vec4 a_position;attribute vec2 a_texCoords;varying vec2 v_texCoords;attribute float a_opacity;varying float v_opacity;void main(){gl_Position=a_position;v_texCoords=a_texCoords;v_opacity=a_opacity;}"; // eslint-disable-line
@@ -37462,7 +41627,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
   var vertexMask = "#version 100\n#define GLSLIFY 1\nattribute vec4 a_position;attribute vec2 a_texCoords1;attribute vec2 a_texCoords2;varying vec2 v_texCoords1;varying vec2 v_texCoords2;void main(){gl_Position=a_position;v_texCoords1=a_texCoords1;v_texCoords2=a_texCoords2;}"; // eslint-disable-line
 
-  var fragmentMask = "#version 100\n#ifdef GL_ES\nprecision mediump float;\n#define GLSLIFY 1\n#endif\nvarying vec2 v_texCoords1;varying vec2 v_texCoords2;uniform sampler2D u_texture1;uniform sampler2D u_texture2;void main(){vec4 color1=texture2D(u_texture1,v_texCoords1);vec4 color2=texture2D(u_texture2,v_texCoords2);float a=color1.a*color2.a;gl_FragColor=vec4(color1.rgb*color2.a,a);}"; // eslint-disable-line
+  var fragmentMask = "#version 100\n#ifdef GL_ES\nprecision mediump float;\n#define GLSLIFY 1\n#endif\nvarying vec2 v_texCoords1;varying vec2 v_texCoords2;uniform sampler2D u_texture1;uniform sampler2D u_texture2;void main(){vec4 color1=texture2D(u_texture1,v_texCoords1);vec4 color2=texture2D(u_texture2,v_texCoords2);gl_FragColor=color1*color2.a;}"; // eslint-disable-line
 
   var fragmentClip = "#version 100\n#ifdef GL_ES\nprecision mediump float;\n#define GLSLIFY 1\n#endif\nvarying vec2 v_texCoords1;varying vec2 v_texCoords2;uniform sampler2D u_texture1;uniform sampler2D u_texture2;void main(){vec4 color1=texture2D(u_texture1,v_texCoords1);vec4 color2=texture2D(u_texture2,v_texCoords2);float a=color1.a*(1.0-color2.a);gl_FragColor=vec4(color1.rgb*(1.0-color2.a),a);}"; // eslint-disable-line
 
@@ -37534,13 +41699,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       MATRIX = _enums$STYLE_KEY.MATRIX,
       TRANSFORM = _enums$STYLE_KEY.TRANSFORM,
       OPACITY = _enums$STYLE_KEY.OPACITY,
-      MIX_BLEND_MODE = _enums$STYLE_KEY.MIX_BLEND_MODE;
+      MIX_BLEND_MODE = _enums$STYLE_KEY.MIX_BLEND_MODE,
+      FONT_SIZE = _enums$STYLE_KEY.FONT_SIZE;
   var isNil$8 = util.isNil,
       isFunction$1 = util.isFunction;
   var PX = o$4.PX,
       INHERIT = o$4.INHERIT;
   var getLevel = o$1.getLevel,
-      isRepaint = o$1.isRepaint,
+      isReflow = o$1.isReflow,
       NONE = o$1.NONE,
       FT = o$1.FILTER,
       PPT = o$1.PERSPECTIVE,
@@ -37651,14 +41817,35 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       _this.__mh = 0; // this.__scx = 1; // 默认缩放，css改变canvas/svg缩放后影响事件坐标，有值手动指定，否则自动计算
       // this.__scy = 1;
 
-      _this.__task = [];
+      _this.__task = []; // 更新样式异步刷新&回调
+
+      _this.__taskClone = []; // 动画执行时可能会修改task，每帧执行前先clone出来防止被篡改
+
+      _this.__frameTask = []; // 帧动画回调汇总
+
+      _this.__ani = []; // 动画异步刷新&回调
+
+      _this.__isAsyncDraw = false;
+      _this.__pause = false;
+      _this.__arList = []; // parse中dom的动画解析预存到Root上，layout后执行
+
       _this.__ref = {};
+      _this.__freeze = false; // 冻住只计算不渲染
+
       _this.__animateController = new Controller();
       Event.mix(_assertThisInitialized(_this));
       _this.__uuid = uuid++;
       _this.__rlv = REBUILD; // 每次刷新最大lv
 
       _this.__lastUpdateP = null; // 每帧addUpdate都会向上检查，很多时候同级无需继续，第一次检查暂存parent对象
+      // 开启wasm后，默认使用，除非显示取消
+
+      if (wasm$1.instance && (props.wasm === undefined || props.wasm)) {
+        _this.__wasmRoot = wasm$1.Root["new"]();
+        _this.__wasmNode = wasm$1.Node["new"](false);
+      } else {
+        _this.__wasmRoot = null;
+      }
 
       builder.buildRoot(_assertThisInitialized(_this), _this.__children);
       _this.__env = null; // 生成cacheTotal时会覆盖这个信息，得知当前离屏画布信息
@@ -37793,7 +41980,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         this.__initProps();
 
-        var tagName = this.tagName;
+        var tagName = this.__tagName;
         var domName = ROOT_DOM_NAME[tagName]; // OffscreenCanvas兼容，包含worker的
 
         if (typeof window !== 'undefined' && window.OffscreenCanvas && dom instanceof window.OffscreenCanvas || typeof self !== 'undefined' && self.OffscreenCanvas && dom instanceof self.OffscreenCanvas) {
@@ -37845,7 +42032,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
         if (!this.__width || !this.__height) {
-          inject.warn('Karas render target with a width or height of 0.');
+          inject.warn('karas render target with a width or height of 0.');
         }
 
         var params = Object.assign({}, ca, this.props.contextAttributes); // 只有canvas有ctx，svg用真实dom
@@ -37880,9 +42067,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.__renderMode = mode.WEBGL;
         }
 
+        var wr = this.__wasmRoot;
+
+        if (wr) {
+          wr.mode = this.__renderMode;
+        }
+
         this.draw(true);
         this.__eventCbList = initEvent(this.__dom, Root);
         this.__dom.__root = this;
+        frame.addRoot(this);
       }
     }, {
       key: "__initShader",
@@ -37918,6 +42112,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             width = this.width,
             height = this.height;
 
+        if (this.__renderMode === mode.WEBGL) {
+          this.ctx.viewport(0, 0, width, height);
+        }
+
         this.__checkRoot(renderMode, width, height);
 
         var wm = this.__currentStyle[WRITING_MODE];
@@ -37940,7 +42138,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           isUpright: isUpright
         }, null);
 
-        this.__structs = this.__structure(0, 0);
+        var s = this.__structs = this.__structure(0, 0);
+
+        var wr = this.__wasmRoot;
+
+        if (wr) {
+          wr.font_size = this.__computedStyle[FONT_SIZE];
+          wr.clear();
+
+          for (var i = 0, len = s.length; i < len; i++) {
+            var node = s[i].node;
+
+            if (node instanceof Component) {
+              node = node.shadowRoot;
+            }
+
+            var wn = node.__wasmNode; // 一定有
+
+            wr.add_node(wn.ptr);
+          }
+        }
+
+        this.__checkAr();
       }
     }, {
       key: "draw",
@@ -37960,11 +42179,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           this.__reLayout();
         }
 
-        if (this.props.noRender) {
-          return;
+        var wr = this.__wasmRoot;
+
+        if (wr) {
+          wr.refresh();
         }
 
         var rlv = this.__rlv;
+        this.__rlv = NONE; // freeze()冻住不渲染
+
+        if (this.props.noRender || this.__freeze) {
+          this.emit(Event.REFRESH, rlv, true);
+          return;
+        }
 
         if (renderMode === mode.CANVAS) {
           this.__clearCanvas(ctx);
@@ -37994,13 +42221,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           renderWebgl(renderMode, ctx, this, isFirst, rlv);
         }
 
-        this.emit(Event.REFRESH, rlv);
-        this.__rlv = NONE;
+        this.emit(Event.REFRESH, rlv, false);
+      }
+    }, {
+      key: "remove",
+      value: function remove() {
+        _get(_getPrototypeOf(Root.prototype), "remove", this).call(this);
+
+        this.destroy();
       }
     }, {
       key: "destroy",
       value: function destroy() {
+        this.children.forEach(function (item) {
+          item.remove();
+        });
+
         this.__destroy();
+
+        frame.removeRoot(this);
 
         this.__animateController.__destroy();
 
@@ -38008,17 +42247,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
         if (n) {
           removeEvent(n, this.__eventCbList || []);
-          n.__root = null;
+          delete n.__root;
         }
 
-        var gl = this.ctx;
+        this.__dom = null;
+        var gl = this.__ctx;
 
-        if (this.renderMode === mode.WEBGL) {
-          ['program', 'programMask', 'programClip', 'programOverflow', 'programCm', 'programDs', 'programMbmMp', 'programMbmSr', 'programMbmOl', 'programMbmDk', 'programMbmLt', 'programMbmCd', 'programMbmCb', 'programMbmHl', 'programMbmSl', 'programMbmDf', 'programMbmEx', 'programMbmHue', 'programMbmSt', 'programMbmCl', 'programMbmLm'].forEach(function (k) {
+        if (this.renderMode === mode.CANVAS) {
+          this.__clearCanvas(gl);
+        } else if (this.renderMode === mode.WEBGL) {
+          this.__clearWebgl(gl);
+
+          ['program', 'programMask', 'programClip', 'programOverflow', 'programCm', 'programDs', 'programMbmMp', 'programMbmSr', 'programMbmOl', 'programMbmDk', 'programMbmLt', 'programMbmCd', 'programMbmCb', 'programMbmHl', 'programMbmSl', 'programMbmDf', 'programMbmEx', 'programMbmHue', 'programMbmSt', 'programMbmCl', 'programMbmLm', 'programSs'].forEach(function (k) {
             var p = gl[k];
             gl.deleteShader(p.vertexShader);
             gl.deleteShader(p.fragmentShader);
             gl.deleteProgram(p);
+            delete gl[k];
           });
 
           for (var i in gl) {
@@ -38027,8 +42272,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               gl.deleteShader(p.vertexShader);
               gl.deleteShader(p.fragmentShader);
               gl.deleteProgram(p);
+              delete gl[i];
             }
           }
+
+          gl.bindTexture(gl.TEXTURE_2D, null); // gl.getExtension('WEBGL_lose_context').loseContext();
+        }
+
+        this.__ctx = gl = null;
+        var wr = this.__wasmRoot;
+
+        if (wr) {
+          wr.clear();
+          wr.free();
+          this.__wasmRoot = null;
         }
       }
     }, {
@@ -38053,6 +42310,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           }, cb);
         } else if (isFunction$1(cb)) {
           cb(-1);
+        }
+
+        var wr = this.__wasmRoot;
+
+        if (wr) {
+          wr.resize(w, h);
         }
       }
     }, {
@@ -38128,7 +42391,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       value: function __checkRoot(renderMode, width, height) {
         var dom = this.dom,
             currentStyle = this.currentStyle,
-            computedStyle = this.computedStyle; // canvas/svg作为根节点一定是block或flex，不会是inline
+            computedStyle = this.computedStyle,
+            __wasmRoot = this.__wasmRoot; // canvas/svg作为根节点一定是block或flex，不会是inline
 
         if (['flex', 'block'].indexOf(currentStyle[DISPLAY]) === -1) {
           computedStyle[DISPLAY] = currentStyle[DISPLAY] = 'block';
@@ -38163,87 +42427,255 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           dom.setAttribute('width', width);
           dom.setAttribute('height', height);
         }
+
+        if (__wasmRoot) {
+          __wasmRoot.resize(width, height);
+        }
       }
       /**
        * 添加更新，分析repaint/reflow和上下影响，异步刷新
+       * sync是动画在gotoAndStop的时候，下一帧刷新由于一帧内同步执行计算标识true
+       * wasmChange比较特殊，仅在gotoAndStop的时候用到，可能变化完全在wasm中js没有keys和lv，需强制刷新
        */
 
     }, {
       key: "__addUpdate",
-      value: function __addUpdate(node, keys, focus, addDom, removeDom, aniParams, cb) {
+      value: function __addUpdate(node, keys, focus, addDom, removeDom, sync, wasmChange, cb) {
+        if (this.__isDestroyed) {
+          return;
+        }
+
         if (node instanceof Component) {
           node = node.shadowRoot;
         }
 
         var _node = node,
             computedStyle = _node.__computedStyle,
-            currentStyle = _node.__currentStyle,
             cacheStyle = _node.__cacheStyle,
-            __cacheProps = _node.__cacheProps,
-            __mask = _node.__mask,
-            __domParent = _node.__domParent;
+            __cacheProps = _node.__cacheProps;
         var hasZ, hasVisibility, hasColor, hasDisplay, hasTsColor, hasTsWidth, hasTsOver; // 可能无keys但有aniParams，多防御一下，比如steps动画
 
-        var lv = focus || (aniParams && keys && keys.length ? aniParams.lv : NONE); // 清空对应改变的cacheStyle
+        var lv = focus || NONE; // 清空对应改变的cacheStyle
 
         if (keys) {
-          if (aniParams) {
-            for (var i = 0, len = keys.length; i < len; i++) {
-              var k = keys[i];
-              cacheStyle[k] = undefined;
-            }
+          for (var i = 0, len = keys.length; i < len; i++) {
+            var k = keys[i];
 
-            hasZ = aniParams.hasZ;
-            hasColor = aniParams.hasColor;
-            hasTsColor = aniParams.hasTsColor;
-            hasTsWidth = aniParams.hasTsWidth;
-            hasTsOver = aniParams.hasTsOver;
-          } else {
-            for (var _i2 = 0, _len = keys.length; _i2 < _len; _i2++) {
-              var _k = keys[_i2];
+            if (node instanceof Geom && isGeom(node.__tagName, k)) {
+              lv |= REPAINT;
+              __cacheProps[k] = undefined;
+            } else {
+              // repaint置空，如果reflow会重新生成空的
+              cacheStyle[k] = undefined; // TRBL变化只对relative/absolute起作用，其它忽视
 
-              if (node instanceof Geom && isGeom(node.tagName, _k)) {
-                lv |= REPAINT;
-                __cacheProps[_k] = undefined;
-              } else {
-                // repaint置空，如果reflow会重新生成空的
-                cacheStyle[_k] = undefined; // TRBL变化只对relative/absolute起作用，其它忽视
-
-                if ((_k === TOP || _k === RIGHT || _k === BOTTOM || _k === LEFT) && ['relative', 'absolute'].indexOf(computedStyle[POSITION]) === -1) {
-                  continue;
-                } // 细化等级
+              if ((k === TOP || k === RIGHT || k === BOTTOM || k === LEFT) && ['relative', 'absolute'].indexOf(computedStyle[POSITION]) === -1) {
+                continue;
+              } // 细化等级
 
 
-                lv |= getLevel(_k);
+              lv |= getLevel(k);
 
-                if (_k === DISPLAY) {
-                  hasDisplay = true;
-                } else if (_k === Z_INDEX) {
-                  hasZ = node !== this && ['relative', 'absolute'].indexOf(computedStyle[POSITION]) > -1;
-                } else if (_k === VISIBILITY) {
-                  hasVisibility = true;
-                } else if (_k === COLOR) {
-                  hasColor = true;
-                } else if (_k === TEXT_STROKE_COLOR) {
-                  hasTsColor = true;
-                } else if (_k === TEXT_STROKE_WIDTH) {
-                  hasTsWidth = true;
-                } else if (_k === TEXT_STROKE_OVER) {
-                  hasTsOver = true;
-                }
+              if (k === DISPLAY) {
+                hasDisplay = true;
+              } else if (k === Z_INDEX) {
+                hasZ = node !== this && ['relative', 'absolute'].indexOf(computedStyle[POSITION]) > -1;
+              } else if (k === VISIBILITY) {
+                hasVisibility = true;
+              } else if (k === COLOR) {
+                hasColor = true;
+              } else if (k === TEXT_STROKE_COLOR) {
+                hasTsColor = true;
+              } else if (k === TEXT_STROKE_WIDTH) {
+                hasTsWidth = true;
+              } else if (k === TEXT_STROKE_OVER) {
+                hasTsOver = true;
               }
             }
           }
-        } // 没有变化，add/remove强制focus
-        // 本身节点为none，变更无效，此时没有display变化，add/remove在操作时已经判断不会进入
+        }
+
+        var res = this.__calUpdate(node, computedStyle, cacheStyle, lv, hasDisplay, hasVisibility, hasZ, hasColor, hasTsColor, hasTsWidth, hasTsOver, addDom, removeDom); // 动画在最后一帧要finish或者cancel时，特殊调用同步计算无需刷新，不会有cb
 
 
-        if (lv === NONE || computedStyle[DISPLAY] === 'none' && !hasDisplay) {
-          if (cb && isFunction$1(cb)) {
-            cb();
+        if (sync) {
+          if (res) {
+            this.__aniChange = true;
           }
 
           return;
+        } // wasm动画变更可能会无keys和lv，需要强制刷新
+
+
+        if (res || wasmChange) {
+          this.__asyncDraw(cb);
+        } else {
+          cb && cb(true);
+        }
+      }
+    }, {
+      key: "__addAniUpdate",
+      value: function __addAniUpdate(node, trans, fixed, frame) {
+        // diff为0或者极端跳帧情况相同时无变化
+        if (this.__isDestroyed) {
+          return;
+        }
+
+        var computedStyle = node.__computedStyle,
+            cacheStyle = node.__cacheStyle,
+            cacheProps = node.__cacheProps;
+        var hasZ, hasVisibility, hasColor, hasDisplay, hasTsColor, hasTsWidth, hasTsOver;
+        hasColor = frame.hasColor;
+        hasTsColor = frame.hasTsColor;
+        hasTsWidth = frame.hasTsWidth;
+        hasTsOver = frame.hasTsOver;
+        var ignoreTRBL = false;
+        var lv = frame.lv || NONE;
+        var len = trans.length;
+
+        for (var i = 0; i < len; i++) {
+          var k = trans[i];
+
+          if (frame.isGeom && node instanceof Geom && isGeom(node.__tagName, k)) {
+            cacheProps[k] = undefined;
+          } else {
+            // repaint置空，如果reflow会重新生成空的
+            cacheStyle[k] = undefined; // TRBL变化只对relative/absolute起作用，其它忽视，如果position也变化会重新布局生效
+
+            if ((k === TOP || k === RIGHT || k === BOTTOM || k === LEFT) && ['relative', 'absolute'].indexOf(computedStyle[POSITION]) === -1) {
+              ignoreTRBL = true;
+            } // 特殊处理，z变化也只对非flow生效
+            else if (k === Z_INDEX) {
+              hasZ = node !== this && ['relative', 'absolute'].indexOf(computedStyle[POSITION]) > -1;
+            }
+          }
+        }
+
+        var fLen = fixed.length;
+
+        for (var _i2 = 0, _len = fLen; _i2 < _len; _i2++) {
+          var _k = fixed[_i2];
+          lv |= getLevel(_k);
+          cacheStyle[_k] = undefined; // 特殊的2个，影响是否需要刷新生效
+
+          if (_k === DISPLAY) {
+            hasDisplay = true;
+          } else if (_k === VISIBILITY) {
+            hasVisibility = true;
+          }
+        } // 无效的变化
+
+
+        if (ignoreTRBL && len === 1 && !fLen) {
+          return;
+        } // 设置有动画造成了更新
+
+
+        this.__aniChange = true;
+
+        this.__calUpdate(node, computedStyle, cacheStyle, lv, hasDisplay, hasVisibility, hasZ, hasColor, hasTsColor, hasTsWidth, hasTsOver, false, false);
+      } // wasm的动画更新外部不知道改了啥（性能），其内部倒是知道，这里检查mask和向上清空cache影响
+
+    }, {
+      key: "__addWasmAniUpdate",
+      value: function __addWasmAniUpdate(node) {
+        var computedStyle = node.__computedStyle,
+            __mask = node.__mask,
+            __hasMask = node.__hasMask,
+            __domParent = node.__domParent; // 没有变化或none无需刷新
+
+        if (computedStyle[DISPLAY] === 'none') {
+          return false;
+        } // mask需清除遮罩对象的缓存
+
+
+        var hasRelease;
+
+        if (__mask) {
+          var prev = node.__prev;
+
+          while (prev && prev.__mask) {
+            prev = prev.__prev;
+          }
+
+          if (prev && (prev instanceof Xom || prev instanceof Component && prev.shadowRoot instanceof Xom)) {
+            prev.__refreshLevel |= CACHE | MASK;
+            prev.__struct.hasMask = prev.__hasMask = __mask;
+
+            if (prev.__cacheMask) {
+              hasRelease = prev.__cacheMask.release() || hasRelease;
+            }
+          }
+        } // mask无论如何都要清除，除非是opacity/ppt，这里因为wasm只考虑opacity
+
+
+        if (__hasMask) {
+          var lv = node.__wasmNode.refresh_level;
+
+          if (lv ^ OP) {
+            if (node.__cacheMask) {
+              hasRelease = node.__cacheMask.release() || hasRelease;
+            }
+
+            if (node.__cacheFilter) {
+              hasRelease = node.__cacheFilter.release() || hasRelease;
+            }
+          }
+        } // 除了清空cache，Root的rlv需要标识向上情况，这样webgl的渲染不会使用老的队列缓存
+
+
+        if (hasRelease) {
+          node.__updateCache();
+        }
+
+        if (__domParent !== this.__lastUpdateP) {
+          var p = __domParent;
+          this.__lastUpdateP = p; // 同层级避免重复进入查找，每次draw()重设
+
+          while (p) {
+            if (p.__refreshLevel & (CACHE | REPAINT | REFLOW)) {
+              break;
+            }
+
+            p.__refreshLevel |= CACHE;
+
+            if (p.__cacheTotal) {
+              hasRelease = p.__cacheTotal.release() || hasRelease;
+            }
+
+            if (p.__cacheFilter) {
+              hasRelease = p.__cacheFilter.release() || hasRelease;
+            }
+
+            if (p.__cacheMask) {
+              hasRelease = p.__cacheMask.release() || hasRelease;
+            }
+
+            if (hasRelease) {
+              p.__updateCache();
+            }
+
+            p = p.__domParent;
+          }
+        }
+
+        if (hasRelease) {
+          this.__rlv |= CACHE;
+        }
+      }
+    }, {
+      key: "__calUpdate",
+      value: function __calUpdate(node, computedStyle, cacheStyle, lv, hasDisplay, hasVisibility, hasZ, hasColor, hasTsColor, hasTsWidth, hasTsOver, addDom, removeDom) {
+        var currentStyle = node.__currentStyle,
+            __mask = node.__mask,
+            __domParent = node.__domParent; // 防御一下
+
+        if (addDom || removeDom) {
+          lv |= REFLOW;
+        } // 没有变化或none无需刷新
+
+
+        if (lv === NONE || computedStyle[DISPLAY] === 'none' && !hasDisplay) {
+          return false;
         } // transform变化清空重算，比较特殊，MATRIX的cache需手动清理
 
 
@@ -38270,12 +42702,44 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               hasRelease = prev.__cacheMask.release() || hasRelease;
             }
           }
-        } // aniParams在动画引擎提前计算好了
+        } // wasm的特殊更新，不管lv多少只要有transform和op都得计算
 
 
-        var isRp = aniParams && aniParams.isRepaint || isRepaint(lv);
+        if (lv & TRANSFORM_ALL) {
+          var wn = node.__wasmNode;
 
-        if (isRp) {
+          if (wn) {
+            wn.cal_matrix(lv & TRANSFORM_ALL);
+          }
+        } // 大部分动画都是repaint初始化已经知道
+
+
+        var isRf = isReflow(lv);
+
+        if (isRf) {
+          var top = reflow.checkTop(this, node, addDom, removeDom);
+
+          if (top === this) {
+            this.__reLayout();
+          } // 布局影响next的所有节点，重新layout的w/h数据使用之前parent暂存的，x使用parent，y使用prev或者parent的
+          else {
+            reflow.checkNext(this, top, node, hasZ, addDom, removeDom);
+
+            this.__checkAr();
+          }
+
+          if (removeDom) {
+            var temp = node;
+
+            while (temp.isShadowRoot) {
+              temp = temp.__host;
+
+              temp.__destroy();
+            }
+
+            node.__destroy();
+          }
+        } else {
           // dom在>=REPAINT时total失效，svg的Geom比较特殊
           var need = lv >= REPAINT;
 
@@ -38293,21 +42757,26 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
               node.__calPerspective(currentStyle, computedStyle, cacheStyle);
             }
 
-            if (lv & TRANSFORM_ALL) {
-              // 特殊的ppt需清空cacheTotal
-              var o = node.__selfPerspectiveMatrix;
+            if (lv & TRANSFORM_ALL || lv & OP) {
+              var _wn = node.__wasmNode;
 
-              node.__calMatrix(lv, currentStyle, computedStyle, cacheStyle, aniParams && aniParams.optimize);
+              if (_wn) ; else {
+                if (lv & TRANSFORM_ALL) {
+                  var o = node.__selfPerspectiveMatrix;
 
-              var n = node.__selfPerspectiveMatrix;
+                  node.__calMatrix(lv, currentStyle, computedStyle, cacheStyle);
 
-              if (!util.equalArr(o, n)) {
-                need = true;
+                  var n = node.__selfPerspectiveMatrix;
+
+                  if (!need && !util.equalArr(o, n)) {
+                    need = true;
+                  }
+                }
+
+                if (lv & OP) {
+                  computedStyle[OPACITY] = currentStyle[OPACITY];
+                }
               }
-            }
-
-            if (lv & OP) {
-              computedStyle[OPACITY] = currentStyle[OPACITY];
             }
 
             if (lv & FT) {
@@ -38316,17 +42785,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
             if (lv & MBM) {
               computedStyle[MIX_BLEND_MODE] = currentStyle[MIX_BLEND_MODE];
+            } // 暂时这样，缺少lv
+
+
+            if (hasZ) {
+              computedStyle[Z_INDEX] = currentStyle[Z_INDEX];
             }
           } // 影响子继承REPAINT的变化，如果被cache住需要清除
 
 
           if (hasVisibility || hasColor || hasTsColor || hasTsWidth || hasTsOver) {
-            for (var __structs = this.__structs, __struct = node.__struct, _i3 = __structs.indexOf(__struct) + 1, _len2 = _i3 + (__struct.total || 0); _i3 < _len2; _i3++) {
-              var _structs$_i = __structs[_i3],
-                  _node2 = _structs$_i.node,
-                  total = _structs$_i.total; // text的style指向parent，不用管
+            for (var __structs = this.__structs, __struct = node.__struct, i = __structs.indexOf(__struct) + 1, len = i + (__struct.total || 0); i < len; i++) {
+              var _structs$i = __structs[i],
+                  _node2 = _structs$i.node,
+                  total = _structs$i.total,
+                  isText = _structs$i.isText; // text的style指向parent，不用管
 
-              if (_node2 instanceof Text) {
+              if (isText) {
                 continue;
               }
 
@@ -38360,7 +42835,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 _node2.__calStyle(REPAINT, _currentStyle, _node2.__computedStyle, _cacheStyle);
               } // 不为inherit此子树可跳过，因为不影响
               else {
-                _i3 += total || 0;
+                i += total || 0;
               }
             }
           } // perspective也特殊只清空total的cache，和>=REPAINT清空total共用
@@ -38370,7 +42845,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             if (node.__cacheTotal) {
               hasRelease = node.__cacheTotal.release() || hasRelease;
             }
-          } // mask无论如何都要清除，除非是opacity
+          } // mask无论如何都要清除，除非是opacity/ppt，其它变化需要重新生成
 
 
           if (node.__hasMask) {
@@ -38386,6 +42861,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           } // 特殊的filter清除cache
           else if ((need || lv & (FT | PPT)) && node.__cacheFilter) {
             hasRelease = node.__cacheFilter.release() || hasRelease;
+          } // 更新cacheTarget有效指向
+
+
+          if (hasRelease) {
+            node.__updateCache();
           } // 向上清除cache汇总缓存信息，过程中可能会出现重复，根据refreshLevel判断，reflow已经自己清过了
 
 
@@ -38412,41 +42892,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 hasRelease = p.__cacheMask.release() || hasRelease;
               }
 
-              p = p.__domParent;
-            } // 清除parent的zIndexChildren缓存，强制所有孩子重新渲染
-
-
-            if (hasZ && __domParent) {
-              __domParent.__zIndexChildren = null;
-
-              __domParent.__updateStruct();
-
-              if (this.__renderMode === mode.SVG) {
-                hasRelease = node.__cacheTotal.release() || hasRelease;
-                reflow.clearSvgCache(__domParent);
+              if (hasRelease) {
+                p.__updateCache();
               }
+
+              p = p.__domParent;
             }
-          }
-        } else {
-          var top = reflow.checkTop(this, node, addDom, removeDom);
+          } // 清除parent的zIndexChildren缓存，强制所有孩子重新渲染，父节点下可能多个子节点重复调用
 
-          if (top === this) {
-            this.__reLayout();
-          } // 布局影响next的所有节点，重新layout的w/h数据使用之前parent暂存的，x使用parent，y使用prev或者parent的
-          else {
-            reflow.checkNext(this, top, node, hasZ, addDom, removeDom);
-          }
 
-          if (removeDom) {
-            var temp = node;
+          if (hasZ && __domParent) {
+            __domParent.__zIndexChildren = null;
 
-            while (temp.isShadowRoot) {
-              temp = temp.__host;
+            __domParent.__updateStruct();
 
-              temp.__destroy();
+            if (this.__renderMode === mode.SVG) {
+              hasRelease = node.__cacheTotal.release() || hasRelease;
+              reflow.clearSvgCache(__domParent);
             }
-
-            node.__destroy();
           }
         }
 
@@ -38456,41 +42919,236 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           lv |= CACHE;
         }
 
+        this.__rlv |= lv;
+
         if (addDom || removeDom) {
           this.__rlv |= REBUILD;
-        } else {
-          this.__rlv |= lv;
         }
 
-        if (cb && !isFunction$1(cb)) {
-          cb = null;
-        }
-
-        this.__frameDraw(cb);
-      } // 异步进行root刷新操作，多次调用缓存结果，刷新成功后回调
+        return true;
+      } // 所有动画由Root代理，方便控制pause，主动更新时参数传null复用，
+      // 注意逻辑耦合，任意动画/主动更新第一次触发时，需把ani和task的队列填充，以防重复onFrame调用
 
     }, {
-      key: "__frameDraw",
-      value: function __frameDraw(cb) {
-        var _this3 = this;
+      key: "__asyncDraw",
+      value: function __asyncDraw(cb) {
+        if (!this.__isAsyncDraw) {
+          frame.onFrame(this);
+          this.__isAsyncDraw = true;
+        }
 
-        if (!this.__task.length) {
-          frame.nextFrame(function () {});
+        this.__task.push(cb);
+      }
+    }, {
+      key: "__cancelAsyncDraw",
+      value: function __cancelAsyncDraw(cb) {
+        if (!cb) {
+          return;
+        }
 
-          frame.__rootTask.push(function () {
-            // 需要先获得累积的刷新回调再刷新，防止refresh触发事件中再次调用刷新
-            var list = _this3.__task.splice(0);
+        var task = this.__task;
+        var i = task.indexOf(cb);
 
-            _this3.draw(false);
+        if (i > -1) {
+          task.splice(i, 1);
 
-            list.forEach(function (item) {
-              item && item();
-            });
-          });
+          if (!task.length && !this.__frameTask.length && !this.__ani.length) {
+            frame.offFrame(this);
+            this.__isAsyncDraw = false;
+          }
+        }
+      }
+    }, {
+      key: "__onFrame",
+      value: function __onFrame(cb) {
+        if (!this.__isAsyncDraw) {
+          frame.onFrame(this);
+          this.__isAsyncDraw = true;
+        }
 
-          this.__task.push(cb);
-        } else if (cb) {
-          this.__task.push(cb);
+        this.__frameTask.push(cb);
+      }
+    }, {
+      key: "__offFrame",
+      value: function __offFrame(cb) {
+        if (!cb) {
+          return;
+        }
+
+        var frameTask = this.__frameTask;
+        var i = frameTask.indexOf(cb);
+
+        if (i > -1) {
+          frameTask.splice(i, 1);
+
+          if (!frameTask.length && !this.__task.length && !this.__ani.length) {
+            frame.offFrame(this);
+            this.__isAsyncDraw = false;
+          }
+        }
+      }
+    }, {
+      key: "__onAniFrame",
+      value: function __onAniFrame(animation) {
+        if (!this.__isAsyncDraw) {
+          frame.onFrame(this);
+          this.__isAsyncDraw = true;
+        }
+
+        this.__ani.push(animation);
+      }
+    }, {
+      key: "__offAniFrame",
+      value: function __offAniFrame(animation) {
+        var ani = this.__ani;
+        var i = ani.indexOf(animation);
+
+        if (i > -1) {
+          ani.splice(i, 1);
+
+          if (!ani.length && !this.__task.length && !this.__frameTask.length) {
+            frame.offFrame(this);
+            this.__isAsyncDraw = false;
+          }
+        }
+      }
+      /**
+       * 每帧调用Root的before回调，先将存储的动画before执行，触发数据先变更完，然后若有变化或主动更新则刷新
+       * wasm的执行也放在和动画__before一起，先后顺序无要求
+       */
+
+    }, {
+      key: "__before",
+      value: function __before(diff) {
+        var ani = this.__ani,
+            len = ani.length,
+            task = this.__taskClone = this.__task.splice(0),
+            len2 = task.length,
+            frameTask = this.__frameTask,
+            len3 = frameTask.length; // 先重置标识，动画没有触发更新，在每个__before执行，如果调用了更新则更改标识
+
+
+        this.__aniChange = false;
+
+        if (!this.__pause) {
+          var wr = this.__wasmRoot; // wasm的动画计算顺序要放在前面，因为其他动画可能包含REPAINT/REFLOW之类的变更，涵盖wasm的transform/opacity
+
+          if (wr) {
+            var n = wr.before(diff); // 有动画执行了需刷新
+
+            if (n) {
+              this.__aniChange = true;
+            }
+          }
+
+          for (var i = 0; i < len; i++) {
+            var a = ani[i];
+
+            var r = a.__before(diff); // 返回true说明完全被wasm动画代理，非true则是其它，更新逻辑会包含wasm的
+
+
+            if (r) {
+              this.__addWasmAniUpdate(a.__target);
+            }
+          }
+        }
+
+        if (this.__aniChange || len2 || len3) {
+          this.draw(false);
+        }
+      }
+      /**
+       * 每帧调用的Root的after回调，将所有动画的after执行，以及主动更新的回调执行
+       * 当都清空的时候，取消raf对本Root的侦听
+       */
+
+    }, {
+      key: "__after",
+      value: function __after(diff) {
+        var ani = this.__ani.slice(0),
+            len = ani.length,
+            task = this.__taskClone.splice(0),
+            len2 = task.length,
+            frameTask = this.__frameTask.slice(0),
+            len3 = frameTask.length; // 动画用同一帧内的pause判断，ani的after可能会改变队列（比如结束），需要先制作副本
+
+
+        var pause = this.__pause;
+
+        if (!pause) {
+          var wr = this.__wasmRoot;
+          /**
+           * 有wasm需要特殊对待，首先要保证动画的执行顺序，主体仍然是每个动画依次执行after，和before的顺序对应，
+           * 但wasm存在的话不可能一个个去执行，通信消耗过大，所以是先执行所有的wasm动画，计算transform和opacity，
+           * 然后是每个普通js动画执行after。
+           * 普通的动画中如果完全被wasm替代计算了，会有ignore标识，before不再执行，
+           * 但after需要执行且需要wasm那边的数据，比如是否begin、end、finish的状态。
+           * 多个动画可能会出现混合状态，即有的有wasm有的没有，有的被wasm完全替代有的没有，
+           * 这时候wasm动画数量和顺序和普通js动画对应不上，获取数据需注意，在普通js动画中有变量可以识别是否有wasm动画，
+           * 以此为手段，在遍历普通js动画中，可以增加偏移量来解决获取对应wasm动画索引的问题。
+           */
+
+          if (wr) {
+            var n = wr.after();
+            var states; // 有n个长度的动画，取共享内存的状态，数量一定和before对得上
+
+            if (n) {
+              states = new Uint8Array(wasm$1.instance.memory.buffer, wr.am_states_ptr(), n);
+            }
+
+            var offset = 0; // 偏移计数器
+
+            for (var i = 0; i < len; i++) {
+              var a = ani[i];
+
+              if (a.__wasmAnimation) {
+                var s = states[i - offset]; // 0是fps中忽略，1是普通frame事件，2是begin，4是end，8是finish
+
+                if (s & 2) {
+                  a.__begin = true;
+                }
+
+                if (s & 4) {
+                  a.__end = true;
+                }
+
+                if (s & 8) {
+                  a.__finished = true;
+                }
+              } // 普通js动画无wasm也就是共享数据中不占队列，除了执行外要标识偏移++，如果下一个动画有wasm的话，索引要保持正确
+              else {
+                offset++;
+              }
+
+              a.__after();
+            }
+          } // 没有wasm普通遍历执行动画列表
+          else {
+            for (var _i3 = 0; _i3 < len; _i3++) {
+              ani[_i3].__after();
+            }
+          }
+
+          for (var _i4 = 0; _i4 < len3; _i4++) {
+            var item = frameTask[_i4];
+            item && item(diff);
+          }
+        } // frameDraw不受pause影响，即主动更新样式之类非动画/帧动画
+
+
+        for (var _i5 = 0; _i5 < len2; _i5++) {
+          var _item = task[_i5];
+          _item && _item();
+        }
+
+        len = this.__ani.length; // 动画和渲染任务可能会改变自己的任务队列
+
+        len2 = this.__task.length;
+        len3 = this.__frameTask.length;
+
+        if (!len && !len2 && !len3) {
+          frame.offFrame(this);
+          this.__isAsyncDraw = false;
         }
       }
     }, {
@@ -38508,6 +43166,46 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       value: function __clearWebgl(ctx) {
         ctx.clearColor(0, 0, 0, 0);
         ctx.clear(ctx.COLOR_BUFFER_BIT);
+      }
+    }, {
+      key: "freeze",
+      value: function freeze() {
+        if (!this.__freeze) {
+          this.__freeze = true;
+          this.emit(Event.FREEZE);
+        }
+      }
+    }, {
+      key: "unFreeze",
+      value: function unFreeze() {
+        if (this.__freeze) {
+          this.__freeze = false;
+          this.emit(Event.UN_FREEZE);
+        }
+      }
+    }, {
+      key: "pause",
+      value: function pause() {
+        this.__pause = true;
+      }
+    }, {
+      key: "resume",
+      value: function resume() {
+        this.__pause = false;
+      }
+    }, {
+      key: "__addAr",
+      value: function __addAr(node) {
+        this.__arList.push(node);
+      }
+    }, {
+      key: "__checkAr",
+      value: function __checkAr() {
+        var list = this.__arList.splice(0);
+
+        for (var i = 0, len = list.length; i < len; i++) {
+          list[i].__execAr();
+        }
       }
     }, {
       key: "dom",
@@ -38570,7 +43268,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     if (x1 < minX || y1 < minY || x1 > maxX || y1 > maxY) {
       var tx = (x0 - x1) / (x0 - 2 * x1 + x2);
 
-      if (tx < 0) {
+      if (isNaN(tx) || tx < 0) {
         tx = 0;
       } else if (tx > 1) {
         tx = 1;
@@ -38578,7 +43276,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       var ty = (y0 - y1) / (y0 - 2 * y1 + y2);
 
-      if (ty < 0) {
+      if (isNaN(ty) || ty < 0) {
         ty = 0;
       } else if (ty > 1) {
         ty = 1;
@@ -39021,7 +43719,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     var end = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
 
     if (!Array.isArray(points) || points.length < 3) {
-      return;
+      return points;
     }
 
     start = Math.max(start, 0);
@@ -39665,7 +44363,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           __cacheProps.d = d;
         }
 
-        if (renderMode === mode.CANVAS || renderMode === mode.WEBGL) {
+        if (renderMode === mode.CANVAS) {
           strokes.forEach(function (stroke, i) {
             var strokeWidth = strokeWidths[i];
             var isStrokeRE = strokeWidth > 0 && stroke.k === 'radial' && Array.isArray(stroke.v);
@@ -40016,14 +44714,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     return Segment;
   }();
 
-  var EPS = 1e-9;
-  var EPS2 = 1 - 1e-9;
+  var EPS$1 = 1e-9;
+  var EPS2$1 = 1 - 1e-9;
+
+  function isParallel(k1, k2) {
+    if (k1 === Infinity && k2 === Infinity) {
+      return true;
+    } else if (k1 === Infinity && k2 === -Infinity) {
+      return true;
+    } else if (k1 === -Infinity && k2 === -Infinity) {
+      return true;
+    } else if (k1 === -Infinity && k2 === Infinity) {
+      return true;
+    } else {
+      return Math.abs(k1 - k2) < EPS$1;
+    }
+  }
 
   function getIntersectionLineLine$1(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2, d) {
     var toSource = ((bx2 - bx1) * (ay1 - by1) - (by2 - by1) * (ax1 - bx1)) / d;
     var toClip = ((ax2 - ax1) * (ay1 - by1) - (ay2 - ay1) * (ax1 - bx1)) / d; // 非顶点相交才是真相交
 
-    if (toSource > EPS && toSource < EPS2 && toClip > EPS && toClip < EPS2) {
+    if (toSource >= 0 && toSource <= 1 && toClip >= 0 && toClip <= 1 && (toSource > EPS$1 && toSource < EPS2$1 || toClip > EPS$1 && toClip < EPS2$1)) {
       var ox = ax1 + toSource * (ax2 - ax1);
       var oy = ay1 + toSource * (ay2 - ay1);
       return [{
@@ -40045,14 +44757,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           toClip = Math.abs((item.x - bx1) / (bx2 - bx1));
         } else {
           toClip = Math.abs((item.y - by1) / (by2 - by1));
-        }
+        } // 相交于双方端点忽略，一方非端点要记录，防止多区域情况
 
-        if (item.t > EPS && item.t < EPS2 && toClip > EPS && toClip < EPS2) {
+
+        if (item.t > EPS$1 && item.t < EPS2$1 || toClip > EPS$1 && toClip < EPS2$1) {
           // 还要判断斜率，相等也忽略（小于一定误差）
           var k1 = bezier.bezierSlope([[ax1, ay1], [ax2, ay2], [ax3, ay3]], item.t);
           var k2 = bezier.bezierSlope([[bx1, by1], [bx2, by2]]); // 忽略方向，180°也是平行，Infinity相减为NaN
 
-          if (Math.abs(Math.abs(k1) - Math.abs(k2) || 0) < EPS) {
+          if (isParallel(k1, k2)) {
             return;
           }
 
@@ -40084,12 +44797,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (toClip.length) {
           toClip = toClip[0];
 
-          if (item.t > EPS && item.t < EPS2 && toClip > EPS && toClip < EPS2) {
+          if (item.t > EPS$1 && item.t < EPS2$1 || toClip > EPS$1 && toClip < EPS2$1) {
             // 还要判断斜率，相等也忽略（小于一定误差）
             var k1 = bezier.bezierSlope([[ax1, ay1], [ax2, ay2], [ax3, ay3]], item.t);
             var k2 = bezier.bezierSlope([[bx1, by1], [bx2, by2], [bx3, by3]], toClip); // 忽略方向，180°也是平行，Infinity相减为NaN
 
-            if (Math.abs(Math.abs(k1) - Math.abs(k2) || 0) < EPS) {
+            if (isParallel(k1, k2)) {
               return;
             }
 
@@ -40122,12 +44835,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (toClip.length) {
           toClip = toClip[0];
 
-          if (item.t > EPS && item.t < EPS2 && toClip > EPS && toClip < EPS2) {
+          if (item.t > EPS$1 && item.t < EPS2$1 || toClip > EPS$1 && toClip < EPS2$1) {
             // 还要判断斜率，相等也忽略（小于一定误差）
             var k1 = bezier.bezierSlope([[ax1, ay1], [ax2, ay2], [ax3, ay3]], item.t);
             var k2 = bezier.bezierSlope([[bx1, by1], [bx2, by2], [bx3, by3], [bx4, by4]], toClip); // 忽略方向，180°也是平行，Infinity相减为NaN
 
-            if (Math.abs(Math.abs(k1) - Math.abs(k2) || 0) < EPS) {
+            if (isParallel(k1, k2)) {
               return;
             }
 
@@ -40161,14 +44874,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           toClip = Math.abs((item.x - bx1) / (bx2 - bx1));
         } else {
           toClip = Math.abs((item.y - by1) / (by2 - by1));
-        }
+        } // 相交于双方端点忽略，一方非端点要记录，防止多区域情况
 
-        if (item.t > EPS && item.t < EPS2 && toClip > EPS && toClip < EPS2) {
+
+        if (item.t > EPS$1 && item.t < EPS2$1 || toClip > EPS$1 && toClip < EPS2$1) {
           // 还要判断斜率，相等也忽略（小于一定误差）
           var k1 = bezier.bezierSlope([[ax1, ay1], [ax2, ay2], [ax3, ay3], [ax4, ay4]], item.t);
           var k2 = bezier.bezierSlope([[bx1, by1], [bx2, by2]]); // 忽略方向，180°也是平行，Infinity相减为NaN
 
-          if (Math.abs(Math.abs(k1) - Math.abs(k2) || 0) < EPS) {
+          if (isParallel(k1, k2)) {
             return;
           }
 
@@ -40200,12 +44914,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         if (toClip.length) {
           toClip = toClip[0];
 
-          if (item.t > EPS && item.t < EPS2 && toClip > EPS && toClip < EPS2) {
+          if (item.t > EPS$1 && item.t < EPS2$1 || toClip > EPS$1 && toClip < EPS2$1) {
             // 还要判断斜率，相等也忽略（小于一定误差）
             var k1 = bezier.bezierSlope([[ax1, ay1], [ax2, ay2], [ax3, ay3], [ax4, ay4]], item.t);
             var k2 = bezier.bezierSlope([[bx1, by1], [bx2, by2], [bx3, by3], [bx4, by4]], toClip); // 忽略方向，180°也是平行，Infinity相减为NaN
 
-            if (Math.abs(Math.abs(k1) - Math.abs(k2) || 0) < EPS) {
+            if (isParallel(k1, k2)) {
               return;
             }
 
@@ -40241,7 +44955,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         t: isSource ? item.toSource : item.toClip
       };
     }).filter(function (item) {
-      return item.t > EPS && item.t < EPS2;
+      return item.t > EPS$1 && item.t < EPS2$1;
     });
   }
 
@@ -40252,7 +44966,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     getIntersectionBezier2Bezier3: getIntersectionBezier2Bezier3$1,
     getIntersectionBezier3Line: getIntersectionBezier3Line$1,
     getIntersectionBezier3Bezier3: getIntersectionBezier3Bezier3$1,
-    sortIntersection: sortIntersection$1
+    sortIntersection: sortIntersection$1,
+    EPS: EPS$1,
+    EPS2: EPS2$1
   };
 
   var getIntersectionLineLine = intersect$1.getIntersectionLineLine,
@@ -40261,7 +44977,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       getIntersectionBezier2Bezier3 = intersect$1.getIntersectionBezier2Bezier3,
       getIntersectionBezier3Line = intersect$1.getIntersectionBezier3Line,
       getIntersectionBezier3Bezier3 = intersect$1.getIntersectionBezier3Bezier3,
-      sortIntersection = intersect$1.sortIntersection;
+      sortIntersection = intersect$1.sortIntersection,
+      EPS = intersect$1.EPS,
+      EPS2 = intersect$1.EPS2;
 
   var Polygon$1 = /*#__PURE__*/function () {
     function Polygon(regions, index) {
@@ -40860,7 +45578,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                   break;
                 } // 有交点，确保原先线段方向顺序（x升序、y升序），各自依次切割，x右侧新线段也要存入list
                 else if (inters && inters.length) {
-                  // console.log('inters', i, inters);
+                  // 特殊检查，当只有一方需要切割时，说明交点在另一方端点上，但是由于精度问题，导致这个点坐标不和那个端点数据一致，
+                  // 且进一步为了让点的引用一致，也应该直接使用这个已存在的端点易用
+                  for (var _i4 = 0, len = inters.length; _i4 < len; _i4++) {
+                    var pt = inters[_i4]; // 只会有一种可能，如果交点对2条线都是误差忽略，求交时已经被屏蔽
+
+                    if (pt.toSource <= EPS) {
+                      pt.point = isSourceReverted ? coordsB[0] : coordsA[0];
+                    } else if (pt.toSource >= EPS2) {
+                      pt.point = isSourceReverted ? coordsB[coordsB.length - 1] : coordsA[coordsA.length - 1];
+                    } else if (pt.toClip <= EPS) {
+                      pt.point = isSourceReverted ? coordsA[0] : coordsB[0];
+                    } else if (pt.toClip >= EPS2) {
+                      pt.point = isSourceReverted ? coordsA[coordsA.length - 1] : coordsB[coordsB.length - 1];
+                    }
+                  } // console.log('inters', i, inters);
+
+
                   var pa = sortIntersection(inters, !isSourceReverted); // console.log(pa);
 
                   var ra = sliceSegment(seg, pa, isIntermediateA && belong === 0); // console.log(ra.map(item => item.toString()));
@@ -41214,12 +45948,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     if (coords.length === 3) {
       var t = isX ? (coords[0].x - coords[1].x) / (coords[0].x - 2 * coords[1].x + coords[2].x) : (coords[0].y - coords[1].y) / (coords[0].y - 2 * coords[1].y + coords[2].y);
 
-      if (t > 0 && t < 1) {
+      if (t > 1e-9 && t < 1 - 1e-9) {
         return [t];
       }
     } else if (coords.length === 4) {
       var _t2 = equation.getRoots([isX ? 3 * (coords[1].x - coords[0].x) : 3 * (coords[1].y - coords[0].y), isX ? 6 * (coords[2].x + coords[0].x - 2 * coords[1].x) : 6 * (coords[2].y + coords[0].y - 2 * coords[1].y), isX ? 3 * (coords[3].x + 3 * coords[1].x - coords[0].x - 3 * coords[2].x) : 3 * (coords[3].y + 3 * coords[1].y - coords[0].y - 3 * coords[2].y)]).filter(function (i) {
-        return i > 0 && i < 1;
+        return i > 1e-9 && i < 1 - 1e-9;
       });
 
       if (_t2.length) {
@@ -41282,7 +46016,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       } // 2条水平线也是
 
 
-      if (bboxA[1] === bboxA[3] && bboxB[1] === bboxB[3] && bboxA[1] === bboxA[1]) {
+      if (bboxA[1] === bboxA[3] && bboxB[1] === bboxB[3] && bboxA[1] === bboxA[3]) {
         if (bboxA[0] >= bboxB[2] || bboxB[0] >= bboxA[2]) {
           return false;
         }
@@ -41543,7 +46277,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     return chain.reverse();
   }
 
-  function _chain (list) {
+  function chains (list) {
     var chains = [],
         res = []; // 在对方内部的排在前面，这样会优先形成包含情况而不是交叉
 
@@ -41932,7 +46666,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return source;
       }
 
-      return _chain(list);
+      return chains(list);
     },
     union: function union(polygonA, polygonB, intermediate) {
       var _trivial3 = trivial(polygonA, polygonB),
@@ -41947,7 +46681,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return source;
       }
 
-      return _chain(list);
+      return chains(list);
     },
     subtract: function subtract(polygonA, polygonB, intermediate) {
       var _trivial5 = trivial(polygonA, polygonB),
@@ -41955,14 +46689,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
           source = _trivial6[0],
           clip = _trivial6[1];
 
-      var list = filter(source.segments.concat(clip.segments), SUBTRACT);
+      var list = filter(source.segments.concat(clip.segments), SUBTRACT); // 暂时这样解决反向的问题
+
+      if (!list.length) {
+        list = filter(source.segments.concat(clip.segments), SUBTRACT_REV);
+      }
 
       if (intermediate) {
         source.segments = list;
         return source;
       }
 
-      return _chain(list);
+      return chains(list);
     },
     subtractRev: function subtractRev(polygonA, polygonB, intermediate) {
       var _trivial7 = trivial(polygonA, polygonB),
@@ -41977,7 +46715,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return source;
       }
 
-      return _chain(list);
+      return chains(list);
     },
     xor: function xor(polygonA, polygonB, intermediate) {
       var _trivial9 = trivial(polygonA, polygonB),
@@ -41992,21 +46730,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         return source;
       }
 
-      return _chain(list);
+      return chains(list);
     },
     chain: function chain(polygon) {
       if (polygon instanceof Polygon$1) {
-        return _chain(polygon.segments);
+        return chains(polygon.segments);
       }
 
       return prefix(polygon);
-    }
+    },
+    chains: chains
   };
 
   var intersect = bo.intersect,
       union = bo.union,
       subtract = bo.subtract,
-      subtract2 = bo.subtract2,
+      subtractRev = bo.subtractRev,
       xor = bo.xor,
       chain = bo.chain;
   var STROKE_WIDTH$4 = enums.STYLE_KEY.STROKE_WIDTH;
@@ -42193,7 +46932,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
             var op = (bo[_i2 - 1] || '').toString().toLowerCase();
             var cur = list[_i2];
 
-            if (['intersect', 'intersection', 'union', 'subtract', 'subtract2', 'diff', 'difference', 'xor'].indexOf(op) === -1) {
+            if (['intersect', 'intersection', 'union', 'subtract', 'subtractrev', 'diff', 'difference', 'xor'].indexOf(op) === -1) {
               res = res.concat(chain(temp));
               temp = cur || [];
               continue;
@@ -42215,8 +46954,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 temp = subtract(temp, cur, true);
                 break;
 
-              case 'subtract2':
-                temp = subtract2(temp, cur, true);
+              case 'subtractrev':
+                temp = subtractRev(temp, cur, true);
                 break;
 
               case 'xor':
@@ -43687,7 +48426,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }(Geom);
 
   var isPrimitive$1 = util.isPrimitive,
-      isNil$1 = util.isNil;
+      isNil$1 = util.isNil,
+      isString$1 = util.isString;
   /**
    * 入口方法，animateRecords记录所有的动画结果等初始化后分配开始动画
    * offsetTime默认0，递归传下去为右libraryId引用的元素增加偏移时间，为了库元素动画复用而开始时间不同
@@ -43700,7 +48440,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
    */
 
   function parse(karas, json, animateRecords, areaStart, areaDuration) {
-    if (isPrimitive$1(json) || json instanceof Node || json instanceof Component) {
+    if (isPrimitive$1(json) || json instanceof Node$1 || json instanceof Component) {
       return json;
     }
 
@@ -43740,17 +48480,33 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
     var vd;
 
-    if (tagName.charAt(0) === '$') {
-      vd = karas.createGm(tagName, props);
-    } else if (/^[A-Z]/.test(tagName)) {
-      var cp = Component.getRegister(tagName);
-      vd = karas.createCp(cp, props, children.map(function (item) {
-        return parse(karas, item, animateRecords, areaStart, areaDuration);
-      }));
-    } else {
-      vd = karas.createVd(tagName, props, children.map(function (item) {
-        return parse(karas, item, animateRecords, areaStart, areaDuration);
-      }));
+    if (isString$1(tagName)) {
+      if (tagName.charAt(0) === '$') {
+        vd = karas.createGm(tagName, props);
+      } else if (/^[A-Z]/.test(tagName)) {
+        var cp = Component.getRegister(tagName);
+        props.tagName = props.tagName || tagName;
+        vd = karas.createCp(cp, props, children.map(function (item) {
+          return parse(karas, item, animateRecords, areaStart, areaDuration);
+        }));
+      } else {
+        vd = karas.createVd(tagName, props, children.map(function (item) {
+          return parse(karas, item, animateRecords, areaStart, areaDuration);
+        }));
+      }
+    } // 扩展支持非标准json，tagName是个类引用
+    else {
+      // 特殊的$匿名类
+      if (tagName instanceof Geom || tagName.prototype && tagName.prototype instanceof Geom) {
+        vd = karas.createGm(tagName, props);
+      } else {
+        var _cp = Component.getRegister(tagName);
+
+        props.tagName = props.tagName || tagName;
+        vd = karas.createCp(_cp, props, children.map(function (item) {
+          return parse(karas, item, animateRecords, areaStart, areaDuration);
+        }));
+      }
     }
 
     if (animate) {
@@ -43780,105 +48536,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     return vd;
   }
 
-  var fullCssProperty = {
-    skewX: 'kx',
-    skewY: 'ky',
-    transform: 'tf',
-    fontSize: 'fz',
-    offset: 'os',
-    easing: 'e',
-    filter: 'ft',
-    boxShadow: 'bd',
-    overflow: 'of',
-    backgroundClip: 'bp',
-    textOverflow: 'tof',
-    flexWrap: 'fp',
-    perspective: 'ppt',
-    rotate3d: 'r3'
-  };
-  var abbrCssProperty$1 = {
-    os: 'offset',
-    // 非css属性不会被下面反向遍历插入，手动
-    e: 'easing'
-  };
-  var fullAnimate = {
-    value: 'v',
-    options: 'o'
-  };
-  var abbrAnimate$1 = {};
-  var fullAnimateOption = {
-    duration: 'dt',
-    delay: 'd',
-    endDelay: 'ed',
-    iterations: 'i',
-    direction: 'dc',
-    fill: 'f',
-    fps: 'fp',
-    playbackRate: 'p',
-    spfLimit: 'sl'
-  };
-  var abbrAnimateOption$1 = {};
-  reset.DOM_KEY_SET.concat(reset.GEOM_KEY_SET).forEach(function (k) {
-    if (fullCssProperty.hasOwnProperty(k)) {
-      abbrCssProperty$1[fullCssProperty[k]] = k;
-      return;
-    }
-
-    var v = k.charAt(0) + k.replace(/[a-z]/g, '').toLowerCase();
-    fullCssProperty[k] = v;
-    abbrCssProperty$1[v] = k;
-  });
-  Object.keys(fullAnimate).forEach(function (k) {
-    abbrAnimate$1[fullAnimate[k]] = k;
-  });
-  Object.keys(fullAnimateOption).forEach(function (k) {
-    abbrAnimateOption$1[fullAnimateOption[k]] = k;
-  });
-  var abbr = {
-    fullCssProperty: fullCssProperty,
-    abbrCssProperty: abbrCssProperty$1,
-    fullAnimate: fullAnimate,
-    abbrAnimate: abbrAnimate$1,
-    fullAnimateOption: fullAnimateOption,
-    abbrAnimateOption: abbrAnimateOption$1
-  };
-
   var isNil = util.isNil,
       isFunction = util.isFunction,
       isPrimitive = util.isPrimitive,
       clone = util.clone,
       extend = util.extend;
-  var abbrCssProperty = abbr.abbrCssProperty,
-      abbrAnimateOption = abbr.abbrAnimateOption,
-      abbrAnimate = abbr.abbrAnimate;
-  /**
-   * 还原缩写到全称，涉及样式和动画属性，已过时
-   * @param target 还原的对象
-   * @param hash 缩写映射
-   */
-
-  function abbr2full(target, hash) {
-    // 也许节点没写样式
-    if (target) {
-      Object.keys(target).forEach(function (k) {
-        // var-attr格式特殊考虑，仅映射attr部分，var-还要保留
-        if (k.indexOf('var-') === 0) {
-          var k2 = k.slice(4);
-
-          if (hash.hasOwnProperty(k2)) {
-            var fk = hash[k2];
-            target['var-' + fk] = target[k]; // delete target[k];
-          }
-        } // 普通样式缩写还原
-        else if (hash.hasOwnProperty(k)) {
-          var _fk = hash[k];
-          target[_fk] = target[k]; // 删除以免二次解析
-
-          delete target[k];
-        }
-      });
-    }
-  }
   /**
    * 链接json中的某个child到library文件，
    * props需要是clone的，因为防止多个child使用同一个库文件
@@ -43887,7 +48549,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
    * @param child
    * @param libraryItem
    */
-
 
   function linkLibrary(child, libraryItem) {
     // 规定图层child只有init和动画，属性和子图层来自库
@@ -43901,14 +48562,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
     if (libraryItem.library) {
       child.library = libraryItem.library;
-    } // library的var-也要继承过来，本身的var-优先级更高，目前只有children会出现优先级情况
+    } // 删除以免二次解析
 
-
-    Object.keys(libraryItem).forEach(function (k) {
-      if (k.indexOf('var-') === 0 && !child.hasOwnProperty(k)) {
-        child[k] = libraryItem[k];
-      }
-    }); // 删除以免二次解析
 
     delete child.libraryId;
     var init = child.init;
@@ -43950,33 +48605,39 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
   function replaceLibraryVars(json, hash, vars) {
     // 新版同级vars语法，增加可以修改library子元素中递归子属性
-    if (json.hasOwnProperty('vars')) {
+    if (json && json.hasOwnProperty('vars')) {
       var slot = json.vars;
-      delete json.vars;
 
       if (!Array.isArray(slot)) {
         slot = [slot];
       }
 
-      slot.forEach(function (item) {
-        var id = item.id,
-            member = item.member;
+      var hasChanged;
+
+      for (var i = 0, len = slot.length; i < len; i++) {
+        var _slot$i = slot[i],
+            id = _slot$i.id,
+            member = _slot$i.member;
 
         if (!Array.isArray(member)) {
           member = [member];
         } // library.xxx，需要>=2的长度，开头必须是library
 
 
-        if (Array.isArray(member) && member.length > 1 && vars && vars.hasOwnProperty(id)) {
-          if (member[0] === 'library') {
+        if (Array.isArray(member) && member[0] === 'library') {
+          slot.splice(i--, 1);
+          len--;
+          hasChanged = true;
+
+          if (vars && vars.hasOwnProperty(id)) {
             var target = hash;
 
-            for (var i = 1, len = member.length; i < len; i++) {
-              var k = member[i]; // 最后一个属性可以为空
+            outer: for (var _i = 1, _len = member.length; _i < _len; _i++) {
+              var k = member[_i]; // 最后一个属性可以为空
 
-              if (target.hasOwnProperty(k) || i === len - 1) {
+              if (target.hasOwnProperty(k) || _i === _len - 1) {
                 // 最后一个member表达式替换
-                if (i === len - 1) {
+                if (_i === _len - 1) {
                   var v = vars[id];
                   var old = target[k]; // 支持函数模式和值模式
 
@@ -43985,7 +48646,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                   } // 直接替换library的子对象，需补充id和tagName
 
 
-                  if (i === 1) {
+                  if (_i === 1) {
                     target[k] = Object.assign({
                       id: old.id,
                       tagName: old.tagName
@@ -44000,140 +48661,69 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
                 }
               } else {
                 inject.error('Library slot miss ' + k);
-                return;
+                break outer;
               }
             }
           }
         }
-      });
-    } // 兼容老版var-，只支持一级library元素
-    else {
-      Object.keys(json).forEach(function (k) {
-        if (k.indexOf('var-library.') === 0) {
-          var v = json[k];
-          delete json[k];
+      }
 
-          if (!v || !vars) {
-            return;
-          }
-
-          var k2 = k.slice(12); // 有id且变量里面传入了替换的值
-
-          if (k2 && v.id && vars.hasOwnProperty(v.id)) {
-            var value = vars[v.id];
-
-            if (isFunction(value)) {
-              value = value(v);
-            } // library对象也要加上id，与正常的library保持一致
-
-
-            hash[k2] = Object.assign({
-              id: k2
-            }, value);
-          }
-        }
-      });
+      if (!slot.length) {
+        delete json.vars;
+      } else if (hasChanged) {
+        json.vars = slot;
+      }
     }
   }
 
   function replaceVars(json, vars) {
-    if (json) {
-      // 新版vars语法
-      if (json.hasOwnProperty('vars')) {
-        var slot = json.vars;
-        delete json.vars;
+    // 新版vars语法
+    if (json && json.hasOwnProperty('vars')) {
+      var slot = json.vars;
+      delete json.vars;
 
-        if (!Array.isArray(slot)) {
-          slot = [slot];
-        }
+      if (!Array.isArray(slot)) {
+        slot = [slot];
+      }
 
-        if (Array.isArray(slot)) {
-          slot.forEach(function (item) {
-            var id = item.id,
-                member = item.member;
+      if (Array.isArray(slot)) {
+        slot.forEach(function (item) {
+          var id = item.id,
+              member = item.member;
 
-            if (!Array.isArray(member)) {
-              member = [member];
-            } // 排除特殊的library
-
-
-            if (Array.isArray(member) && member.length && member[0] !== 'library' && vars && vars.hasOwnProperty(id)) {
-              var target = json;
-
-              for (var i = 0, len = member.length; i < len; i++) {
-                var k = member[i]; // 最后一个属性可以为空
-
-                if (target.hasOwnProperty(k) || i === len - 1) {
-                  // 最后一个member表达式替换
-                  if (i === len - 1) {
-                    var v = vars[id]; // undefined和null意义不同
-
-                    if (v === undefined) {
-                      return;
-                    } // 支持函数模式和值模式
+          if (!Array.isArray(member)) {
+            member = [member];
+          } // 排除特殊的library
 
 
-                    if (isFunction(v)) {
-                      v = v(target[k]);
-                    }
+          if (Array.isArray(member) && member.length && member[0] !== 'library' && vars && vars.hasOwnProperty(id)) {
+            var target = json;
 
-                    target[k] = v;
-                  } else {
-                    target = target[k];
+            for (var i = 0, len = member.length; i < len; i++) {
+              var k = member[i]; // 最后一个属性可以为空
+
+              if (target.hasOwnProperty(k) || i === len - 1) {
+                // 最后一个member表达式替换
+                if (i === len - 1) {
+                  var v = vars[id]; // undefined和null意义不同
+
+                  if (v === undefined) {
+                    return;
+                  } // 支持函数模式和值模式
+
+
+                  if (isFunction(v)) {
+                    v = v(target[k]);
                   }
+
+                  target[k] = v;
                 } else {
-                  inject.error('Slot miss ' + k);
-                  return;
+                  target = target[k];
                 }
-              }
-            }
-          });
-        }
-      } else {
-        Object.keys(json).forEach(function (k) {
-          if (k.indexOf('var-') === 0) {
-            var v = json[k];
-            delete json[k];
-
-            if (!v || !vars) {
-              return;
-            }
-
-            var k2 = k.slice(4); // 有id且变量里面传入了替换的值，值可为null，因为某些情况下空为自动
-
-            if (k2 && v.id && vars.hasOwnProperty(v.id)) {
-              var value = vars[v.id]; // undefined和null意义不同
-
-              if (value === undefined) {
+              } else {
+                inject.error('Slot miss ' + k);
                 return;
               }
-
-              var target = json; // 如果有.则特殊处理子属性
-
-              if (k2.indexOf('.') > -1) {
-                var list = k2.split('.');
-                var len = list.length;
-
-                for (var i = 0; i < len - 1; i++) {
-                  k2 = list[i]; // 避免异常
-
-                  if (target[k2]) {
-                    target = target[k2];
-                  } else {
-                    inject.warn('parseJson vars is not exist: ' + v.id + ', ' + k + ', ' + list.slice(0, i).join('.'));
-                    return;
-                  }
-                }
-
-                k2 = list[len - 1];
-              } // 支持函数模式和值模式
-
-
-              if (isFunction(value)) {
-                value = value(v);
-              }
-
-              target[k2] = value;
             }
           }
         });
@@ -44151,7 +48741,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 
   function apply(json, opt, hash) {
-    if (isPrimitive(json) || json instanceof Node || json instanceof Component) {
+    if (isPrimitive(json) || json instanceof Node$1 || json instanceof Component) {
       return json;
     }
 
@@ -44218,14 +48808,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
       if (/^#\d+$/.test(fontFamily)) {
         var fonts = opt.fonts,
-            _i = parseInt(fontFamily.slice(1));
+            _i2 = parseInt(fontFamily.slice(1));
 
         if (Array.isArray(fonts)) {
-          style.fontFamily = fonts[_i];
+          style.fontFamily = fonts[_i2];
         }
-      }
+      } // 先替换style的
 
-      opt.abbr !== false && abbr2full(style, abbrCssProperty); // 先替换style的
 
       replaceVars(style, opt.vars);
     } // 再替换静态属性，style也作为属性的一种
@@ -44242,19 +48831,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       }
 
       animate.forEach(function (item) {
-        opt.abbr !== false && abbr2full(item, abbrAnimate);
         var value = item.value,
             options = item.options; // 忽略空动画
 
         if (Array.isArray(value) && value.length) {
           value.forEach(function (item) {
-            opt.abbr !== false && abbr2full(item, abbrCssProperty);
             replaceVars(item, opt.vars);
           });
         }
 
         if (options) {
-          opt.abbr !== false && abbr2full(options, abbrAnimateOption);
           replaceVars(options, opt.vars);
           replaceAnimateOptions(options, opt);
         }
@@ -44268,16 +48854,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   function apply$1 (json) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-    // json中定义无abbr
-    if (json.abbr === false) {
-      options.abbr = false;
-    }
-
-    if (options.abbr !== false) {
-      inject.warn('Abbr in json is deprecated');
-    } // 特殊单例声明无需clone加速解析
-
-
+    // 特殊单例声明无需clone加速解析
     if (!options.singleton && !json.singleton) {
       json = util.clone(json);
     }
@@ -44459,8 +49036,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
       } else {
         cb();
       }
-    },
-    abbr: abbr
+    }
   };
 
   var style = {
@@ -44468,7 +49044,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     reset: reset,
     unit: o$4,
     font: o$3,
-    abbr: abbr$1,
+    abbr: abbr,
     transform: transform$1
   };
 
@@ -44835,11 +49411,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     Cache: Cache,
     CanvasPage: CanvasPage,
     CanvasCache: CanvasCache,
-    webgl: webgl
+    webgl: webgl,
+    ImgWebglCache: ImgWebglCache
   };
 
-  var version = "0.84.4";
+  var version = "0.86.22";
 
+  var isString = util.isString;
   Geom.register('$line', Line);
   Geom.register('$polyline', Polyline);
   Geom.register('$polygon', Polygon);
@@ -44849,6 +49427,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
   Geom.register('$ellipse', Ellipse);
   var karas$1 = {
     version: version,
+    wasm: wasm$1,
     render: function render(root, dom) {
       if (!(root instanceof Root)) {
         throw new Error('Render dom must be canvas/svg/webgl');
@@ -44868,10 +49447,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
         children.push(arguments[i]);
       }
 
-      if (util.isString(tagName)) {
+      if (isString(tagName)) {
         if (tagName.charAt(0) === '$') {
           return this.createGm(tagName, props);
-        } else if (/^A-Z/.test(tagName)) {
+        } else if (/^[A-Z]/.test(tagName)) {
           return this.createCp(tagName, props, children);
         } else {
           return this.createVd(tagName, props, children);
@@ -44905,7 +49484,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     createGm: function createGm(tagName, props) {
       var klass = Geom.getRegister(tagName);
 
-      if (!util.isString(tagName)) {
+      if (!isString(tagName)) {
         var s = /^function ([\w$]+)/.exec(tagName.toString());
 
         if (s && s.length > 1) {
@@ -44918,7 +49497,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     createCp: function createCp(tagName, props) {
       var children = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
       var klass = Component.getRegister(tagName);
-      props.children = children; // 特例，cp的children通过props传入
+
+      if (isString(tagName)) {
+        props.tagName = tagName; // 特例，tagName如果是string需要记录下来
+      }
+
+      props.children = children; // 特例，children通过props传入
 
       return new klass(props);
     },
@@ -44930,7 +49514,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     },
     mode: mode,
     Component: Component,
-    Node: Node,
+    Node: Node$1,
     Text: Text,
     Geom: Geom,
     Xom: Xom,
@@ -44947,15 +49531,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
     refresh: refresh,
     enums: enums,
     ca: ca,
-
-    get debug() {
-      return debug.flag;
-    },
-
-    set debug(v) {
-      debug.flag = !!v;
-    }
-
+    config: config
   };
 
   if (typeof window !== 'undefined') {
@@ -54413,9 +58989,9 @@ var List = (List_dec = inject('global'), List_dec(List_class = mobxreact_esm_obs
   return List;
 }(_react_17_0_2_react.Component)) || List_class) || List_class);
 /* harmony default export */ const component_List = (List);
-// EXTERNAL MODULE: ./node_modules/_karas@0.84.4@karas/index.js
-var _karas_0_84_4_karas = __webpack_require__(511);
-var _karas_0_84_4_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_84_4_karas);
+// EXTERNAL MODULE: ./node_modules/_karas@0.86.22@karas/index.js
+var _karas_0_86_22_karas = __webpack_require__(516);
+var _karas_0_86_22_karas_default = /*#__PURE__*/__webpack_require__.n(_karas_0_86_22_karas);
 ;// CONCATENATED MODULE: ./src/util/output.js
 var STYLE = ['top', 'right', 'bottom', 'left', 'width', 'height', 'transformOrigin', 'translateX', 'translateY', 'translateZ', 'opacity', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'start', 'end', 'begin', 'perspective', 'fontSize', 'lineHeight', 'translatePath', 'scale', 'zIndex'];
 var EXIST_FONT = {
@@ -55213,13 +59789,13 @@ function recursionGetAutoSize(node, hash) {
         height = _data$props$style.height;
     canvas.width = width;
     canvas.height = height;
-    var root = _karas_0_84_4_karas_default().parse({
+    var root = _karas_0_86_22_karas_default().parse({
       tagName: 'canvas',
       props: {
         width: width,
         height: height
       },
-      children: [_karas_0_84_4_karas_default().parse(data, {
+      children: [_karas_0_86_22_karas_default().parse(data, {
         autoPlay: false
       })],
       abbr: false
@@ -55598,19 +60174,19 @@ function checkOverflow(root, node, vertexes, obj) {
   if (node !== root) {
     var p = node.getBoundingClientRect(true).points; // 4个顶点都在root的vertexes内就不出界
 
-    if (!_karas_0_84_4_karas_default().math.geom.pointInConvexPolygon(p[0][0], p[0][1], vertexes)) {
+    if (!_karas_0_86_22_karas_default().math.geom.pointInConvexPolygon(p[0][0], p[0][1], vertexes)) {
       return true;
     }
 
-    if (!_karas_0_84_4_karas_default().math.geom.pointInConvexPolygon(p[1][0], p[1][1], vertexes)) {
+    if (!_karas_0_86_22_karas_default().math.geom.pointInConvexPolygon(p[1][0], p[1][1], vertexes)) {
       return true;
     }
 
-    if (!_karas_0_84_4_karas_default().math.geom.pointInConvexPolygon(p[2][0], p[2][1], vertexes)) {
+    if (!_karas_0_86_22_karas_default().math.geom.pointInConvexPolygon(p[2][0], p[2][1], vertexes)) {
       return true;
     }
 
-    if (!_karas_0_84_4_karas_default().math.geom.pointInConvexPolygon(p[3][0], p[3][1], vertexes)) {
+    if (!_karas_0_86_22_karas_default().math.geom.pointInConvexPolygon(p[3][0], p[3][1], vertexes)) {
       return true;
     }
   }
@@ -55621,7 +60197,7 @@ function checkOverflow(root, node, vertexes, obj) {
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
 
-      if (child instanceof (_karas_0_84_4_karas_default()).Text) {
+      if (child instanceof (_karas_0_86_22_karas_default()).Text) {
         continue;
       }
 
@@ -55652,13 +60228,13 @@ function checkOverflow(root, node, vertexes, obj) {
       height = _data$props$style.height;
   overflow_canvas.width = width;
   overflow_canvas.height = height;
-  var root = _karas_0_84_4_karas_default().parse({
+  var root = _karas_0_86_22_karas_default().parse({
     tagName: 'canvas',
     props: {
       width: width,
       height: height
     },
-    children: [_karas_0_84_4_karas_default().parse(data, {
+    children: [_karas_0_86_22_karas_default().parse(data, {
       autoPlay: false
     })],
     abbr: false
@@ -55884,13 +60460,13 @@ var Preview_Preview = (Preview_dec = inject('global'), _dec2 = inject('preview')
       } // 不同类型type根节点
 
 
-      root = window.root = _karas_0_84_4_karas_default().parse({
+      root = window.root = _karas_0_86_22_karas_default().parse({
         tagName: type,
         props: {
           width: width,
           height: height
         },
-        children: [_karas_0_84_4_karas_default().parse(data, {
+        children: [_karas_0_86_22_karas_default().parse(data, {
           autoPlay: false
         })],
         abbr: false
@@ -56794,7 +61370,7 @@ var Alert = (Alert_dec = inject('global'), Alert_dec(Alert_class = mobxreact_esm
   }
 });
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"0.7.6"};
+const package_namespaceObject = {"i8":"0.7.7"};
 ;// CONCATENATED MODULE: ./src/index.html
 /* harmony default export */ const src = (__webpack_require__.p + "index.html");
 ;// CONCATENATED MODULE: ./src/index.js
