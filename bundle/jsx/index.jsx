@@ -3459,7 +3459,6 @@ function preParse(data, library, start, duration, displayStartTime, offset) {
     for (var j = 1, len = item.length; j < len; j++) {
       if (item[j].hasOwnProperty('opacity')) {
         animate.splice(i, 1);
-        $.ae2karas.log(123);
         break outer;
       }
     }
